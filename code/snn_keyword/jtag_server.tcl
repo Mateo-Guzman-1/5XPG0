@@ -4,7 +4,7 @@ targets -set -filter {name =~ "ARM*#0"}
 configparams force-mem-access 1
 proc rd {address} {return [expr {wide([lindex [mrd -force -value $address] 0])}]}
 proc signed {n} {if {$n>=0x80000000} {return [expr {$n-0x100000000}]}; return $n}
-if {[rd 0x4004001c]!=0x20000 || [rd 0x40010430]!=0x4b575331} {error "Load the keyword bitstream and firmware first"}
+if {([rd 0x4004001c]&0xffff0000)!=0x20000 ||[rd 0x40010430]!=0x4b575331} {error "Load the keyword bitstream and firmware first"}
 proc process_frame {channel} {
     if {[eof $channel]} {close $channel;return}
     if {[gets $channel line]<0} {return}

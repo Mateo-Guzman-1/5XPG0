@@ -97,6 +97,42 @@ register, fixes AXI read/write arbitration and byte enables, and exposes
 the Zynq DDR/fixed I/O ports. Do not use the original `spike_top.bit` for
 this demo: the server requires hardware ABI version 2.
 
+## Custom instruction: `kdot` dot-product coprocessor
+
+The input layer (64 × 768 int16 × uint8 multiply-accumulates) was about
+99% of inference time. Every CPU read waits on the BRAM bus, so the
+pure-RV32IM loop costs about 120 cycles per MAC. `rtl/kdot_pcpi.v`
+(in `pynqz2_riscv_flow`) attaches to PicoRV32's PCPI port and adds two
+custom-0 (opcode `0x0B`) R-type instructions:
+
+| Instruction | Encoding | Effect |
+|---|---|---|
+| `klen x0, rs1, x0` | funct3=1 | length register ← rs1 (elements, multiple of 4) |
+| `kdot rd, rs1, rs2` | funct3=0 | rd ← Σ int16 w[rs1+2i] · uint8 x[rs2+i], 32-bit wrap |
+
+The core stalls on `kdot`. Meanwhile the unit borrows BRAM port B, streams
+one input word and two weight words per four elements, and keeps a
+registered DSP multiply stage and an accumulate stage. The result is
+bit-exact with the C loop. `firmware/Makefile` builds both
+`keyword.bin` (pure RV32IM) and `keyword_kdot.bin` (`-DUSE_KDOT`).
+The fabric advertises the unit through ABI bit 0 (`0x00020001`).
+The baseline image still runs unchanged on the new fabric.
+
+RTL simulation, 40 verification vectors, same SoC:
+
+| Firmware | Cycles (max) | Latency at 100 MHz | Scores vs oracle |
+|---|---|---|---|
+| `keyword.bin` (RV32IM) | 5,981,498 | 59.81 ms | 40/40 exact |
+| `keyword_kdot.bin` | 267,370 | 2.67 ms | 40/40 exact |
+
+That is a 22.4× worst-case speedup. What remains is mostly the LIF time
+loop and the readout. On the physical PYNQ-Z2 (loaded over JTAG, see
+`results/board_jtag_kdot.csv`), all 40 vectors match the oracle, and
+scores, spikes and cycle counts are identical to RTL simulation.
+Implementation meets timing (WNS +0.745 ns at 100 MHz). The unit costs
+about 180 LUTs and 150 flip-flops over the baseline. `deploy/keyword_kdot.bit` is the matching bitstream;
+the original `keyword.bit`/`keyword.bin` release is unchanged.
+
 ## PC simulation demo
 
 In one terminal:

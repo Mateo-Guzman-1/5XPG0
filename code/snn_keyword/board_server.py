@@ -23,8 +23,12 @@ class Board:
             os.close(fd)
         if self.read_reg(0x14) != 0x534b454c:
             raise RuntimeError('Expected spike SoC bitstream is not loaded')
-        if self.read_reg(0x1c) != 0x00020000:
+        abi = self.read_reg(0x1c)
+        if abi & 0xffff0000 != 0x00020000:
             raise RuntimeError('Load deploy/keyword.bit: this bitstream lacks the timed LED ABI')
+        # ABI bit0: kdot PCPI coprocessor present (deploy/keyword_kdot.bit).
+        if 'kdot' in Path(firmware).name and not abi & 1:
+            raise RuntimeError('kdot firmware needs deploy/keyword_kdot.bit (ABI bit0)')
         if self.read_reg(0x10) != 100000000:
             raise RuntimeError('Expected 100 MHz fabric clock')
         image = Path(firmware).read_bytes()

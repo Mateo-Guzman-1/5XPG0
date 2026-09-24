@@ -193,7 +193,7 @@ module ps_if #(
                 5'd4:  rd_sys_q <= CLK_HZ;                             // CLK_HZ
                 5'd5:  rd_sys_q <= 32'h534B_454C;                      // MAGIC "SKEL"
                 5'd6:  rd_sys_q <= {22'h0, led};                       // LED
-                5'd7:  rd_sys_q <= 32'h0002_0000;                    // keyword pulse ABI
+                5'd7:  rd_sys_q <= 32'h0002_0001;                    // keyword pulse ABI + bit0 kdot
                 default: rd_sys_q <= 32'h0;
                 endcase
                 s_axil_rresp <= (sel_bram_addr(s_axil_araddr) ||

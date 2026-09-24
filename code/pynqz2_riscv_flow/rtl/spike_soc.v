@@ -10,6 +10,7 @@
 //   0x1000_1000  TIMER          0x00 TIME   (32-bit free-running counter)
 //   0x1000_2000  LED            0x00 OUT    ([9:0] PYNQ-Z2 board LEDs)
 //   0x1000_3000  POISSON        hardware spike generator (see rtl/poisson.v)
+//   PCPI custom-0               kdot/klen dot-product coprocessor (rtl/kdot_pcpi.v)
 //
 // The BRAM has two ports: port A belongs to the PS (via ps_if, used to load
 // the program and read the console / spike log), port B belongs to the CPU.
@@ -59,7 +60,12 @@ module spike_soc #(
     reg        xfer_bram;            // 1 = data comes from BRAM
     reg  [31:0] peri_rdata_r;        // peripheral value captured at accept
 
-    wire acc     = cpu_mem_valid && !cpu_mem_ready && (xfer == 4'd0);
+    // The kdot coprocessor borrows port B while the CPU is stalled on it.
+    wire        kd_busy;
+    wire [15:0] kd_addr;
+    wire acc_req = cpu_mem_valid && !cpu_mem_ready && (xfer == 4'd0);
+    wire acc     = acc_req && !kd_busy;
+    wire kd_mem_idle = (xfer == 4'd0) && !acc_req;
     wire acc_wr  = acc && req_write;
     wire acc_rd  = acc && !req_write;
     wire bram_wr_now = acc_wr && sel_bram;
@@ -74,7 +80,7 @@ module spike_soc #(
     reg  [31:0] pa_rdata_i;          // port A read data (PS)
     assign pa_rdata = pa_rdata_i;
 
-    wire [15:0] pb_word_addr = cpu_mem_addr[17:2];
+    wire [15:0] pb_word_addr = kd_busy ? kd_addr : cpu_mem_addr[17:2];
 
     // Port A (PS)
     always @(posedge clk) begin
@@ -178,7 +184,7 @@ module spike_soc #(
                     case (cpu_mem_addr[15:12])
                     4'h0: case (cpu_mem_addr[3:2])                  // SYSCTRL
                           2'd0: peri_rdata_r <= 32'h534B_454C;     // "SKEL"
-                          2'd1: peri_rdata_r <= 32'h0002_0000;     // v2.0: LED countdown
+                          2'd1: peri_rdata_r <= 32'h0002_0001;     // v2.0 + bit0: kdot coprocessor
                           2'd2: peri_rdata_r <= sys_scratch;
                           2'd3: peri_rdata_r <= {31'b0, core_trap};
                           endcase
@@ -204,7 +210,28 @@ module spike_soc #(
     // ------------------------------------------------------------------
     // CPU
     // ------------------------------------------------------------------
+    wire        pcpi_valid, pcpi_wr, pcpi_wait, pcpi_ready;
+    wire [31:0] pcpi_insn, pcpi_rs1, pcpi_rs2, pcpi_rd;
+
+    kdot_pcpi u_kdot (
+        .clk        (clk),
+        .resetn     (core_rst_n),
+        .pcpi_valid (pcpi_valid),
+        .pcpi_insn  (pcpi_insn),
+        .pcpi_rs1   (pcpi_rs1),
+        .pcpi_rs2   (pcpi_rs2),
+        .pcpi_wr    (pcpi_wr),
+        .pcpi_rd    (pcpi_rd),
+        .pcpi_wait  (pcpi_wait),
+        .pcpi_ready (pcpi_ready),
+        .mem_idle   (kd_mem_idle),
+        .mem_busy   (kd_busy),
+        .mem_addr   (kd_addr),
+        .mem_rdata  (pb_rdata)
+    );
+
     picorv32 #(
+        .ENABLE_PCPI       (1),
         .ENABLE_COUNTERS   (1),
         .ENABLE_COUNTERS64 (0),
         .ENABLE_MUL        (0),
@@ -225,8 +252,8 @@ module spike_soc #(
         .mem_wdata   (cpu_mem_wdata),
         .mem_wstrb   (cpu_mem_wstrb),
         .mem_rdata   (cpu_mem_rdata),
-        .pcpi_valid  (), .pcpi_insn (), .pcpi_rs1 (), .pcpi_rs2 (),
-        .pcpi_wr     (1'b0), .pcpi_rd (32'h0), .pcpi_wait (1'b0), .pcpi_ready (1'b0),
+        .pcpi_valid  (pcpi_valid), .pcpi_insn (pcpi_insn), .pcpi_rs1 (pcpi_rs1), .pcpi_rs2 (pcpi_rs2),
+        .pcpi_wr     (pcpi_wr), .pcpi_rd (pcpi_rd), .pcpi_wait (pcpi_wait), .pcpi_ready (pcpi_ready),
         .irq         (32'h0),
         .eoi         (),
         .trace_valid (), .trace_data ()

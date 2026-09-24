@@ -7,4 +7,4 @@ gcc -O3 -Wall -Wextra -Werror -Ibuild -Ifirmware sim/native.c firmware/inference
 verilator --cc --exe --build -j 8 -Wno-fatal --top-module spike_soc \
   --Mdir "$PWD/build/obj_dir" -CFLAGS '-O3' \
   ../pynqz2_riscv_flow/rtl/spike_soc.v ../pynqz2_riscv_flow/rtl/picorv32.v \
-  ../pynqz2_riscv_flow/rtl/poisson.v "$PWD/sim/soc_main.cpp"
+  ../pynqz2_riscv_flow/rtl/poisson.v ../pynqz2_riscv_flow/rtl/kdot_pcpi.v "$PWD/sim/soc_main.cpp"
