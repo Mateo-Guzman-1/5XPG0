@@ -95,8 +95,8 @@ points, not solutions. See the README in each folder.
 
 * **You may use AI tools for everything**, and group coding is allowed — but
   **you are responsible for the results, not the AI**.
-* Weekly meetings: **Monday 08:30–09:30** and **Thursday 14:00–15:00**
-  (30 minutes per group).
+* Weekly meetings: **Monday 08:30–09:00** and **Thursday 13:30–14:00**
+  (both groups).
 * Deliverables: **report, code, presentation**.
 * Evaluation: **33%** research-question formulation, **33%** scientific
   execution (no logical gaps), **33%** engineering solutions (results).
