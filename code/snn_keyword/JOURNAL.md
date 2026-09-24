@@ -204,6 +204,9 @@ With only two voices, they indicate trends, not accuracy.
 
 ## Open items
 
+The chosen route and its phases are in `OPTIMIZATION_REPORT.md` and
+`IMPLEMENTATION_PLAN.md`. The items below remain open until then.
+
 1. Reflash the SD card and test the standard Ethernet path (`board_server.py`).
 2. Choose between the release and trial models (recall against confusable
    rejection).

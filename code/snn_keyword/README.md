@@ -8,7 +8,11 @@ classifies them and a hardware countdown lights LED0 for exactly one second.
 
 See [REPORT.md](REPORT.md), [presentation.pdf](presentation.pdf),
 [JOURNAL.md](JOURNAL.md) (dated log of every change, its motivation and its
-outcome), and the machine-readable [results](results/). Inference is verified
+outcome), and the machine-readable [results](results/). The next steps are
+in [OPTIMIZATION_REPORT.md](OPTIMIZATION_REPORT.md), which compares options
+with references and says which route was chosen, and
+[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md), which lays out phases,
+acceptance targets and gates. Inference is verified
 in RTL simulation and on the physical PYNQ-Z2, loaded over JTAG (see
 [JTAG workaround](#jtag-workaround-this-board-only)). The standard PYNQ
 Linux/Ethernet path has not run on hardware yet. The live microphone demo was
