@@ -1,0 +1,13 @@
+# Python packages installed into the board's PYNQ venv by install.sh.
+#
+# The bring-up flow itself needs NO extra board-side packages: the host tool
+# (host/spike_pynq.py) only uses the Python standard library plus /dev/mem.
+#
+# The PYNQ venv already ships the heavy packages (numpy, pyzmq, ...), so
+# there is normally nothing to add here. If your project needs an extra
+# board-side package, add it below — but remember the PYNQ-Z2 is 32-bit ARM
+# (armv7l), where many scientific packages have NO PyPI wheels and cannot be
+# built on the image's old toolchain. Keep this list lean.
+#
+# Example (already present on the stock image):
+# pyzmq

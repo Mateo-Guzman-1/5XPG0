@@ -1,0 +1,9 @@
+# Python packages for the MNIST ANN-vs-SNN example.
+# Create a virtual environment and install these (see README.md):
+#   python3 -m venv .venv && source .venv/bin/activate
+#   pip install -r requirements.txt
+
+torch
+torchvision
+snntorch
+numpy

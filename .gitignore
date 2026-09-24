@@ -1,0 +1,47 @@
+# =============================================================================
+# 5XPG0 — things that must NOT go into the student repository
+# =============================================================================
+
+# Internal documents (instructor-only)
+instructions.md
+detailed_instructions.md
+
+# LaTeX: publish only the compiled PDFs, never the sources or the beamer style
+*.tex
+*.sty
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# LaTeX asset folders (not needed once only the PDFs are published)
+PresentationInstruction/figures/
+PresentationInstruction/resources/
+ProjectPitch/figures/
+ProjectPitch/resources/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+runs/
+data/
+
+# Build artifacts — keep the sources and the single released bitstream only
+code/pynqz2_riscv_flow/firmware/*.o
+code/pynqz2_riscv_flow/firmware/*.elf
+code/pynqz2_riscv_flow/firmware/*.map
+code/pynqz2_riscv_flow/vivado/rvproj/
+code/pynqz2_riscv_flow/vivado/build-logs/
+code/pynqz2_riscv_flow/vivado/.Xil/
+code/pynqz2_riscv_flow/.board-ip
+
+# OS / editor
+.DS_Store
+*.swp

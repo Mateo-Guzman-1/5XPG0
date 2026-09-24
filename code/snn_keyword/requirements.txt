@@ -1,0 +1,11 @@
+# Python packages for the SNN training examples.
+# Create a virtual environment and install these (see README.md):
+#   python3 -m venv .venv && source .venv/bin/activate
+#   pip install -r requirements.txt
+#
+# Pillow is only needed for the MNIST example (torchvision image loading).
+
+torch
+torchvision
+snntorch
+numpy
