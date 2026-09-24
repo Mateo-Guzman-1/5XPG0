@@ -2,19 +2,19 @@
   "native_c": {
     "samples": 11005,
     "score_and_spike_mismatches": 0,
-    "wall_seconds_including_wsl": 2.2416799999773502
+    "wall_seconds_including_wsl": 5.177382299967576
   },
   "rtl": {
     "samples": 40,
     "score_and_spike_mismatches": 0,
-    "cycles_min": 5975298,
-    "cycles_mean": 5978903.8,
-    "cycles_max": 5981498,
-    "milliseconds_max_at_100mhz": 59.81498,
+    "cycles_min": 5975321,
+    "cycles_mean": 5978926.8,
+    "cycles_max": 5981521,
+    "milliseconds_max_at_100mhz": 59.81521,
     "led_pulse_cycles": 100000000,
     "malformed_requests": "pass",
     "duplicate_sequence": "pass"
   },
-  "firmware_sha256": "fd21aed87913467efc53dd6d93bd1606f825380aaf7f0d8486b5f72ed9a49abc",
-  "model_sha256": "493402f984fc47e20cd1bce59a8e683baba53b82096061b307e2c8cff8aa4ae7"
+  "firmware_sha256": "e9997e6ebb07b96085895259707b449f76fe90be98f78c986c9fb1afb81303a2",
+  "model_sha256": "6ffcdf843d15798cc48ac96916f9e43bab9ba3b01a3a3fbac0394cfd5ac7909e"
 }

@@ -1,10 +1,18 @@
 {
-  "hardware_abi": "0x00020000",
+  "hardware_abi": {
+    "keyword.bit": "0x00020000",
+    "keyword_kdot.bit": "0x00020001"
+  },
   "keyword": "yes",
-  "board_tested": false,
+  "board_tested": {
+    "method": "JTAG (jtag/bringup.tcl, jtag/board_test.tcl)",
+    "date": "2026-09-24",
+    "result": "40/40 verification vectors bit-exact, LED0 pulse about 1 s",
+    "not_tested": "PYNQ Linux, Ethernet board_server.py, PYNQ Clocks setup"
+  },
   "files": {
     "keyword.bin": {
-      "sha256": "fd21aed87913467efc53dd6d93bd1606f825380aaf7f0d8486b5f72ed9a49abc",
+      "sha256": "e9997e6ebb07b96085895259707b449f76fe90be98f78c986c9fb1afb81303a2",
       "bytes": 197120
     },
     "keyword.bit": {
@@ -12,15 +20,28 @@
       "bytes": 1292867
     },
     "model.npz": {
-      "sha256": "493402f984fc47e20cd1bce59a8e683baba53b82096061b307e2c8cff8aa4ae7",
-      "bytes": 62977
+      "sha256": "6ffcdf843d15798cc48ac96916f9e43bab9ba3b01a3a3fbac0394cfd5ac7909e",
+      "bytes": 63184
+    },
+    "keyword_kdot.bin": {
+      "sha256": "bd84a8cb76ecaac7a3a48ccdfb4585fdb3cfbdb7a96c644772bff9d00c96a52c",
+      "bytes": 197120
+    },
+    "keyword_kdot.bit": {
+      "sha256": "29d86aa01a0b73ce6bb8e99f1b98410396b21bb22da662a02b9f2cc1b7c1e5f7",
+      "bytes": 1310387
+    },
+    "ps7_init.tcl": {
+      "sha256": "65e14e21d56626ceb6ab98687fd0c5fb1f902b8525717df45ee0479bc8ce41de",
+      "bytes": 35746
     }
   },
   "sources_sha256_lf_normalized": {
+    "code/pynqz2_riscv_flow/rtl/kdot_pcpi.v": "4a02b99ce78b9246e0438c5e04bbf62b3ab3640a86266fc58d93eb5eac12d782",
     "code/pynqz2_riscv_flow/rtl/picorv32.v": "0836050971b3c6cdd28ac3b1e5719a67fb645161912bef1e472e63995ceb0622",
     "code/pynqz2_riscv_flow/rtl/poisson.v": "a888ac1a064cd25eb86f0e783c38f29588b091f8302089cc92ea4e63723e890e",
-    "code/pynqz2_riscv_flow/rtl/ps_if.v": "aa9f9a90631e2a0ad9689c4825ce31b3cdac450784d9a8a6b89b9bbe152c25c1",
-    "code/pynqz2_riscv_flow/rtl/spike_soc.v": "295b6ad2d188b805051158e6d4bcb6fd8bd23dbe71eb92fe7ff89da2095f9608",
+    "code/pynqz2_riscv_flow/rtl/ps_if.v": "86d98314afae64a61fdda2ecb509614eabe15b581df94d795b5d336e2c25e3fa",
+    "code/pynqz2_riscv_flow/rtl/spike_soc.v": "c6dfeb5862762fb50dbb62b336122ff120a9043022d001541ec15d5a3cea638d",
     "code/pynqz2_riscv_flow/rtl/spike_top.v": "149f7a2fc18ab707eca3e7528b808031b8c06f67e979e06e2ecb0a8a245d0df6"
   }
 }

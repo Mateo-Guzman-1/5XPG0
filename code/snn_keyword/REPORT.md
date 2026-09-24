@@ -12,8 +12,10 @@ advantage of one encoding or SNNs over ANNs.
 
 The deployed model is **current_seed2**: precision 90.15%,
 recall 85.20%, F1 87.61%. Its maximum observed RTL
-latency was **59.81 ms** at 100 MHz.
-No physical board or microphone measurement was performed.
+latency was **59.82 ms** at 100 MHz.
+On the physical PYNQ-Z2, loaded over JTAG because the board's SD card does
+not boot, all 40 verification vectors ran bit-exact with RTL cycle counts.
+Later work is summarized below and logged in `JOURNAL.md`.
 
 ## Dataset, controls, and training
 
@@ -93,7 +95,7 @@ used in training; see `results/background_noise.json` for the six sources.
 
 | Encoding | Mean cycles | Maximum cycles | Maximum ms at 100 MHz |
 |---|---:|---:|---:|
-| Current | 5978904 | 5981498 | 59.81 |
+| Current | 5978927 | 5981521 | 59.82 |
 | Rate | 59493791 | 71552298 | 715.52 |
 
 Mean latency improves by 9.95x. These are actual
@@ -160,18 +162,44 @@ request, and returns the core's scores, cycle count, spikes, and decision.
 This can also run locally with an integer-model server; simulated-server
 cycle fields are zero to avoid presenting fabricated processor timing.
 
-No board was available. Ethernet behavior on the PYNQ, Linux/PS clock setup,
-physical LED timing, actual microphone accuracy, continuous-speech false
-accepts per hour, acoustic robustness, power, and long-duration stability
-remain physical acceptance checks. The isolated-word recall is about 85%,
+Inference, cycle counts, and LED timing were measured on the board through a
+JTAG workaround (`jtag/`), needed only because this board's SD card fails
+to boot (BootROM error 0x200A). Reflashing the card should restore the
+standard path. The Ethernet server on PYNQ Linux, the PYNQ clock setup,
+calibrated microphone accuracy, continuous-speech false accepts per hour,
+acoustic robustness, power, and long-duration stability remain physical
+acceptance checks. The isolated-word recall is about 85%,
 so missed detections remain a substantive model limitation. A 1 s sliding
 window does not constitute a validated wake-word product. Do not claim board
 measurements or energy savings from these results.
 
+## Later work (see JOURNAL.md)
+
+- **`kdot` custom instruction.** A PicoRV32 PCPI coprocessor streams the
+  input-layer dot products from BRAM. Worst-case inference drops from
+  5.98 M to 0.27 M cycles (22.4×, 2.67 ms), bit-exact in RTL and on the board.
+  Setup slack +0.745 ns; 2879 LUTs,
+  8 DSPs.
+- **"2 of 3" confirmation.** A stream window counts only if one of the two
+  previous windows also passes a validation-tuned threshold. On held-out
+  clips in noise at the 250 ms hop, "yes" detected / other words accepted
+  goes from 74.5% / 1.07% to 67.3% / 0.13%.
+- **Confusable endings.** Augmentation from real "yes" recordings
+  (`augment.py`) yields a trial model. With 2 of 3 it scores
+  60.1% / 0.50% live. On held-out synthesized words it detects
+  "yeets"-type 11.8%, "pizza" 3.1%,
+  and "ch" words 0.8%, against 52.8%,
+  11.5%, and 5.5% for the release model with
+  2 of 3. It is not the release model because of its lower recall. An
+  informal microphone test found that 2 of 3 removed most false "yes" on
+  made-up /s/-final words, though detection remains far from perfect.
+- **64 time bins** did not improve this dense network
+  (`results/confusables_64bins.json`).
+
 ## Reproducibility and references
 
 `README.md` contains exact environment, training, export, simulation, and
-future-board commands. `EXPERIMENT_PLAN.md` states the controlled comparison.
+board (Ethernet and JTAG) commands. `EXPERIMENT_PLAN.md` states the controlled comparison.
 `deploy/` contains the selected model, firmware, bitstream, and hash manifest;
 `results/` contains all six integer models, training histories, metrics, test
 vectors, and implementation reports. Dataset audio and floating checkpoints

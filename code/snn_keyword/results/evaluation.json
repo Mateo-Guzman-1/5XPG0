@@ -1,7 +1,7 @@
 {
   "selected_run": "current_seed2",
   "selection_rule": "maximum integer validation F1 among encodings with measured RTL max <= 25,000,000 cycles (250 ms at 100 MHz)",
-  "model_sha256": "493402f984fc47e20cd1bce59a8e683baba53b82096061b307e2c8cff8aa4ae7",
+  "model_sha256": "6ffcdf843d15798cc48ac96916f9e43bab9ba3b01a3a3fbac0394cfd5ac7909e",
   "test_samples": 11005,
   "runs": [
     {
@@ -334,5 +334,6 @@
   "observed_encoding_max_cycles": {
     "current": 5981498,
     "rate": 71552298
-  }
+  },
+  "model_sha256_note": "2026-09-25: deploy/model.npz gained the key stream_threshold (tune_stream.py); weights and decision_threshold unchanged (previous file hash 493402f9...)."
 }

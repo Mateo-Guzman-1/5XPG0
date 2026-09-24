@@ -6,9 +6,13 @@ inference kernel on the PicoRV32 RTL, and builds the PYNQ-Z2 bitstream.
 The PC computes one-second mel spectrograms every 250 ms; the RISC-V core
 classifies them and a hardware countdown lights LED0 for exactly one second.
 
-See [REPORT.md](REPORT.md), [presentation.pdf](presentation.pdf), and the
-machine-readable [results](results/). These are simulation and implementation
-results. The board and microphone have not been tested physically.
+See [REPORT.md](REPORT.md), [presentation.pdf](presentation.pdf),
+[JOURNAL.md](JOURNAL.md) (dated log of every change, its motivation and its
+outcome), and the machine-readable [results](results/). Inference is verified
+in RTL simulation and on the physical PYNQ-Z2, loaded over JTAG (see
+[JTAG workaround](#jtag-workaround-this-board-only)). The standard PYNQ
+Linux/Ethernet path has not run on hardware yet. The live microphone demo was
+tried by hand (see [Live confirmation](#live-confirmation-and-confusable-words)).
 
 ## What was measured
 
@@ -17,11 +21,18 @@ results. The board and microphone have not been tested physically.
 - Official speaker-disjoint split: 84,843 training, 9,981 validation,
   11,005 test clips; "yes" versus all other 34 words.
 - Deployed current model: 90.15% precision, 85.20% recall, 87.61% F1.
-- Worst of 40 RTL vectors: 5,981,498 cycles = 59.82 ms at 100 MHz.
+- Worst of 40 RTL vectors: 5,981,521 cycles = 59.82 ms at 100 MHz with
+  plain RV32IM, or 267,393 cycles = 2.67 ms with the `kdot` custom instruction.
 - The best rate model took up to 715.52 ms and misses the 250 ms hop budget.
 - Full-test native C and RTL stress vectors match the integer oracle exactly.
 - Zero detections on 398 separate background-noise windows; this is not a
   continuous-speech false-accepts-per-hour measurement.
+- Physical PYNQ-Z2, loaded over JTAG: the 40 vectors are bit-exact for the
+  RV32IM, `kdot` and augmented-trial firmware. Cycle counts equal RTL, and
+  the LED0 pulse is about 1 s.
+- Live windows (held-out clips in noise, 250 ms hop): "2 of 3" confirmation
+  lowers other words accepted from 1.07% to 0.13%, while "yes" detection
+  goes from 74.5% to 67.3%.
 
 ## Local environment
 
@@ -71,6 +82,34 @@ wsl -d Ubuntu -- code/snn_keyword/build/obj_dir/Vspike_soc code/snn_keyword/buil
 wsl -d Ubuntu -- bash code/snn_keyword/sim/build.sh
 .venv/Scripts/python.exe code/snn_keyword/verify.py
 .venv/Scripts/python.exe code/snn_keyword/robustness.py
+```
+
+Confusable endings, stream confirmation and the held-out word probe
+(JOURNAL.md, 2026-09-24/25):
+
+```powershell
+.venv/Scripts/python.exe code/snn_keyword/augment.py
+.venv/Scripts/python.exe code/snn_keyword/train_keyword_snn.py --encodings current --aug-fraction 0.3 --out code/snn_keyword/runs_aug
+.venv/Scripts/python.exe code/snn_keyword/tune_stream.py code/snn_keyword/deploy/model.npz
+.venv/Scripts/python.exe code/snn_keyword/tune_stream.py code/snn_keyword/runs_aug/current_seed2/model.npz
+powershell -ExecutionPolicy Bypass -File code/snn_keyword/make_tts_probe.ps1
+.venv/Scripts/python.exe code/snn_keyword/confusables.py release=code/snn_keyword/deploy/model.npz trial=code/snn_keyword/runs_aug/current_seed2/model.npz
+```
+
+`results/models/augmented_current_seed2.npz` is the trial model that was
+tested on the board. `results/confusables.json` scores it, the release model,
+and every configuration in the journal. The 64-time-bin experiment uses the
+experiment-only `KWS_TIME_BINS` switch. Its data directory needs the dataset
+inside it; a hard link to the archive plus a junction to the extracted
+folder avoid a second copy:
+
+```powershell
+$env:KWS_TIME_BINS = 64
+.venv/Scripts/python.exe code/snn_keyword/prepare_data.py --data code/snn_keyword/data/b64
+.venv/Scripts/python.exe code/snn_keyword/augment.py --data code/snn_keyword/data/b64
+.venv/Scripts/python.exe code/snn_keyword/train_keyword_snn.py --data code/snn_keyword/data/b64 --encodings current --hidden 56 --aug-fraction 0.3 --out code/snn_keyword/runs_b64
+.venv/Scripts/python.exe code/snn_keyword/confusables.py b64=code/snn_keyword/runs_b64/current_seed0/model.npz --data code/snn_keyword/data/b64 --out code/snn_keyword/results/confusables_64bins.json
+Remove-Item Env:KWS_TIME_BINS
 ```
 
 The explicit current model and threshold above reproduce this release's
@@ -125,13 +164,17 @@ RTL simulation, 40 verification vectors, same SoC:
 | `keyword.bin` (RV32IM) | 5,981,498 | 59.81 ms | 40/40 exact |
 | `keyword_kdot.bin` | 267,370 | 2.67 ms | 40/40 exact |
 
-That is a 22.4× worst-case speedup. What remains is mostly the LIF time
-loop and the readout. On the physical PYNQ-Z2 (loaded over JTAG, see
+That is a 22.4× worst-case speedup. Adding the stream command (see
+below) later cost 23 cycles per inference in both images. After `kdot`,
+the 12 LIF time steps take about 72% of the remaining cycles, the 64 `kdot`
+calls about 14%, and division, bias, readout and mailbox the rest. This was
+measured by building the firmware with 6 and with 12 steps. On the physical PYNQ-Z2 (loaded over JTAG, see
 `results/board_jtag_kdot.csv`), all 40 vectors match the oracle, and
 scores, spikes and cycle counts are identical to RTL simulation.
 Implementation meets timing (WNS +0.745 ns at 100 MHz). The unit costs
-about 180 LUTs and 150 flip-flops over the baseline. `deploy/keyword_kdot.bit` is the matching bitstream;
-the original `keyword.bit`/`keyword.bin` release is unchanged.
+about 180 LUTs and 150 flip-flops over the baseline (`results/hardware_kdot.json`,
+`results/kdot_*.rpt`). `deploy/keyword_kdot.bit` is the matching bitstream;
+the original `keyword.bit` is unchanged.
 
 ## PC simulation demo
 
@@ -200,7 +243,16 @@ Windows voices that were never used in training, at the real 250 ms hop:
 
 On real held-out speakers the augmented model with 2 of 3 detects 60.1% of
 "yes" and accepts 0.50% of other words. It trades recall for rejecting
-these confusions and is not yet the release model.
+these confusions and is not yet the release model. All figures above come
+from `results/confusables.json` (`confusables.py`).
+
+**Manual microphone test (user, board over JTAG).** Spoken made-up words
+ending in /s/ or similar sounds, such as "mes", "ras", "tes", "tos" and "ex",
+were often detected as "yes" when each window decided on its own. With "2 of
+3" confirmation (and the augmented trial model on the board) most of these
+false detections stopped. Detection is still far from perfect. This was an
+informal listening test, not a measurement; the model has never been
+trained on its speaker or microphone.
 
 **Finer time bins do not help this network.** 64 time bins (about 16 ms,
 1536-byte input, 48 or 56 hidden neurons to fit BRAM) scored below 32 bins
@@ -211,9 +263,11 @@ time-convolutional front layer is the next step. The firmware already
 publishes its input size (mailbox word 14), and the RTL harness and JTAG
 relay adapt to it.
 
-## When the PYNQ becomes available
+## Run on the PYNQ board (standard Ethernet path)
 
-No board upload has been attempted. Copy this folder's `deploy/`,
+This is the intended deployment. It has **not** yet run on hardware,
+because the board used so far does not boot PYNQ Linux (see the next
+section). Copy this folder's `deploy/`,
 `board_server.py`, `protocol.py`, and `features.py` to the board. Use the
 PYNQ environment (which already provides NumPy) to load the released image:
 
@@ -233,9 +287,41 @@ Each positive single-window request, or each confirmed stream window,
 retriggers LED0 for one second from that detection.
 Use the lab network; the small demo protocol has no authentication.
 
-The remaining physical checks are Ethernet connectivity, actual clock setup,
-microphone behavior, LED observation, and board timing. Do not replace
-simulation results with claims of board measurement.
+Still unchecked on hardware for this path: Ethernet connectivity, the
+PYNQ Clocks setup, and `board_server.py` itself. Inference, cycle counts and
+LED timing were measured on the board through the JTAG workaround below.
+
+## JTAG workaround (this board only)
+
+This workaround exists for **one specific problem on the board used here**.
+It is not the normal way to deploy. The PYNQ-Z2's UART (COM8) stayed silent
+and the board never appeared on Ethernet. Over JTAG, the boot-mode register
+read 5 (SD card) but the BootROM status was `0x0040200A`: error `0x200A`,
+boot from SD failed. PYNQ Linux therefore never starts. Reflashing the SD card
+with the PYNQ-Z2 v3.1 image, or reseating or replacing the card, will most
+likely fix it. After that, use the standard path above and ignore this section.
+
+JTAG stands in for the missing boot chain. `jtag/bringup.tcl` runs the
+Vivado-generated `ps7_init` (PS clocks, FCLK0 = 100 MHz), programs the
+bitstream, and enables the PS-PL level shifters. It then holds the PicoRV32
+in reset, writes the firmware into BRAM through the PS AXI port, and
+releases it. `jtag_server.py` stands in for `board_server.py` on the PC. It
+takes the demo's TCP frames and moves them through the Vivado debugger
+(xsdb) into the same mailbox.
+
+```powershell
+$X = "C:/AMDDesignTools/2025.2/Vivado/bin/xsdb.bat"
+& $X code/snn_keyword/jtag/bringup.tcl code/snn_keyword/deploy/keyword_kdot.bit code/snn_keyword/deploy/keyword_kdot.bin
+.venv/Scripts/python.exe code/snn_keyword/jtag/make_board_vectors.py --model code/snn_keyword/deploy/model.npz
+& $X code/snn_keyword/jtag/board_test.tcl
+.venv/Scripts/python.exe code/snn_keyword/jtag_server.py   # keep running
+.venv/Scripts/python.exe code/snn_keyword/pc_keyword_demo.py 127.0.0.1
+```
+
+Limitations:
+- Nothing persists: a power cycle clears the FPGA and BRAM, so bring-up must run again.
+- Each 250 ms window costs 30–45 ms of JTAG transfer, against 2.7 ms of inference.
+- Vivado's Hardware Manager shares the cable. Close it while the demo runs. The relay re-selects a lost target and retries for up to 5 s.
 
 ## Interface and arithmetic
 

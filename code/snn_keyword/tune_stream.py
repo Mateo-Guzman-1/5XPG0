@@ -23,14 +23,16 @@ ROOT = Path(__file__).resolve().parent
 HOP = SAMPLE_RATE // 4
 
 
-def live_windows(data, negatives, seed=2):
-    cache = ROOT / 'build' / f'live_validation_{negatives}_{seed}.npz'
+def live_windows(data, negatives, seed=2, split=1):
+    """Consecutive 250 ms-hop windows of clips in noise; split 1 = validation, 2 = test."""
+    from features import N_TIME
+    cache = ROOT / 'build' / f'live_split{split}_{negatives}_{seed}_{N_TIME}bins.npz'
     if cache.exists():
         z = np.load(cache)
         return z['x'], z['clip'], z['y']
     d = np.load(data / 'features.npz')
     raw = data / 'speech_commands_v0.02'
-    names, y = d['names'][d['split'] == 1], d['y'][d['split'] == 1]
+    names, y = d['names'][d['split'] == split], d['y'][d['split'] == split]
     noise = np.concatenate([read_wav(p) for p in sorted(glob.glob(str(raw / '_background_noise_' / '*.wav')))])
     rng = np.random.default_rng(seed)
     ids = np.r_[np.flatnonzero(y == 1), rng.choice(np.flatnonzero(y == 0), negatives, replace=False)]

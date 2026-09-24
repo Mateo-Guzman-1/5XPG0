@@ -1,0 +1,2138 @@
+{
+  "time_bins": 32,
+  "live_test": {
+    "yes_clips": 419,
+    "other_clips": 3000
+  },
+  "tts_utterances": 576,
+  "models": {
+    "release": {
+      "decision_threshold": 2674,
+      "stream_threshold": 1553,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.9015,
+        "recall": 0.852,
+        "f1": 0.8761
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.7446,
+          "other_accepted": 0.0107
+        },
+        "two_of_three": {
+          "yes_detected": 0.673,
+          "other_accepted": 0.0013
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.8012,
+        "ch": 0.4618,
+        "sh": 0.4312,
+        "cut": 0.4648,
+        "tail": 0.1101,
+        "head": 0.3303,
+        "shift": 0.9358
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.9115,
+          "yeets/yets/yetz": 0.7465,
+          "pizza(s)": 0.3125,
+          "eats/its": 0.6562,
+          "other -ts": 0.2042,
+          "ch words": 0.2604,
+          "yeah": 0.3333,
+          "yeet": 0.1771,
+          "guess/less": 0.5365,
+          "cheese/yesterday": 0.5104
+        },
+        "two_of_three": {
+          "yes": 0.7656,
+          "yeets/yets/yetz": 0.5278,
+          "pizza(s)": 0.1146,
+          "eats/its": 0.4375,
+          "other -ts": 0.1229,
+          "ch words": 0.0547,
+          "yeah": 0.1458,
+          "yeet": 0.0104,
+          "guess/less": 0.375,
+          "cheese/yesterday": 0.2292
+        }
+      },
+      "file": "deploy/model.npz"
+    },
+    "trial_augmented_seed2": {
+      "decision_threshold": 2067,
+      "stream_threshold": 652,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8977,
+        "recall": 0.7542,
+        "f1": 0.8197
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6611,
+          "other_accepted": 0.0083
+        },
+        "two_of_three": {
+          "yes_detected": 0.6014,
+          "other_accepted": 0.005
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0642,
+        "ch": 0.0031,
+        "sh": 0.0245,
+        "cut": 0.0459,
+        "tail": 0.0183,
+        "head": 0.1651,
+        "shift": 0.8349
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.724,
+          "yeets/yets/yetz": 0.2222,
+          "pizza(s)": 0.0677,
+          "eats/its": 0.2188,
+          "other -ts": 0.1313,
+          "ch words": 0.0182,
+          "yeah": 0.0104,
+          "yeet": 0.0,
+          "guess/less": 0.5208,
+          "cheese/yesterday": 0.1719
+        },
+        "two_of_three": {
+          "yes": 0.5573,
+          "yeets/yets/yetz": 0.1181,
+          "pizza(s)": 0.0312,
+          "eats/its": 0.0677,
+          "other -ts": 0.0646,
+          "ch words": 0.0078,
+          "yeah": 0.0312,
+          "yeet": 0.0,
+          "guess/less": 0.3333,
+          "cheese/yesterday": 0.0781
+        }
+      },
+      "file": "results/models/augmented_current_seed2.npz"
+    },
+    "tsch/seed0": {
+      "decision_threshold": 2348,
+      "stream_threshold": 2348,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8638,
+        "recall": 0.7112,
+        "f1": 0.7801
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6277,
+          "other_accepted": 0.0297
+        },
+        "two_of_three": {
+          "yes_detected": 0.4511,
+          "other_accepted": 0.0017
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0245,
+        "ch": 0.0061,
+        "sh": 0.0642,
+        "cut": 0.1131,
+        "tail": 0.2141,
+        "head": 0.419,
+        "shift": 0.7401
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.8958,
+          "yeets/yets/yetz": 0.4583,
+          "pizza(s)": 0.3125,
+          "eats/its": 0.4635,
+          "other -ts": 0.2333,
+          "ch words": 0.2005,
+          "yeah": 0.3229,
+          "yeet": 0.1354,
+          "guess/less": 0.5938,
+          "cheese/yesterday": 0.4531
+        },
+        "two_of_three": {
+          "yes": 0.5521,
+          "yeets/yets/yetz": 0.0972,
+          "pizza(s)": 0.0312,
+          "eats/its": 0.0521,
+          "other -ts": 0.0312,
+          "ch words": 0.0078,
+          "yeah": 0.0417,
+          "yeet": 0.0104,
+          "guess/less": 0.25,
+          "cheese/yesterday": 0.0833
+        }
+      },
+      "file": "runs_sweep/tsch/current_seed0/model.npz"
+    },
+    "tsch/seed1": {
+      "decision_threshold": 2250,
+      "stream_threshold": 2250,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.7698,
+        "recall": 0.7184,
+        "f1": 0.7432
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6468,
+          "other_accepted": 0.036
+        },
+        "two_of_three": {
+          "yes_detected": 0.4869,
+          "other_accepted": 0.003
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0214,
+        "ch": 0.0153,
+        "sh": 0.1009,
+        "cut": 0.0642,
+        "tail": 0.2232,
+        "head": 0.315,
+        "shift": 0.7523
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.9115,
+          "yeets/yets/yetz": 0.3958,
+          "pizza(s)": 0.3438,
+          "eats/its": 0.3906,
+          "other -ts": 0.1708,
+          "ch words": 0.2135,
+          "yeah": 0.3542,
+          "yeet": 0.2083,
+          "guess/less": 0.6146,
+          "cheese/yesterday": 0.526
+        },
+        "two_of_three": {
+          "yes": 0.5,
+          "yeets/yets/yetz": 0.0903,
+          "pizza(s)": 0.0417,
+          "eats/its": 0.0573,
+          "other -ts": 0.0354,
+          "ch words": 0.0104,
+          "yeah": 0.0208,
+          "yeet": 0.0,
+          "guess/less": 0.2812,
+          "cheese/yesterday": 0.1458
+        }
+      },
+      "file": "runs_sweep/tsch/current_seed1/model.npz"
+    },
+    "tsch/seed2": {
+      "decision_threshold": 2435,
+      "stream_threshold": 2435,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8947,
+        "recall": 0.7303,
+        "f1": 0.8042
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.685,
+          "other_accepted": 0.0277
+        },
+        "two_of_three": {
+          "yes_detected": 0.4845,
+          "other_accepted": 0.0003
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0122,
+        "ch": 0.0061,
+        "sh": 0.0795,
+        "cut": 0.0887,
+        "tail": 0.1437,
+        "head": 0.3578,
+        "shift": 0.7492
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.8385,
+          "yeets/yets/yetz": 0.3993,
+          "pizza(s)": 0.3333,
+          "eats/its": 0.3906,
+          "other -ts": 0.1562,
+          "ch words": 0.099,
+          "yeah": 0.1458,
+          "yeet": 0.1458,
+          "guess/less": 0.5833,
+          "cheese/yesterday": 0.349
+        },
+        "two_of_three": {
+          "yes": 0.4427,
+          "yeets/yets/yetz": 0.0764,
+          "pizza(s)": 0.0312,
+          "eats/its": 0.0312,
+          "other -ts": 0.0187,
+          "ch words": 0.0078,
+          "yeah": 0.0312,
+          "yeet": 0.0,
+          "guess/less": 0.2135,
+          "cheese/yesterday": 0.0417
+        }
+      },
+      "file": "runs_sweep/tsch/current_seed2/model.npz"
+    },
+    "tsch_f15/seed0": {
+      "decision_threshold": 2156,
+      "stream_threshold": 2156,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8194,
+        "recall": 0.747,
+        "f1": 0.7815
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.7064,
+          "other_accepted": 0.032
+        },
+        "two_of_three": {
+          "yes_detected": 0.5107,
+          "other_accepted": 0.0017
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0642,
+        "ch": 0.0183,
+        "sh": 0.107,
+        "cut": 0.1498,
+        "tail": 0.2538,
+        "head": 0.3731,
+        "shift": 0.7492
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.9427,
+          "yeets/yets/yetz": 0.566,
+          "pizza(s)": 0.3438,
+          "eats/its": 0.625,
+          "other -ts": 0.225,
+          "ch words": 0.3802,
+          "yeah": 0.4167,
+          "yeet": 0.4062,
+          "guess/less": 0.6458,
+          "cheese/yesterday": 0.5781
+        },
+        "two_of_three": {
+          "yes": 0.5312,
+          "yeets/yets/yetz": 0.1771,
+          "pizza(s)": 0.026,
+          "eats/its": 0.1615,
+          "other -ts": 0.0396,
+          "ch words": 0.0312,
+          "yeah": 0.0208,
+          "yeet": 0.0104,
+          "guess/less": 0.2135,
+          "cheese/yesterday": 0.1406
+        }
+      },
+      "file": "runs_sweep/tsch_f15/current_seed0/model.npz"
+    },
+    "tsch_f15/seed1": {
+      "decision_threshold": 2864,
+      "stream_threshold": 2864,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8981,
+        "recall": 0.673,
+        "f1": 0.7694
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6277,
+          "other_accepted": 0.017
+        },
+        "two_of_three": {
+          "yes_detected": 0.4702,
+          "other_accepted": 0.001
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.052,
+        "ch": 0.0245,
+        "sh": 0.0856,
+        "cut": 0.0887,
+        "tail": 0.107,
+        "head": 0.2202,
+        "shift": 0.7003
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.8906,
+          "yeets/yets/yetz": 0.3854,
+          "pizza(s)": 0.2604,
+          "eats/its": 0.5156,
+          "other -ts": 0.1625,
+          "ch words": 0.112,
+          "yeah": 0.125,
+          "yeet": 0.1146,
+          "guess/less": 0.5573,
+          "cheese/yesterday": 0.3229
+        },
+        "two_of_three": {
+          "yes": 0.4375,
+          "yeets/yets/yetz": 0.0903,
+          "pizza(s)": 0.0156,
+          "eats/its": 0.0521,
+          "other -ts": 0.0208,
+          "ch words": 0.0,
+          "yeah": 0.0104,
+          "yeet": 0.0,
+          "guess/less": 0.1719,
+          "cheese/yesterday": 0.0573
+        }
+      },
+      "file": "runs_sweep/tsch_f15/current_seed1/model.npz"
+    },
+    "tsch_f15/seed2": {
+      "decision_threshold": 2576,
+      "stream_threshold": 2576,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.9067,
+        "recall": 0.7422,
+        "f1": 0.8163
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6802,
+          "other_accepted": 0.018
+        },
+        "two_of_three": {
+          "yes_detected": 0.4916,
+          "other_accepted": 0.0007
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0306,
+        "ch": 0.0092,
+        "sh": 0.1346,
+        "cut": 0.1193,
+        "tail": 0.2355,
+        "head": 0.3456,
+        "shift": 0.7615
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.9062,
+          "yeets/yets/yetz": 0.3715,
+          "pizza(s)": 0.2448,
+          "eats/its": 0.3333,
+          "other -ts": 0.125,
+          "ch words": 0.1875,
+          "yeah": 0.3646,
+          "yeet": 0.2396,
+          "guess/less": 0.5312,
+          "cheese/yesterday": 0.375
+        },
+        "two_of_three": {
+          "yes": 0.5312,
+          "yeets/yets/yetz": 0.1181,
+          "pizza(s)": 0.0312,
+          "eats/its": 0.0781,
+          "other -ts": 0.0208,
+          "ch words": 0.0026,
+          "yeah": 0.0625,
+          "yeet": 0.0104,
+          "guess/less": 0.2083,
+          "cheese/yesterday": 0.0677
+        }
+      },
+      "file": "runs_sweep/tsch_f15/current_seed2/model.npz"
+    },
+    "tsch_h88/seed0": {
+      "decision_threshold": 1658,
+      "stream_threshold": 1658,
+      "hidden": 88,
+      "clips": {
+        "precision": 0.8625,
+        "recall": 0.7637,
+        "f1": 0.8101
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.7518,
+          "other_accepted": 0.0277
+        },
+        "two_of_three": {
+          "yes_detected": 0.5895,
+          "other_accepted": 0.0023
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0245,
+        "ch": 0.0153,
+        "sh": 0.1468,
+        "cut": 0.0917,
+        "tail": 0.1804,
+        "head": 0.2966,
+        "shift": 0.8196
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.9062,
+          "yeets/yets/yetz": 0.3993,
+          "pizza(s)": 0.2604,
+          "eats/its": 0.4062,
+          "other -ts": 0.1167,
+          "ch words": 0.1667,
+          "yeah": 0.3125,
+          "yeet": 0.1667,
+          "guess/less": 0.5625,
+          "cheese/yesterday": 0.2969
+        },
+        "two_of_three": {
+          "yes": 0.6094,
+          "yeets/yets/yetz": 0.1528,
+          "pizza(s)": 0.0052,
+          "eats/its": 0.099,
+          "other -ts": 0.0167,
+          "ch words": 0.0182,
+          "yeah": 0.125,
+          "yeet": 0.0,
+          "guess/less": 0.1927,
+          "cheese/yesterday": 0.0781
+        }
+      },
+      "file": "runs_sweep/tsch_h88/current_seed0/model.npz"
+    },
+    "tsch_h88/seed1": {
+      "decision_threshold": 2690,
+      "stream_threshold": 2690,
+      "hidden": 88,
+      "clips": {
+        "precision": 0.8291,
+        "recall": 0.7064,
+        "f1": 0.7629
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6229,
+          "other_accepted": 0.0463
+        },
+        "two_of_three": {
+          "yes_detected": 0.432,
+          "other_accepted": 0.0013
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0183,
+        "ch": 0.0092,
+        "sh": 0.1193,
+        "cut": 0.0826,
+        "tail": 0.1774,
+        "head": 0.211,
+        "shift": 0.7125
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.8021,
+          "yeets/yets/yetz": 0.3854,
+          "pizza(s)": 0.2344,
+          "eats/its": 0.3594,
+          "other -ts": 0.1104,
+          "ch words": 0.1927,
+          "yeah": 0.2812,
+          "yeet": 0.1562,
+          "guess/less": 0.5469,
+          "cheese/yesterday": 0.3177
+        },
+        "two_of_three": {
+          "yes": 0.4635,
+          "yeets/yets/yetz": 0.0521,
+          "pizza(s)": 0.026,
+          "eats/its": 0.0312,
+          "other -ts": 0.0042,
+          "ch words": 0.0078,
+          "yeah": 0.0104,
+          "yeet": 0.0,
+          "guess/less": 0.125,
+          "cheese/yesterday": 0.0625
+        }
+      },
+      "file": "runs_sweep/tsch_h88/current_seed1/model.npz"
+    },
+    "tsch_h88/seed2": {
+      "decision_threshold": 2288,
+      "stream_threshold": 2288,
+      "hidden": 88,
+      "clips": {
+        "precision": 0.8633,
+        "recall": 0.7685,
+        "f1": 0.8131
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.716,
+          "other_accepted": 0.0233
+        },
+        "two_of_three": {
+          "yes_detected": 0.5322,
+          "other_accepted": 0.001
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0245,
+        "ch": 0.0183,
+        "sh": 0.1284,
+        "cut": 0.1101,
+        "tail": 0.2018,
+        "head": 0.3303,
+        "shift": 0.7554
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.8854,
+          "yeets/yets/yetz": 0.4132,
+          "pizza(s)": 0.2031,
+          "eats/its": 0.4115,
+          "other -ts": 0.1667,
+          "ch words": 0.2083,
+          "yeah": 0.3438,
+          "yeet": 0.1562,
+          "guess/less": 0.5469,
+          "cheese/yesterday": 0.4792
+        },
+        "two_of_three": {
+          "yes": 0.4948,
+          "yeets/yets/yetz": 0.0868,
+          "pizza(s)": 0.0208,
+          "eats/its": 0.0625,
+          "other -ts": 0.0187,
+          "ch words": 0.0052,
+          "yeah": 0.0625,
+          "yeet": 0.0,
+          "guess/less": 0.1719,
+          "cheese/yesterday": 0.0885
+        }
+      },
+      "file": "runs_sweep/tsch_h88/current_seed2/model.npz"
+    },
+    "all_h88/seed0": {
+      "decision_threshold": 2621,
+      "stream_threshold": 2621,
+      "hidden": 88,
+      "clips": {
+        "precision": 0.882,
+        "recall": 0.7136,
+        "f1": 0.7889
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6587,
+          "other_accepted": 0.0197
+        },
+        "two_of_three": {
+          "yes_detected": 0.4749,
+          "other_accepted": 0.0003
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0306,
+        "ch": 0.0061,
+        "sh": 0.0214,
+        "cut": 0.0245,
+        "tail": 0.1407,
+        "head": 0.208,
+        "shift": 0.7523
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.7865,
+          "yeets/yets/yetz": 0.2604,
+          "pizza(s)": 0.1667,
+          "eats/its": 0.2344,
+          "other -ts": 0.075,
+          "ch words": 0.1042,
+          "yeah": 0.2083,
+          "yeet": 0.1042,
+          "guess/less": 0.3906,
+          "cheese/yesterday": 0.2448
+        },
+        "two_of_three": {
+          "yes": 0.3906,
+          "yeets/yets/yetz": 0.066,
+          "pizza(s)": 0.0208,
+          "eats/its": 0.026,
+          "other -ts": 0.0146,
+          "ch words": 0.0078,
+          "yeah": 0.0104,
+          "yeet": 0.0,
+          "guess/less": 0.1198,
+          "cheese/yesterday": 0.0677
+        }
+      },
+      "file": "runs_sweep/all_h88/current_seed0/model.npz"
+    },
+    "all_h88/seed1": {
+      "decision_threshold": 2686,
+      "stream_threshold": 2686,
+      "hidden": 88,
+      "clips": {
+        "precision": 0.8793,
+        "recall": 0.6778,
+        "f1": 0.7655
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6372,
+          "other_accepted": 0.0223
+        },
+        "two_of_three": {
+          "yes_detected": 0.4678,
+          "other_accepted": 0.0013
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0306,
+        "ch": 0.0,
+        "sh": 0.0214,
+        "cut": 0.0275,
+        "tail": 0.1774,
+        "head": 0.2202,
+        "shift": 0.7064
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.8125,
+          "yeets/yets/yetz": 0.3264,
+          "pizza(s)": 0.1927,
+          "eats/its": 0.3177,
+          "other -ts": 0.1458,
+          "ch words": 0.0964,
+          "yeah": 0.1667,
+          "yeet": 0.0208,
+          "guess/less": 0.4583,
+          "cheese/yesterday": 0.2552
+        },
+        "two_of_three": {
+          "yes": 0.4271,
+          "yeets/yets/yetz": 0.0486,
+          "pizza(s)": 0.0156,
+          "eats/its": 0.0312,
+          "other -ts": 0.0104,
+          "ch words": 0.0026,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.1771,
+          "cheese/yesterday": 0.0521
+        }
+      },
+      "file": "runs_sweep/all_h88/current_seed1/model.npz"
+    },
+    "all_h88/seed2": {
+      "decision_threshold": 2425,
+      "stream_threshold": 2425,
+      "hidden": 88,
+      "clips": {
+        "precision": 0.8991,
+        "recall": 0.7446,
+        "f1": 0.8146
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6778,
+          "other_accepted": 0.019
+        },
+        "two_of_three": {
+          "yes_detected": 0.5084,
+          "other_accepted": 0.0007
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0214,
+        "ch": 0.0061,
+        "sh": 0.0245,
+        "cut": 0.0183,
+        "tail": 0.2385,
+        "head": 0.3333,
+        "shift": 0.7615
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.8698,
+          "yeets/yets/yetz": 0.3021,
+          "pizza(s)": 0.1979,
+          "eats/its": 0.2708,
+          "other -ts": 0.1417,
+          "ch words": 0.1198,
+          "yeah": 0.1562,
+          "yeet": 0.0417,
+          "guess/less": 0.5208,
+          "cheese/yesterday": 0.2344
+        },
+        "two_of_three": {
+          "yes": 0.5104,
+          "yeets/yets/yetz": 0.0903,
+          "pizza(s)": 0.026,
+          "eats/its": 0.0417,
+          "other -ts": 0.0417,
+          "ch words": 0.0078,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.1927,
+          "cheese/yesterday": 0.026
+        }
+      },
+      "file": "runs_sweep/all_h88/current_seed2/model.npz"
+    },
+    "aug_h64/seed0": {
+      "decision_threshold": 2171,
+      "stream_threshold": 2171,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8809,
+        "recall": 0.7589,
+        "f1": 0.8154
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.7041,
+          "other_accepted": 0.011
+        },
+        "two_of_three": {
+          "yes_detected": 0.4749,
+          "other_accepted": 0.0017
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.104,
+        "ch": 0.0183,
+        "sh": 0.0367,
+        "cut": 0.0428,
+        "tail": 0.0092,
+        "head": 0.1682,
+        "shift": 0.8073
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.8698,
+          "yeets/yets/yetz": 0.3264,
+          "pizza(s)": 0.1979,
+          "eats/its": 0.3854,
+          "other -ts": 0.1333,
+          "ch words": 0.0365,
+          "yeah": 0.0312,
+          "yeet": 0.0,
+          "guess/less": 0.6198,
+          "cheese/yesterday": 0.2448
+        },
+        "two_of_three": {
+          "yes": 0.4688,
+          "yeets/yets/yetz": 0.0799,
+          "pizza(s)": 0.0104,
+          "eats/its": 0.0521,
+          "other -ts": 0.0417,
+          "ch words": 0.0,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.1406,
+          "cheese/yesterday": 0.0781
+        }
+      },
+      "file": "runs_sweep/aug_h64/current_seed0/model.npz"
+    },
+    "aug_h64/seed1": {
+      "decision_threshold": 2463,
+      "stream_threshold": 2463,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.9088,
+        "recall": 0.7136,
+        "f1": 0.7995
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6396,
+          "other_accepted": 0.0097
+        },
+        "two_of_three": {
+          "yes_detected": 0.4415,
+          "other_accepted": 0.0013
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0765,
+        "ch": 0.0061,
+        "sh": 0.0306,
+        "cut": 0.0306,
+        "tail": 0.0122,
+        "head": 0.1407,
+        "shift": 0.7829
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.7031,
+          "yeets/yets/yetz": 0.2361,
+          "pizza(s)": 0.2083,
+          "eats/its": 0.2708,
+          "other -ts": 0.0813,
+          "ch words": 0.0312,
+          "yeah": 0.0521,
+          "yeet": 0.0,
+          "guess/less": 0.4375,
+          "cheese/yesterday": 0.151
+        },
+        "two_of_three": {
+          "yes": 0.3438,
+          "yeets/yets/yetz": 0.0243,
+          "pizza(s)": 0.0156,
+          "eats/its": 0.0104,
+          "other -ts": 0.0083,
+          "ch words": 0.0026,
+          "yeah": 0.0104,
+          "yeet": 0.0,
+          "guess/less": 0.125,
+          "cheese/yesterday": 0.0417
+        }
+      },
+      "file": "runs_sweep/aug_h64/current_seed1/model.npz"
+    },
+    "aug_h64/seed2": {
+      "decision_threshold": 2044,
+      "stream_threshold": 2044,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.888,
+        "recall": 0.7566,
+        "f1": 0.817
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6635,
+          "other_accepted": 0.0093
+        },
+        "two_of_three": {
+          "yes_detected": 0.4988,
+          "other_accepted": 0.001
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0673,
+        "ch": 0.0061,
+        "sh": 0.0245,
+        "cut": 0.0367,
+        "tail": 0.0183,
+        "head": 0.1621,
+        "shift": 0.8012
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.7656,
+          "yeets/yets/yetz": 0.2743,
+          "pizza(s)": 0.1146,
+          "eats/its": 0.2604,
+          "other -ts": 0.1333,
+          "ch words": 0.0625,
+          "yeah": 0.0312,
+          "yeet": 0.0208,
+          "guess/less": 0.5156,
+          "cheese/yesterday": 0.1979
+        },
+        "two_of_three": {
+          "yes": 0.4688,
+          "yeets/yets/yetz": 0.0938,
+          "pizza(s)": 0.0104,
+          "eats/its": 0.0521,
+          "other -ts": 0.0521,
+          "ch words": 0.0,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.1875,
+          "cheese/yesterday": 0.0365
+        }
+      },
+      "file": "runs_sweep/aug_h64/current_seed2/model.npz"
+    },
+    "aug_h88/seed0": {
+      "decision_threshold": 2083,
+      "stream_threshold": 2083,
+      "hidden": 88,
+      "clips": {
+        "precision": 0.9014,
+        "recall": 0.7637,
+        "f1": 0.8269
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6921,
+          "other_accepted": 0.009
+        },
+        "two_of_three": {
+          "yes_detected": 0.4845,
+          "other_accepted": 0.0017
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0581,
+        "ch": 0.0092,
+        "sh": 0.0306,
+        "cut": 0.0459,
+        "tail": 0.0061,
+        "head": 0.1743,
+        "shift": 0.841
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.8281,
+          "yeets/yets/yetz": 0.2708,
+          "pizza(s)": 0.1615,
+          "eats/its": 0.3229,
+          "other -ts": 0.1083,
+          "ch words": 0.0365,
+          "yeah": 0.0104,
+          "yeet": 0.0104,
+          "guess/less": 0.599,
+          "cheese/yesterday": 0.1719
+        },
+        "two_of_three": {
+          "yes": 0.4948,
+          "yeets/yets/yetz": 0.0868,
+          "pizza(s)": 0.0052,
+          "eats/its": 0.0469,
+          "other -ts": 0.0229,
+          "ch words": 0.0,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.2344,
+          "cheese/yesterday": 0.0417
+        }
+      },
+      "file": "runs_sweep/aug_h88/current_seed0/model.npz"
+    },
+    "aug_h88/seed1": {
+      "decision_threshold": 1800,
+      "stream_threshold": 1800,
+      "hidden": 88,
+      "clips": {
+        "precision": 0.8705,
+        "recall": 0.7542,
+        "f1": 0.8082
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.716,
+          "other_accepted": 0.014
+        },
+        "two_of_three": {
+          "yes_detected": 0.5179,
+          "other_accepted": 0.0013
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0826,
+        "ch": 0.0122,
+        "sh": 0.0398,
+        "cut": 0.0612,
+        "tail": 0.0153,
+        "head": 0.1804,
+        "shift": 0.8318
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.8021,
+          "yeets/yets/yetz": 0.2812,
+          "pizza(s)": 0.1771,
+          "eats/its": 0.3438,
+          "other -ts": 0.1229,
+          "ch words": 0.0521,
+          "yeah": 0.0312,
+          "yeet": 0.0104,
+          "guess/less": 0.4896,
+          "cheese/yesterday": 0.2188
+        },
+        "two_of_three": {
+          "yes": 0.4531,
+          "yeets/yets/yetz": 0.0764,
+          "pizza(s)": 0.0,
+          "eats/its": 0.0833,
+          "other -ts": 0.0271,
+          "ch words": 0.0,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.2656,
+          "cheese/yesterday": 0.0729
+        }
+      },
+      "file": "runs_sweep/aug_h88/current_seed1/model.npz"
+    },
+    "aug_h88/seed2": {
+      "decision_threshold": 2182,
+      "stream_threshold": 2182,
+      "hidden": 88,
+      "clips": {
+        "precision": 0.9052,
+        "recall": 0.7064,
+        "f1": 0.7936
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6468,
+          "other_accepted": 0.013
+        },
+        "two_of_three": {
+          "yes_detected": 0.4391,
+          "other_accepted": 0.0
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0642,
+        "ch": 0.0092,
+        "sh": 0.0245,
+        "cut": 0.0275,
+        "tail": 0.0061,
+        "head": 0.156,
+        "shift": 0.7706
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.7135,
+          "yeets/yets/yetz": 0.2847,
+          "pizza(s)": 0.1198,
+          "eats/its": 0.2917,
+          "other -ts": 0.1458,
+          "ch words": 0.0156,
+          "yeah": 0.0,
+          "yeet": 0.0104,
+          "guess/less": 0.4531,
+          "cheese/yesterday": 0.2135
+        },
+        "two_of_three": {
+          "yes": 0.401,
+          "yeets/yets/yetz": 0.0833,
+          "pizza(s)": 0.0,
+          "eats/its": 0.0521,
+          "other -ts": 0.0375,
+          "ch words": 0.0,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.151,
+          "cheese/yesterday": 0.0417
+        }
+      },
+      "file": "runs_sweep/aug_h88/current_seed2/model.npz"
+    },
+    "aug2_h64/seed0": {
+      "decision_threshold": 1851,
+      "stream_threshold": 1851,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8537,
+        "recall": 0.7661,
+        "f1": 0.8075
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.7136,
+          "other_accepted": 0.011
+        },
+        "two_of_three": {
+          "yes_detected": 0.4821,
+          "other_accepted": 0.0013
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.1284,
+        "ch": 0.0214,
+        "sh": 0.0428,
+        "cut": 0.052,
+        "tail": 0.0061,
+        "head": 0.1865,
+        "shift": 0.8502
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.7604,
+          "yeets/yets/yetz": 0.2674,
+          "pizza(s)": 0.1406,
+          "eats/its": 0.3073,
+          "other -ts": 0.1333,
+          "ch words": 0.0599,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.6094,
+          "cheese/yesterday": 0.2656
+        },
+        "two_of_three": {
+          "yes": 0.4375,
+          "yeets/yets/yetz": 0.0972,
+          "pizza(s)": 0.0104,
+          "eats/its": 0.0521,
+          "other -ts": 0.0521,
+          "ch words": 0.0026,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.2656,
+          "cheese/yesterday": 0.0625
+        }
+      },
+      "file": "runs_sweep/aug2_h64/current_seed0/model.npz"
+    },
+    "aug2_h64/seed1": {
+      "decision_threshold": 1588,
+      "stream_threshold": 1588,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8824,
+        "recall": 0.7876,
+        "f1": 0.8323
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.7232,
+          "other_accepted": 0.0163
+        },
+        "two_of_three": {
+          "yes_detected": 0.4964,
+          "other_accepted": 0.0023
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0948,
+        "ch": 0.0061,
+        "sh": 0.0489,
+        "cut": 0.0489,
+        "tail": 0.0153,
+        "head": 0.1774,
+        "shift": 0.8257
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.724,
+          "yeets/yets/yetz": 0.2604,
+          "pizza(s)": 0.1823,
+          "eats/its": 0.2604,
+          "other -ts": 0.1271,
+          "ch words": 0.0417,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.6198,
+          "cheese/yesterday": 0.1979
+        },
+        "two_of_three": {
+          "yes": 0.4219,
+          "yeets/yets/yetz": 0.066,
+          "pizza(s)": 0.0104,
+          "eats/its": 0.0521,
+          "other -ts": 0.0437,
+          "ch words": 0.0,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.2552,
+          "cheese/yesterday": 0.0521
+        }
+      },
+      "file": "runs_sweep/aug2_h64/current_seed1/model.npz"
+    },
+    "aug2_h64/seed2": {
+      "decision_threshold": 2067,
+      "stream_threshold": 2067,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8977,
+        "recall": 0.7542,
+        "f1": 0.8197
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6611,
+          "other_accepted": 0.0083
+        },
+        "two_of_three": {
+          "yes_detected": 0.4606,
+          "other_accepted": 0.001
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0642,
+        "ch": 0.0031,
+        "sh": 0.0245,
+        "cut": 0.0459,
+        "tail": 0.0183,
+        "head": 0.1651,
+        "shift": 0.8349
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.724,
+          "yeets/yets/yetz": 0.2222,
+          "pizza(s)": 0.0677,
+          "eats/its": 0.2188,
+          "other -ts": 0.1313,
+          "ch words": 0.0182,
+          "yeah": 0.0104,
+          "yeet": 0.0,
+          "guess/less": 0.5208,
+          "cheese/yesterday": 0.1719
+        },
+        "two_of_three": {
+          "yes": 0.4323,
+          "yeets/yets/yetz": 0.0694,
+          "pizza(s)": 0.0052,
+          "eats/its": 0.0156,
+          "other -ts": 0.05,
+          "ch words": 0.0,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.1406,
+          "cheese/yesterday": 0.0104
+        }
+      },
+      "file": "runs_sweep/aug2_h64/current_seed2/model.npz"
+    },
+    "aug2_h88/seed0": {
+      "decision_threshold": 1398,
+      "stream_threshold": 1398,
+      "hidden": 88,
+      "clips": {
+        "precision": 0.8777,
+        "recall": 0.7876,
+        "f1": 0.8302
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6945,
+          "other_accepted": 0.0103
+        },
+        "two_of_three": {
+          "yes_detected": 0.4893,
+          "other_accepted": 0.0013
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0642,
+        "ch": 0.0122,
+        "sh": 0.0367,
+        "cut": 0.0428,
+        "tail": 0.0122,
+        "head": 0.1743,
+        "shift": 0.8777
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.8073,
+          "yeets/yets/yetz": 0.2778,
+          "pizza(s)": 0.0833,
+          "eats/its": 0.2865,
+          "other -ts": 0.125,
+          "ch words": 0.0339,
+          "yeah": 0.0729,
+          "yeet": 0.0,
+          "guess/less": 0.5938,
+          "cheese/yesterday": 0.2083
+        },
+        "two_of_three": {
+          "yes": 0.5365,
+          "yeets/yets/yetz": 0.0972,
+          "pizza(s)": 0.0,
+          "eats/its": 0.0625,
+          "other -ts": 0.0521,
+          "ch words": 0.0,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.25,
+          "cheese/yesterday": 0.0469
+        }
+      },
+      "file": "runs_sweep/aug2_h88/current_seed0/model.npz"
+    },
+    "aug2_h88/seed1": {
+      "decision_threshold": 1680,
+      "stream_threshold": 1680,
+      "hidden": 88,
+      "clips": {
+        "precision": 0.862,
+        "recall": 0.7303,
+        "f1": 0.7907
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6683,
+          "other_accepted": 0.01
+        },
+        "two_of_three": {
+          "yes_detected": 0.4869,
+          "other_accepted": 0.0003
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.1162,
+        "ch": 0.0092,
+        "sh": 0.0336,
+        "cut": 0.0398,
+        "tail": 0.0183,
+        "head": 0.1804,
+        "shift": 0.8257
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.7865,
+          "yeets/yets/yetz": 0.3021,
+          "pizza(s)": 0.2448,
+          "eats/its": 0.3958,
+          "other -ts": 0.1271,
+          "ch words": 0.0495,
+          "yeah": 0.0312,
+          "yeet": 0.0,
+          "guess/less": 0.5156,
+          "cheese/yesterday": 0.1875
+        },
+        "two_of_three": {
+          "yes": 0.4323,
+          "yeets/yets/yetz": 0.0903,
+          "pizza(s)": 0.0312,
+          "eats/its": 0.0573,
+          "other -ts": 0.0625,
+          "ch words": 0.0,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.1719,
+          "cheese/yesterday": 0.0469
+        }
+      },
+      "file": "runs_sweep/aug2_h88/current_seed1/model.npz"
+    },
+    "aug2_h88/seed2": {
+      "decision_threshold": 1767,
+      "stream_threshold": 1767,
+      "hidden": 88,
+      "clips": {
+        "precision": 0.8625,
+        "recall": 0.7637,
+        "f1": 0.8101
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6969,
+          "other_accepted": 0.0127
+        },
+        "two_of_three": {
+          "yes_detected": 0.5131,
+          "other_accepted": 0.0007
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0917,
+        "ch": 0.0183,
+        "sh": 0.0428,
+        "cut": 0.0489,
+        "tail": 0.0153,
+        "head": 0.1865,
+        "shift": 0.8471
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.8281,
+          "yeets/yets/yetz": 0.2951,
+          "pizza(s)": 0.0885,
+          "eats/its": 0.2552,
+          "other -ts": 0.1625,
+          "ch words": 0.0417,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.5625,
+          "cheese/yesterday": 0.2708
+        },
+        "two_of_three": {
+          "yes": 0.4062,
+          "yeets/yets/yetz": 0.1076,
+          "pizza(s)": 0.0,
+          "eats/its": 0.0365,
+          "other -ts": 0.05,
+          "ch words": 0.0026,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.1615,
+          "cheese/yesterday": 0.0625
+        }
+      },
+      "file": "runs_sweep/aug2_h88/current_seed2/model.npz"
+    },
+    "aug2_h176/seed0": {
+      "decision_threshold": 1878,
+      "stream_threshold": 1878,
+      "hidden": 176,
+      "clips": {
+        "precision": 0.8836,
+        "recall": 0.7971,
+        "f1": 0.8381
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.7136,
+          "other_accepted": 0.0083
+        },
+        "two_of_three": {
+          "yes_detected": 0.4893,
+          "other_accepted": 0.0003
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0826,
+        "ch": 0.0153,
+        "sh": 0.0398,
+        "cut": 0.052,
+        "tail": 0.0183,
+        "head": 0.1774,
+        "shift": 0.8654
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.8073,
+          "yeets/yets/yetz": 0.2674,
+          "pizza(s)": 0.1198,
+          "eats/its": 0.3125,
+          "other -ts": 0.1271,
+          "ch words": 0.0755,
+          "yeah": 0.0417,
+          "yeet": 0.0,
+          "guess/less": 0.599,
+          "cheese/yesterday": 0.2396
+        },
+        "two_of_three": {
+          "yes": 0.4688,
+          "yeets/yets/yetz": 0.0833,
+          "pizza(s)": 0.0104,
+          "eats/its": 0.0469,
+          "other -ts": 0.0354,
+          "ch words": 0.0026,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.25,
+          "cheese/yesterday": 0.0573
+        }
+      },
+      "file": "runs_sweep/aug2_h176/current_seed0/model.npz"
+    },
+    "aug2_h176/seed1": {
+      "decision_threshold": 1688,
+      "stream_threshold": 1688,
+      "hidden": 176,
+      "clips": {
+        "precision": 0.9067,
+        "recall": 0.7422,
+        "f1": 0.8163
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.673,
+          "other_accepted": 0.0107
+        },
+        "two_of_three": {
+          "yes_detected": 0.4391,
+          "other_accepted": 0.0007
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0642,
+        "ch": 0.0122,
+        "sh": 0.0398,
+        "cut": 0.0306,
+        "tail": 0.0122,
+        "head": 0.156,
+        "shift": 0.8349
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.7865,
+          "yeets/yets/yetz": 0.2396,
+          "pizza(s)": 0.1094,
+          "eats/its": 0.3125,
+          "other -ts": 0.1083,
+          "ch words": 0.0234,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.5521,
+          "cheese/yesterday": 0.2083
+        },
+        "two_of_three": {
+          "yes": 0.4948,
+          "yeets/yets/yetz": 0.059,
+          "pizza(s)": 0.0,
+          "eats/its": 0.0365,
+          "other -ts": 0.0354,
+          "ch words": 0.0052,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.2031,
+          "cheese/yesterday": 0.0573
+        }
+      },
+      "file": "runs_sweep/aug2_h176/current_seed1/model.npz"
+    },
+    "aug2_h176/seed2": {
+      "decision_threshold": 2278,
+      "stream_threshold": 2278,
+      "hidden": 176,
+      "clips": {
+        "precision": 0.9107,
+        "recall": 0.7303,
+        "f1": 0.8106
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.673,
+          "other_accepted": 0.0067
+        },
+        "two_of_three": {
+          "yes_detected": 0.4582,
+          "other_accepted": 0.0003
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0642,
+        "ch": 0.0153,
+        "sh": 0.0306,
+        "cut": 0.0336,
+        "tail": 0.0153,
+        "head": 0.1743,
+        "shift": 0.8226
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.6771,
+          "yeets/yets/yetz": 0.2153,
+          "pizza(s)": 0.0781,
+          "eats/its": 0.2135,
+          "other -ts": 0.1,
+          "ch words": 0.0182,
+          "yeah": 0.0312,
+          "yeet": 0.0,
+          "guess/less": 0.5365,
+          "cheese/yesterday": 0.1198
+        },
+        "two_of_three": {
+          "yes": 0.3906,
+          "yeets/yets/yetz": 0.0729,
+          "pizza(s)": 0.0,
+          "eats/its": 0.0208,
+          "other -ts": 0.0417,
+          "ch words": 0.0,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.1198,
+          "cheese/yesterday": 0.0312
+        }
+      },
+      "file": "runs_sweep/aug2_h176/current_seed2/model.npz"
+    },
+    "aug2_h256/seed0": {
+      "decision_threshold": 2328,
+      "stream_threshold": 2328,
+      "hidden": 256,
+      "clips": {
+        "precision": 0.9288,
+        "recall": 0.747,
+        "f1": 0.828
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.642,
+          "other_accepted": 0.0053
+        },
+        "two_of_three": {
+          "yes_detected": 0.4582,
+          "other_accepted": 0.0
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.052,
+        "ch": 0.0061,
+        "sh": 0.0306,
+        "cut": 0.0367,
+        "tail": 0.0092,
+        "head": 0.1713,
+        "shift": 0.8654
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.8021,
+          "yeets/yets/yetz": 0.2847,
+          "pizza(s)": 0.1615,
+          "eats/its": 0.25,
+          "other -ts": 0.1417,
+          "ch words": 0.0599,
+          "yeah": 0.0312,
+          "yeet": 0.0,
+          "guess/less": 0.4896,
+          "cheese/yesterday": 0.1875
+        },
+        "two_of_three": {
+          "yes": 0.4583,
+          "yeets/yets/yetz": 0.0764,
+          "pizza(s)": 0.0,
+          "eats/its": 0.0469,
+          "other -ts": 0.0417,
+          "ch words": 0.0026,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.1667,
+          "cheese/yesterday": 0.0365
+        }
+      },
+      "file": "runs_sweep/aug2_h256/current_seed0/model.npz"
+    },
+    "aug2_h256/seed1": {
+      "decision_threshold": 2179,
+      "stream_threshold": 2179,
+      "hidden": 256,
+      "clips": {
+        "precision": 0.9514,
+        "recall": 0.747,
+        "f1": 0.8369
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6325,
+          "other_accepted": 0.0093
+        },
+        "two_of_three": {
+          "yes_detected": 0.4391,
+          "other_accepted": 0.0
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0336,
+        "ch": 0.0061,
+        "sh": 0.0245,
+        "cut": 0.0306,
+        "tail": 0.0092,
+        "head": 0.159,
+        "shift": 0.8379
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.7656,
+          "yeets/yets/yetz": 0.2465,
+          "pizza(s)": 0.0781,
+          "eats/its": 0.2188,
+          "other -ts": 0.1292,
+          "ch words": 0.0391,
+          "yeah": 0.0208,
+          "yeet": 0.0,
+          "guess/less": 0.5,
+          "cheese/yesterday": 0.2135
+        },
+        "two_of_three": {
+          "yes": 0.4531,
+          "yeets/yets/yetz": 0.0764,
+          "pizza(s)": 0.0,
+          "eats/its": 0.0312,
+          "other -ts": 0.0375,
+          "ch words": 0.0,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.1979,
+          "cheese/yesterday": 0.0417
+        }
+      },
+      "file": "runs_sweep/aug2_h256/current_seed1/model.npz"
+    },
+    "aug2_h256/seed2": {
+      "decision_threshold": 1983,
+      "stream_threshold": 1983,
+      "hidden": 256,
+      "clips": {
+        "precision": 0.8864,
+        "recall": 0.7637,
+        "f1": 0.8205
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6659,
+          "other_accepted": 0.0097
+        },
+        "two_of_three": {
+          "yes_detected": 0.4749,
+          "other_accepted": 0.0007
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.055,
+        "ch": 0.0092,
+        "sh": 0.0214,
+        "cut": 0.0398,
+        "tail": 0.0122,
+        "head": 0.1896,
+        "shift": 0.8287
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.7865,
+          "yeets/yets/yetz": 0.2153,
+          "pizza(s)": 0.1042,
+          "eats/its": 0.2292,
+          "other -ts": 0.0958,
+          "ch words": 0.0391,
+          "yeah": 0.0625,
+          "yeet": 0.0,
+          "guess/less": 0.5625,
+          "cheese/yesterday": 0.2135
+        },
+        "two_of_three": {
+          "yes": 0.4583,
+          "yeets/yets/yetz": 0.0868,
+          "pizza(s)": 0.0,
+          "eats/its": 0.0625,
+          "other -ts": 0.0396,
+          "ch words": 0.0026,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.1458,
+          "cheese/yesterday": 0.0521
+        }
+      },
+      "file": "runs_sweep/aug2_h256/current_seed2/model.npz"
+    },
+    "nohead/seed0": {
+      "decision_threshold": 2035,
+      "stream_threshold": 2035,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.9049,
+        "recall": 0.7947,
+        "f1": 0.8463
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6993,
+          "other_accepted": 0.0177
+        },
+        "two_of_three": {
+          "yes_detected": 0.5274,
+          "other_accepted": 0.0017
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0795,
+        "ch": 0.0153,
+        "sh": 0.0459,
+        "cut": 0.0428,
+        "tail": 0.0214,
+        "head": 0.419,
+        "shift": 0.8349
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.875,
+          "yeets/yets/yetz": 0.3646,
+          "pizza(s)": 0.3021,
+          "eats/its": 0.401,
+          "other -ts": 0.1625,
+          "ch words": 0.0417,
+          "yeah": 0.0833,
+          "yeet": 0.0,
+          "guess/less": 0.7396,
+          "cheese/yesterday": 0.224
+        },
+        "two_of_three": {
+          "yes": 0.6042,
+          "yeets/yets/yetz": 0.1528,
+          "pizza(s)": 0.0312,
+          "eats/its": 0.0469,
+          "other -ts": 0.0667,
+          "ch words": 0.0052,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.349,
+          "cheese/yesterday": 0.0833
+        }
+      },
+      "file": "runs_sweep/nohead/current_seed0/model.npz"
+    },
+    "nohead/seed1": {
+      "decision_threshold": 2202,
+      "stream_threshold": 2202,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8792,
+        "recall": 0.747,
+        "f1": 0.8077
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.7017,
+          "other_accepted": 0.015
+        },
+        "two_of_three": {
+          "yes_detected": 0.5084,
+          "other_accepted": 0.0017
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.1193,
+        "ch": 0.0245,
+        "sh": 0.0398,
+        "cut": 0.0336,
+        "tail": 0.0092,
+        "head": 0.2477,
+        "shift": 0.8226
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.8333,
+          "yeets/yets/yetz": 0.2569,
+          "pizza(s)": 0.2448,
+          "eats/its": 0.3542,
+          "other -ts": 0.1521,
+          "ch words": 0.0234,
+          "yeah": 0.0,
+          "yeet": 0.0208,
+          "guess/less": 0.651,
+          "cheese/yesterday": 0.224
+        },
+        "two_of_three": {
+          "yes": 0.5208,
+          "yeets/yets/yetz": 0.0451,
+          "pizza(s)": 0.0156,
+          "eats/its": 0.0365,
+          "other -ts": 0.0292,
+          "ch words": 0.0,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.2865,
+          "cheese/yesterday": 0.0417
+        }
+      },
+      "file": "runs_sweep/nohead/current_seed1/model.npz"
+    },
+    "nohead/seed2": {
+      "decision_threshold": 2332,
+      "stream_threshold": 2332,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8864,
+        "recall": 0.7446,
+        "f1": 0.8093
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6372,
+          "other_accepted": 0.0127
+        },
+        "two_of_three": {
+          "yes_detected": 0.4726,
+          "other_accepted": 0.0007
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0673,
+        "ch": 0.0153,
+        "sh": 0.0306,
+        "cut": 0.052,
+        "tail": 0.0061,
+        "head": 0.3058,
+        "shift": 0.8349
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.8385,
+          "yeets/yets/yetz": 0.2674,
+          "pizza(s)": 0.1562,
+          "eats/its": 0.3125,
+          "other -ts": 0.1354,
+          "ch words": 0.0312,
+          "yeah": 0.0417,
+          "yeet": 0.0208,
+          "guess/less": 0.6094,
+          "cheese/yesterday": 0.2031
+        },
+        "two_of_three": {
+          "yes": 0.4427,
+          "yeets/yets/yetz": 0.0868,
+          "pizza(s)": 0.0,
+          "eats/its": 0.0573,
+          "other -ts": 0.0437,
+          "ch words": 0.0,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.2031,
+          "cheese/yesterday": 0.0156
+        }
+      },
+      "file": "runs_sweep/nohead/current_seed2/model.npz"
+    },
+    "nohead_f2/seed0": {
+      "decision_threshold": 1857,
+      "stream_threshold": 1857,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8995,
+        "recall": 0.79,
+        "f1": 0.8412
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.7208,
+          "other_accepted": 0.0217
+        },
+        "two_of_three": {
+          "yes_detected": 0.5251,
+          "other_accepted": 0.001
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.1498,
+        "ch": 0.0245,
+        "sh": 0.0489,
+        "cut": 0.0734,
+        "tail": 0.0153,
+        "head": 0.2936,
+        "shift": 0.8624
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.875,
+          "yeets/yets/yetz": 0.3299,
+          "pizza(s)": 0.276,
+          "eats/its": 0.3698,
+          "other -ts": 0.1375,
+          "ch words": 0.0469,
+          "yeah": 0.0104,
+          "yeet": 0.0417,
+          "guess/less": 0.7292,
+          "cheese/yesterday": 0.3177
+        },
+        "two_of_three": {
+          "yes": 0.5833,
+          "yeets/yets/yetz": 0.1111,
+          "pizza(s)": 0.0365,
+          "eats/its": 0.1042,
+          "other -ts": 0.0792,
+          "ch words": 0.0052,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.3385,
+          "cheese/yesterday": 0.0885
+        }
+      },
+      "file": "runs_sweep/nohead_f2/current_seed0/model.npz"
+    },
+    "nohead_f2/seed1": {
+      "decision_threshold": 2327,
+      "stream_threshold": 2327,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8904,
+        "recall": 0.7566,
+        "f1": 0.8181
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6683,
+          "other_accepted": 0.015
+        },
+        "two_of_three": {
+          "yes_detected": 0.4749,
+          "other_accepted": 0.0017
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.1315,
+        "ch": 0.0122,
+        "sh": 0.0367,
+        "cut": 0.0398,
+        "tail": 0.0122,
+        "head": 0.2569,
+        "shift": 0.8135
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.7448,
+          "yeets/yets/yetz": 0.2083,
+          "pizza(s)": 0.2188,
+          "eats/its": 0.3385,
+          "other -ts": 0.1354,
+          "ch words": 0.0417,
+          "yeah": 0.0,
+          "yeet": 0.0208,
+          "guess/less": 0.599,
+          "cheese/yesterday": 0.276
+        },
+        "two_of_three": {
+          "yes": 0.4479,
+          "yeets/yets/yetz": 0.0556,
+          "pizza(s)": 0.0104,
+          "eats/its": 0.0365,
+          "other -ts": 0.0354,
+          "ch words": 0.0,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.2188,
+          "cheese/yesterday": 0.0521
+        }
+      },
+      "file": "runs_sweep/nohead_f2/current_seed1/model.npz"
+    },
+    "nohead_f2/seed2": {
+      "decision_threshold": 2355,
+      "stream_threshold": 2355,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.9438,
+        "recall": 0.7613,
+        "f1": 0.8428
+      },
+      "live": {
+        "single_window": {
+          "yes_detected": 0.6706,
+          "other_accepted": 0.0203
+        },
+        "two_of_three": {
+          "yes_detected": 0.5155,
+          "other_accepted": 0.0013
+        }
+      },
+      "augmented_test_detected": {
+        "ts": 0.0917,
+        "ch": 0.0153,
+        "sh": 0.0428,
+        "cut": 0.0489,
+        "tail": 0.0214,
+        "head": 0.3639,
+        "shift": 0.8624
+      },
+      "tts": {
+        "single_window": {
+          "yes": 0.8385,
+          "yeets/yets/yetz": 0.2465,
+          "pizza(s)": 0.1198,
+          "eats/its": 0.3958,
+          "other -ts": 0.1062,
+          "ch words": 0.0234,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.5781,
+          "cheese/yesterday": 0.2083
+        },
+        "two_of_three": {
+          "yes": 0.4948,
+          "yeets/yets/yetz": 0.0972,
+          "pizza(s)": 0.0052,
+          "eats/its": 0.0677,
+          "other -ts": 0.0521,
+          "ch words": 0.0,
+          "yeah": 0.0,
+          "yeet": 0.0,
+          "guess/less": 0.2188,
+          "cheese/yesterday": 0.0312
+        }
+      },
+      "file": "runs_sweep/nohead_f2/current_seed2/model.npz"
+    }
+  }
+}

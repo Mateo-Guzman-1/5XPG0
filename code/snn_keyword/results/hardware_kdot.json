@@ -2,18 +2,17 @@
   "tool": "Vivado 2025.2",
   "part": "xc7z020clg400-1",
   "clock_hz": 100000000,
-  "setup_slack_ns": 0.517,
-  "hold_slack_ns": 0.031,
+  "setup_slack_ns": 0.745,
+  "hold_slack_ns": 0.024,
   "resources": {
-    "luts": 2699,
-    "registers": 2588,
+    "luts": 2879,
+    "registers": 2735,
     "bram36": 64,
-    "dsps": 6
+    "dsps": 8
   },
   "drc_errors": 0,
-  "bitstream_sha256": "d2556a5f885fffa436378c8520c62dd6341e4b22a26754189bb52412fbd8a8b3",
-  "drc_advisories": "4 DPOP-1 and 6 DPOP-2 DSP pipeline warnings",
-  "unconstrained_outputs": "10 asynchronous human-visible LED pins have no external output delay",
+  "bitstream_sha256": "29d86aa01a0b73ce6bb8e99f1b98410396b21bb22da662a02b9f2cc1b7c1e5f7",
+  "hardware_abi": "0x00020001",
   "board_tested": {
     "method": "JTAG (jtag/bringup.tcl, jtag/board_test.tcl)",
     "date": "2026-09-24",

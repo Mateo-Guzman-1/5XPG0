@@ -117,8 +117,9 @@ def main():
     p.add_argument('--hidden', type=int, default=64)
     p.add_argument('--steps', type=int, default=12)
     p.add_argument('--lr', type=float, default=.002)
-    p.add_argument('--aug-fraction', type=float, default=.3,
-                   help='Share of each class half-batch drawn from data/augment.npz (0 disables)')
+    p.add_argument('--aug-fraction', type=float, default=0,
+                   help='Share of each class half-batch drawn from data/augment.npz (augment.py); '
+                        '0 = release training, 0.3 = augmented trial model')
     p.add_argument('--aug-kinds', nargs='+', default=['ts', 'ch', 'sh', 'cut', 'tail', 'head', 'shift'],
                    choices=['ts', 'ch', 'sh', 'cut', 'tail', 'head', 'shift'], help='augment.py variants to train on')
     a = p.parse_args()

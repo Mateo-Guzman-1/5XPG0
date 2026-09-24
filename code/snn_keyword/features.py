@@ -5,11 +5,15 @@
 Absolute log-power mapping [-80, 0] dB to uint8; no per-clip normalization.
 """
 from functools import lru_cache
+import os
 import wave
 import numpy as np
 
 SAMPLE_RATE = 16000
-N_MELS, N_TIME = 24, 32
+N_MELS = 24
+# KWS_TIME_BINS exists only for the time-resolution experiment (see JOURNAL.md).
+# Firmware, host, and model must all use the same value; the release uses 32.
+N_TIME = int(os.environ.get('KWS_TIME_BINS', 32))
 N_INPUT = N_MELS * N_TIME
 
 

@@ -11,6 +11,42 @@ from matplotlib.backends.backend_pdf import PdfPages
 ROOT=Path(__file__).resolve().parent
 
 
+def later_work(read):
+    """Summary of work after the release, from the retained result files."""
+    try:
+        k=read('hardware_kdot.json'); c=read('confusables.json')['models']
+    except FileNotFoundError:
+        return ''
+    rel,tri=c['release'],c['trial_augmented_seed2']
+    pct=lambda v:f'{100*v:.1f}%'
+    live=lambda m,mode:f"{pct(m['live'][mode]['yes_detected'])} / {100*m['live'][mode]['other_accepted']:.2f}%"
+    tts=lambda m,g:pct(m['tts']['two_of_three'][g])
+    return f'''## Later work (see JOURNAL.md)
+
+- **`kdot` custom instruction.** A PicoRV32 PCPI coprocessor streams the
+  input-layer dot products from BRAM. Worst-case inference drops from
+  5.98 M to 0.27 M cycles (22.4×, 2.67 ms), bit-exact in RTL and on the board.
+  Setup slack +{k['setup_slack_ns']:.3f} ns; {k['resources']['luts']} LUTs,
+  {k['resources']['dsps']} DSPs.
+- **"2 of 3" confirmation.** A stream window counts only if one of the two
+  previous windows also passes a validation-tuned threshold. On held-out
+  clips in noise at the 250 ms hop, "yes" detected / other words accepted
+  goes from {live(rel,'single_window')} to {live(rel,'two_of_three')}.
+- **Confusable endings.** Augmentation from real "yes" recordings
+  (`augment.py`) yields a trial model. With 2 of 3 it scores
+  {live(tri,'two_of_three')} live. On held-out synthesized words it detects
+  "yeets"-type {tts(tri,'yeets/yets/yetz')}, "pizza" {tts(tri,'pizza(s)')},
+  and "ch" words {tts(tri,'ch words')}, against {tts(rel,'yeets/yets/yetz')},
+  {tts(rel,'pizza(s)')}, and {tts(rel,'ch words')} for the release model with
+  2 of 3. It is not the release model because of its lower recall. An
+  informal microphone test found that 2 of 3 removed most false "yes" on
+  made-up /s/-final words, though detection remains far from perfect.
+- **64 time bins** did not improve this dense network
+  (`results/confusables_64bins.json`).
+
+'''
+
+
 def main():
     read=lambda n:json.loads((ROOT/'results'/n).read_text())
     e,v,h,b=map(read,['evaluation.json','verification.json','hardware.json','background_noise.json'])
@@ -26,6 +62,7 @@ def main():
     axes[1].set(ylabel='Worst observed inference (ms)',title='40 RTL vectors at 100 MHz');axes[1].legend()
     fig.savefig(ROOT/'results/comparison.png',dpi=180)
     table='\n'.join(f'| {r["encoding"]} | {r["seed"]} | {r["validation"]["f1"]:.4f} | {r["test"]["precision"]:.4f} | {r["test"]["recall"]:.4f} | {r["test"]["f1"]:.4f} | {100*r["test"]["fpr"]:.3f}% |' for r in e['runs'])
+    later=later_work(read)
     report=f'''# Group 2: spiking keyword detection on PicoRV32
 
 ## Research question and outcome
@@ -41,7 +78,9 @@ advantage of one encoding or SNNs over ANNs.
 The deployed model is **{e['selected_run']}**: precision {100*m['precision']:.2f}%,
 recall {100*m['recall']:.2f}%, F1 {100*m['f1']:.2f}%. Its maximum observed RTL
 latency was **{cur['milliseconds_max_at_100mhz']:.2f} ms** at 100 MHz.
-No physical board or microphone measurement was performed.
+On the physical PYNQ-Z2, loaded over JTAG because the board's SD card does
+not boot, all 40 verification vectors ran bit-exact with RTL cycle counts.
+Later work is summarized below and logged in `JOURNAL.md`.
 
 ## Dataset, controls, and training
 
@@ -183,18 +222,21 @@ request, and returns the core's scores, cycle count, spikes, and decision.
 This can also run locally with an integer-model server; simulated-server
 cycle fields are zero to avoid presenting fabricated processor timing.
 
-No board was available. Ethernet behavior on the PYNQ, Linux/PS clock setup,
-physical LED timing, actual microphone accuracy, continuous-speech false
-accepts per hour, acoustic robustness, power, and long-duration stability
-remain physical acceptance checks. The isolated-word recall is about 85%,
+Inference, cycle counts, and LED timing were measured on the board through a
+JTAG workaround (`jtag/`), needed only because this board's SD card fails
+to boot (BootROM error 0x200A). Reflashing the card should restore the
+standard path. The Ethernet server on PYNQ Linux, the PYNQ clock setup,
+calibrated microphone accuracy, continuous-speech false accepts per hour,
+acoustic robustness, power, and long-duration stability remain physical
+acceptance checks. The isolated-word recall is about 85%,
 so missed detections remain a substantive model limitation. A 1 s sliding
 window does not constitute a validated wake-word product. Do not claim board
 measurements or energy savings from these results.
 
-## Reproducibility and references
+{later}## Reproducibility and references
 
 `README.md` contains exact environment, training, export, simulation, and
-future-board commands. `EXPERIMENT_PLAN.md` states the controlled comparison.
+board (Ethernet and JTAG) commands. `EXPERIMENT_PLAN.md` states the controlled comparison.
 `deploy/` contains the selected model, firmware, bitstream, and hash manifest;
 `results/` contains all six integer models, training histories, metrics, test
 vectors, and implementation reports. Dataset audio and floating checkpoints
@@ -208,7 +250,7 @@ reported measurements come from the retained execution results.
 '''
     (ROOT/'REPORT.md').write_text(report,encoding='utf-8')
     slides=[
-        ('Spiking keyword detection on PicoRV32','Group 2 | Keyword: yes\nSpeech Commands v0.02 | PYNQ-Z2\n\nGPU training, integer deployment, RTL verification\nBoard acceptance remains pending'),
+        ('Spiking keyword detection on PicoRV32','Group 2 | Keyword: yes\nSpeech Commands v0.02 | PYNQ-Z2\n\nGPU training, integer deployment, RTL verification\nBoard: 40/40 vectors bit-exact (loaded over JTAG)'),
         ('Question and hypothesis','Can a small SNN fit 256 KiB BRAM and finish within a 250 ms hop?\n\nHypothesis: caching the constant projection cuts latency without a large F1 penalty.\n\nCompare current and deterministic rate encoding under equal training budgets.'),
         ('Controlled experiment','Official speaker-disjoint splits: 84,843 / 9,981 / 11,005\nYes vs all other 34 words\n768 inputs -> 64 LIF neurons -> 2 linear readouts\n12 steps, beta 7/8, immediate subtractive reset\n3 seeds x 2 encodings x 35 epochs; final 10 use QAT\nCheckpoint and threshold selection use validation data only.'),
         ('Training and deployment share a frontend','16 kHz, one-second mono audio\n400-sample Hann / 160 hop / 512 FFT\n24 mel bands x 32 time bins -> 768 uint8 bytes\nSigned Q10 int16 weights and int32 accumulators\nIndependent NumPy, native C, and RV32IM implementations\nNo floating point on the RISC-V processor.'),
@@ -217,7 +259,7 @@ reported measurements come from the retained execution results.
         ('Measured comparison',None),
         ('Verification evidence','11,005 clips: native production C matches integer oracle exactly\n40 vectors per encoding: actual PicoRV32 execution matches exactly\nTraps, timeouts, malformed requests, and duplicate sequence checks\nAXI backpressure, byte lanes, independent AW/W, read/write contention\n100,000,000-cycle LED pulse; retrigger/reset/cancel/wrap checks\nReal-model local TCP replay and shared WAV frontend tests'),
         ('FPGA implementation',f'Vivado 2025.2 | XC7Z020 | 100 MHz\nSetup slack +{h["setup_slack_ns"]:.3f} ns; hold slack +{h["hold_slack_ns"]:.3f} ns\n{h["resources"]["luts"]} LUTs; {h["resources"]["registers"]} registers\n{h["resources"]["bram36"]} BRAM36 tiles; {h["resources"]["dsps"]} DSPs\n98,824-byte integer model; 16 KiB reserved stack\nBitstream generated; no implementation errors or critical warnings.'),
-        ('Demo and limitations','PC microphone -> mel features -> TCP -> ARM mailbox -> PicoRV32\nPositive inference retriggers hardware LED0 for one second.\n\nNot yet measured: physical board, microphone, Ethernet latency, power.\nAbout 15% of isolated yes clips are missed.\nNo general energy or SNN-vs-ANN claim.\nArtifacts, hashes, raw reports, and reproduction commands are included.')]
+        ('Demo and limitations','PC microphone -> mel features -> TCP -> ARM mailbox -> PicoRV32\nPositive inference retriggers hardware LED0 for one second.\n\nBoard inference verified over JTAG (SD boot fails on this board).\nNot yet measured: Ethernet path, calibrated microphone accuracy, power.\nLater: kdot instruction, 2-of-3 confirmation (JOURNAL.md).\nAbout 15% of isolated yes clips are missed.\nNo general energy or SNN-vs-ANN claim.\nArtifacts, hashes, raw reports, and reproduction commands are included.')]
     with PdfPages(ROOT/'presentation.pdf') as pdf:
         for index,(title,body) in enumerate(slides):
             if body is None:
