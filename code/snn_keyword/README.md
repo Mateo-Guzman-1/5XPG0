@@ -29,10 +29,9 @@ python train_keyword_snn.py
 ## Suggested plan
 
 1. **Research question (starting point — refine it).**
-   > How should the algorithm (input encoding and network) and the
-   > resource-constrained RISC-V platform be co-designed so that a keyword
-   > spotter stays accurate while fitting the platform's memory and real-time
-   > limits?
+   > What co-design choices between the network (input encoding and topology)
+   > and the resource-constrained RISC-V platform let a keyword spotter stay
+   > accurate while fitting the platform's memory and real-time limits?
 
    Make it measurable: pick the design knobs you vary (e.g. encoding scheme,
    network size), the outcomes you measure (accuracy, latency), and the
