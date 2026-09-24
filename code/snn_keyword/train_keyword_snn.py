@@ -31,12 +31,26 @@ def run(args, seed, encoding):
     x = cache['x']; y = cache['y']; split = cache['split']
     xt = torch.tensor(x[split == 0], device=device, dtype=torch.float32) / 255
     yt = torch.tensor(y[split == 0], device=device, dtype=torch.long)
-    xv = torch.tensor(x[split == 1], device=device, dtype=torch.float32) / 255
-    yv = y[split == 1]
+    xv_np, yv = x[split == 1], y[split == 1]
+    n_orig = len(yt)
+    if args.aug_fraction > 0:
+        # Edited "yes" clips from augment.py (confusable endings, window-edge cuts,
+        # shifted positives); they inherit the official speaker-disjoint splits.
+        aug = np.load(args.data / 'augment.npz')
+        use = np.isin(aug['kind'], args.aug_kinds)
+        tr, va = use & (aug['split'] == 0), use & (aug['split'] == 1)
+        xt = torch.cat([xt, torch.tensor(aug['x'][tr], device=device, dtype=torch.float32) / 255])
+        yt = torch.cat([yt, torch.tensor(aug['y'][tr], device=device, dtype=torch.long)])
+        xv_np = np.concatenate([xv_np, aug['x'][va]]); yv = np.concatenate([yv, aug['y'][va]])
+    xv = torch.tensor(xv_np, device=device, dtype=torch.float32) / 255
     model = SpikeMLP(args.hidden, args.steps, encoding).to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-3)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(opt, args.epochs, eta_min=args.lr / 10)
-    pos = torch.where(yt == 1)[0]; neg = torch.where(yt == 0)[0]
+    original = torch.arange(len(yt), device=device) < n_orig
+    pools = [torch.where(original & (yt == c))[0] for c in (1, 0)]
+    aug_pools = [torch.where(~original & (yt == c))[0] for c in (1, 0)]
+    half = args.batch // 2
+    n_aug = [int(half * args.aug_fraction) if len(a) else 0 for a in aug_pools]
     best, best_state, history = -1, None, []
     start = time.perf_counter()
     for epoch in range(args.epochs):
@@ -44,8 +58,9 @@ def run(args, seed, encoding):
         model.qat = epoch >= args.epochs - args.qat_epochs
         total = 0.
         for _ in range(args.samples_per_epoch // args.batch):
-            ids = torch.cat([pos[torch.randint(len(pos), (args.batch // 2,), device=device)],
-                             neg[torch.randint(len(neg), (args.batch // 2,), device=device)]])
+            # Each class fills half the batch; aug_fraction of that half is augmented.
+            ids = torch.cat([pool[torch.randint(len(pool), (n,), device=device)]
+                             for c in range(2) for pool, n in ((pools[c], half - n_aug[c]), (aug_pools[c], n_aug[c])) if n])
             xb, yb = xt[ids].clone(), yt[ids]
             xb = (xb + torch.randn(len(xb), 1, device=device) * .025 + torch.randn_like(xb) * .01).clamp(0, 1)
             xb = torch.round(xb * 255) / 255
@@ -70,7 +85,7 @@ def run(args, seed, encoding):
         print(f'{encoding} seed={seed} epoch={epoch+1}/{args.epochs} loss={result["loss"]:.4f} val_f1={result["f1"]:.4f} recall={result["recall"]:.4f} fpr={result["fpr"]:.4f} qat={model.qat}', flush=True)
     model.load_state_dict(best_state)
     q = quantize(model)
-    qlogits, _ = integer_forward(x[split == 1], q)
+    qlogits, _ = integer_forward(xv_np, q)
     margin = qlogits[:, 1] - qlogits[:, 0]
     q['decision_threshold'] = int(choose_threshold(yv, margin))
     out = args.out / f'{encoding}_seed{seed}'
@@ -78,6 +93,7 @@ def run(args, seed, encoding):
     np.savez_compressed(out / 'model.npz', **q)
     torch.save({'state_dict': best_state, 'hidden': args.hidden, 'steps': args.steps, 'encoding': encoding}, out / 'checkpoint.pt')
     summary = {'seed': seed, 'encoding': encoding, 'hidden': args.hidden, 'steps': args.steps,
+               'aug_fraction': args.aug_fraction, 'aug_kinds': args.aug_kinds, 'augmented_train': len(yt) - n_orig,
                'epochs': args.epochs, 'samples_per_epoch': args.samples_per_epoch,
                'training_seconds': time.perf_counter() - start, 'device': str(device),
                'gpu': torch.cuda.get_device_name() if device.type == 'cuda' else None,
@@ -101,9 +117,13 @@ def main():
     p.add_argument('--hidden', type=int, default=64)
     p.add_argument('--steps', type=int, default=12)
     p.add_argument('--lr', type=float, default=.002)
+    p.add_argument('--aug-fraction', type=float, default=.3,
+                   help='Share of each class half-batch drawn from data/augment.npz (0 disables)')
+    p.add_argument('--aug-kinds', nargs='+', default=['ts', 'ch', 'sh', 'cut', 'tail', 'head', 'shift'],
+                   choices=['ts', 'ch', 'sh', 'cut', 'tail', 'head', 'shift'], help='augment.py variants to train on')
     a = p.parse_args()
-    if not 0 < a.qat_epochs <= a.epochs or a.batch % 2 or a.samples_per_epoch < a.batch:
-        p.error('Require 0 < qat_epochs <= epochs, even batch, samples >= batch')
+    if not 0 < a.qat_epochs <= a.epochs or a.batch % 2 or a.samples_per_epoch < a.batch or not 0 <= a.aug_fraction < 1:
+        p.error('Require 0 < qat_epochs <= epochs, even batch, samples >= batch, 0 <= aug_fraction < 1')
     torch.set_num_threads(8)
     torch.use_deterministic_algorithms(True)
     for encoding in a.encodings:

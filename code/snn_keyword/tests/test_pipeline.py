@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from features import features, mel_bank, N_INPUT
 from model import integer_forward, trunc_div, metrics, choose_threshold
-from protocol import request, recv_exact, HEADER, RESPONSE, MAGIC
+from protocol import request, recv_exact, HEADER, RESPONSE, MAGIC, MODE_STREAM
 from board_server import handle
 from board_server import SimulatedBoard
 from board_server import Board
@@ -46,9 +46,11 @@ def test_hand_computed_lif_and_reset():
 
 
 class FakeBoard:
-    def infer(self,payload):
+    def __init__(self): self.opcodes=[]
+    def infer(self,payload,opcode=1):
         assert len(payload)==768
-        return (0,-3,12,12345,3,1)
+        self.opcodes.append(opcode)
+        return (0,-3,12,12345,3,1 if opcode==1 else 3)
 
 
 def test_tcp_request_reply_and_multiple_requests():
@@ -69,12 +71,54 @@ def test_tcp_rejects_unbounded_length():
     thread.start()
     with a:
         # Fragmented headers exercise recv_exact as well as bounded allocation.
-        packet=HEADER.pack(MAGIC,7,0xffffffff)
+        packet=HEADER.pack(MAGIC,7,0xffff,0)
         for byte in packet: a.sendall(bytes([byte]))
         reply=RESPONSE.unpack(recv_exact(a,RESPONSE.size))
         assert reply[1:3]==(7,1)
     thread.join(timeout=2); b.close()
     assert not thread.is_alive()
+
+
+def test_stream_mode_and_legacy_header():
+    import struct
+    a,b=socket.socketpair(); board=FakeBoard()
+    thread=threading.Thread(target=handle,args=(b,board),daemon=True)
+    thread.start()
+    with a:
+        r=request(a,1,bytes(768),MODE_STREAM)
+        assert r['detected'] and r['window']
+        # A client using the original '<4sII' header is served as a single window.
+        a.sendall(struct.pack('<4sII',MAGIC,2,768)+bytes(768))
+        reply=RESPONSE.unpack(recv_exact(a,RESPONSE.size))
+        assert reply[1:3]==(2,0) and reply[-1]==1
+        # Unknown modes are rejected.
+        a.sendall(HEADER.pack(MAGIC,3,768,7))
+        assert RESPONSE.unpack(recv_exact(a,RESPONSE.size))[1:3]==(3,1)
+    thread.join(timeout=2); b.close()
+    assert not thread.is_alive() and board.opcodes==[3,1]
+
+
+def test_simulated_two_of_three_confirmation(monkeypatch):
+    import board_server
+    backend=SimulatedBoard.__new__(SimulatedBoard)
+    backend.np=np; backend.led_until=0.; backend.history=[(False,0.),(False,0.)]
+    backend.q={'decision_threshold':np.array(0)}
+    margins=iter([])
+    backend.forward=lambda x,q:(np.array([[0,next(margins)]]),np.array([1]))
+    now=[0.]
+    monkeypatch.setattr(board_server.time,'monotonic',lambda:now[0])
+    def run(pattern,step=.25):
+        nonlocal margins
+        margins=iter([1 if p else -1 for p in pattern]); out=[]
+        for _ in pattern:
+            out.append(backend.infer(bytes(768),3)[-1]); now[0]+=step
+        return out
+    # +,+,-,+ : unconfirmed, confirmed, none, confirmed (window bit is bit1).
+    assert run([1,1,0,1])==[2,3,0,3]
+    # Single windows (command 1) are unaffected by the stream history.
+    margins=iter([1]); assert backend.infer(bytes(768),1)[-1]==1
+    # Positives more than 750 ms apart never confirm each other.
+    now[0]+=5; assert run([1,1],step=.8)==[2,2]
 
 
 def test_exported_model_silence():

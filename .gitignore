@@ -57,6 +57,7 @@ dist/
 
 # Project-generated datasets, models, and experiment output
 runs/
+runs_*/
 data/
 checkpoints/
 *.pt

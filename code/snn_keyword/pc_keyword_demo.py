@@ -6,7 +6,7 @@ import socket
 from pathlib import Path
 import numpy as np
 from features import SAMPLE_RATE, features, read_wav
-from protocol import request
+from protocol import MODE_SINGLE, MODE_STREAM, request
 
 
 def main():
@@ -15,6 +15,8 @@ def main():
     p.add_argument('--port', type=int, default=5556)
     p.add_argument('--wav', type=Path, help='Replay one mono PCM16 16 kHz WAV')
     p.add_argument('--device', help='sounddevice input name or ID')
+    p.add_argument('--single', action='store_true',
+                   help='Live: decide on each window alone instead of requiring 2 of 3 consecutive windows')
     a = p.parse_args()
     with socket.create_connection((a.host, a.port), timeout=10) as sock:
         if a.wav:
@@ -37,7 +39,9 @@ def main():
                 chunks.put_nowait(None)
         buffer = np.empty(0, dtype=np.float32)
         seq = 0
-        print('Listening for "yes"; 1 s windows / 250 ms hop. Ctrl-C stops.')
+        mode = MODE_SINGLE if a.single else MODE_STREAM
+        rule = 'each window' if a.single else '2 of 3 consecutive windows'
+        print(f'Listening for "yes"; 1 s windows / 250 ms hop; detection needs {rule}. Ctrl-C stops.')
         with sd.InputStream(channels=1, samplerate=SAMPLE_RATE, blocksize=4000,
                             dtype='float32', device=a.device, callback=callback):
             while True:
@@ -49,7 +53,7 @@ def main():
                 if len(buffer) < SAMPLE_RATE:
                     continue
                 seq = (seq + 1) & 0xffffffff
-                result = request(sock, seq, features(buffer))
+                result = request(sock, seq, features(buffer), mode)
                 print(json.dumps(result), flush=True)
 
 

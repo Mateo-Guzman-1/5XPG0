@@ -6,7 +6,7 @@ from pathlib import Path
 import socket
 import struct
 import time
-from protocol import HEADER, RESPONSE, MAGIC, recv_exact
+from protocol import HEADER, RESPONSE, MAGIC, MODE_SINGLE, MODE_STREAM, recv_exact
 from features import N_INPUT
 
 ROOT = Path(__file__).resolve().parent
@@ -57,14 +57,14 @@ class Board:
     def write(self, offset, value):
         struct.pack_into('<I', self.ram, offset, value)
 
-    def infer(self, payload):
+    def infer(self, payload, opcode=1):
         if len(payload) != N_INPUT:
             raise ValueError('Incorrect feature payload size')
         if self.read_reg(0) & 1:
             raise RuntimeError('Core is stopped; restart the board server')
         seq = (self.read(0x10400) + 1) & 0xffffffff
         self.ram[0x10800:0x10800+N_INPUT] = payload
-        self.write(0x10408, 1); self.write(0x1040c, N_INPUT)
+        self.write(0x10408, opcode); self.write(0x1040c, N_INPUT)
         self.write(0x10400, seq)  # publish last
         deadline = time.monotonic() + 5
         while self.read(0x10404) != seq:
@@ -85,29 +85,36 @@ class SimulatedBoard:
         self.np, self.forward = np, integer_forward
         self.q = dict(np.load(model))
         self.led_until = 0.
+        self.history = [(False, 0.), (False, 0.)]   # previous two stream windows
 
-    def infer(self, payload):
+    def infer(self, payload, opcode=1):
         scores, spikes = self.forward(self.np.frombuffer(payload, self.np.uint8)[None], self.q)
         s0, s1 = map(int, scores[0])
-        detected = s1 - s0 >= int(self.q['decision_threshold'])
-        if detected:
+        detected = int(s1 - s0 >= int(self.q['decision_threshold']))
+        if opcode == 3:   # mirrors firmware/main.c "2 of 3" confirmation
+            stream_threshold = int(self.q.get('stream_threshold', self.q['decision_threshold']))
+            now, window = time.monotonic(), int(s1 - s0 >= stream_threshold)
+            detected = int(window and any(hit and now - t < .75 for hit, t in self.history))
+            self.history = [(bool(window), now), self.history[0]]
+            detected |= window << 1
+        if detected & 1:
             self.led_until = time.monotonic() + 1
         # CPU cycle count is only available in RTL or hardware, never fabricated here.
-        return 0, s0, s1, 0, int(spikes[0]), int(detected)
+        return 0, s0, s1, 0, int(spikes[0]), detected
 
 
 def handle(client, backend):
     client.settimeout(10)
     while True:
         try:
-            magic, seq, length = HEADER.unpack(recv_exact(client, HEADER.size))
+            magic, seq, length, mode = HEADER.unpack(recv_exact(client, HEADER.size))
         except EOFError:
             return
-        if magic != MAGIC or length != N_INPUT:
+        if magic != MAGIC or length != N_INPUT or mode not in (MODE_SINGLE, MODE_STREAM):
             client.sendall(RESPONSE.pack(MAGIC, seq, 1, 0, 0, 0, 0, 0))
             return
         payload = recv_exact(client, length)
-        response = backend.infer(payload)
+        response = backend.infer(payload, 3 if mode == MODE_STREAM else 1)
         client.sendall(RESPONSE.pack(MAGIC, seq, *response))
 
 

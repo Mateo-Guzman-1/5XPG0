@@ -11,7 +11,9 @@ def export(model, out):
     config = '\n'.join(['#ifndef MODEL_CONFIG_H', '#define MODEL_CONFIG_H',
         f'#define MODEL_INPUT {N_INPUT}', f'#define MODEL_HIDDEN {len(q["w1"])}',
         f'#define MODEL_STEPS {int(q["steps"])}', f'#define MODEL_ENCODING {int(q["encoding"])}',
-        f'#define MODEL_DECISION_THRESHOLD ({int(q["decision_threshold"])})', '#endif', ''])
+        f'#define MODEL_DECISION_THRESHOLD ({int(q["decision_threshold"])})',
+        # Per-window threshold for "2 of 3" stream confirmation (tune_stream.py).
+        f'#define MODEL_STREAM_THRESHOLD ({int(q.get("stream_threshold", q["decision_threshold"]))})', '#endif', ''])
     (out / 'model_config.h').write_text(config)
     lines = ['#include <stdint.h>', '#include "model_config.h"']
     for name in ['w1', 'b1', 'w2', 'b2']:

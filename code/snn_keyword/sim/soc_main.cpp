@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
         if (argc != 5) throw std::runtime_error("usage: Vspike_soc firmware.bin vectors.bin results.csv threshold");
         const int32_t threshold = std::stoi(argv[4]);
         auto fw = bytes(argv[1]), input = bytes(argv[2]);
-        if (fw.size() > 0x3c000 || input.size() % 768) throw std::runtime_error("Invalid file size");
+        if (fw.size() > 0x3c000) throw std::runtime_error("Invalid firmware size");
         Sim s; s.d.core_rst_n = 0; s.d.pa_we = 0;
         // Entire memory initialized through the host port, never hierarchical preload.
         for (unsigned a=0; a<0x40000; a+=4) {
@@ -51,28 +51,40 @@ int main(int argc, char **argv) {
         }
         s.d.core_rst_n = 1;
         s.wait(0x10430, 0x4b575331);
+        // Firmware publishes its input size; images predating MB[14] use 768 bytes.
+        unsigned n_in = s.read(0x10438);
+        if (!n_in) n_in = 768;
+        const int32_t stream_threshold = int32_t(s.read(0x1043c));
+        if (input.size() % n_in) throw std::runtime_error("Vector file does not match the firmware input size");
+        auto load = [&](size_t n) {
+            for (unsigned a=0; a<n_in; a+=4) {
+                uint32_t w=0;
+                for (unsigned b=0;b<4;++b) w |= uint32_t(input[n*n_in+a+b]) << (8*b);
+                s.write(0x10800+a,w);
+            }
+        };
         std::ofstream out(argv[3]);
         out << "index,score0,score1,spikes,cycles,detected\n";
         uint32_t seq=0;
         // Reject malformed requests, then demonstrate recovery.
         for (unsigned op : {1u, 99u}) {
-            s.write(0x10408, op); s.write(0x1040c, 767); s.write(0x10400, ++seq);
+            s.write(0x10408, op); s.write(0x1040c, n_in - 1); s.write(0x10400, ++seq);
             s.wait(0x10404, seq);
             if (s.read(0x10418) != 1) throw std::runtime_error("Malformed request accepted");
         }
         bool pulse_checked=false;
-        for (size_t n=0; n<input.size()/768; ++n) {
-            for (unsigned a=0; a<768; a+=4) {
-                uint32_t w=0;
-                for (unsigned b=0;b<4;++b) w |= uint32_t(input[n*768+a+b]) << (8*b);
-                s.write(0x10800+a,w);
-            }
-            s.write(0x10408,1); s.write(0x1040c,768); s.write(0x10400,++seq);
+        long first_pos=-1, first_neg=-1;
+        for (size_t n=0; n<input.size()/n_in; ++n) {
+            load(n);
+            s.write(0x10408,1); s.write(0x1040c,n_in); s.write(0x10400,++seq);
             s.wait(0x10404,seq);
             if (s.read(0x10418)) throw std::runtime_error("Inference failed");
             int32_t score0=s.read(0x1041c), score1=s.read(0x10420);
             uint32_t c=s.read(0x10424), spikes=s.read(0x10428), detected=s.read(0x1042c);
             if (detected != unsigned(score1-score0 >= threshold)) throw std::runtime_error("Decision mismatch");
+            // Stream-test vectors: positive under both thresholds, negative under the stream one.
+            if (detected && score1-score0 >= stream_threshold && first_pos < 0) first_pos = long(n);
+            if (score1-score0 < stream_threshold && first_neg < 0) first_neg = long(n);
             out << n << ',' << score0 << ',' << score1 << ',' << spikes << ',' << c << ',' << detected << '\n';
             out.flush();
             if (detected && !pulse_checked) {
@@ -86,6 +98,19 @@ int main(int argc, char **argv) {
             if (s.read(0x10404)!=seq || s.read(0x10424)!=c) throw std::runtime_error("Duplicate request executed");
         }
         if (!pulse_checked) throw std::runtime_error("No positive test exercised LED");
-        std::cout << "PASS: " << input.size()/768 << " RV32IM inferences, malformed requests, duplicate sequence, 100000000-cycle LED pulse; total cycles=" << s.cycles << '\n';
+        // Stream windows (command 3): +,+,-,+ must give unconfirmed, confirmed, none, confirmed.
+        if (first_pos < 0 || first_neg < 0) throw std::runtime_error("No vectors for the stream test");
+        while (s.d.led_o) s.tick();
+        const long pattern[4] = {first_pos, first_pos, first_neg, first_pos};
+        const uint32_t expect[4] = {2, 3, 0, 3};
+        for (unsigned k=0; k<4; ++k) {
+            load(size_t(pattern[k]));
+            s.write(0x10408,3); s.write(0x1040c,n_in); s.write(0x10400,++seq);
+            s.wait(0x10404,seq);
+            if (s.read(0x10418) || s.read(0x1042c) != expect[k]) throw std::runtime_error("Stream confirmation mismatch");
+            if (k == 0 && s.d.led_o) throw std::runtime_error("Unconfirmed window lit the LED");
+            if (k == 1 && !s.d.led_o) throw std::runtime_error("Confirmed window did not light the LED");
+        }
+        std::cout << "PASS: " << input.size()/n_in << " RV32IM inferences (" << n_in << " B input), malformed requests, duplicate sequence, 100000000-cycle LED pulse, 2-of-3 stream confirmation; total cycles=" << s.cycles << '\n';
     } catch(const std::exception& e) { std::cerr << e.what() << '\n'; return 1; }
 }

@@ -21,8 +21,8 @@ class JtagBoard:
         self.sock=socket.create_connection(('127.0.0.1',5557),timeout=5)
         self.stream=self.sock.makefile('rwb',buffering=0)
 
-    def infer(self,payload):
-        self.stream.write((payload.hex()+'\n').encode())
+    def infer(self,payload,opcode=1):
+        self.stream.write(f'{opcode} {payload.hex()}\n'.encode())
         while True:
             line=self.stream.readline().decode()
             if not line or line.startswith('ERROR'):
