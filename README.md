@@ -98,6 +98,8 @@ points, not solutions. See the README in each folder.
 * Weekly meetings: **Monday 08:30–09:00** and **Thursday 13:30–14:00**
   (both groups).
 * Deliverables: **report, code, presentation**.
+* **Code submission:** at the end of the project, push your code to this repo
+  on a branch named `group<id>_<year>` (e.g. `group2_2026`, `group4_2026`).
 * Evaluation: **33%** research-question formulation, **33%** scientific
   execution (no logical gaps), **33%** engineering solutions (results).
 
