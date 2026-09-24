@@ -28,14 +28,14 @@ python benchmark.py
 ## Suggested plan
 
 1. **Research question (starting point — refine it).**
-   > Given an equal parameter count and training budget, does a rate-encoded
-   > spiking MLP achieve a higher accuracy per synaptic operation than a
-   > matched non-spiking ANN on MNIST, when both run on the same RISC-V core?
+   > For edge inference on a resource-constrained processor, is a spiking
+   > network a better design choice than a classical ANN — and what hardware
+   > support (e.g. instruction-set extensions) is worth adding to make it win?
 
-   Make it measurable: name the independent variable (ANN vs SNN), the
-   dependent variable (accuracy per synaptic operation / per inference), and
-   the controls you hold constant (topology, parameter count, training epochs,
-   seeds, input encoding). State a hypothesis before you build.
+   Make it measurable: compare ANN vs SNN under the same budget, measure
+   accuracy and a cost proxy (energy / synaptic operations / latency), and keep
+   topology, parameter count, training and seeds fixed. State a hypothesis
+   before you build.
 2. **Training.** Make the comparison fair: same width, same budget, several
    seeds, enough epochs to actually learn. Report error bars.
 3. **Deployment.** Port both inference paths to `firmware/main.c` in
