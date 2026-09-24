@@ -87,7 +87,9 @@ module ps_if #(
 
     assign s_axil_awready = !aw_got && !b_wait;
     assign s_axil_wready  = !w_got  && !b_wait;
-    wire wr_fire = aw_got && w_got && !b_wait;
+    // The shared BRAM address must remain stable until the read is captured.
+    // AW/W may queue independently, but cannot execute during that read.
+    wire wr_fire = aw_got && w_got && !b_wait && (rstate == 2'd0) && !s_axil_rvalid;
 
     // Read channel accept (blocked for one cycle while a write fires, so the
     // write and the read never fight over bram_addr in the same cycle)
@@ -152,7 +154,10 @@ module ps_if #(
                     if (syscon_widx == 5'd0) begin
                         if (wr_strb_q[0]) core_rst <= wr_data_q[0];
                     end else if (syscon_widx == 5'd3) begin
-                        if (wr_strb_q[0]) scratch <= wr_data_q;
+                        if (wr_strb_q[0]) scratch[7:0] <= wr_data_q[7:0];
+                        if (wr_strb_q[1]) scratch[15:8] <= wr_data_q[15:8];
+                        if (wr_strb_q[2]) scratch[23:16] <= wr_data_q[23:16];
+                        if (wr_strb_q[3]) scratch[31:24] <= wr_data_q[31:24];
                     end
                 end else begin
                     s_axil_bresp <= 2'b10;   // SLVERR
@@ -188,6 +193,7 @@ module ps_if #(
                 5'd4:  rd_sys_q <= CLK_HZ;                             // CLK_HZ
                 5'd5:  rd_sys_q <= 32'h534B_454C;                      // MAGIC "SKEL"
                 5'd6:  rd_sys_q <= {22'h0, led};                       // LED
+                5'd7:  rd_sys_q <= 32'h0002_0000;                    // keyword pulse ABI
                 default: rd_sys_q <= 32'h0;
                 endcase
                 s_axil_rresp <= (sel_bram_addr(s_axil_araddr) ||

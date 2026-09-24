@@ -1,150 +1,115 @@
-#!/usr/bin/env python3
-"""train_keyword_snn.py — SKELETON for GROUP 2 (single-keyword detection).
-
-This is a starting point, NOT a solution. It shows the whole pipeline:
-
-    spectrogram frame  ->  spike encoding  ->  2-layer SNN (snnTorch)
-    ->  training loop (ONE epoch, on purpose)  ->  saved weights
-
-It deliberately:
-  * uses a tiny, SYNTHETIC spectrogram dataset so the script runs anywhere
-    with no downloads (see SyntheticSpectrograms below),
-  * trains for exactly ONE epoch, with a very small 2-layer MLP,
-  * does NOT check accuracy. The network is intentionally under-trained;
-    deciding the topology / encoding / training is your job.
-
-What you should change (design choices!):
-  1. INPUT ENCODING   — try rate, latency (time-to-first-spike), or delta.
-  2. TOPOLOGY         — number of hidden neurons, recurrent layers, ...
-  3. TRAINING         — more epochs, better LR schedule, surrogate gradients.
-  4. DATASET          — replace SyntheticSpectrograms with real audio:
-                        e.g. torchaudio.datasets.SPEECHCOMMANDS, then compute
-                        a mel spectrogram per 1 s window.
-
-Run:  python train_keyword_snn.py
-Output: runs/keyword_snn.pt  (state_dict) and prints the training loss.
-"""
-
+"""Surrogate-gradient training, QAT, and validation-only checkpoint selection."""
+import argparse
 import os
-
+import copy
+import json
+import random
+import time
+from pathlib import Path
+import numpy as np
+os.environ.setdefault('CUBLAS_WORKSPACE_CONFIG', ':4096:8')
 import torch
-import torch.nn as nn
-import snntorch as snn
-from snntorch import surrogate
+from torch import nn
+from model import SpikeMLP, integer_forward, quantize, metrics, choose_threshold
 
-# ----------------------------------------------------------------------
-# Configuration (sensible defaults for a quick smoke run)
-# ----------------------------------------------------------------------
-N_FREQ = 16          # spectrogram "frequency bins"
-N_TIME = 16          # spectrogram time frames per sample
-N_INPUT = N_FREQ * N_TIME
-N_HIDDEN = 64
-N_CLASSES = 2        # e.g. {keyword, not-keyword}
-N_TIMESTEPS = 25     # simulation steps per sample (rate encoding)
-BATCH = 16
-N_TRAIN = 512
-EPOCHS = 1           # <-- on purpose: the skeleton is under-trained
-LR = 1e-3
-SEED = 0
-OUT_DIR = "runs"
+ROOT = Path(__file__).resolve().parent
 
 
-# ----------------------------------------------------------------------
-# Synthetic spectrogram dataset
-# ----------------------------------------------------------------------
-class SyntheticSpectrograms(torch.utils.data.Dataset):
-    """Random 16x16 "spectrograms" with a class-dependent bump.
-
-    Class 0 has an energy bump in the lower half of the frequency axis,
-    class 1 in the upper half. This is only a stand-in so the script runs;
-    real data will look very different. Do not read accuracy into this.
-    """
-
-    def __init__(self, n, seed=0):
-        g = torch.Generator().manual_seed(seed)
-        self.x = torch.rand(n, N_FREQ, N_TIME, generator=g)
-        self.y = torch.randint(0, N_CLASSES, (n,), generator=g)
-        for i in range(n):
-            if self.y[i] == 0:
-                self.x[i, : N_FREQ // 2, :] += 1.0
-            else:
-                self.x[i, N_FREQ // 2:, :] += 1.0
-        self.x = self.x.clamp(0, 2) / 2.0        # -> [0, 1]
-
-    def __len__(self):
-        return len(self.y)
-
-    def __getitem__(self, i):
-        return self.x[i], self.y[i]
+def evaluate(model, x, batch=512):
+    model.eval()
+    with torch.no_grad():
+        return torch.cat([model(b)[0] for b in x.split(batch)]).cpu().numpy()
 
 
-def rate_encode(x, n_steps):
-    """Rate encoding: repeat the (analog) input for n_steps steps.
-
-    Each input value is treated as a constant drive for every time step.
-    A Bernoulli/rate encoder or latency encoder would be a design change.
-    """
-    return x.unsqueeze(0).repeat(n_steps, 1, 1)   # [T, B, N_INPUT]
-
-
-# ----------------------------------------------------------------------
-# 2-layer spiking MLP
-# ----------------------------------------------------------------------
-class SpikeMLP(nn.Module):
-    def __init__(self):
-        super().__init__()
-        spike_grad = surrogate.fast_sigmoid()
-        self.fc1 = nn.Linear(N_INPUT, N_HIDDEN)
-        self.lif1 = snn.Leaky(beta=0.9, spike_grad=spike_grad)
-        self.fc2 = nn.Linear(N_HIDDEN, N_CLASSES)
-        self.lif2 = snn.Leaky(beta=0.9, spike_grad=spike_grad)
-
-    def forward(self, x):
-        # x: [T, B, N_INPUT]
-        mem1 = self.lif1.init_leaky()
-        mem2 = self.lif2.init_leaky()
-        spk2_rec = []
-        for step in range(x.shape[0]):
-            cur1 = self.fc1(x[step])
-            spk1, mem1 = self.lif1(cur1, mem1)
-            cur2 = self.fc2(spk1)
-            spk2, mem2 = self.lif2(cur2, mem2)
-            spk2_rec.append(spk2)
-        return torch.stack(spk2_rec, dim=0)      # [T, B, N_CLASSES]
+def run(args, seed, encoding):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    device = torch.device(args.device)
+    cache = np.load(args.data / 'features.npz')
+    x = cache['x']; y = cache['y']; split = cache['split']
+    xt = torch.tensor(x[split == 0], device=device, dtype=torch.float32) / 255
+    yt = torch.tensor(y[split == 0], device=device, dtype=torch.long)
+    xv = torch.tensor(x[split == 1], device=device, dtype=torch.float32) / 255
+    yv = y[split == 1]
+    model = SpikeMLP(args.hidden, args.steps, encoding).to(device)
+    opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-3)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(opt, args.epochs, eta_min=args.lr / 10)
+    pos = torch.where(yt == 1)[0]; neg = torch.where(yt == 0)[0]
+    best, best_state, history = -1, None, []
+    start = time.perf_counter()
+    for epoch in range(args.epochs):
+        model.train()
+        model.qat = epoch >= args.epochs - args.qat_epochs
+        total = 0.
+        for _ in range(args.samples_per_epoch // args.batch):
+            ids = torch.cat([pos[torch.randint(len(pos), (args.batch // 2,), device=device)],
+                             neg[torch.randint(len(neg), (args.batch // 2,), device=device)]])
+            xb, yb = xt[ids].clone(), yt[ids]
+            xb = (xb + torch.randn(len(xb), 1, device=device) * .025 + torch.randn_like(xb) * .01).clamp(0, 1)
+            xb = torch.round(xb * 255) / 255
+            silent = torch.rand(len(xb), device=device) < .04
+            xb[silent] = 0; yb[silent] = 0
+            logits, spikes = model(xb)
+            loss = nn.functional.cross_entropy(logits, yb) + 1e-4 * spikes.mean()
+            opt.zero_grad(set_to_none=True)
+            loss.backward()
+            nn.utils.clip_grad_norm_(model.parameters(), 5)
+            opt.step()
+            total += loss.item()
+        scheduler.step()
+        logits = evaluate(model, xv)
+        margin = logits[:, 1] - logits[:, 0]
+        threshold = choose_threshold(yv, margin)
+        result = metrics(yv, margin >= threshold)
+        result.update(epoch=epoch + 1, loss=total / (args.samples_per_epoch // args.batch), qat=model.qat)
+        history.append(result)
+        if model.qat and result['f1'] > best:
+            best, best_state = result['f1'], copy.deepcopy(model.state_dict())
+        print(f'{encoding} seed={seed} epoch={epoch+1}/{args.epochs} loss={result["loss"]:.4f} val_f1={result["f1"]:.4f} recall={result["recall"]:.4f} fpr={result["fpr"]:.4f} qat={model.qat}', flush=True)
+    model.load_state_dict(best_state)
+    q = quantize(model)
+    qlogits, _ = integer_forward(x[split == 1], q)
+    margin = qlogits[:, 1] - qlogits[:, 0]
+    q['decision_threshold'] = int(choose_threshold(yv, margin))
+    out = args.out / f'{encoding}_seed{seed}'
+    out.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(out / 'model.npz', **q)
+    torch.save({'state_dict': best_state, 'hidden': args.hidden, 'steps': args.steps, 'encoding': encoding}, out / 'checkpoint.pt')
+    summary = {'seed': seed, 'encoding': encoding, 'hidden': args.hidden, 'steps': args.steps,
+               'epochs': args.epochs, 'samples_per_epoch': args.samples_per_epoch,
+               'training_seconds': time.perf_counter() - start, 'device': str(device),
+               'gpu': torch.cuda.get_device_name() if device.type == 'cuda' else None,
+               'torch': torch.__version__, 'validation': metrics(yv, margin >= q['decision_threshold']),
+               'decision_threshold': q['decision_threshold'], 'history': history}
+    (out / 'training.json').write_text(json.dumps(summary, indent=2))
+    return summary
 
 
 def main():
-    torch.manual_seed(SEED)
-    os.makedirs(OUT_DIR, exist_ok=True)
-
-    ds = SyntheticSpectrograms(N_TRAIN, seed=SEED)
-    loader = torch.utils.data.DataLoader(ds, batch_size=BATCH, shuffle=True)
-
-    net = SpikeMLP()
-    opt = torch.optim.Adam(net.parameters(), lr=LR)
-    loss_fn = nn.CrossEntropyLoss()
-
-    net.train()
-    for epoch in range(EPOCHS):
-        total = 0.0
-        for x, y in loader:
-            x = x.reshape(x.shape[0], -1)             # [B, N_INPUT]
-            spikes = net(rate_encode(x, N_TIMESTEPS))  # [T, B, N_CLASSES]
-            # decode: use the spike count (firing rate) over time
-            out = spikes.sum(dim=0)                    # [B, N_CLASSES]
-            loss = loss_fn(out, y)
-
-            opt.zero_grad()
-            loss.backward()
-            opt.step()
-            total += loss.item() * y.shape[0]
-        print(f"epoch {epoch+1}/{EPOCHS}  loss={total/len(ds):.4f}")
-
-    path = os.path.join(OUT_DIR, "keyword_snn.pt")
-    torch.save(net.state_dict(), path)
-    print(f"saved {path}")
-    print("NOTE: one epoch only - this model is NOT expected to work well.")
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--data', type=Path, default=ROOT / 'data')
+    p.add_argument('--out', type=Path, default=ROOT / 'runs')
+    p.add_argument('--device', default='cuda' if torch.cuda.is_available() else 'cpu')
+    p.add_argument('--seeds', nargs='+', type=int, default=[0, 1, 2])
+    p.add_argument('--encodings', nargs='+', choices=['current', 'rate'], default=['current', 'rate'])
+    p.add_argument('--epochs', type=int, default=35)
+    p.add_argument('--qat-epochs', type=int, default=10)
+    p.add_argument('--samples-per-epoch', type=int, default=16384)
+    p.add_argument('--batch', type=int, default=256)
+    p.add_argument('--hidden', type=int, default=64)
+    p.add_argument('--steps', type=int, default=12)
+    p.add_argument('--lr', type=float, default=.002)
+    a = p.parse_args()
+    if not 0 < a.qat_epochs <= a.epochs or a.batch % 2 or a.samples_per_epoch < a.batch:
+        p.error('Require 0 < qat_epochs <= epochs, even batch, samples >= batch')
+    torch.set_num_threads(8)
+    torch.use_deterministic_algorithms(True)
+    for encoding in a.encodings:
+        for seed in a.seeds:
+            run(a, seed, encoding)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -1,0 +1,1 @@
+PASS: 40 RV32IM inferences, malformed requests, duplicate sequence, 100000000-cycle LED pulse; total cycles=339266205

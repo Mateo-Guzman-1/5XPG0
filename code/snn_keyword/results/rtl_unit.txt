@@ -1,0 +1,4 @@
+PASS AXI: independent AW/W, byte lanes, backpressure, concurrent BRAM read/write, syscon
+sim/tb_axi.sv:71: $finish called at 880000 (1ps)
+PASS LED: initialization, exact duration, retrigger, cancel, reset, timer wrap
+sim/tb_led.sv:47: $finish called at 660000 (1ps)

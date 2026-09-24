@@ -1,0 +1,37 @@
+{
+  "purpose": "out-of-training background probes, nonoverlapping 1 s clips; not continuous-speech FAR",
+  "recordings": [
+    {
+      "recording": "doing_the_dishes.wav",
+      "windows": 95,
+      "false_detections": 0
+    },
+    {
+      "recording": "dude_miaowing.wav",
+      "windows": 61,
+      "false_detections": 0
+    },
+    {
+      "recording": "exercise_bike.wav",
+      "windows": 61,
+      "false_detections": 0
+    },
+    {
+      "recording": "pink_noise.wav",
+      "windows": 60,
+      "false_detections": 0
+    },
+    {
+      "recording": "running_tap.wav",
+      "windows": 61,
+      "false_detections": 0
+    },
+    {
+      "recording": "white_noise.wav",
+      "windows": 60,
+      "false_detections": 0
+    }
+  ],
+  "windows": 398,
+  "false_detections": 0
+}

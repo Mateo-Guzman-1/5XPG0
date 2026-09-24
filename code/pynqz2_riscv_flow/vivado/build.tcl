@@ -7,14 +7,17 @@
 
 set part xc7z020clg400-1
 set board tul.com.tw:pynq-z2:part0:1.0
-set projdir ./rvproj
+set projdir [file normalize ./rvproj]
+if {$argc >= 1} { set projdir [file normalize [lindex $argv 0]] }
+set output_bit [file normalize ./spike_top.bit]
+if {$argc >= 2} { set output_bit [file normalize [lindex $argv 1]] }
 
 # ----------------------------------------------------------------------
 # Project
 # ----------------------------------------------------------------------
 set_param board.repoPaths [list [file normalize ./board_files]]
 
-if {[file exists $projdir]} { file delete -force $projdir }
+if {[file exists $projdir]} { error "Build directory already exists: $projdir. Choose a fresh path with -tclargs." }
 create_project rv $projdir -part $part -force
 set_property board_part $board [current_project]
 
@@ -29,6 +32,10 @@ add_files -fileset constrs_1 -norecurse ./spike_top.xdc
 create_bd_design ps_bd
 
 set ps7 [create_bd_cell -type ip -vlnv xilinx.com:ip:processing_system7:5.5 ps7]
+foreach interface {DDR FIXED_IO} {
+    make_bd_intf_pins_external [get_bd_intf_pins ps7/$interface]
+    set_property name $interface [get_bd_intf_ports ${interface}_0]
+}
 
 # Board preset (DDR, MIO, clocks for the PYNQ-Z2): the vendored board file
 # preset.xml is a plain list of CONFIG parameters — apply them directly.
@@ -51,6 +58,7 @@ set_property -dict [list \
     CONFIG.PCW_USE_M_AXI_GP1 {0} \
     CONFIG.PCW_EN_CLK0_PORT {1} \
     CONFIG.PCW_EN_RST0_PORT {0} \
+    CONFIG.PCW_FPGA0_PERIPHERAL_FREQMHZ {100.000000} \
 ] $ps7
 
 set ic [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 ic0]
@@ -111,8 +119,12 @@ wait_on_run impl_1
 
 set bit $projdir/rv.runs/impl_1/spike_top.bit
 if {[file exists $bit]} {
-    file copy -force $bit ./spike_top.bit
-    puts "BITSTREAM: [file normalize ./spike_top.bit]"
+    file copy -force $bit $output_bit
+    open_run impl_1
+    report_timing_summary -file $projdir/timing_summary.rpt
+    report_utilization -file $projdir/utilization.rpt
+    report_drc -file $projdir/drc.rpt
+    puts "BITSTREAM: $output_bit"
 } else {
     error "bitstream not produced - check runs"
 }

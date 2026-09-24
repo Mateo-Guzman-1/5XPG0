@@ -1,0 +1,20 @@
+{
+  "native_c": {
+    "samples": 11005,
+    "score_and_spike_mismatches": 0,
+    "wall_seconds_including_wsl": 9.383107700035907
+  },
+  "rtl": {
+    "samples": 40,
+    "score_and_spike_mismatches": 0,
+    "cycles_min": 57359458,
+    "cycles_mean": 59493791.15,
+    "cycles_max": 71552298,
+    "milliseconds_max_at_100mhz": 715.52298,
+    "led_pulse_cycles": 100000000,
+    "malformed_requests": "pass",
+    "duplicate_sequence": "pass"
+  },
+  "firmware_sha256": "ecd81e4d9e851ce20a782e37298ebde4d4cd54020492cfded45c778ef334ce5e",
+  "model_sha256": "3d8221e2f6dc7f37bf4b338b61ede4237cabf11c24ce296a61c2dcd2abd00e68"
+}

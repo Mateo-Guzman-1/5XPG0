@@ -11,6 +11,12 @@ Kick-off slides: [`PresentationInstruction/main.pdf`](PresentationInstruction/ma
 ## The two projects
 
 ### Group 2 — single-keyword detection
+The completed implementation, trained models, simulation results, and fresh
+FPGA bitstream are in [`code/snn_keyword`](code/snn_keyword/README.md).
+See the [report](code/snn_keyword/REPORT.md) and
+[presentation](code/snn_keyword/presentation.pdf). Physical board acceptance
+is pending because no PYNQ was available during verification.
+
 Build a spiking neural network that detects **one keyword**, deploy it on the
 PYNQ-Z2 RISC-V core, and light an LED for one second when the keyword is
 spoken into the PC microphone. The PC computes a spectrogram and sends it to
@@ -83,6 +89,7 @@ See `code/pynqz2_riscv_flow/README.md` for the full details and memory map.
 Set-Location code\snn_keyword
 .\setup_venv.ps1
 .\.venv\Scripts\Activate.ps1
+python prepare_data.py
 python train_keyword_snn.py
 
 # Group 4
@@ -102,6 +109,7 @@ PowerShell process. Pass `-Recreate` to a setup script to rebuild its venv.
 ```bash
 # Group 2
 cd code/snn_keyword && ./setup_venv.sh && source .venv/bin/activate
+python prepare_data.py
 python train_keyword_snn.py
 
 # Group 4
@@ -109,8 +117,9 @@ cd code/ann_vs_snn_mnist && ./setup_venv.sh && source .venv/bin/activate
 python train_mnist.py && python benchmark.py
 ```
 
-Both training scripts run for **one epoch** on purpose: they are starting
-points, not solutions. See the README in each folder.
+The Group 4 training script remains a one-epoch starting point. Group 2 now
+uses real Speech Commands data and six 35-epoch GPU training runs; follow
+its README to prepare data and reproduce the full deployment verification.
 
 The FPGA deployment scripts and Makefiles require a Unix-like shell. On a
 Windows PC, use WSL or Git Bash for that hardware flow; the Python training

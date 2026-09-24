@@ -1,0 +1,18 @@
+{
+  "tool": "Vivado 2025.2",
+  "part": "xc7z020clg400-1",
+  "clock_hz": 100000000,
+  "setup_slack_ns": 0.517,
+  "hold_slack_ns": 0.031,
+  "resources": {
+    "luts": 2699,
+    "registers": 2588,
+    "bram36": 64,
+    "dsps": 6
+  },
+  "drc_errors": 0,
+  "drc_advisories": "4 DPOP-1 and 6 DPOP-2 DSP pipeline warnings",
+  "unconstrained_outputs": "10 asynchronous human-visible LED pins have no external output delay",
+  "board_tested": false,
+  "bitstream_sha256": "d2556a5f885fffa436378c8520c62dd6341e4b22a26754189bb52412fbd8a8b3"
+}

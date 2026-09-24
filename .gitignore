@@ -69,6 +69,8 @@ code/pynqz2_riscv_flow/firmware/*.map
 code/pynqz2_riscv_flow/vivado/rvproj/
 code/pynqz2_riscv_flow/vivado/build-logs/
 code/pynqz2_riscv_flow/vivado/.Xil/
+code/pynqz2_riscv_flow/vivado/NA/
+code/pynqz2_riscv_flow/vivado/dfx_runtime.txt
 code/pynqz2_riscv_flow/.board-ip
 
 # OS / editor

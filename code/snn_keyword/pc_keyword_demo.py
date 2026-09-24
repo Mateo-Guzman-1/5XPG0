@@ -1,85 +1,60 @@
-#!/usr/bin/env python3
-"""pc_keyword_demo.py — SKELETON for GROUP 2 (PC side).
-
-Captures microphone audio, turns each short window into a small mel
-spectrogram "frame" and publishes it over Ethernet with ZeroMQ. The board
-(see the README) is meant to subscribe, run the SNN and flash an LED.
-
-This is an un-finished skeleton: it captures + encodes + sends, but the
-packet format, the frame rate, the size and the board-side handling are all
-DESIGN CHOICES left to you.
-
-Needs on the PC:  pip install sounddevice numpy pyzmq
-
-Run:  python pc_keyword_demo.py <board-ip>
-"""
-
-import sys
-import time
-
+"""Microphone or WAV -> shared mel frontend -> Ethernet -> PicoRV32 reply."""
+import argparse
+import json
+import queue
+import socket
+from pathlib import Path
 import numpy as np
-import zmq
-
-try:
-    import sounddevice as sd
-except ImportError:
-    sd = None
-
-SAMPLE_RATE = 16000
-WIN_MS = 500            # 0.5 s window
-HOP_MS = 250            # send a frame every 0.25 s
-N_MELS = 16             # keep it small: the board is a tiny CPU
-PORT = 5556
-
-
-def mel_spectrogram(wav):
-    """Very small hand-rolled mel-ish spectrogram -> [N_MELS, n_frames], [0,1]."""
-    win = int(SAMPLE_RATE * 0.025)
-    hop = int(SAMPLE_RATE * 0.010)
-    frames = [wav[i:i + win] for i in range(0, len(wav) - win, hop)]
-    if not frames:
-        return np.zeros((N_MELS, 1), dtype=np.float32)
-    spec = np.abs(np.fft.rfft(np.stack(frames) * np.hanning(win), axis=1))
-    # crude band grouping instead of a real mel filterbank (a design choice!)
-    spec = spec[:N_MELS * 8].reshape(len(frames), N_MELS, 8).mean(axis=2)
-    spec = np.log1p(spec).T                     # [N_MELS, n_frames]
-    m = spec.max()
-    return (spec / m).astype(np.float32) if m > 0 else spec.astype(np.float32)
+from features import SAMPLE_RATE, features, read_wav
+from protocol import request
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("usage: pc_keyword_demo.py <board-ip>")
-        return 2
-    board_ip = sys.argv[1]
-    if sd is None:
-        print("sounddevice not installed: pip install sounddevice")
-        return 1
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('host', nargs='?', default='127.0.0.1')
+    p.add_argument('--port', type=int, default=5556)
+    p.add_argument('--wav', type=Path, help='Replay one mono PCM16 16 kHz WAV')
+    p.add_argument('--device', help='sounddevice input name or ID')
+    a = p.parse_args()
+    with socket.create_connection((a.host, a.port), timeout=10) as sock:
+        if a.wav:
+            print(json.dumps(request(sock, 1, features(read_wav(a.wav)))))
+            return
+        import sounddevice as sd
+        chunks = queue.Queue(maxsize=8)
+        def callback(indata, frames, timing, status):
+            if status:
+                # Signal a discontinuity; the main thread clears its rolling buffer.
+                try: chunks.put_nowait(None)
+                except queue.Full: pass
+            try:
+                chunks.put_nowait(indata[:, 0].copy())
+            except queue.Full:
+                # Bounded memory, discard backlog and reset the audio window.
+                while True:
+                    try: chunks.get_nowait()
+                    except queue.Empty: break
+                chunks.put_nowait(None)
+        buffer = np.empty(0, dtype=np.float32)
+        seq = 0
+        print('Listening for "yes"; 1 s windows / 250 ms hop. Ctrl-C stops.')
+        with sd.InputStream(channels=1, samplerate=SAMPLE_RATE, blocksize=4000,
+                            dtype='float32', device=a.device, callback=callback):
+            while True:
+                chunk = chunks.get()
+                if chunk is None:
+                    buffer = np.empty(0, dtype=np.float32)
+                    continue
+                buffer = np.concatenate((buffer, chunk))[-SAMPLE_RATE:]
+                if len(buffer) < SAMPLE_RATE:
+                    continue
+                seq = (seq + 1) & 0xffffffff
+                result = request(sock, seq, features(buffer))
+                print(json.dumps(result), flush=True)
 
-    ctx = zmq.Context()
-    sock = ctx.socket(zmq.PUB)
-    sock.bind(f"tcp://*:{PORT}")
-    print(f"publishing spectrogram frames on tcp://*:{PORT} "
-          f"(board {board_ip} should SUB to it)")
 
-    win = int(SAMPLE_RATE * WIN_MS / 1000)
-    hop = int(SAMPLE_RATE * HOP_MS / 1000)
-
-    def callback(indata, frames, t, status):
-        callback.buf = np.append(callback.buf, indata[:, 0])
-        if len(callback.buf) >= win:
-            frame = mel_spectrogram(callback.buf[-win:])
-            # payload = int32 shape (mels, n_frames) + float32 data, little endian
-            hdr = np.array(frame.shape, dtype="<i4").tobytes()
-            sock.send(hdr + frame.astype("<f4").tobytes())
-
-    callback.buf = np.zeros(0, dtype=np.float32)
-
-    with sd.InputStream(channels=1, samplerate=SAMPLE_RATE,
-                        blocksize=hop, callback=callback):
-        while True:
-            time.sleep(0.5)
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        pass

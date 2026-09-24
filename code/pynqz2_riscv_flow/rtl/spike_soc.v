@@ -102,6 +102,10 @@ module spike_soc #(
     // Peripherals
     // ------------------------------------------------------------------
     reg [31:0] sys_scratch;
+    // LED pulse duration in fabric clocks; independent of firmware workload.
+    reg [31:0] led_remaining;
+    // FPGA register INIT also gives a defined timer in four-state simulation.
+    initial timer_lo = 32'd0;
 
     // Hardware Poisson spike generator.
     wire        po_wr  = acc_wr && sel_peri && (cpu_mem_addr[15:12] == 4'h3);
@@ -138,8 +142,13 @@ module spike_soc #(
             xfer          <= 4'd0;
             sys_scratch   <= 32'h0;
             led_o         <= 10'h0;
+            led_remaining <= 32'd0;
         end else begin
             cpu_mem_ready <= 1'b0;
+            if (led_remaining != 0) begin
+                led_remaining <= led_remaining - 1'b1;
+                if (led_remaining == 1) led_o <= 10'd0;
+            end
 
             if (xfer == 4'd0) begin
                 if (acc_wr) begin
@@ -148,8 +157,17 @@ module spike_soc #(
                         case (cpu_mem_addr[15:12])
                         4'h0: if (cpu_mem_addr[3:2] == 2'd2)        // SYSCTRL SCRATCH
                                   sys_scratch <= cpu_mem_wdata;
-                        4'h2: if (cpu_mem_addr[3:2] == 2'd0)        // LED OUT
-                                  led_o <= cpu_mem_wdata[9:0];
+                        4'h2: begin
+                            if (cpu_mem_addr[3:2] == 2'd0) begin
+                                led_o <= cpu_mem_wdata[9:0];
+                                led_remaining <= 0;
+                            end
+                            // Writing duration starts/retriggers LED0 atomically.
+                            if (cpu_mem_addr[3:2] == 2'd1) begin
+                                led_remaining <= cpu_mem_wdata;
+                                led_o <= cpu_mem_wdata == 0 ? 10'd0 : 10'd1;
+                            end
+                        end
                         default: ;   // TIMER/POISSON have no CPU writes here
                         endcase
                     end
@@ -160,12 +178,12 @@ module spike_soc #(
                     case (cpu_mem_addr[15:12])
                     4'h0: case (cpu_mem_addr[3:2])                  // SYSCTRL
                           2'd0: peri_rdata_r <= 32'h534B_454C;     // "SKEL"
-                          2'd1: peri_rdata_r <= 32'h0001_0000;     // v1.0
+                          2'd1: peri_rdata_r <= 32'h0002_0000;     // v2.0: LED countdown
                           2'd2: peri_rdata_r <= sys_scratch;
                           2'd3: peri_rdata_r <= {31'b0, core_trap};
                           endcase
                     4'h1: peri_rdata_r <= timer_lo;                 // TIMER
-                    4'h2: peri_rdata_r <= {22'b0, led_o};           // LED
+                    4'h2: peri_rdata_r <= cpu_mem_addr[3:2] == 2'd1 ? led_remaining : {22'b0, led_o};
                     4'h3: peri_rdata_r <= po_rdata;                 // POISSON
                     default: peri_rdata_r <= 32'hDEAD_BEEF;
                     endcase

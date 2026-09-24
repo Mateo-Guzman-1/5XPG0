@@ -1,0 +1,26 @@
+{
+  "url": "https://storage.googleapis.com/download.tensorflow.org/data/speech_commands_v0.02.tar.gz",
+  "archive_sha256": "af14739ee7dc311471de98f5f9d2c9191b18aedfe957f4a6ff791c709868ff58",
+  "keyword": "yes",
+  "features": [
+    768
+  ],
+  "speaker_disjoint": true,
+  "splits": {
+    "train": {
+      "total": 84843,
+      "positive": 3228,
+      "speakers": 2112
+    },
+    "validation": {
+      "total": 9981,
+      "positive": 397,
+      "speakers": 256
+    },
+    "test": {
+      "total": 11005,
+      "positive": 419,
+      "speakers": 250
+    }
+  }
+}
