@@ -27,9 +27,15 @@ python benchmark.py
 
 ## Suggested plan
 
-1. **Research question.** e.g. "Under an equal memory/compute budget, does an
-   SNN beat an ANN in energy per inference on a RISC-V core?" Define what you
-   hold constant (topology, params, training epochs, seeds).
+1. **Research question (starting point — refine it).**
+   > Given an equal parameter count and training budget, does a rate-encoded
+   > spiking MLP achieve a higher accuracy per synaptic operation than a
+   > matched non-spiking ANN on MNIST, when both run on the same RISC-V core?
+
+   Make it measurable: name the independent variable (ANN vs SNN), the
+   dependent variable (accuracy per synaptic operation / per inference), and
+   the controls you hold constant (topology, parameter count, training epochs,
+   seeds, input encoding). State a hypothesis before you build.
 2. **Training.** Make the comparison fair: same width, same budget, several
    seeds, enough epochs to actually learn. Report error bars.
 3. **Deployment.** Port both inference paths to `firmware/main.c` in

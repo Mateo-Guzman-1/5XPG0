@@ -28,9 +28,14 @@ python train_keyword_snn.py
 
 ## Suggested plan
 
-1. **Research question.** e.g. "How does input encoding affect keyword
-   detection accuracy and latency on a RISC-V core?" or "How small can the
-   SNN be while keeping a usable detection rate?"
+1. **Research question (starting point — refine it).**
+   > Under a fixed on-board memory budget, how does the input spike-encoding
+   > scheme (rate, latency, or delta) affect the detection accuracy and the
+   > end-to-end latency of a small SNN keyword spotter on the PicoRV32 core?
+
+   Make it measurable: name the independent variable (encoding scheme), the
+   dependent variables (accuracy, latency), and the controls (memory budget,
+   network size, data split). State a hypothesis before you build.
 2. **Data.** Replace `SyntheticSpectrograms` with real audio (TorchAudio
    `SPEECHCOMMANDS`, or your own recordings). Compute mel spectrograms on the
    PC — the board should receive spectrograms, not raw audio.
