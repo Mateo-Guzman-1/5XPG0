@@ -37,7 +37,7 @@ code/
     vivado/              #   build scripts + the released bitstream
     host/                #   spike_pynq.py, demo/smoke scripts
     install.sh           #   deploy everything to the board
-  snn_keyword/           # Group 2: snnTorch training + PC demo skeleton
+  snn_keyword/           # Group 2: training + deployable PC/board keyword demo
   ann_vs_snn_mnist/      # Group 4: ANN/SNN training + benchmark skeleton
 PresentationInstruction/  # kick-off presentation (PDF)
 ProjectPitch/             # original project description (PDF)
@@ -85,6 +85,10 @@ Set-Location code\snn_keyword
 .\.venv\Scripts\Activate.ps1
 python train_keyword_snn.py
 
+# Deploy the exported model (Git Bash / MSYS2)
+# ./install_keyword_demo.sh 192.168.2.99
+# Then, in PowerShell: python pc_keyword_demo.py 192.168.2.99
+
 # Group 4
 Set-Location ..\ann_vs_snn_mnist
 .\setup_venv.ps1
@@ -109,8 +113,9 @@ cd code/ann_vs_snn_mnist && ./setup_venv.sh && source .venv/bin/activate
 python train_mnist.py && python benchmark.py
 ```
 
-Both training scripts run for **one epoch** on purpose: they are starting
-points, not solutions. See the README in each folder.
+The Group 2 trainer now provides a complete real-audio reference path and
+defaults to 12 epochs; the Group 4 trainer remains a one-epoch starting
+point. See the README in each folder.
 
 The FPGA deployment scripts and Makefiles require a Unix-like shell. On a
 Windows PC, use WSL or Git Bash for that hardware flow; the Python training

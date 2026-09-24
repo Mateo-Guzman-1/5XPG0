@@ -1,84 +1,151 @@
 #!/usr/bin/env python3
-"""pc_keyword_demo.py — SKELETON for GROUP 2 (PC side).
+"""Capture audio, create a fixed spectrogram, and classify it on the board.
 
-Captures microphone audio, turns each short window into a small mel
-spectrogram "frame" and publishes it over Ethernet with ZeroMQ. The board
-(see the README) is meant to subscribe, run the SNN and flash an LED.
+The board-side ``keyword_bridge.py`` owns TCP port 5556. Each request carries
+one 16x16 uint8 feature map; the reply contains the PicoRV32 decision, spike
+counts, and measured inference cycles.
 
-This is an un-finished skeleton: it captures + encodes + sends, but the
-packet format, the frame rate, the size and the board-side handling are all
-DESIGN CHOICES left to you.
-
-Needs on the PC:  pip install sounddevice numpy pyzmq
-
-Run:  python pc_keyword_demo.py <board-ip>
+Examples:
+    python pc_keyword_demo.py 192.168.2.99
+    python pc_keyword_demo.py 192.168.2.99 --wav sample.wav
 """
 
-import sys
+from __future__ import annotations
+
+import argparse
+import json
+import queue
 import time
 
 import numpy as np
 import zmq
+
+from audio_features import (
+    N_MELS,
+    N_TIME,
+    SAMPLE_RATE,
+    WINDOW_SAMPLES,
+    extract_features,
+    pack_frame,
+    read_wav,
+)
 
 try:
     import sounddevice as sd
 except ImportError:
     sd = None
 
-SAMPLE_RATE = 16000
-WIN_MS = 500            # 0.5 s window
-HOP_MS = 250            # send a frame every 0.25 s
-N_MELS = 16             # keep it small: the board is a tiny CPU
+
 PORT = 5556
+HOP_MS = 250
 
 
-def mel_spectrogram(wav):
-    """Very small hand-rolled mel-ish spectrogram -> [N_MELS, n_frames], [0,1]."""
-    win = int(SAMPLE_RATE * 0.025)
-    hop = int(SAMPLE_RATE * 0.010)
-    frames = [wav[i:i + win] for i in range(0, len(wav) - win, hop)]
-    if not frames:
-        return np.zeros((N_MELS, 1), dtype=np.float32)
-    spec = np.abs(np.fft.rfft(np.stack(frames) * np.hanning(win), axis=1))
-    # crude band grouping instead of a real mel filterbank (a design choice!)
-    spec = spec[:N_MELS * 8].reshape(len(frames), N_MELS, 8).mean(axis=2)
-    spec = np.log1p(spec).T                     # [N_MELS, n_frames]
-    m = spec.max()
-    return (spec / m).astype(np.float32) if m > 0 else spec.astype(np.float32)
+def mel_spectrogram(wav: np.ndarray) -> np.ndarray:
+    """Compatibility name retained for notebooks using the old skeleton."""
+    return extract_features(wav)
 
 
-def main():
-    if len(sys.argv) < 2:
-        print("usage: pc_keyword_demo.py <board-ip>")
-        return 2
-    board_ip = sys.argv[1]
+def make_socket(ctx: zmq.Context, board_ip: str, port: int) -> zmq.Socket:
+    sock = ctx.socket(zmq.REQ)
+    sock.setsockopt(zmq.LINGER, 0)
+    sock.setsockopt(zmq.SNDTIMEO, 5_000)
+    sock.setsockopt(zmq.RCVTIMEO, 5_000)
+    sock.connect(f"tcp://{board_ip}:{port}")
+    return sock
+
+
+def classify(sock: zmq.Socket, wav: np.ndarray, sequence: int) -> dict:
+    feature = extract_features(wav)
+    sock.send(pack_frame(feature, sequence))
+    try:
+        return json.loads(sock.recv().decode("utf-8"))
+    except zmq.Again as exc:
+        raise TimeoutError("board did not answer within 5 seconds") from exc
+
+
+def print_result(result: dict, quiet_negatives: bool = False) -> None:
+    if "error" in result:
+        raise RuntimeError(f"board rejected the frame: {result['error']}")
+    if quiet_negatives and not result.get("keyword"):
+        return
+    label = "KEYWORD" if result.get("keyword") else "not-keyword"
+    print(
+        f"frame={result.get('sequence')}  {label:11s}  "
+        f"spikes=[{result.get('score_not')},{result.get('score_keyword')}]  "
+        f"cycles={result.get('cycles')}  ms={result.get('inference_ms'):.2f}  "
+        f"led={result.get('led')}"
+    )
+
+
+def wav_mode(sock: zmq.Socket, path: str) -> int:
+    result = classify(sock, read_wav(path), 1)
+    print_result(result)
+    return 0
+
+
+def microphone_mode(
+    sock: zmq.Socket,
+    duration: float | None,
+    quiet_negatives: bool,
+) -> int:
     if sd is None:
-        print("sounddevice not installed: pip install sounddevice")
+        print("sounddevice is not installed; run setup_venv.ps1 or use --wav")
         return 1
 
-    ctx = zmq.Context()
-    sock = ctx.socket(zmq.PUB)
-    sock.bind(f"tcp://*:{PORT}")
-    print(f"publishing spectrogram frames on tcp://*:{PORT} "
-          f"(board {board_ip} should SUB to it)")
-
-    win = int(SAMPLE_RATE * WIN_MS / 1000)
+    blocks: queue.SimpleQueue[np.ndarray] = queue.SimpleQueue()
     hop = int(SAMPLE_RATE * HOP_MS / 1000)
 
-    def callback(indata, frames, t, status):
-        callback.buf = np.append(callback.buf, indata[:, 0])
-        if len(callback.buf) >= win:
-            frame = mel_spectrogram(callback.buf[-win:])
-            # payload = int32 shape (mels, n_frames) + float32 data, little endian
-            hdr = np.array(frame.shape, dtype="<i4").tobytes()
-            sock.send(hdr + frame.astype("<f4").tobytes())
+    def callback(indata, frames, timing, status):
+        if status:
+            print(f"audio status: {status}")
+        blocks.put(indata[:, 0].copy())
 
-    callback.buf = np.zeros(0, dtype=np.float32)
+    samples = np.zeros(0, dtype=np.float32)
+    sequence = 0
+    started = time.monotonic()
+    print(
+        f"listening at {SAMPLE_RATE} Hz; sending {N_MELS}x{N_TIME} frames "
+        f"to the board every {HOP_MS} ms (Ctrl-C to stop)"
+    )
 
-    with sd.InputStream(channels=1, samplerate=SAMPLE_RATE,
-                        blocksize=hop, callback=callback):
-        while True:
-            time.sleep(0.5)
+    try:
+        with sd.InputStream(
+            channels=1,
+            samplerate=SAMPLE_RATE,
+            blocksize=hop,
+            dtype="float32",
+            callback=callback,
+        ):
+            while duration is None or time.monotonic() - started < duration:
+                samples = np.append(samples, blocks.get())
+                if samples.size < WINDOW_SAMPLES:
+                    continue
+                samples = samples[-WINDOW_SAMPLES:]
+                sequence += 1
+                print_result(classify(sock, samples, sequence), quiet_negatives)
+    except KeyboardInterrupt:
+        print()
+    return 0
+
+
+def main() -> int:
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("board_ip")
+    p.add_argument("--port", type=int, default=PORT)
+    p.add_argument("--wav", help="classify one WAV file instead of the microphone")
+    p.add_argument("--duration", type=float, help="stop microphone mode after N seconds")
+    p.add_argument("--quiet-negatives", action="store_true")
+    args = p.parse_args()
+
+    ctx = zmq.Context()
+    sock = make_socket(ctx, args.board_ip, args.port)
+    try:
+        if args.wav:
+            return wav_mode(sock, args.wav)
+        return microphone_mode(sock, args.duration, args.quiet_negatives)
+    finally:
+        sock.close()
+        ctx.term()
 
 
 if __name__ == "__main__":

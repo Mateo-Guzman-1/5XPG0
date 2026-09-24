@@ -18,7 +18,7 @@ Subcommands:
     spikes               print new output-spike records
     spikes -c            ... as csv
     cmd <name> [args]    mailbox command (echo, status, set_rate, set_weight,
-                         set_threshold, set_leak, reset_v)
+                         set_threshold, set_leak, reset_v, classify)
     rate <ch> <hz>       shortcut for set_rate
     weight <ch> <w>      shortcut for set_weight
 
@@ -47,15 +47,19 @@ SPIKE_LOG_BASE = 0x11000
 SPIKE_LOG_DATA = SPIKE_LOG_BASE + 16
 SPIKE_LOG_NWORDS = 16384
 SPIKE_LOG_VERSION = 0x5A110001
+INPUT_FRAME_BASE = 0x22000
+INPUT_FRAME_BYTES = 256
 
 # mailbox opcodes (mirror of board.h)
 MB = {
     "nop": 0, "echo": 1, "status": 2, "set_rate": 3, "set_weight": 4,
     "set_threshold": 5, "set_leak": 6, "reset_v": 7,
+    "classify": 8,
 }
 MB_ARGC = {
     "nop": 0, "echo": 3, "status": 0, "set_rate": 2, "set_weight": 2,
     "set_threshold": 1, "set_leak": 1, "reset_v": 0,
+    "classify": 3,
 }
 
 _devmem = None
