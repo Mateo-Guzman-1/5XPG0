@@ -9,3 +9,5 @@ torch
 torchvision
 snntorch
 numpy
+sounddevice
+pyzmq

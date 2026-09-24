@@ -11,12 +11,23 @@ RISC-V instruction set be extended to make the SNN more efficient?
 | `train_mnist.py`     | ANN + SNN, 2-layer MLPs, ONE epoch each, saves weights   |
 | `benchmark.py`       | parameters, PC-CPU latency, SNN spike-count proxy        |
 | `requirements.txt`   | Python deps for training                                 |
-| `setup_venv.sh`      | create `.venv` and install the deps                      |
+| `setup_venv.sh` / `setup_venv.ps1` | create `.venv` and install the deps       |
 
 Both networks are **skeletons**: tiny, trained one epoch, deliberately not a
 fair comparison yet. Building a *scientific* benchmark is the project.
 
 ## Setup & run the training example
+
+Windows PowerShell:
+
+```powershell
+.\setup_venv.ps1
+.\.venv\Scripts\Activate.ps1
+python train_mnist.py
+python benchmark.py
+```
+
+Linux, WSL, or Git Bash:
 
 ```bash
 ./setup_venv.sh

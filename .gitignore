@@ -25,13 +25,42 @@ PresentationInstruction/resources/
 ProjectPitch/figures/
 ProjectPitch/resources/
 
-# Python
+# Python bytecode and caches (these patterns apply in every subfolder)
 __pycache__/
 *.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+
+# Local Python environments and environment-specific configuration
 .venv/
 venv/
+env/
+ENV/
+.env
+.env.*
+!.env.example
+pip-wheel-metadata/
+
+# Python packaging/build output
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Project-generated datasets, models, and experiment output
 runs/
 data/
+checkpoints/
+*.pt
+*.pth
 
 # Build artifacts — keep the sources and the single released bitstream only
 code/pynqz2_riscv_flow/firmware/*.o
@@ -44,4 +73,29 @@ code/pynqz2_riscv_flow/.board-ip
 
 # OS / editor
 .DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.idea/
+.vscode/
+*.code-workspace
 *.swp
+*.swo
+*~
+
+# Windows/PowerShell temporary output
+*.tmp
+*.temp
+*.stackdump
+
+# Credentials and local SSH keys
+*.pem
+*.key
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+code/pynqz2_riscv_flow/pynq
+code/pynqz2_riscv_flow/pynq.pub
+code/pynqz2_riscv_flow/y
+code/pynqz2_riscv_flow/y.pub

@@ -11,7 +11,7 @@ spoken into the PC microphone.
 | `train_keyword_snn.py`  | snnTorch 2-layer SNN, ONE epoch, synthetic spectrograms    |
 | `pc_keyword_demo.py`    | PC side: mic → mel spectrogram → ZeroMQ publisher          |
 | `requirements.txt`      | Python deps for training                                   |
-| `setup_venv.sh`         | create `.venv` and install the deps                        |
+| `setup_venv.sh` / `setup_venv.ps1` | create `.venv` and install the deps         |
 
 The training script is a **skeleton**: it runs end-to-end but is
 intentionally under-trained and uses fake data. The board side (receive the
@@ -19,6 +19,16 @@ spectrogram, run the SNN, drive the LED) is left to you — see the PYNQ flow in
 `../pynqz2_riscv_flow/`.
 
 ## Setup & run the training example
+
+Windows PowerShell:
+
+```powershell
+.\setup_venv.ps1
+.\.venv\Scripts\Activate.ps1
+python train_keyword_snn.py
+```
+
+Linux, WSL, or Git Bash:
 
 ```bash
 ./setup_venv.sh

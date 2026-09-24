@@ -76,6 +76,29 @@ See `code/pynqz2_riscv_flow/README.md` for the full details and memory map.
 
 ## Quick start — training skeletons
 
+### Windows (PowerShell)
+
+```powershell
+# Group 2
+Set-Location code\snn_keyword
+.\setup_venv.ps1
+.\.venv\Scripts\Activate.ps1
+python train_keyword_snn.py
+
+# Group 4
+Set-Location ..\ann_vs_snn_mnist
+.\setup_venv.ps1
+.\.venv\Scripts\Activate.ps1
+python train_mnist.py
+python benchmark.py
+```
+
+If PowerShell blocks local scripts, run `Set-ExecutionPolicy -Scope Process
+Bypass` once in that terminal. The policy change lasts only for the current
+PowerShell process. Pass `-Recreate` to a setup script to rebuild its venv.
+
+### Linux, WSL, or Git Bash
+
 ```bash
 # Group 2
 cd code/snn_keyword && ./setup_venv.sh && source .venv/bin/activate
@@ -88,6 +111,10 @@ python train_mnist.py && python benchmark.py
 
 Both training scripts run for **one epoch** on purpose: they are starting
 points, not solutions. See the README in each folder.
+
+The FPGA deployment scripts and Makefiles require a Unix-like shell. On a
+Windows PC, use WSL or Git Bash for that hardware flow; the Python training
+and benchmark tools run directly in PowerShell.
 
 ---
 

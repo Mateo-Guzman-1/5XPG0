@@ -15,6 +15,11 @@ host/      spike_pynq.py (load/run/read)  demo.sh  smoke_test.sh
 install.sh  run_demo.sh  Makefile  requirements.txt
 ```
 
+For local Python work on Windows, run `.\setup_venv.ps1` in PowerShell and
+activate with `.\.venv\Scripts\Activate.ps1`. The deployment and FPGA build
+commands below use Bash/Make and should be run through WSL or Git Bash on a
+Windows host. Board-side commands still run on the PYNQ Linux image.
+
 ## What the design does
 
 ```

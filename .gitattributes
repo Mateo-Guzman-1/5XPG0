@@ -1,0 +1,18 @@
+# Keep cross-platform source files predictable while allowing native checkout
+# line endings for platform-specific scripts.
+* text=auto
+*.sh text eol=lf
+Makefile text eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.py text eol=lf
+*.c text eol=lf
+*.h text eol=lf
+*.v text eol=lf
+*.tcl text eol=lf
+*.xdc text eol=lf
+*.pdf binary
+*.bit binary
+*.bin binary
+*.jpg binary
