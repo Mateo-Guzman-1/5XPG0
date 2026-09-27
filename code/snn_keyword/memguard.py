@@ -1,0 +1,42 @@
+"""Self-limiting jobs on the shared machine: exit cleanly (code 3) when over budget.
+
+check() is called every 50 training steps and in every cache loop. Limits:
+private (commit) memory 6 GB, reserved GPU memory 2.3 GB.
+"""
+import sys
+
+import psutil
+
+MAX_PRIVATE = 6 * 2 ** 30
+MAX_GPU = int(2.3 * 2 ** 30)
+
+
+def private_bytes():
+    m = psutil.Process().memory_info()
+    return getattr(m, 'private', m.rss)
+
+
+def check(where=''):
+    p = private_bytes()
+    if p > MAX_PRIVATE:
+        print(f'memguard: private memory {p / 2 ** 30:.2f} GB > 6 GB at {where}; exiting', flush=True)
+        sys.exit(3)
+    if 'torch' in sys.modules:
+        import torch
+        if torch.cuda.is_available() and torch.cuda.is_initialized():
+            g = torch.cuda.memory_reserved()
+            if g > MAX_GPU:
+                print(f'memguard: reserved GPU memory {g / 2 ** 30:.2f} GB > 2.3 GB at {where}; exiting', flush=True)
+                sys.exit(3)
+
+
+def free_ok(min_ram_gb=10., min_gpu_gb=2.5):
+    """Start condition for GPU jobs: free system RAM and free GPU memory."""
+    ram = psutil.virtual_memory().available / 2 ** 30
+    gpu = None
+    import torch
+    if torch.cuda.is_available():
+        free, _ = torch.cuda.mem_get_info()
+        gpu = free / 2 ** 30
+    ok = ram >= min_ram_gb and (gpu is None or gpu >= min_gpu_gb)
+    return ok, {'free_ram_gb': round(ram, 2), 'free_gpu_gb': None if gpu is None else round(gpu, 2)}

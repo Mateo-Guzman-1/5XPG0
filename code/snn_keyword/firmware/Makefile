@@ -27,3 +27,14 @@ $(BUILD)/keyword_stream_engine.elf: $(STREAM_SRC)
 	$(CC) $(FLAGS) -DUSE_KDOT -DUSE_ENGINE -I$(BUILD)/stream -T linker.ld -Wl,--build-id=none,-Map=$(BUILD)/keyword_stream_engine.map ../../pynqz2_riscv_flow/firmware/start.S stream_main.c stream_infer.c runtime.c -o $@ -lgcc
 	$(CROSS)size $@
 .PHONY: all stream
+# Verifier track: stage 1 (kdot + engine, or pure RV32IM) with the phoneme verifier, command 6.
+# Headers: build/stream (export_model.py) and build/verifier (verifier_export.py).
+VER_SRC := $(STREAM_SRC) verifier.c verifier.h $(BUILD)/verifier/verifier_data.h $(BUILD)/verifier/verifier_config.h
+verifier: $(BUILD)/keyword_stream_verifier_engine.bin $(BUILD)/keyword_stream_verifier.bin
+$(BUILD)/keyword_stream_verifier_engine.elf: $(VER_SRC)
+	$(CC) $(FLAGS) -DUSE_KDOT -DUSE_ENGINE -DUSE_VERIFIER -I$(BUILD)/stream -I$(BUILD)/verifier -T linker.ld -Wl,--build-id=none,-Map=$(BUILD)/keyword_stream_verifier_engine.map ../../pynqz2_riscv_flow/firmware/start.S stream_main.c stream_infer.c verifier.c runtime.c -o $@ -lgcc
+	$(CROSS)size $@
+$(BUILD)/keyword_stream_verifier.elf: $(VER_SRC)
+	$(CC) $(FLAGS) -DUSE_VERIFIER -I$(BUILD)/stream -I$(BUILD)/verifier -T linker.ld -Wl,--build-id=none,-Map=$(BUILD)/keyword_stream_verifier.map ../../pynqz2_riscv_flow/firmware/start.S stream_main.c stream_infer.c verifier.c runtime.c -o $@ -lgcc
+	$(CROSS)size $@
+.PHONY: verifier

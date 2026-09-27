@@ -26,6 +26,9 @@ import numpy as np
 import torch
 from torch.nn import functional as F
 
+import sys
+
+import memguard
 from augment_online import Augmenter
 from verifier_data import SYMBOLS, encode, text_phones
 from verifier_model import Verifier, keyword_score_torch, n_params
@@ -181,10 +184,16 @@ def main():
     p.add_argument('--kw-weight', type=float, default=1.)
     p.add_argument('--lr', type=float, default=3e-3)
     p.add_argument('--seed', type=int, default=0)
-    p.add_argument('--gpu-fraction', type=float, default=.28, help='cap on this process's share of GPU memory (~2.3 GB)')
+    p.add_argument('--force-start', action='store_true')
+    p.add_argument('--gpu-fraction', type=float, default=.28, help='cap on the GPU memory share (~2.3 GB)')
     p.add_argument('--name', default='v1')
     p.add_argument('--out', type=Path, default=ROOT / 'runs_verifier')
     a = p.parse_args()
+    ok, free = memguard.free_ok()
+    print('free at start', free, flush=True)
+    if not ok and not a.force_start:
+        print('not enough free RAM (10 GB) or GPU memory (2.5 GB); exiting', flush=True)
+        sys.exit(3)
     dev = torch.device('cuda')
     # Shared 8 GB GPU: a hard cap turns an overrun into an OOM error here instead of WDDM
     # paging GPU memory into host RAM (which exhausted system commit memory on the first run).
@@ -213,7 +222,9 @@ def main():
     history, best, t0 = [], -1., time.perf_counter()
     for epoch in range(a.epochs):
         sums = {'libri': 0., 'kw': 0.}
-        for _ in range(a.steps_per_epoch):
+        for step in range(a.steps_per_epoch):
+            if step % 50 == 0:
+                memguard.check(f'epoch {epoch + 1} step {step}')
             with torch.no_grad():
                 wl, tl = libri.batch(a.libri_seconds)
                 xl = phase(features(aug, wl, dev), rng)
