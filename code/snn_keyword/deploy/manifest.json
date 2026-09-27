@@ -5,10 +5,9 @@
   },
   "keyword": "yes",
   "board_tested": {
-    "method": "JTAG (jtag/bringup.tcl, jtag/board_test.tcl)",
-    "date": "2026-09-24",
-    "result": "40/40 verification vectors bit-exact, LED0 pulse about 1 s",
-    "not_tested": "PYNQ Linux, Ethernet board_server.py, PYNQ Clocks setup"
+    "method": "JTAG (jtag/bringup.tcl, jtag/board_test.tcl); PYNQ Linux 3.0.1 over Ethernet (run_board.ps1, board_server.py)",
+    "date": "2026-09-24 (JTAG), 2026-09-27 (Ethernet)",
+    "result": "40/40 verification vectors bit-exact, LED0 pulse about 1 s; over Ethernet also \"2 of 3\" stream confirmation and the live microphone demo"
   },
   "files": {
     "keyword.bin": {

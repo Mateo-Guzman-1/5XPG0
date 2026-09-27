@@ -202,9 +202,59 @@ With only two voices, they indicate trends, not accuracy.
 - The JTAG scripts moved from ignored build files into `jtag/`, and were
   retested on the board (40/40).
 
+## 2026-09-27
+
+### 8. Standard Ethernet path on a second PYNQ-Z2; requests processed twice
+
+- **Motivation.** Open item 1: run the intended deployment (`board_server.py`
+  on PYNQ Linux) instead of the JTAG relay.
+- **Board.** A second PYNQ-Z2 boots from SD (BootROM status `0x00400000`, no
+  error) into PYNQ Linux 3.0.1, user `student`, passwordless sudo. It is
+  cabled directly to the PC: board 10.43.0.1, PC 10.43.0.2. No rebuild was
+  needed. The Vitis 2026.1 `riscv64-unknown-elf-gcc` (GCC 13.4) reproduces
+  both released firmware images byte for byte.
+- **Change 1: start-up scripts.** Under `sudo`, PYNQ reported "No Devices
+  Found" because `sudo` drops `XILINX_XRT`. `start_board.sh` (runs on the
+  board) sets it, loads the bitstream and starts the server in the background.
+  `run_board.ps1` (PC) copies the files over SSH and runs it.
+- **Finding.** 40/40 vectors were bit-exact at once, but a stream probe with
+  known vectors showed every positive window as *confirmed*, even a single one
+  after two negatives (expected: +,+,−,+ → 2,3,0,3; measured 3,3,0,3).
+  Evidence:
+  - The disassembled firmware implements "2 of 3" correctly.
+  - The history words on the stack showed a stream window that ended 747
+    cycles before the current one started, with no request sent in between.
+    Every request ran twice, so its second pass confirmed its first.
+  - A debug firmware recorded the sequence number it accepted. It was 0.
+    The core then acknowledged 0 and ran the real request again.
+  - Cause: `struct.pack_into('<I', mmap, …)` in `board_server.py`. CPython
+    zeroes the four bytes and then writes them one byte at a time, so the
+    polling core briefly sees `seq_in = 0`. The JTAG relay writes whole words
+    (`mwr`), so it never showed this. The same pattern also briefly released
+    the CPU reset whenever the server tried to hold it.
+- **Change 2: `board_server.py`.** All register and mailbox words go through
+  32-bit `memoryview`s (one bus access each). Firmware and bitstreams are
+  unchanged. A firmware-side double read of `seq_in` was tried first; it
+  reduced but did not remove the problem, because the zero is a real
+  intermediate value, not a read glitch. It was discarded.
+- **Outcome** (both `keyword.bin` and `keyword_kdot.bin`, over Ethernet):
+  - 40/40 vectors bit-exact (3 × 40 for RV32IM). Cycles equal RTL; worst
+    `kdot` case 267,393 cycles = 2.67 ms.
+  - Stream sequences as specified, 3 repetitions each: + → 2;
+    −,−,+ → 0,0,2; +,+,−,+ → 2,3,0,3; −,+,−,+ → 0,2,0,3.
+  - LED0 went off 999 ms after a detection (read back from syscon `LED`).
+  - PC round trip about 7 ms per window (JTAG relay: 30–45 ms). The live
+    microphone demo streams one window per 250 ms.
+  - Windows voices (David, Zira): "yes" detected in both single and stream
+    mode (first window unconfirmed, then confirmed); "no", "pizza" and
+    "hello" rejected in both modes.
+- **Unaffected earlier results.** `confusables.json`, `tune_stream.py` and
+  the manual microphone test (over JTAG) did not use `board_server.py`.
+
 ## Open items
 
-1. Reflash the SD card and test the standard Ethernet path (`board_server.py`).
+1. ~~Reflash the SD card and test the standard Ethernet path~~: done on a
+   second board (entry 8). The first board still needs a reflashed SD card.
 2. Choose between the release and trial models (recall against confusable
    rejection).
 3. A time-convolutional first layer, the likely real fix for /ts/ and

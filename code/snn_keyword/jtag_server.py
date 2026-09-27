@@ -40,7 +40,9 @@ class JtagBoard:
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--xsdb',type=Path,default=Path('C:/AMDDesignTools/2025.2/Vivado/bin/xsdb.bat'))
+    # Newest installed Vivado (2025.2 and 2026.1 both work).
+    installed=sorted(Path('C:/AMDDesignTools').glob('*/Vivado/bin/xsdb.bat'))
+    p.add_argument('--xsdb',type=Path,default=installed[-1] if installed else Path('C:/AMDDesignTools/2025.2/Vivado/bin/xsdb.bat'))
     p.add_argument('--port',type=int,default=5556)
     a=p.parse_args()
     backend=JtagBoard(a.xsdb)

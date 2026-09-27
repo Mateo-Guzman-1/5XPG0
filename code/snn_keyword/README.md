@@ -9,10 +9,11 @@ classifies them and a hardware countdown lights LED0 for exactly one second.
 See [REPORT.md](REPORT.md), [presentation.pdf](presentation.pdf),
 [JOURNAL.md](JOURNAL.md) (dated log of every change, its motivation and its
 outcome), and the machine-readable [results](results/). Inference is verified
-in RTL simulation and on the physical PYNQ-Z2, loaded over JTAG (see
-[JTAG workaround](#jtag-workaround-this-board-only)). The standard PYNQ
-Linux/Ethernet path has not run on hardware yet. The live microphone demo was
-tried by hand (see [Live confirmation](#live-confirmation-and-confusable-words)).
+in RTL simulation and on two physical PYNQ-Z2 boards: first loaded over JTAG
+(see [JTAG workaround](#jtag-workaround-this-board-only)), then through the
+standard PYNQ Linux/Ethernet path, which also runs the live microphone demo
+(see [Run on the PYNQ board](#run-on-the-pynq-board-standard-ethernet-path)
+and [Live confirmation](#live-confirmation-and-confusable-words)).
 
 ## What was measured
 
@@ -30,6 +31,10 @@ tried by hand (see [Live confirmation](#live-confirmation-and-confusable-words))
 - Physical PYNQ-Z2, loaded over JTAG: the 40 vectors are bit-exact for the
   RV32IM, `kdot` and augmented-trial firmware. Cycle counts equal RTL, and
   the LED0 pulse is about 1 s.
+- Physical PYNQ-Z2 on PYNQ Linux over Ethernet (`board_server.py`): the same
+  40 vectors bit-exact for both firmware images (3 × 40 for RV32IM), cycle
+  counts equal RTL, LED0 pulse 999 ms, "2 of 3" sequences as specified, and
+  a 7 ms PC round trip per window (JTAG relay: 30–45 ms).
 - Live windows (held-out clips in noise, 250 ms hop): "2 of 3" confirmation
   lowers other words accepted from 1.07% to 0.13%, while "yes" detection
   goes from 74.5% to 67.3%.
@@ -265,16 +270,32 @@ relay adapt to it.
 
 ## Run on the PYNQ board (standard Ethernet path)
 
-This is the intended deployment. It has **not** yet run on hardware,
-because the board used so far does not boot PYNQ Linux (see the next
-section). Copy this folder's `deploy/`,
-`board_server.py`, `protocol.py`, and `features.py` to the board. Use the
-PYNQ environment (which already provides NumPy) to load the released image:
+This is the intended deployment, tested on a PYNQ-Z2 with PYNQ Linux 3.0.1
+(2026-09-27, see JOURNAL.md entry 8). It needs passwordless SSH from the PC
+to the board and passwordless sudo on the board. From the repository root on
+Windows:
+
+```powershell
+code/snn_keyword/run_board.ps1 -Board pynq          # or -Board student@10.43.0.1; -Variant base|stop
+.venv/Scripts/python.exe -m pip install numpy sounddevice   # the PC side needs only these two
+.venv/Scripts/python.exe code/snn_keyword/pc_keyword_demo.py 10.43.0.1
+```
+
+`run_board.ps1` copies `deploy/`, `board_server.py`, `protocol.py`,
+`features.py` and `start_board.sh` to `~/snn_keyword` on the board, and
+runs `start_board.sh` there. That script loads `keyword_kdot.bit` (or
+`keyword.bit` with `base`), starts `board_server.py` in the background with
+the matching firmware, and waits for `Listening on 0.0.0.0:5556`. The server
+log is `~/snn_keyword/server.log`. Nothing persists on the FPGA: run it again
+after every board reboot. By hand on the board, the steps are:
 
 ```bash
-sudo /usr/local/share/pynq-venv/bin/python3 -c "from pynq import Bitstream; Bitstream('deploy/keyword.bit').download()"
-sudo /usr/local/share/pynq-venv/bin/python3 board_server.py --bind 0.0.0.0 --firmware deploy/keyword.bin
+sudo env XILINX_XRT=/usr BOARD=Pynq-Z2 /usr/local/share/pynq-venv/bin/python3 -c "from pynq import Bitstream; Bitstream('deploy/keyword_kdot.bit').download()"
+sudo env XILINX_XRT=/usr BOARD=Pynq-Z2 /usr/local/share/pynq-venv/bin/python3 board_server.py --bind 0.0.0.0 --firmware deploy/keyword_kdot.bin
 ```
+
+`sudo` drops the variables that `/etc/profile.d` sets; without
+`XILINX_XRT` PYNQ reports "No Devices Found".
 
 Then run `pc_keyword_demo.py <board-ip>` on the PC. The server validates
 the fabric magic, ABI version, and advertised clock, holds the CPU in reset,
@@ -287,9 +308,11 @@ Each positive single-window request, or each confirmed stream window,
 retriggers LED0 for one second from that detection.
 Use the lab network; the small demo protocol has no authentication.
 
-Still unchecked on hardware for this path: Ethernet connectivity, the
-PYNQ Clocks setup, and `board_server.py` itself. Inference, cycle counts and
-LED timing were measured on the board through the JTAG workaround below.
+The server accesses mailbox words and registers through 32-bit memoryviews
+(one bus access each). The earlier `struct.pack_into` version zeroed each
+word and then wrote it byte by byte. The running core saw sequence number 0,
+acknowledged it and ran every request twice, which made every positive
+stream window confirm itself (JOURNAL.md entry 8).
 
 ## JTAG workaround (this board only)
 
@@ -310,7 +333,7 @@ takes the demo's TCP frames and moves them through the Vivado debugger
 (xsdb) into the same mailbox.
 
 ```powershell
-$X = "C:/AMDDesignTools/2025.2/Vivado/bin/xsdb.bat"
+$X = "C:/AMDDesignTools/2025.2/Vivado/bin/xsdb.bat"   # use your installed version, e.g. 2026.1
 & $X code/snn_keyword/jtag/bringup.tcl code/snn_keyword/deploy/keyword_kdot.bit code/snn_keyword/deploy/keyword_kdot.bin
 .venv/Scripts/python.exe code/snn_keyword/jtag/make_board_vectors.py --model code/snn_keyword/deploy/model.npz
 & $X code/snn_keyword/jtag/board_test.tcl
