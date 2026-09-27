@@ -51,7 +51,7 @@ class LibriBatches:
         k = self.rng.integers(len(self.order))
         n = max(1, int(seconds * SR // self.length[self.order[k]]))
         ids = self.order[max(0, min(k, len(self.order) - n)):][:n]
-        L = int(self.length[ids].max())
+        L = int(np.ceil(self.length[ids].max() / SR)) * SR     # 1 s buckets: fewer distinct shapes
         w = np.zeros((len(ids), L), np.float32)
         for j, i in enumerate(ids):
             w[j, :self.length[i]] = self.audio[self.start[i]:self.start[i] + self.length[i]] / 32768
@@ -181,10 +181,14 @@ def main():
     p.add_argument('--kw-weight', type=float, default=1.)
     p.add_argument('--lr', type=float, default=3e-3)
     p.add_argument('--seed', type=int, default=0)
+    p.add_argument('--gpu-fraction', type=float, default=.28, help='cap on this process's share of GPU memory (~2.3 GB)')
     p.add_argument('--name', default='v1')
     p.add_argument('--out', type=Path, default=ROOT / 'runs_verifier')
     a = p.parse_args()
     dev = torch.device('cuda')
+    # Shared 8 GB GPU: a hard cap turns an overrun into an OOM error here instead of WDDM
+    # paging GPU memory into host RAM (which exhausted system commit memory on the first run).
+    torch.cuda.set_per_process_memory_fraction(a.gpu_fraction, dev)
     torch.manual_seed(a.seed)
     rng = np.random.default_rng(a.seed)
     libri = LibriBatches(rng)
@@ -223,6 +227,7 @@ def main():
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.)
             opt.step(); sched.step()
             sums['libri'] += ll.item(); sums['kw'] += lk.item()
+        torch.cuda.empty_cache()
         r = {k: round(v / a.steps_per_epoch, 4) for k, v in sums.items()}
         r.update(validate(model, aug, dev, libri_val, kw_val, kw_ids, val_noise))
         r.update(epoch=epoch + 1, minutes=round((time.perf_counter() - t0) / 60, 1),
