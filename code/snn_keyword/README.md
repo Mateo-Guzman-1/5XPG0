@@ -205,6 +205,9 @@ on the main thread. Responses contain scores, detection, and hidden spikes.
 Simulation reports zero cycles; only RTL/board execution measures cycles.
 Live microphone mode uses "2 of 3" confirmation (below); `--single`
 restores per-window decisions. WAV mode always classifies a single window.
+Live mode prints one dot per window and one `YES detected` line per spoken
+keyword (consecutive confirmed windows count once); `--json` prints every
+reply instead.
 
 ## Live confirmation and confusable words
 

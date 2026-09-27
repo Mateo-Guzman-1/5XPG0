@@ -17,6 +17,8 @@ def main():
     p.add_argument('--device', help='sounddevice input name or ID')
     p.add_argument('--single', action='store_true',
                    help='Live: decide on each window alone instead of requiring 2 of 3 consecutive windows')
+    p.add_argument('--json', action='store_true',
+                   help='Live: print every board reply as JSON instead of one line per detected keyword')
     a = p.parse_args()
     with socket.create_connection((a.host, a.port), timeout=10) as sock:
         if a.wav:
@@ -42,6 +44,7 @@ def main():
         mode = MODE_SINGLE if a.single else MODE_STREAM
         rule = 'each window' if a.single else '2 of 3 consecutive windows'
         print(f'Listening for "yes"; 1 s windows / 250 ms hop; detection needs {rule}. Ctrl-C stops.')
+        detections, previous = 0, False
         with sd.InputStream(channels=1, samplerate=SAMPLE_RATE, blocksize=4000,
                             dtype='float32', device=a.device, callback=callback):
             while True:
@@ -54,7 +57,16 @@ def main():
                     continue
                 seq = (seq + 1) & 0xffffffff
                 result = request(sock, seq, features(buffer), mode)
-                print(json.dumps(result), flush=True)
+                if a.json:
+                    print(json.dumps(result), flush=True)
+                elif result['detected'] and not previous:
+                    # One spoken "yes" confirms several consecutive windows; report it once.
+                    detections += 1
+                    print(f'\nYES detected ({detections}), score margin {result["score1"] - result["score0"]}, '
+                          f'{result["cycles"]} cycles on the RISC-V core', flush=True)
+                else:
+                    print('.', end='', flush=True)   # one dot per window: still listening
+                previous = result['detected']
 
 
 if __name__ == '__main__':
