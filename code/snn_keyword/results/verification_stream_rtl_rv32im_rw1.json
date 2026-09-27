@@ -1,0 +1,24 @@
+{
+  "model": "runs_stream/s2_nokd_qat/int_last.npz",
+  "firmware": "build/keyword_stream.bin",
+  "read_wait": 1,
+  "kdot": false,
+  "streams": 8,
+  "hops": 72,
+  "bit_exact": true,
+  "cycles_per_hop": {
+    "max": 11321119,
+    "mean": 8981012.09375,
+    "p99": 10732271.229999997
+  },
+  "ms_per_hop_at_100MHz": {
+    "max": 113.21119,
+    "mean": 89.8101209375
+  },
+  "events_per_hop": {
+    "max": 69650,
+    "mean": 38444.59375
+  },
+  "simulation_seconds": 139.9,
+  "harness": "PASS: 8 streams, 72 hops bit-exact with the oracle; malformed requests, reset, duplicate sequence, 1 s LED pulse; worst 11321119 cycles per 25-frame hop, mean 8981012; total cycles=720478896"
+}

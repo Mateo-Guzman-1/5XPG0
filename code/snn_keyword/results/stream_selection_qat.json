@@ -1,0 +1,117 @@
+{
+  "config": {
+    "split": "validation",
+    "time_bins": 32,
+    "live": {
+      "yes": 397,
+      "other": 3000
+    },
+    "device": {
+      "mic_profiles": 16,
+      "mic_seed": 20260925,
+      "real_rirs": 0
+    },
+    "mswc": {
+      "split": "dev",
+      "yes": 332,
+      "yes_edge_clipped": 8,
+      "near_miss": {
+        "ye- (yet, yeah, yep, yell, yellow, yesterday)": 245,
+        "/s/-final (guess, less, this, us, ...)": 599,
+        "/ts/-final (its, gets, lets, eats, ...)": 323,
+        "/t\u0283/-final (each, reach, speech, ...)": 340,
+        "/st/, /ks/ (best, test, next, ...)": 420,
+        "other near (year, you, said, cheese, ...)": 628
+      },
+      "random_other": 3000
+    },
+    "stream": {
+      "seconds": 3600,
+      "clips": {
+        "yes": 138,
+        "word": 508,
+        "libri": 276
+      },
+      "speech_seconds": {
+        "yes": 135.6,
+        "word": 496.9,
+        "libri": 1895.5
+      },
+      "libri_subset": "dev-clean",
+      "seed": 7,
+      "yes_inserted": 138,
+      "holdoff_s": 1.0,
+      "hit_tolerance_s": 1.25
+    }
+  },
+  "rule": {
+    "checkpoints": [
+      "runs_stream\\s2_nokd_qat\\model.pt",
+      "runs_stream\\s2_nokd_qat\\last.pt",
+      "runs_stream\\s2_nokd_qat\\int_model.npz",
+      "runs_stream\\s2_nokd_qat\\int_last.npz"
+    ],
+    "data": "C:\\Users\\matut\\FULL_AI\\5XPG0\\code\\snn_keyword\\data",
+    "max_live_fa": 0.002,
+    "max_fa_hour": 2.0,
+    "out": "results\\stream_selection_qat.json"
+  },
+  "models": {
+    "runs_stream\\s2_nokd_qat\\model.pt": {
+      "threshold": 8.14140319824207,
+      "live_recall": 0.5969773299748111,
+      "live_fa": 0.0006666666666666666,
+      "stream": {
+        "recall": 0.6232,
+        "false_accepts": 0,
+        "fa_per_hour": 0.0,
+        "latency_median_s": 0.121,
+        "latency_p90_s": 0.191
+      },
+      "mswc_recall": 0.4246987951807229,
+      "mswc_other_fa": 0.0037803780378037805
+    },
+    "runs_stream\\s2_nokd_qat\\last.pt": {
+      "threshold": 8.181130359047309,
+      "live_recall": 0.5969773299748111,
+      "live_fa": 0.0003333333333333333,
+      "stream": {
+        "recall": 0.6159,
+        "false_accepts": 2,
+        "fa_per_hour": 2.0,
+        "latency_median_s": 0.121,
+        "latency_p90_s": 0.192
+      },
+      "mswc_recall": 0.4186746987951807,
+      "mswc_other_fa": 0.004140414041404141
+    },
+    "runs_stream\\s2_nokd_qat\\int_model.npz": {
+      "threshold": 10619.736842105252,
+      "live_recall": 0.41309823677581864,
+      "live_fa": 0.0003333333333333333,
+      "stream": {
+        "recall": 0.4565,
+        "false_accepts": 2,
+        "fa_per_hour": 2.0,
+        "latency_median_s": 0.114,
+        "latency_p90_s": 0.18
+      },
+      "mswc_recall": 0.2560240963855422,
+      "mswc_other_fa": 0.00216021602160216
+    },
+    "runs_stream\\s2_nokd_qat\\int_last.npz": {
+      "threshold": 9661.31578947365,
+      "live_recall": 0.5969773299748111,
+      "live_fa": 0.001,
+      "stream": {
+        "recall": 0.6304,
+        "false_accepts": 2,
+        "fa_per_hour": 2.0,
+        "latency_median_s": 0.107,
+        "latency_p90_s": 0.172
+      },
+      "mswc_recall": 0.43373493975903615,
+      "mswc_other_fa": 0.0054005400540054005
+    }
+  }
+}

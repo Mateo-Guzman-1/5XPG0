@@ -267,6 +267,66 @@ time-convolutional front layer is the next step. The firmware already
 publishes its input size (mailbox word 14), and the RTL harness and JTAG
 relay adapt to it.
 
+## Streaming SNN candidate (implementation plan, not promoted)
+
+[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) Phases 0-7 are carried
+out; JOURNAL.md entries 8-17 give every step and number. The result is a
+streaming two-layer adaptive-LIF SNN with learnable delays (58k parameters,
+int8), bit-exact from the Python oracle through native C to the SoC RTL,
+with an event-driven neuron engine in the fabric (10.2 ms per 250 ms hop,
+timing met at 100 MHz). **It does not meet the plan's acceptance targets,
+so `deploy/` still holds the release.** Test split,
+`results/robust_final.json`:
+
+| | Release | Streaming SNN |
+|---|---|---|
+| Live "yes" / other words accepted | 67.3% / 0.13% | 57.8% / 0.27% |
+| Synthesized /ts/ words detected | 11-53% | 0-6% |
+| False accepts per hour (1 h stream) | 52 | 5 |
+| Stream recall at ≤ 2 false accepts per hour | 42% | 54% |
+| Held-out microphone recall drop | 17.7 points | 19.6 points |
+| Compute per hop (engine) | 2.7 ms | 10.2 ms |
+
+Pipeline (each step writes to `results/` or `runs_*`; downloads need about
+60 GB of disk and several hours):
+
+```powershell
+python fetch_corpora.py mswc --split test     # also: librispeech, rirs, musan; mswc --split dev/train --needed-only
+python robust_eval.py release=deploy/model.npz # Phase 0 harness (writes results/robust_baseline.json)
+python make_tts_negatives.py                   # Piper voices and 55,000 utterances
+python prepare_multicorpus.py                  # data/multi: clips, LibriSpeech, noise
+python train_dense_online.py                   # Phase 1 gate: the release model on the new data
+python teacher.py                              # Phase 2: BC-ResNet-8 teacher
+python train_stream.py --stage 1 --no-kd --name s1_nokd_seed0
+python train_stream.py --stage 2 --init runs_stream/s1_nokd_seed0/model.pt --name s2_nokd_seed0
+python train_stream.py --stage 2 --qat --init runs_stream/s2_nokd_seed0/model.pt --lr 3e-4 --epochs 8 --name s2_nokd_qat
+python quantize_stream_model.py runs_stream/s2_nokd_qat/last.pt runs_stream/s2_nokd_qat/int_last.npz
+python stream_select.py runs_stream/s2_nokd_qat/int_last.npz   # threshold on validation only
+python verify_stream.py runs_stream/s2_nokd_qat/int_last.npz   # native C = oracle
+python verify_stream_rtl.py runs_stream/s2_nokd_qat/int_last.npz --engine --streams 40
+python robust_eval.py stream_snn_int8=runs_stream/s2_nokd_qat/int_last.npz --out results/robust_final.json
+```
+
+Streaming firmware and protocol (ABI v3): `make -C firmware stream` builds
+`keyword_stream.bin` (RV32IM), `keyword_stream_kdot.bin` and
+`keyword_stream_engine.bin` (needs the engine bitstream). The mailbox magic
+"KWS3" marks it; a request streams 1-100 frames of 24 bytes and the network
+state stays on the core. `board_server.py`, the JTAG relay and
+`pc_keyword_demo.py` detect the loaded ABI and serve v2 and v3. The bus fix
+(`READ_WAIT` 8 → 1) is in `rtl/spike_soc.v`.
+
+On the physical board (`build/keyword_engine.bit`, JOURNAL entry 18), 40 live
+test streams (358 hops) are bit-exact with the oracle for all three
+firmwares. Every field and cycle count equals RTL. Worst case per 250 ms hop:
+10.2 ms with the engine, 88.8 ms with `kdot`, 125.4 ms with RV32IM.
+
+```powershell
+$X = "C:/AMDDesignTools/2025.2/Vivado/bin/xsdb.bat"
+.venv/Scripts/python.exe code/snn_keyword/jtag/make_stream_vectors.py
+& $X code/snn_keyword/jtag/bringup.tcl code/snn_keyword/build/keyword_engine.bit code/snn_keyword/build/keyword_stream_engine.bin
+& $X code/snn_keyword/jtag/stream_board_test.tcl
+```
+
 ## Run on the PYNQ board (standard Ethernet path)
 
 This is the intended deployment. It has **not** yet run on hardware,
@@ -304,6 +364,14 @@ read 5 (SD card) but the BootROM status was `0x0040200A`: error `0x200A`,
 boot from SD failed. PYNQ Linux therefore never starts. Reflashing the SD card
 with the PYNQ-Z2 v3.1 image, or reseating or replacing the card, will most
 likely fix it. After that, use the standard path above and ignore this section.
+
+Update 2026-09-27: after a fresh power-up the SD card booted PYNQ Linux with
+the base overlay. `jtag/bringup.tcl` notices when the PS is already
+configured (FCLK0 = 100 MHz, level shifters on) and then only reprograms the
+PL, leaving Linux running. The test scripts and the relay reach memory
+through the APU debug port in that case. Once, the PS hung after repeated PL
+reprogramming under Linux; `rst -system` over JTAG (or a power cycle)
+recovers it (JOURNAL entry 18).
 
 JTAG stands in for the missing boot chain. `jtag/bringup.tcl` runs the
 Vivado-generated `ps7_init` (PS clocks, FCLK0 = 100 MHz), programs the

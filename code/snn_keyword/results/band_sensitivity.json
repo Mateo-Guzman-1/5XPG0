@@ -1,0 +1,464 @@
+{
+ "clean": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5466,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5718,
+   "other_accepted": 0.0017
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.597,
+   "other_accepted": 0.001
+  }
+ },
+ "lowpass 3500 Hz": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.0705,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.1587,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.1083,
+   "other_accepted": 0.0003
+  }
+ },
+ "lowpass 4000 Hz": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.1637,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.2217,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.1612,
+   "other_accepted": 0.0
+  }
+ },
+ "lowpass 4500 Hz": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.2469,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.2997,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.262,
+   "other_accepted": 0.0
+  }
+ },
+ "lowpass 5000 Hz": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.3224,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.3778,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.3199,
+   "other_accepted": 0.0
+  }
+ },
+ "lowpass 5500 Hz": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.4081,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.4559,
+   "other_accepted": 0.0007
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.4307,
+   "other_accepted": 0.0003
+  }
+ },
+ "lowpass 6000 Hz": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.4786,
+   "other_accepted": 0.0007
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.4962,
+   "other_accepted": 0.0007
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.4937,
+   "other_accepted": 0.001
+  }
+ },
+ "lowpass 7000 Hz": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5315,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5491,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.602,
+   "other_accepted": 0.001
+  }
+ },
+ "lowpass 7500 Hz": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5416,
+   "other_accepted": 0.0007
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5567,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.602,
+   "other_accepted": 0.0003
+  }
+ },
+ "highpass 100 Hz": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5441,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5567,
+   "other_accepted": 0.0023
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.5844,
+   "other_accepted": 0.001
+  }
+ },
+ "highpass 200 Hz": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5617,
+   "other_accepted": 0.0013
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5491,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.6146,
+   "other_accepted": 0.0
+  }
+ },
+ "highpass 300 Hz": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5869,
+   "other_accepted": 0.0013
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5516,
+   "other_accepted": 0.0013
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.6398,
+   "other_accepted": 0.001
+  }
+ },
+ "highpass 400 Hz": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5743,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5466,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.6549,
+   "other_accepted": 0.001
+  }
+ },
+ "highpass 500 Hz": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5869,
+   "other_accepted": 0.0013
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.534,
+   "other_accepted": 0.0023
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.67,
+   "other_accepted": 0.002
+  }
+ },
+ "peak 250 Hz -9 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5668,
+   "other_accepted": 0.0007
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5592,
+   "other_accepted": 0.0023
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.6574,
+   "other_accepted": 0.0007
+  }
+ },
+ "peak 250 Hz +9 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5264,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5743,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.5844,
+   "other_accepted": 0.0003
+  }
+ },
+ "peak 500 Hz -9 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5844,
+   "other_accepted": 0.0013
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.6297,
+   "other_accepted": 0.0013
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.6776,
+   "other_accepted": 0.002
+  }
+ },
+ "peak 500 Hz +9 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5768,
+   "other_accepted": 0.0017
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.4786,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.5466,
+   "other_accepted": 0.0007
+  }
+ },
+ "peak 1000 Hz -9 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5365,
+   "other_accepted": 0.0013
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5844,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.5919,
+   "other_accepted": 0.0003
+  }
+ },
+ "peak 1000 Hz +9 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.597,
+   "other_accepted": 0.0013
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5113,
+   "other_accepted": 0.0017
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.6096,
+   "other_accepted": 0.0017
+  }
+ },
+ "peak 2000 Hz -9 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5768,
+   "other_accepted": 0.002
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5466,
+   "other_accepted": 0.0013
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.6045,
+   "other_accepted": 0.0
+  }
+ },
+ "peak 2000 Hz +9 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.4962,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5315,
+   "other_accepted": 0.0013
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.5919,
+   "other_accepted": 0.0007
+  }
+ },
+ "peak 3000 Hz -9 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5365,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.534,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.597,
+   "other_accepted": 0.0003
+  }
+ },
+ "peak 3000 Hz +9 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5743,
+   "other_accepted": 0.0007
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5491,
+   "other_accepted": 0.0023
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.6222,
+   "other_accepted": 0.0013
+  }
+ },
+ "peak 4000 Hz -9 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5365,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5214,
+   "other_accepted": 0.0007
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.5919,
+   "other_accepted": 0.0007
+  }
+ },
+ "peak 4000 Hz +9 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5819,
+   "other_accepted": 0.0007
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5718,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.6499,
+   "other_accepted": 0.0007
+  }
+ },
+ "peak 5000 Hz -9 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5139,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.4887,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.5516,
+   "other_accepted": 0.0003
+  }
+ },
+ "peak 5000 Hz +9 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.597,
+   "other_accepted": 0.0013
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.6146,
+   "other_accepted": 0.0023
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.6675,
+   "other_accepted": 0.001
+  }
+ },
+ "peak 6000 Hz -9 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.4937,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.471,
+   "other_accepted": 0.0007
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.5038,
+   "other_accepted": 0.0003
+  }
+ },
+ "peak 6000 Hz +9 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.6222,
+   "other_accepted": 0.0013
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5945,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.6574,
+   "other_accepted": 0.0007
+  }
+ },
+ "gain -20 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.398,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.2997,
+   "other_accepted": 0.0007
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.4635,
+   "other_accepted": 0.002
+  }
+ },
+ "gain -10 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.4987,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.4458,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.5768,
+   "other_accepted": 0.0003
+  }
+ },
+ "gain +10 dB": {
+  "runs_stream\\s2_nokd_seed0\\model.pt": {
+   "recall": 0.5466,
+   "other_accepted": 0.002
+  },
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5264,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_nokd_qat\\int_last.npz": {
+   "recall": 0.602,
+   "other_accepted": 0.0023
+  }
+ }
+}

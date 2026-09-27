@@ -1,0 +1,101 @@
+{
+  "rule": "validation only; live FA <= 0.2%, stream <= 2 FA/h; best of model.pt/last.pt",
+  "variants": {
+    "+ distillation": {
+      "checkpoint": "runs_stream/s2_kd_seed0/last.pt",
+      "live_recall": 0.4458,
+      "live_fa": 0.001,
+      "stream_recall": 0.4783,
+      "stream_fa_per_hour": 1.0,
+      "latency_median_s": 0.096,
+      "mswc_recall": 0.2771,
+      "live_recall_vs_baseline_points": -10.1,
+      "stream_recall_vs_baseline_points": -10.9,
+      "mswc_recall_vs_baseline_points": -14.8
+    },
+    "LIF (no adaptation)": {
+      "checkpoint": "runs_stream/s2_lif/model.pt",
+      "live_recall": 0.3401,
+      "live_fa": 0.002,
+      "stream_recall": 0.2246,
+      "stream_fa_per_hour": 1.0,
+      "latency_median_s": 0.105,
+      "mswc_recall": 0.2199,
+      "live_recall_vs_baseline_points": -20.6,
+      "stream_recall_vs_baseline_points": -36.2,
+      "mswc_recall_vs_baseline_points": -20.5
+    },
+    "64 + 64 neurons": {
+      "checkpoint": "runs_stream/s2_n64/last.pt",
+      "live_recall": 0.5919,
+      "live_fa": 0.002,
+      "stream_recall": 0.529,
+      "stream_fa_per_hour": 0.0,
+      "latency_median_s": 0.107,
+      "mswc_recall": 0.503,
+      "live_recall_vs_baseline_points": 4.5,
+      "stream_recall_vs_baseline_points": -5.8,
+      "mswc_recall_vs_baseline_points": 7.8
+    },
+    "no delays": {
+      "checkpoint": "runs_stream/s2_nodelay/model.pt",
+      "live_recall": 0.335,
+      "live_fa": 0.001,
+      "stream_recall": 0.3913,
+      "stream_fa_per_hour": 2.0,
+      "latency_median_s": 0.129,
+      "mswc_recall": 0.2922,
+      "live_recall_vs_baseline_points": -21.2,
+      "stream_recall_vs_baseline_points": -19.6,
+      "mswc_recall_vs_baseline_points": -13.2
+    },
+    "baseline (no distillation)": {
+      "checkpoint": "runs_stream/s2_nokd_seed0/model.pt",
+      "live_recall": 0.5466,
+      "live_fa": 0.0013,
+      "stream_recall": 0.587,
+      "stream_fa_per_hour": 2.0,
+      "latency_median_s": 0.127,
+      "mswc_recall": 0.4247,
+      "live_recall_vs_baseline_points": 0.0,
+      "stream_recall_vs_baseline_points": 0.0,
+      "mswc_recall_vs_baseline_points": 0.0
+    },
+    "no recurrence": {
+      "checkpoint": "runs_stream/s2_norec/model.pt",
+      "live_recall": 0.4433,
+      "live_fa": 0.002,
+      "stream_recall": 0.3333,
+      "stream_fa_per_hour": 2.0,
+      "latency_median_s": 0.087,
+      "mswc_recall": 0.3102,
+      "live_recall_vs_baseline_points": -10.3,
+      "stream_recall_vs_baseline_points": -25.4,
+      "mswc_recall_vs_baseline_points": -11.5
+    },
+    "no TTS negatives": {
+      "checkpoint": "runs_stream/s2_notts/model.pt",
+      "live_recall": 0.4912,
+      "live_fa": 0.0,
+      "stream_recall": 0.6014,
+      "stream_fa_per_hour": 0.0,
+      "latency_median_s": 0.082,
+      "mswc_recall": 0.3916,
+      "live_recall_vs_baseline_points": -5.5,
+      "stream_recall_vs_baseline_points": 1.4,
+      "mswc_recall_vs_baseline_points": -3.3
+    },
+    "PCEN front end": {
+      "checkpoint": "runs_stream/s2_pcen/last.pt",
+      "live_recall": 0.5668,
+      "live_fa": 0.002,
+      "stream_recall": 0.529,
+      "stream_fa_per_hour": 2.0,
+      "latency_median_s": 0.145,
+      "mswc_recall": 0.3735,
+      "live_recall_vs_baseline_points": 2.0,
+      "stream_recall_vs_baseline_points": -5.8,
+      "mswc_recall_vs_baseline_points": -5.1
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "model": "runs_stream/s2_nokd_qat/int_last.npz",
+  "sequences": 3420,
+  "frames": 1080332,
+  "live_clips": 3419,
+  "stream_seconds": 3600,
+  "frame_mismatches": 0,
+  "bit_exact": true,
+  "synapses_nonzero": 16153,
+  "per_frame": {
+    "layer1_spikes_mean": 5.157609882887853,
+    "layer2_spikes_mean": 6.746795429553138,
+    "synaptic_events_mean": 1510.0603545946988,
+    "synaptic_events_max": 5020,
+    "synaptic_events_p99": 3173.0
+  },
+  "seconds": {
+    "native_including_wsl": 10.0,
+    "oracle": 227.3
+  }
+}

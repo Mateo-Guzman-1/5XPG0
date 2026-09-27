@@ -1,0 +1,24 @@
+{
+  "model": "build/int_test.npz",
+  "firmware": "build/keyword_stream_kdot.bin",
+  "read_wait": 8,
+  "kdot": true,
+  "streams": 4,
+  "hops": 36,
+  "bit_exact": true,
+  "cycles_per_hop": {
+    "max": 23634245,
+    "mean": 20220634.75,
+    "p99": 23420846.27
+  },
+  "ms_per_hop_at_100MHz": {
+    "max": 236.34245,
+    "mean": 202.2063475
+  },
+  "events_per_hop": {
+    "max": 64771,
+    "mean": 38991.53125
+  },
+  "simulation_seconds": 555.1,
+  "harness": "PASS: 4 streams, 36 hops bit-exact with the oracle; malformed requests, reset, duplicate sequence, LED not exercised; worst 23634245 cycles per 25-frame hop, mean 20220634; total cycles=695230764"
+}

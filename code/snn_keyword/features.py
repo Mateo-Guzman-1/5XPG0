@@ -46,3 +46,64 @@ def features(audio):
     # Pool in time only; mel-major flattening is the firmware ABI.
     pooled = np.stack([part.mean(axis=0) for part in np.array_split(db, N_TIME)], axis=1)
     return np.rint(np.clip((pooled + 80) / 80, 0, 1) * 255).astype(np.uint8).reshape(-1)
+
+
+# ----------------------------------------------------------------------------
+# Frame-level front end for streaming models (IMPLEMENTATION_PLAN.md, Phase 1).
+# One 24-band uint8 vector per 10 ms frame, same FFT and mel bank as above;
+# frame k covers samples [160 k, 160 k + 400) of the stream.
+
+PCEN = dict(s=0.04, alpha=0.96, delta=2.0, r=0.5, scale=2.0 ** 31, top=6.0)
+
+
+def frame_power(audio):
+    """Mel power per frame, float32 (n_frames, 24). Streams shorter than one frame give no frames."""
+    a = np.asarray(audio, dtype=np.float32).reshape(-1)
+    if len(a) < 400:
+        return np.zeros((0, N_MELS), np.float32)
+    frames = np.lib.stride_tricks.sliding_window_view(a, 400)[::160]
+    window = np.hanning(401)[:-1].astype(np.float32)
+    out = np.empty((len(frames), N_MELS), np.float32)
+    # Blocks of frames bound the memory of hour-long streams (each frame is independent).
+    for i in range(0, len(frames), 20000):
+        power = np.abs(np.fft.rfft(frames[i:i + 20000] * window, n=512, axis=1) / window.sum()) ** 2
+        out[i:i + 20000] = power @ mel_bank().T
+    return out
+
+
+# Log-mel ranges (dB re full scale) mapped onto uint8. 'logmel' is the window
+# front end's; speech in the live sets never gets above about -40 dB, and 35% of
+# its values sit on the -80 dB floor (46% of the /s/ bands at -20 dB input), so
+# 'logmel_w' moves the window down and widens it (JOURNAL entry 20).
+LOGMEL_RANGE = {'logmel': (-80., 0.), 'logmel_w': (-120., -20.)}
+FRONTENDS = ('logmel', 'logmel_w', 'pcen')
+
+
+def logmel_frames(power, frontend='logmel'):
+    """Absolute log power over LOGMEL_RANGE[frontend] dB to uint8."""
+    lo, hi = LOGMEL_RANGE[frontend]
+    db = 10 * np.log10(np.maximum(power, 10 ** (lo / 10)))
+    return np.rint(np.clip((db - lo) / (hi - lo), 0, 1) * 255).astype(np.uint8)
+
+
+def pcen_frames(power, state=None, p=PCEN):
+    """Per-channel energy normalization [20] to uint8; returns (frames, smoother state).
+
+    M[t] = (1 - s) M[t-1] + s E[t];  y = (E / (eps + M)^alpha + delta)^r - delta^r.
+    The smoother starts at the first frame unless a state is passed (streaming).
+    The gain normalization removes static level and slow spectral tilt, i.e.
+    most of a microphone's and room's colouring.
+    """
+    from scipy.signal import lfilter
+    e = power.astype(np.float64) * p['scale']
+    if len(e) == 0:
+        return np.zeros((0, N_MELS), np.uint8), state
+    prev = e[0] if state is None else state
+    m, _ = lfilter([p['s']], [1, p['s'] - 1], e, axis=0, zi=((1 - p['s']) * prev)[None])
+    y = (e / (1e-6 + m) ** p['alpha'] + p['delta']) ** p['r'] - p['delta'] ** p['r']
+    return np.rint(np.clip(y / p['top'], 0, 1) * 255).astype(np.uint8), m[-1]
+
+
+def frame_features(audio, frontend='logmel'):
+    power = frame_power(audio)
+    return pcen_frames(power)[0] if frontend == 'pcen' else logmel_frames(power, frontend)

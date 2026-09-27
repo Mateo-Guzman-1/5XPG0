@@ -1,0 +1,210 @@
+{
+ "model": "runs_stream/s2_nokd_qat/int_last.npz",
+ "rules": {
+  "raw1": {
+   "threshold": 9661.31578947365,
+   "live_recall": 0.597,
+   "live_fa": 0.001,
+   "stream_recall": 0.6304,
+   "fa_per_hour": 2.0,
+   "recall_if_only_live_fa": 0.597,
+   "recall_if_only_stream_fa": 0.597,
+   "mswc_recall": 0.4337
+  },
+  "mean3": {
+   "threshold": 9574.964912280608,
+   "live_recall": 0.5844,
+   "live_fa": 0.0007,
+   "stream_recall": 0.5942,
+   "fa_per_hour": 0.0,
+   "recall_if_only_live_fa": 0.6574,
+   "recall_if_only_stream_fa": 0.5844,
+   "mswc_recall": 0.4157
+  },
+  "mean5": {
+   "threshold": 9386.010526315713,
+   "live_recall": 0.5768,
+   "live_fa": 0.0007,
+   "stream_recall": 0.5942,
+   "fa_per_hour": 0.0,
+   "recall_if_only_live_fa": 0.6499,
+   "recall_if_only_stream_fa": 0.5768,
+   "mswc_recall": 0.4006
+  },
+  "mean10": {
+   "threshold": 8249.826315789494,
+   "live_recall": 0.6423,
+   "live_fa": 0.001,
+   "stream_recall": 0.6232,
+   "fa_per_hour": 2.0,
+   "recall_if_only_live_fa": 0.6423,
+   "recall_if_only_stream_fa": 0.6423,
+   "mswc_recall": 0.4458
+  },
+  "min2": {
+   "threshold": 9516.157894736825,
+   "live_recall": 0.5894,
+   "live_fa": 0.001,
+   "stream_recall": 0.6087,
+   "fa_per_hour": 1.0,
+   "recall_if_only_live_fa": 0.5894,
+   "recall_if_only_stream_fa": 0.5894,
+   "mswc_recall": 0.4157
+  },
+  "min3": {
+   "threshold": 9217.157894736745,
+   "live_recall": 0.6071,
+   "live_fa": 0.001,
+   "stream_recall": 0.5942,
+   "fa_per_hour": 2.0,
+   "recall_if_only_live_fa": 0.6071,
+   "recall_if_only_stream_fa": 0.6071,
+   "mswc_recall": 0.4367
+  },
+  "min5": {
+   "threshold": 8598.789473684126,
+   "live_recall": 0.6146,
+   "live_fa": 0.0007,
+   "stream_recall": 0.6014,
+   "fa_per_hour": 0.0,
+   "recall_if_only_live_fa": 0.6877,
+   "recall_if_only_stream_fa": 0.6146,
+   "mswc_recall": 0.4337
+  }
+ },
+ "false_accepts_at_threshold": [
+  [
+   769.13,
+   "libri",
+   "libri",
+   "2412-153954-0001.flac"
+  ],
+  [
+   2587.2,
+   "libri",
+   "libri",
+   "652-130726-0011.flac"
+  ]
+ ],
+ "looser": {
+  "live_recall_0.65": {
+   "threshold": 9313.6,
+   "fa_per_hour": 4.0,
+   "live_fa": 0.002,
+   "by_kind": {
+    "word": 1,
+    "libri": 3
+   },
+   "top_words": [
+    [
+     "libri",
+     3
+    ],
+    [
+     "cat",
+     1
+    ]
+   ]
+  },
+  "live_recall_0.7": {
+   "threshold": 9064.4,
+   "fa_per_hour": 6.0,
+   "live_fa": 0.0027,
+   "by_kind": {
+    "word": 1,
+    "libri": 5
+   },
+   "top_words": [
+    [
+     "libri",
+     5
+    ],
+    [
+     "cat",
+     1
+    ]
+   ]
+  },
+  "live_recall_0.75": {
+   "threshold": 8722.0,
+   "fa_per_hour": 10.0,
+   "live_fa": 0.004,
+   "by_kind": {
+    "word": 2,
+    "libri": 8
+   },
+   "top_words": [
+    [
+     "libri",
+     8
+    ],
+    [
+     "cat",
+     1
+    ],
+    [
+     "left",
+     1
+    ]
+   ]
+  }
+ },
+ "misses": {
+  "snr_db": [
+   {
+    "range": [
+     -16.9,
+     -1.1
+    ],
+    "recall": 0.534
+   },
+   {
+    "range": [
+     -1.1,
+     5.2
+    ],
+    "recall": 0.602
+   },
+   {
+    "range": [
+     5.2,
+     21.0
+    ],
+    "recall": 0.647
+   }
+  ],
+  "level_dbfs": [
+   {
+    "range": [
+     -44.1,
+     -25.8
+    ],
+    "recall": 0.556
+   },
+   {
+    "range": [
+     -25.8,
+     -19.9
+    ],
+    "recall": 0.571
+   },
+   {
+    "range": [
+     -19.9,
+     -10.6
+    ],
+    "recall": 0.662
+   }
+  ],
+  "edge_clipped": {
+   "n": 43,
+   "recall": 0.326,
+   "recall_not_clipped": 0.63
+  },
+  "missed_margin_sd": [
+   -1.78,
+   -0.62,
+   -0.11
+  ]
+ }
+}

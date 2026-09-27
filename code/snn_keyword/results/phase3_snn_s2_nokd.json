@@ -1,0 +1,427 @@
+{
+  "config": {
+    "split": "test",
+    "time_bins": 32,
+    "live": {
+      "yes": 419,
+      "other": 3000
+    },
+    "device": {
+      "mic_profiles": 16,
+      "mic_seed": 20260925,
+      "real_rirs": 218
+    },
+    "mswc": {
+      "split": "test",
+      "yes": 332,
+      "yes_edge_clipped": 14,
+      "near_miss": {
+        "ye- (yet, yeah, yep, yell, yellow, yesterday)": 245,
+        "/s/-final (guess, less, this, us, ...)": 599,
+        "/ts/-final (its, gets, lets, eats, ...)": 323,
+        "/t\u0283/-final (each, reach, speech, ...)": 340,
+        "/st/, /ks/ (best, test, next, ...)": 421,
+        "other near (year, you, said, cheese, ...)": 628
+      },
+      "random_other": 3000
+    },
+    "stream": {
+      "seconds": 3600,
+      "clips": {
+        "yes": 138,
+        "word": 448,
+        "libri": 274
+      },
+      "speech_seconds": {
+        "yes": 136.8,
+        "word": 439.2,
+        "libri": 2041.1
+      },
+      "libri_subset": "test-clean",
+      "seed": 7,
+      "yes_inserted": 138,
+      "holdoff_s": 1.0,
+      "hit_tolerance_s": 1.25
+    },
+    "tts_utterances": 576
+  },
+  "models": {
+    "snn_s2_nokd": {
+      "kind": "stream",
+      "threshold": 8.499775284215005,
+      "live": {
+        "clean": {
+          "yes_detected": 0.5513,
+          "other_accepted": 0.0027
+        },
+        "mic": {
+          "yes_detected": 0.4057,
+          "other_accepted": 0.0007,
+          "recall_drop_points": 14.56
+        },
+        "room": {
+          "yes_detected": 0.5107,
+          "other_accepted": 0.0023,
+          "recall_drop_points": 4.06
+        },
+        "mic+room": {
+          "yes_detected": 0.3604,
+          "other_accepted": 0.002,
+          "recall_drop_points": 19.09
+        }
+      },
+      "corpus_mswc": {
+        "yes_detected": 0.4367,
+        "yes_detected_clean_edge": 0.4497,
+        "other_accepted": 0.0003,
+        "near_miss_accepted": {
+          "ye- (yet, yeah, yep, yell, yellow, yesterday)": 0.0163,
+          "/s/-final (guess, less, this, us, ...)": 0.0284,
+          "/ts/-final (its, gets, lets, eats, ...)": 0.0062,
+          "/t\u0283/-final (each, reach, speech, ...)": 0.0059,
+          "/st/, /ks/ (best, test, next, ...)": 0.0143,
+          "other near (year, you, said, cheese, ...)": 0.0127
+        },
+        "equal_fa": {
+          "false_accept_rate": 0.00267,
+          "speech_commands_recall": 0.5442,
+          "mswc_recall": 0.497,
+          "recall_drop_points": 4.72
+        }
+      },
+      "stream": {
+        "false_accepts_by_source": {
+          "speech commands word": 3,
+          "librispeech": 2
+        },
+        "recall": 0.5652,
+        "false_accepts": 5,
+        "fa_per_hour": 5.0,
+        "latency_median_s": 0.11,
+        "latency_p90_s": 0.182,
+        "recall_at_fa_per_hour": {
+          "0.5": 0.0072,
+          "1": 0.0072,
+          "2": 0.0072,
+          "5": 0.0072,
+          "10": 0.0072
+        },
+        "curve": [
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 2237.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 2216.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 2202.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 2188.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 2171.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 2147.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 2125.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 2109.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 2097.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 2084.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 2059.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 2039.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 2015.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 1997.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 1975.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 1959.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 1940.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 1912.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 1886.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 1863.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9928,
+            "fa_per_hour": 1836.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9928,
+            "fa_per_hour": 1809.0
+          },
+          {
+            "threshold": 0,
+            "recall": 1.0,
+            "fa_per_hour": 1779.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9928,
+            "fa_per_hour": 1753.0
+          },
+          {
+            "threshold": 0,
+            "recall": 1.0,
+            "fa_per_hour": 1725.0
+          },
+          {
+            "threshold": 0,
+            "recall": 1.0,
+            "fa_per_hour": 1694.0
+          },
+          {
+            "threshold": 0,
+            "recall": 1.0,
+            "fa_per_hour": 1666.0
+          },
+          {
+            "threshold": 0,
+            "recall": 1.0,
+            "fa_per_hour": 1629.0
+          },
+          {
+            "threshold": 0,
+            "recall": 1.0,
+            "fa_per_hour": 1594.0
+          },
+          {
+            "threshold": 0,
+            "recall": 1.0,
+            "fa_per_hour": 1556.0
+          },
+          {
+            "threshold": 0,
+            "recall": 1.0,
+            "fa_per_hour": 1517.0
+          },
+          {
+            "threshold": 0,
+            "recall": 1.0,
+            "fa_per_hour": 1477.0
+          },
+          {
+            "threshold": 0,
+            "recall": 1.0,
+            "fa_per_hour": 1434.0
+          },
+          {
+            "threshold": 0,
+            "recall": 1.0,
+            "fa_per_hour": 1400.0
+          },
+          {
+            "threshold": 0,
+            "recall": 1.0,
+            "fa_per_hour": 1365.0
+          },
+          {
+            "threshold": 0,
+            "recall": 1.0,
+            "fa_per_hour": 1330.0
+          },
+          {
+            "threshold": 0,
+            "recall": 1.0,
+            "fa_per_hour": 1293.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9928,
+            "fa_per_hour": 1253.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9928,
+            "fa_per_hour": 1208.0
+          },
+          {
+            "threshold": 0,
+            "recall": 0.9855,
+            "fa_per_hour": 1157.0
+          },
+          {
+            "threshold": 1,
+            "recall": 0.971,
+            "fa_per_hour": 1116.0
+          },
+          {
+            "threshold": 1,
+            "recall": 0.971,
+            "fa_per_hour": 1070.0
+          },
+          {
+            "threshold": 1,
+            "recall": 0.9783,
+            "fa_per_hour": 1020.0
+          },
+          {
+            "threshold": 1,
+            "recall": 0.9783,
+            "fa_per_hour": 969.0
+          },
+          {
+            "threshold": 1,
+            "recall": 0.971,
+            "fa_per_hour": 909.0
+          },
+          {
+            "threshold": 1,
+            "recall": 0.971,
+            "fa_per_hour": 839.0
+          },
+          {
+            "threshold": 1,
+            "recall": 0.971,
+            "fa_per_hour": 774.0
+          },
+          {
+            "threshold": 1,
+            "recall": 0.971,
+            "fa_per_hour": 716.0
+          },
+          {
+            "threshold": 2,
+            "recall": 0.9783,
+            "fa_per_hour": 644.0
+          },
+          {
+            "threshold": 2,
+            "recall": 0.9783,
+            "fa_per_hour": 573.0
+          },
+          {
+            "threshold": 2,
+            "recall": 0.971,
+            "fa_per_hour": 492.0
+          },
+          {
+            "threshold": 2,
+            "recall": 0.9638,
+            "fa_per_hour": 417.0
+          },
+          {
+            "threshold": 3,
+            "recall": 0.9638,
+            "fa_per_hour": 361.0
+          },
+          {
+            "threshold": 3,
+            "recall": 0.9493,
+            "fa_per_hour": 302.0
+          },
+          {
+            "threshold": 3,
+            "recall": 0.9493,
+            "fa_per_hour": 236.0
+          },
+          {
+            "threshold": 4,
+            "recall": 0.942,
+            "fa_per_hour": 173.0
+          },
+          {
+            "threshold": 5,
+            "recall": 0.9348,
+            "fa_per_hour": 108.0
+          },
+          {
+            "threshold": 5,
+            "recall": 0.913,
+            "fa_per_hour": 59.0
+          },
+          {
+            "threshold": 7,
+            "recall": 0.7826,
+            "fa_per_hour": 14.0
+          },
+          {
+            "threshold": 12,
+            "recall": 0.0072,
+            "fa_per_hour": 0.0
+          }
+        ]
+      },
+      "tts_confirmed": {
+        "yes": 0.3333,
+        "yeets/yets/yetz": 0.0972,
+        "pizza(s)": 0.0,
+        "eats/its": 0.0104,
+        "other -ts": 0.0,
+        "ch words": 0.0104,
+        "yeah": 0.0,
+        "yeet": 0.0,
+        "guess/less": 0.0469,
+        "cheese/yesterday": 0.0052
+      },
+      "file": "runs_stream/s2_nokd_seed0/model.pt"
+    }
+  }
+}

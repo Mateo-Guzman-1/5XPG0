@@ -56,7 +56,7 @@ module spike_soc #(
     // Read data phase: BRAM is sync-read, so reads complete a few cycles
     // after accept. Writes complete on the accept cycle itself.
     reg  [3:0] xfer;                 // 0 idle, counting up to READ_WAIT
-    localparam [3:0] READ_WAIT = 4'd8;
+    localparam [3:0] READ_WAIT = 4'd1;       // BRAM read is registered once: data valid one cycle after accept
     reg        xfer_bram;            // 1 = data comes from BRAM
     reg  [31:0] peri_rdata_r;        // peripheral value captured at accept
 
@@ -134,6 +134,19 @@ module spike_soc #(
         .total   (po_total)
     );
 
+    // Event-driven neuron engine (layer 2 + readout of the streaming SNN), 0x1000_4000.
+    wire        ne_wr = acc_wr && sel_peri && (cpu_mem_addr[15:12] == 4'h4);
+    wire [31:0] ne_rdata;
+    neuron_engine u_engine (
+        .clk    (clk),
+        .resetn (core_rst_n),
+        .wr     (ne_wr),
+        .addr   (cpu_mem_addr[7:0]),
+        .wdata  (cpu_mem_wdata),
+        .raddr  (cpu_mem_addr[7:0]),
+        .rdata  (ne_rdata)
+    );
+
     // Free-running timer (not reset by core_rst_n, so the PS can tell the
     // fabric is alive even while the CPU is held in reset).
     always @(posedge clk)
@@ -184,13 +197,14 @@ module spike_soc #(
                     case (cpu_mem_addr[15:12])
                     4'h0: case (cpu_mem_addr[3:2])                  // SYSCTRL
                           2'd0: peri_rdata_r <= 32'h534B_454C;     // "SKEL"
-                          2'd1: peri_rdata_r <= 32'h0002_0001;     // v2.0 + bit0: kdot coprocessor
+                          2'd1: peri_rdata_r <= 32'h0002_0003;     // v2.0 + bit0: kdot coprocessor, bit1: neuron engine
                           2'd2: peri_rdata_r <= sys_scratch;
                           2'd3: peri_rdata_r <= {31'b0, core_trap};
                           endcase
                     4'h1: peri_rdata_r <= timer_lo;                 // TIMER
                     4'h2: peri_rdata_r <= cpu_mem_addr[3:2] == 2'd1 ? led_remaining : {22'b0, led_o};
                     4'h3: peri_rdata_r <= po_rdata;                 // POISSON
+                    4'h4: peri_rdata_r <= ne_rdata;                 // NEURON ENGINE
                     default: peri_rdata_r <= 32'hDEAD_BEEF;
                     endcase
                 end

@@ -184,3 +184,99 @@ def test_board_timeout_stops_core(monkeypatch):
     with pytest.raises(RuntimeError,match='timed out'): board.infer(bytes(768))
     assert board.read_reg(0)==1
     with pytest.raises(RuntimeError,match='stopped'): board.infer(bytes(768))
+
+
+# ---------------------------------------------------------------- streaming SNN, ABI v3
+
+def small_stream_model():
+    """A randomly initialised StreamSNN (16 + 16 neurons), exported to integers."""
+    import torch
+    from snn_stream import StreamSNN
+    from model import quantize_stream
+    torch.manual_seed(0)
+    m = StreamSNN(n1=16, n2=16, classes=3, seed=0)
+    m.hard_delays = True
+    with torch.no_grad():
+        m.fc1.weight.mul_(8)   # enough drive that neurons spike on random frames
+    q = quantize_stream(m, threshold=0.)
+    q['yes_class'] = np.array(2)
+    return q
+
+
+def test_live_framing_equals_offline_frames():
+    from features import frame_features
+    from pc_keyword_demo import FrameStream
+    audio = np.random.default_rng(0).standard_normal(3 * 16000 + 123).astype(np.float32) * .05
+    fs = FrameStream()
+    live = np.concatenate([fs.push(audio[i:i + 4000]) for i in range(0, len(audio), 4000)])
+    assert np.array_equal(live, frame_features(audio))
+
+
+def test_v3_frames_over_tcp_equal_oracle_and_state_persists():
+    from model import integer_forward_stream
+    from protocol import info, request_frames, MODE_RESET
+    q = small_stream_model()
+    backend = SimulatedBoard.__new__(SimulatedBoard)
+    backend.np, backend.q, backend.abi, backend.led_until = np, q, 3, 0.
+    backend.state, backend.frames_done, backend.last_event = None, 0, None
+    backend.window, backend.recent = 1, np.zeros(0, np.int64)
+    frames = np.random.default_rng(1).integers(0, 256, (1, 60, 24), dtype=np.uint8)
+    expected, _, _ = integer_forward_stream(frames, q)
+    a, b = socket.socketpair()
+    thread = threading.Thread(target=handle, args=(b, backend), daemon=True); thread.start()
+    with a:
+        assert info(a, 1)['abi'] == 3
+        request_frames(a, 2, b'', MODE_RESET)
+        first = request_frames(a, 3, frames[0, :25].tobytes())
+        second = request_frames(a, 4, frames[0, 25:].tobytes())   # state carried over
+        assert (first['best'], first['last']) == (expected[0, :25].max(), expected[0, 24])
+        assert (second['best'], second['last']) == (expected[0, 25:].max(), expected[0, -1])
+        request_frames(a, 5, b'', MODE_RESET)
+        again = request_frames(a, 6, frames[0, :25].tobytes())    # reset restores the start
+        assert again['best'] == first['best'] and again['spikes'] == first['spikes']
+    b.close(); thread.join(2)
+
+
+def test_moving_sum_decision_crosses_requests_and_resets():
+    """decision_window > 1: the running sum continues across requests (13-frame hops,
+    window 7) and a reset clears it; detections and their frames equal the oracle."""
+    from model import decision_scores, integer_forward_stream
+    from protocol import request_frames, MODE_RESET
+    q = small_stream_model()
+    frames = np.random.default_rng(2).integers(0, 256, (1, 260, 24), dtype=np.uint8)
+    raw, _, _ = integer_forward_stream(frames, q)
+    d = decision_scores(raw[0], 7)
+    q['decision_window'] = np.array(7)
+    q['stream_threshold'] = np.array(int(np.quantile(d, .9)))   # a few crossings
+    th, expected, last, at = int(q['stream_threshold']), [], None, []
+    for f in range(len(d)):   # firmware rule: 100-frame hold-off
+        if d[f] >= th and (last is None or f - last >= 100):
+            last = f; at.append(f)
+    backend = SimulatedBoard.__new__(SimulatedBoard)
+    backend.np, backend.q, backend.abi, backend.led_until = np, q, 3, 0.
+    backend.state, backend.frames_done, backend.last_event = None, 0, None
+    backend.window, backend.recent = 7, np.zeros(0, np.int64)
+    a, b = socket.socketpair()
+    thread = threading.Thread(target=handle, args=(b, backend), daemon=True); thread.start()
+    with a:
+        seq = iter(range(1, 1000))
+        for _ in range(2):   # the second round checks that the reset cleared the sum
+            request_frames(a, next(seq), b'', MODE_RESET)
+            got = []
+            for f0 in range(0, 260, 13):
+                r = request_frames(a, next(seq), frames[0, f0:f0 + 13].tobytes())
+                if r['detected']:
+                    got.append(f0 + r['at_frame'])
+            assert got == at and at
+    b.close(); thread.join(2)
+
+
+def test_v2_request_to_v3_backend_is_refused():
+    backend = SimulatedBoard.__new__(SimulatedBoard)
+    backend.np, backend.q, backend.abi = np, small_stream_model(), 3
+    a, b = socket.socketpair()
+    thread = threading.Thread(target=handle, args=(b, backend), daemon=True); thread.start()
+    with a:
+        with pytest.raises(RuntimeError, match='error 2'):
+            request(a, 1, bytes(N_INPUT))
+    b.close(); thread.join(2)

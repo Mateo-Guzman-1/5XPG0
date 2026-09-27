@@ -13,4 +13,17 @@ $(BUILD)/keyword_kdot.elf: $(SRC)
 	$(CROSS)size $@
 $(BUILD)/%.bin: $(BUILD)/%.elf
 	$(CROSS)objcopy -O binary $< $@
-.PHONY: all
+# Streaming model (ABI v3): headers from export_model.py into $(BUILD)/stream.
+STREAM_SRC := stream_main.c stream_infer.c stream_infer.h runtime.c linker.ld $(BUILD)/stream/model_stream_data.h $(BUILD)/stream/model_stream_config.h ../../pynqz2_riscv_flow/firmware/start.S
+stream: $(BUILD)/keyword_stream.bin $(BUILD)/keyword_stream_kdot.bin $(BUILD)/keyword_stream_engine.bin
+$(BUILD)/keyword_stream.elf: $(STREAM_SRC)
+	$(CC) $(FLAGS) -I$(BUILD)/stream -T linker.ld -Wl,--build-id=none,-Map=$(BUILD)/keyword_stream.map ../../pynqz2_riscv_flow/firmware/start.S stream_main.c stream_infer.c runtime.c -o $@ -lgcc
+	$(CROSS)size $@
+$(BUILD)/keyword_stream_kdot.elf: $(STREAM_SRC)
+	$(CC) $(FLAGS) -DUSE_KDOT -I$(BUILD)/stream -T linker.ld -Wl,--build-id=none,-Map=$(BUILD)/keyword_stream_kdot.map ../../pynqz2_riscv_flow/firmware/start.S stream_main.c stream_infer.c runtime.c -o $@ -lgcc
+	$(CROSS)size $@
+# Layer 1 with kdot, layer 2 and readout in rtl/neuron_engine.v (ABI bit1).
+$(BUILD)/keyword_stream_engine.elf: $(STREAM_SRC)
+	$(CC) $(FLAGS) -DUSE_KDOT -DUSE_ENGINE -I$(BUILD)/stream -T linker.ld -Wl,--build-id=none,-Map=$(BUILD)/keyword_stream_engine.map ../../pynqz2_riscv_flow/firmware/start.S stream_main.c stream_infer.c runtime.c -o $@ -lgcc
+	$(CROSS)size $@
+.PHONY: all stream

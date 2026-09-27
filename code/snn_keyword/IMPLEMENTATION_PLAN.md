@@ -39,9 +39,9 @@ produced by `confusables.py` (extended in Phase 0), it meets all of these:
 | Live other words accepted | 0.13% | **≤ 0.2%** |
 | Synthesized /ts/ words (yeets/yets/yetz, pizza, eats) detected | 11–53% | **≤ 10%** |
 | Synthesized "yes" detected | 77% | **≥ 85%** |
-| Drop under held-out microphone/room conditions (Phase 0) | not measured | **≤ 3 points** recall |
-| Drop on a held-out *corpus* (leave-one-source-out, Phase 0) | not measured | **≤ 5 points** recall at equal false-accept rate |
-| False accepts per hour, continuous-stream proxy (Phase 0) | not measured | report; target set after Phase 0 |
+| Drop under held-out microphone/room conditions (Phase 0) | 17.7 (mic) / 9.1 (room) / 29.4 (both) points | **≤ 3 points** recall |
+| Drop on a held-out *corpus* (leave-one-source-out, Phase 0) | 26.5 points (MSWC) | **≤ 5 points** recall at equal false-accept rate |
+| False accepts per hour, continuous-stream proxy (Phase 0) | 52 | **≤ 2** (proposed after Phase 0) |
 | Compute per 250 ms hop on the board | 2.7 ms | **≤ 25 ms** (10% duty) |
 | Bit-exact oracle / C / RTL / board | yes | yes |
 
