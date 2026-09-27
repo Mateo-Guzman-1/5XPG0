@@ -55,9 +55,15 @@ SPLITS = {'test': dict(sc=2, mswc='test', libri='test-clean', seed=1),
 YES_PREFIXED = 'yes-prefixed (yesterday; not a false accept)'
 
 
+# 'dontcare' (default, JOURNAL entry 21) or 'negative': words beginning with "yes"
+# are false accepts (explore-yes-boundary, the policy that rejects "yesterday").
+PREFIX_POLICY = 'dontcare'
+
+
 def yes_prefixed(word):
+    """True for a "don't care" word under PREFIX_POLICY (always False when they count as negatives)."""
     w = str(word).lower()
-    return w.startswith('yes') and w != 'yes'
+    return PREFIX_POLICY == 'dontcare' and w.startswith('yes') and w != 'yes'
 
 
 MSWC_GROUPS = {
@@ -205,7 +211,9 @@ def libri_utterances(data, subset):
     for t in sorted(base.rglob('*.trans.txt')):
         for line in t.read_text().splitlines():
             uid, text = line.split(' ', 1)
-            if not any(w.startswith('YES') for w in text.split()):   # YES and YESTERDAY, YES'M, ...
+            toks = text.split()
+            drop = any(w.startswith('YES') for w in toks) if PREFIX_POLICY == 'dontcare' else 'YES' in toks
+            if not drop:   # YES always; YESTERDAY, YES'M only when they are don't care
                 keep.append(t.parent / f'{uid}.flac')
     return keep
 

@@ -86,7 +86,8 @@ def clip_val(model, sampler, aug, device, frontend, corpus='sc', batch=1024):
     return float((pred == cls).mean())
 
 
-def build_streams(sampler, aug, n, seconds, device, rng, yes_share=.25, hard_words=None, hard_share=0.):
+def build_streams(sampler, aug, n, seconds, device, rng, yes_share=.25, hard_words=None, hard_share=0.,
+                  pos_delay=(0, 35)):
     """n waveforms of `seconds` with 3-class frame targets and yes windows.
 
     yes_share of the clips are replaced by "yes" clips (about 5% at the corpus mix).
@@ -130,9 +131,12 @@ def build_streams(sampler, aug, n, seconds, device, rng, yes_share=.25, hard_wor
             f0 = (t + (s0 - max(0, s0 - 800))) // HOP
             f1 = min(T - 1, (t + (e0 - max(0, s0 - 800))) // HOP)
             if cls[c] == YES:
-                labels[i, f0:min(T, f1 + 35)] = -1
-                if f1 + 5 < T:
-                    windows.append((i, f1, min(T - 1, f1 + 35)))
+                # pos_delay (d0, d1): the "yes" must be detected between d0 and d1 frames
+                # after the end of the word; everything before is "don't care".
+                d0, d1 = pos_delay
+                labels[i, f0:min(T, f1 + d1)] = -1
+                if f1 + d0 + 5 < T:
+                    windows.append((i, f1 + d0, min(T - 1, f1 + d1)))
             else:
                 labels[i, max(0, f0 - 2):min(T, f1 + 3)] = torch.where(
                     labels[i, max(0, f0 - 2):min(T, f1 + 3)] == -1, -1, 1)
@@ -256,6 +260,10 @@ def main():
     p.add_argument('--exclude-words', default=None,
                    help="regex of training words to leave out; 'yes.+' drops every word that begins with a "
                         "complete yes (don't care for a causal detector, JOURNAL entries 20-21)")
+    p.add_argument('--pos-delay', type=int, nargs=2, default=[0, 35], metavar=('D0', 'D1'),
+                   help='stage 2: frames after the end of "yes" in which it must be detected. A later D0 '
+                        'makes the model wait for the word boundary, so that words beginning with "yes" '
+                        '(yesterday) can be rejected (explore-yes-boundary)')
     p.add_argument('--word-mine-share', type=float, default=0., help='stage 2: share of word slots taken by mined words')
     p.add_argument('--mine-pool', type=int, default=2048)
     p.add_argument('--mine-keep', type=int, default=256)
@@ -313,7 +321,8 @@ def main():
                         if hard_words is not None:
                             sums.setdefault('mined_word_margin', []).append(hard_words.mine(model, aug, a.frontend, dev))
                     wave, labels, windows = build_streams(train, aug, a.batch - n_speech, a.seconds, dev, rng,
-                                                          hard_words=hard_words, hard_share=a.word_mine_share)
+                                                          hard_words=hard_words, hard_share=a.word_mine_share,
+                                                          pos_delay=tuple(a.pos_delay))
                     speed = aug.cfg['p_speed']; aug.cfg['p_speed'] = 0.  # clips were sped up before placement
                     wave, mic = aug.waveform(wave)
                     aug.cfg['p_speed'] = speed
