@@ -20,20 +20,27 @@ mailbox result.
 
 The checked-in model was trained with seed 0 on a balanced subset of
 TensorFlow Mini Speech Commands: 800 `yes` clips and 800 clips sampled from
-the other seven commands. On its fixed 320-clip validation split it reached:
+the other seven commands. The 1,280 clean training clips are supplemented by
+1,280 gain-shifted/noise-mixed variants and 600 explicit silence/background
+negatives. On its fixed 320-clip validation split it reached:
 
-- floating SNN accuracy: **92.50%**;
-- exported integer SNN accuracy: **91.56%**;
-- floating/integer prediction agreement: **97.19%**.
+- clean floating SNN accuracy: **90.00%**;
+- clean exported integer SNN accuracy: **89.06%**;
+- 10 dB SNR integer accuracy: **87.81%**;
+- 5 dB SNR integer accuracy: **82.50%**;
+- generated silence/background false positives: **0/400**;
+- floating/integer prediction agreement: **99.06%**.
 
-A full replay of those 320 held-out feature maps through the physical PYNQ-Z2
-matched the Python integer model's output spike counts for **320/320** frames.
-Mean PicoRV32 inference time was **17.56 ms** at 100 MHz.
+A full replay of all 1,360 clean, noisy, and background-only feature maps
+through the physical PYNQ-Z2 matched the Python integer model's output spike
+counts and decisions for **1,360/1,360** frames. Mean PicoRV32 inference time
+was **17.54 ms** at 100 MHz. A five-second live ambient-microphone run produced
+zero detections across sixteen windows.
 
 These figures establish a reproducible baseline, not a final scientific
 claim. The split is clip-random rather than speaker-independent, only the
-eight-command mini dataset is used, and continuous false accepts have not yet
-been measured.
+eight-command mini dataset is used, much of the added noise is generated, and
+long-duration false accepts per hour have not yet been measured.
 
 ## Files
 
@@ -113,7 +120,9 @@ The export uses signed int8 weights, int32 membrane/current state, Q8 leak
 (`230/256`), 48 hidden LIF neurons, two output LIF neurons, and 16 simulation
 steps. The first-layer current is constant over those steps and is computed
 once per inference, which preserves the recurrence while avoiding repeated
-dot products.
+dot products. The audio frontend rejects RMS levels at or below `0.003` and
+uses a logarithmic activity factor up to RMS `0.04`, so near-silence is not
+peak-normalised into a full-strength spectrogram.
 
 ## Interface contract
 
@@ -122,8 +131,9 @@ dot products.
 - BRAM input window: RISC-V/BRAM offset `0x22000`, 256 bytes.
 - Mailbox command: `MB_CMD_CLASSIFY` (`8`), returning decision, two spike
   counts, and inference cycles.
-- Positive class: output neuron 1; a strict `keyword > not-keyword` spike-count
-  comparison lights all ten LEDs for one second.
+- Positive class: output neuron 1 must emit at least two spikes and lead the
+  non-keyword neuron by at least two spikes. Passing that confidence rule
+  lights all ten LEDs for one second.
 
 Keep `audio_features.py`, the trainer, and the live client together. Training
 and inference with different feature extraction is a silent but serious model
@@ -134,11 +144,11 @@ mismatch.
 1. Replace the clip-random split with a speaker-disjoint train/validation/test
    manifest and reserve the test set before tuning.
 2. Measure precision, recall, false accepts per hour, and missed detections on
-   continuous audio; tune a confidence margin and temporal debounce rather
-   than relying only on `argmax`.
+   continuous audio; add temporal debounce on top of the existing two-spike
+   confidence margin.
 3. Compare direct current input against rate, latency, and delta encoding at a
    fixed memory/latency budget. Report several seeds and confidence intervals.
 4. Sweep hidden width, time steps, and int8/int16 quantization; measure board
    cycles and memory alongside accuracy.
-5. Add background noise, silence, unknown-word, and locally recorded samples
-   before treating the demo as robust.
+5. Replace or supplement generated noise with recorded room, fan, keyboard,
+   music, and overlapping-speech backgrounds plus locally recorded speakers.

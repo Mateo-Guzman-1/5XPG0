@@ -156,7 +156,11 @@ static void mb_service(void)
         u32 started = timer_now();
         classify((const volatile u8 *)a0, score);
         u32 cycles = timer_now() - started;
-        u32 decision = score[1] > score[0];
+        // A strict confidence policy rejects ties, weak output activity, and
+        // marginal wins that are common for silence or stationary noise.
+        u32 decision =
+            score[1] >= KW_MIN_KEYWORD_SPIKES &&
+            score[1] >= score[0] + KW_DECISION_MARGIN;
         last_sequence = a2;
         last_decision = decision;
         last_cycles = cycles;

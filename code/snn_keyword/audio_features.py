@@ -24,6 +24,14 @@ N_MELS = 16               # compact, mel-ish frequency bands
 N_TIME = 16               # fixed board input length
 N_INPUTS = N_MELS * N_TIME
 
+# Peak-normalising every window makes electrical hiss look as strong as
+# speech.  Preserve spectral shape, but scale it by a logarithmic activity
+# factor so near-silence stays near zero.  The thresholds are deliberately
+# conservative: the 0.003 gate is below roughly 95% of the speech-command
+# clips, while 0.04 is close to the dataset's median speech RMS.
+RMS_GATE = 0.003
+RMS_FULL_SCALE = 0.040
+
 PACKET_MAGIC = b"KWS1"
 PACKET_HEADER = struct.Struct("<4sIHH")
 
@@ -77,6 +85,12 @@ def extract_features(wav: np.ndarray) -> np.ndarray:
     and 98 short-time frames are mean-pooled into sixteen time bins.
     """
     wav = _fit_one_second(wav)
+    rms = float(np.sqrt(np.mean(wav * wav)))
+    if rms <= RMS_GATE:
+        return np.zeros((N_MELS, N_TIME), dtype=np.float32)
+
+    activity = np.log(rms / RMS_GATE) / np.log(RMS_FULL_SCALE / RMS_GATE)
+    activity = float(np.clip(activity, 0.0, 1.0))
     starts = range(0, WINDOW_SAMPLES - FFT_WINDOW + 1, FFT_HOP)
     frames = np.stack([wav[i:i + FFT_WINDOW] for i in starts])
     spectrum = np.abs(
@@ -96,6 +110,7 @@ def extract_features(wav: np.ndarray) -> np.ndarray:
     peak = float(pooled.max())
     if peak > 0.0:
         pooled /= peak
+    pooled *= activity
     return pooled.astype(np.float32)
 
 
