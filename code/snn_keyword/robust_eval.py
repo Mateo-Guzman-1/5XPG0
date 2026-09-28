@@ -38,6 +38,7 @@ from pathlib import Path
 import numpy as np
 
 import channels
+import keyword_config as K
 from features import N_TIME, SAMPLE_RATE, features, read_wav
 from model import integer_forward
 
@@ -45,38 +46,23 @@ ROOT = Path(__file__).resolve().parent
 HOP = SAMPLE_RATE // 4
 LIVE_SECONDS = 2.25
 HOLDOFF = 1.0            # s; one detection lights LED0 for about 1 s
-TOLERANCE = 1.25         # s after the end of a "yes" in which a detection counts as a hit
+TOLERANCE = 1.25         # s after the end of the keyword in which a detection counts as a hit
 STREAM_SECONDS = 3600
 SPLITS = {'test': dict(sc=2, mswc='test', libri='test-clean', seed=1),
           'validation': dict(sc=1, mswc='dev', libri='dev-clean', seed=2)}
-# Words that begin with a complete "yes" (yesterday, yessir, ...) are "don't care":
-# a causal detector cannot tell them from "yes" without waiting for the rest of
-# the word. They are not false accepts anywhere; YES_PREFIXED reports them apart.
-YES_PREFIXED = 'yes-prefixed (yesterday; not a false accept)'
+# Words that begin with the complete keyword (yesterday, sheila's, ...) are "don't
+# care": a causal detector cannot tell them from the keyword without waiting for
+# the rest of the word. They are not false accepts anywhere; YES_PREFIXED reports
+# them apart. The keyword itself comes from keyword_config (KWS_KEYWORD).
+YES_PREFIXED = f'{K.KEYWORD}-prefixed (not a false accept)'
 
 
 def yes_prefixed(word):
-    w = str(word).lower()
-    return w.startswith('yes') and w != 'yes'
+    return K.prefixed(word)
 
 
-MSWC_GROUPS = {
-    YES_PREFIXED: ['yesterday'],
-    'ye- (yet, yeah, yep, yell, yellow)': ['yet', 'yeah', 'yep', 'yell', 'yellow'],
-    '/s/-final (guess, less, this, us, ...)': ['guess', 'less', 'mess', 'bless', 'dress', 'press', 'chess', 'address',
-                                              'unless', 'success', 'says', 'this', 'us', 'plus', 'jess', 'tess'],
-    '/ts/-final (its, gets, lets, eats, ...)': ['its', 'gets', 'lets', 'sets', 'bets', 'jets', 'pets', 'eats', 'meets',
-                                               'seats', 'streets'],
-    '/tʃ/-final (each, reach, speech, ...)': ['each', 'reach', 'beach', 'peach', 'teach', 'speech', 'fetch', 'sketch',
-                                             'stretch'],
-    '/st/, /ks/ (best, test, next, ...)': ['nest', 'best', 'rest', 'west', 'test', 'sex', 'next', 'ex', 'text'],
-    'other near (year, you, said, cheese, ...)': ['year', 'years', 'young', 'you', 'said', 'set', 'check', 'pizza',
-                                                  'jazz', 'cheese', 'ease', 'these'],
-}
-TTS_GROUPS = {'yes': ['yes'], 'yeets/yets/yetz': ['yeets', 'yets', 'yetz'], 'pizza(s)': ['pizza', 'pizzas'],
-              'eats/its': ['eats', 'its'], 'other -ts': ['jets', 'gets', 'bets', 'lets', 'sets'],
-              'ch words': ['yech', 'yetch', 'each', 'peach'], 'yeah': ['yeah'], 'yeet': ['yeet'],
-              'guess/less': ['guess', 'less'], 'cheese': ['cheese'], YES_PREFIXED: ['yesterday']}
+MSWC_GROUPS = {YES_PREFIXED: [w for w in K.NEAR_MISS[K.KEYWORD] if K.prefixed(w)], **K.MSWC_GROUPS}
+TTS_GROUPS = {**K.TTS_GROUPS[K.KEYWORD], YES_PREFIXED: [w for w in ('yesterday', "sheila's") if K.prefixed(w)]}
 
 
 # --------------------------------------------------------------------------- detectors
@@ -164,7 +150,8 @@ def place_clips(clips, noise, rng, channel=None):
 def sc_live_clips(data, split, negatives=3000, seed=1):
     """Speech Commands clips in the order and selection of tune_stream.live_windows."""
     d = np.load(data / 'features.npz')
-    names, y = d['names'][d['split'] == split], d['y'][d['split'] == split]
+    names = d['names'][d['split'] == split]
+    y = K.sc_keyword_labels(names)   # the keyword's clips (features.npz 'y' is the release's "yes")
     rng = np.random.default_rng(seed)
     ids = np.r_[np.flatnonzero(y == 1), rng.choice(np.flatnonzero(y == 0), negatives, replace=False)]
     raw = data / 'speech_commands_v0.02'
@@ -190,7 +177,7 @@ def edge_clipped(a, frame=160, margin_db=15):
 
 def mswc_clips(data, split):
     base = data / 'mswc'
-    table = base / f'{split}_selected.csv'
+    table = K.mswc_table(base, split)
     if not table.exists():
         raise FileNotFoundError(f'{table}; run: python fetch_corpora.py mswc --split {split}')
     rows = list(csv.DictReader(open(table, encoding='utf-8')))
@@ -205,7 +192,7 @@ def libri_utterances(data, subset):
     for t in sorted(base.rglob('*.trans.txt')):
         for line in t.read_text().splitlines():
             uid, text = line.split(' ', 1)
-            if not any(w.startswith('YES') for w in text.split()):   # YES and YESTERDAY, YES'M, ...
+            if not any(w.lower().startswith(K.KEYWORD) for w in text.split()):   # the keyword and prefixed words
                 keep.append(t.parent / f'{uid}.flac')
     return keep
 
@@ -222,7 +209,8 @@ def build_stream(data, split, seconds=STREAM_SECONDS, seed=7):
     import soundfile as sf
     cfg = SPLITS[split]
     d = np.load(data / 'features.npz')
-    names, y = d['names'][d['split'] == cfg['sc']], d['y'][d['split'] == cfg['sc']]
+    names = d['names'][d['split'] == cfg['sc']]
+    y = K.sc_keyword_labels(names)
     raw = data / 'speech_commands_v0.02'
     libri = libri_utterances(data, cfg['libri'])
     rng = np.random.default_rng(seed)
@@ -281,7 +269,8 @@ def negative_stream(data, split, chunk_seconds=600, seed=11):
     import soundfile as sf
     cfg = SPLITS[split]
     d = np.load(data / 'features.npz')
-    names, y = d['names'][d['split'] == cfg['sc']], d['y'][d['split'] == cfg['sc']]
+    names = d['names'][d['split'] == cfg['sc']]
+    y = K.sc_keyword_labels(names)
     raw = data / 'speech_commands_v0.02'
     items = [('word', str(n)) for n in names[y == 0]]
     for subset in NEG_LIBRI[split]:
@@ -410,7 +399,7 @@ def score_stream(times, score, threshold, marks, hours, segments=None):
 
 
 def evaluate(det, sets):
-    out = {'kind': det.kind, 'threshold': det.threshold}
+    out = {'kind': det.kind, 'threshold': det.threshold, 'keyword': K.KEYWORD}
     th = det.threshold
     # Live, clean and under held-out channels.
     y = sets['live_y']
@@ -432,7 +421,7 @@ def evaluate(det, sets):
     if sets.get('mswc'):
         audios, words, clipped = sets['mswc']
         s = clip_scores(det, audios)
-        pos, rnd = words == 'yes', ~np.isin(words, sum(MSWC_GROUPS.values(), []) + ['yes'])
+        pos, rnd = words == K.KEYWORD, ~np.isin(words, sum(MSWC_GROUPS.values(), []) + [K.KEYWORD])
         ref_fa = float((sc_scores[y == 0] >= th).mean())
         t_eq = threshold_at_fa(s[rnd], ref_fa)
         # Recall of Speech Commands at the same false-accept rate, measured with the same rule.
@@ -480,7 +469,7 @@ def build_sets(data, split, probe, stream_seconds, skip):
         if cond != 'clean' and 'device' in skip:
             continue
         sets['live'][cond] = place_clips(clips, noise, rng, None if cond == 'clean' else cond)
-    info = {'split': split, 'time_bins': N_TIME, 'live': {'yes': int(y.sum()), 'other': int((1 - y).sum())},
+    info = {'keyword': K.KEYWORD, 'split': split, 'time_bins': N_TIME, 'live': {'yes': int(y.sum()), 'other': int((1 - y).sum())},
             'device': {'mic_profiles': channels.N_PROFILES, 'mic_seed': channels.HELDOUT_SEED,
                        'real_rirs': len(channels.heldout_rirs()) if 'device' not in skip else 0}}
     if 'corpus' not in skip:
@@ -488,10 +477,10 @@ def build_sets(data, split, probe, stream_seconds, skip):
         words = np.array(words)
         clipped = np.array([edge_clipped(a) for a in audios])
         sets['mswc'] = (place_clips(audios, noise, np.random.default_rng(cfg['seed'] + 100)), words, clipped)
-        info['mswc'] = {'split': cfg['mswc'], 'yes': int((words == 'yes').sum()),
-                        'yes_edge_clipped': int(clipped[words == 'yes'].sum()),
+        info['mswc'] = {'split': cfg['mswc'], 'yes': int((words == K.KEYWORD).sum()),
+                        'yes_edge_clipped': int(clipped[words == K.KEYWORD].sum()),
                         'near_miss': {g: int(np.isin(words, ws).sum()) for g, ws in MSWC_GROUPS.items()},
-                        'random_other': int((~np.isin(words, sum(MSWC_GROUPS.values(), []) + ['yes'])).sum())}
+                        'random_other': int((~np.isin(words, sum(MSWC_GROUPS.values(), []) + [K.KEYWORD])).sum())}
     if 'stream' not in skip:
         audio, marks, sinfo = build_stream(data, split, stream_seconds)
         sets['stream'] = (audio, marks, sinfo)

@@ -29,26 +29,33 @@ import urllib.request
 
 import numpy as np
 
+import keyword_config as K
+
 ROOT = Path(__file__).resolve().parent
-OUT = ROOT / 'data/tts'
+# "yes" keeps data/tts; other keywords (KWS_KEYWORD) get data/tts_<keyword>.
+OUT = ROOT / ('data/tts' if K.KEYWORD == 'yes' else f'data/tts_{K.KEYWORD}')
 HF = 'https://huggingface.co/rhasspy/piper-voices/resolve/main/en'
 MODELS = {'libritts_r': 'en_US/libritts_r/medium/en_US-libritts_r-medium',
           'vctk': 'en_GB/vctk/medium/en_GB-vctk-medium',
           'l2arctic': 'en_US/l2arctic/medium/en_US-l2arctic-medium',
           'arctic': 'en_US/arctic/medium/en_US-arctic-medium'}
 HELDOUT_MODELS = ('vctk', 'l2arctic', 'arctic')
-REAL_WORDS = ('yeah', 'yea', 'yet', 'yep', 'yeet', 'yeets', 'yets', 'yetz', 'yech', 'yetch', 'yesterday', 'yellow',
+REAL_WORDS_YES = ('yeah', 'yea', 'yet', 'yep', 'yeet', 'yeets', 'yets', 'yetz', 'yech', 'yetch', 'yesterday', 'yellow',
               'guess', 'less', 'mess', 'bless', 'dress', 'press', 'chess', 'jess', 'tess', 'this', 'us', 'plus',
               'says', 'kiss', 'miss', 'gas', 'pass', 'nice', 'ice', 'piece', 'peace', 'cheese', 'ease', 'these',
               'its', 'eats', 'gets', 'lets', 'sets', 'bets', 'jets', 'pets', 'meets', 'seats', 'beats', 'pizza',
               'pizzas', 'each', 'peach', 'reach', 'teach', 'speech', 'fetch', 'sketch', 'best', 'rest', 'test',
               'next', 'text', 'sex', 'ex', 'ras', 'tos', 'mes', 'tes', 'yas', 'yus', 'yos')
-AMBIGUOUS = {'yez', 'yess', 'yesz', 'yezs'}
+AMBIGUOUS_YES = {'yez', 'yess', 'yesz', 'yezs'}
+# Per keyword: real near-miss words, and edits known to sound like the keyword.
+REAL_WORDS = REAL_WORDS_YES if K.KEYWORD == 'yes' else tuple(w for w in K.NEAR_MISS[K.KEYWORD] if w != K.KEYWORD)
+AMBIGUOUS = AMBIGUOUS_YES if K.KEYWORD == 'yes' else set(K.ALIASES)
 SPLIT_SHARE = {'train': .8, 'validation': .1, 'test': .1}
 COUNTS = {'train': (8000, 32000), 'validation': (1000, 4000), 'test': (1000, 4000), 'test_heldout_models': (1000, 4000)}
 
 
-def grapheme_edits(base='yes'):
+def grapheme_edits(base=None):
+    base = base or K.KEYWORD
     L = string.ascii_lowercase
     eds = {base[:i] + c + base[i:] for i in range(len(base) + 1) for c in L}
     eds |= {base[:i] + base[i + 1:] for i in range(len(base))}
@@ -61,9 +68,14 @@ def negative_words():
     from piper.phonemize_espeak import EspeakPhonemizer
     ph = EspeakPhonemizer()
     say = lambda w: ''.join(sum(ph.phonemize('en-us', w), []))
-    ref = say('yes')
+    ref = say(K.KEYWORD)
     words = sorted((grapheme_edits() | set(REAL_WORDS)) - AMBIGUOUS)
-    return [w for w in words if say(w) != ref]
+    words = [w for w in words if say(w) != ref]
+    if K.KEYWORD != 'yes':
+        # Edits that begin with the whole keyword (sheila + letter) contain it: "don't care",
+        # never negatives (JOURNAL entries 20-21). "yes" keeps its data and excludes them in training.
+        words = [w for w in words if not K.prefixed(w)]
+    return words
 
 
 def voice_files(name):
@@ -98,7 +110,7 @@ def plan(seed=0):
     jobs = []
     for split, (n_pos, n_neg) in COUNTS.items():
         for k in range(n_pos + n_neg):
-            word = 'yes' if k < n_pos else words[rng.integers(len(words))]
+            word = K.KEYWORD if k < n_pos else words[rng.integers(len(words))]
             if split == 'test_heldout_models':
                 model = HELDOUT_MODELS[rng.integers(len(HELDOUT_MODELS))]
                 speaker = int(rng.integers(num_speakers(model)))
@@ -149,7 +161,7 @@ def main():
         w = csv.DictWriter(f, fieldnames=['path', 'word', 'label', 'split', 'model', 'speaker'])
         w.writeheader()
         for j, path in zip(jobs, paths):
-            w.writerow(dict(path=path.relative_to(OUT).as_posix(), word=j['word'], label=int(j['word'] == 'yes'),
+            w.writerow(dict(path=path.relative_to(OUT).as_posix(), word=j['word'], label=int(j['word'] == K.KEYWORD),
                             split=j['split'], model=j['model'], speaker=j['speaker']))
     (OUT / 'words.json').write_text(json.dumps({'negative_words': words, 'counts': COUNTS}, indent=1))
     print(json.dumps({'utterances': len(jobs), 'negative_words': len(words)}), flush=True)

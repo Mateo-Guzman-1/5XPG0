@@ -798,6 +798,61 @@ which is slightly pessimistic (6 of about 5,600 negative utterances).
 pool was mostly yes + letter, so 30% of word slots taught "yes is negative".
 `s2_wide_mine3` differs only by excluding `yes[a-z]`.
 
+### 22. Round 3: mining without the conflict, the front-end test, keyword change
+
+**`s2_wide_mine3`**: `mine2` without the yes + letter pseudo-words. Live
+recall 46.1% at W=10, against 39.8% for `mine2` and 57.2% for `s2_wide`.
+Removing the conflicting words recovers most of the loss. Mining as set up
+(30% of word slots from a mined pool, a quarter of the batch speech-only)
+still costs recall. Mining is not used further.
+
+**`logmel_w` is not adopted.** Same stage-2 recipe as `s2_wide`, on
+`s1_logw`. `band_sensitivity.py`, same clips:
+
+| Condition | `s2_wide` | `s2_logw` |
+|---|---|---|
+| Clean | 57.2% | 48.1% |
+| −20 dB | 30.0% | 53.9% |
+| −10 dB | 44.6% | 53.1% |
+| +10 dB | 52.6% | 35.5% |
+| Low-pass 4.5 kHz | 30.0% | 37.3% |
+| Live recall at ≤ 2 FA/h (W=10) | 57.2% | 48.1% |
+
+Moving the floor fixes quiet input, but the model is still level-dependent;
+its best level moved and loud input now fails. Any absolute log scale
+teaches the network a preferred level. Next: level invariance by
+construction, with a causal gain control relative to a running peak
+(`logmel_agc`).
+
+**Keyword changed to "sheila"** (user request).
+- `keyword_config.py` (env `KWS_KEYWORD`, default "yes") drives data
+  selection, training, evaluation, vectors and TTS.
+  - Models record their keyword, and the detectors refuse a mismatch.
+  - "yes" reproduces exactly: the derived labels equal `features.npz`'s y.
+- Speech Commands v2 has 2,022 "sheila" clips (1,606 / 204 / 212); the
+  validation live set holds 204 positives (SE about 3.4 points).
+- MSWC has almost none (16 train, 2 dev, 2 test; "shiela" is treated as an
+  alias, never a negative). It supplies near-miss negatives only; the
+  corpus-shift test must come from held-out TTS voices.
+  - `data/mswc/*_selected_sheila.csv`: 7,523 train, 3,634 dev and 3,634
+    test clips over 463 words.
+  - MSWC dev and test share 770 speakers (the official splits are not
+    speaker-disjoint), so thresholds chosen on dev can slightly favour
+    test speakers.
+- TTS generation for "sheila" is ready (`data/tts_sheila`, 348 negative
+  words, none containing a whole "sheila") and waits for the user's choice
+  of data sources.
+- Stage 1 is keyword-agnostic (35 words), so `s1_wide` is reused.
+  `sheila_s2_wide` trains on the existing multi-corpus data through a
+  junction `data/multi_sheila` → `data/multi`.
+
+**Verifier track** (branch `explore-verifier`):
+- v2 had keyword AUC 0.39 (it ranked other words above "yes").
+- v3, with `logmel_w` and a clean-audio warm-up, reached AUC 0.976.
+- RTL: 10.5M cycles per verification with kdot, bit-exact; 121 KB of the
+  144 KB model region with stage 1.
+- Its keyword target changes to SH IY L AH.
+
 ## Open items
 
 Status of `IMPLEMENTATION_PLAN.md`: Phases 0-6 done; the streaming firmware and

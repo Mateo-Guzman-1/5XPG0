@@ -118,7 +118,7 @@ def main():
         st = (times, smooth(score, rule))
         op = operating_point(live, y, st, marks, hours)
         m = np.array([smooth(c, rule).max() for _, c, _ in mswc_tr])
-        op['mswc_recall'] = round(float((m[words == 'yes'] >= op['threshold']).mean()), 4)
+        op['mswc_recall'] = round(float((m[words == R.K.KEYWORD] >= op['threshold']).mean()), 4)
         report['rules'][f'{rule[0]}{rule[1]}'] = op
         print(rule, json.dumps(op), flush=True)
     # Failure analysis on the raw score.

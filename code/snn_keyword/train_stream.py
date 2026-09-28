@@ -45,8 +45,9 @@ from snn_stream import MAX_DELAY, StreamSNN
 
 ROOT = Path(__file__).resolve().parent
 SR, HOP = 16000, 160
-YES = CLASSES.index('yes')
-STREAM_CLASSES = ['_silence_', '_unknown_', 'yes']
+import keyword_config as K
+YES = CLASSES.index(K.KEYWORD)   # the keyword (KWS_KEYWORD; "yes" by default)
+STREAM_CLASSES = ['_silence_', '_unknown_', K.KEYWORD]
 
 
 def sigma_at(epoch, epochs):
@@ -240,7 +241,7 @@ def main():
     p.add_argument('--no-delays', action='store_true')
     p.add_argument('--no-recurrence', action='store_true')
     p.add_argument('--lif', action='store_true', help='no threshold adaptation')
-    p.add_argument('--frontend', choices=['logmel', 'logmel_w', 'pcen'], default='logmel')
+    p.add_argument('--frontend', choices=['logmel', 'logmel_w', 'logmel_agc', 'pcen'], default='logmel')
     p.add_argument('--corpora', nargs='+', default=['sc', 'mswc', 'tts'])
     p.add_argument('--epochs', type=int, default=30)
     p.add_argument('--steps-per-epoch', type=int, default=300)
@@ -357,12 +358,12 @@ def main():
         if model.hard_delays and score > best:
             best = score
             torch.save({'state_dict': copy.deepcopy(model.state_dict()), 'config': config, 'args': vars(a),
-                        'frontend': a.frontend, 'yes_class': YES if a.stage == 1 else 2,
+                        'frontend': a.frontend, 'yes_class': YES if a.stage == 1 else 2, 'keyword': K.KEYWORD,
                         'classes': CLASSES if a.stage == 1 else STREAM_CLASSES, 'threshold': 0.,
                         'qat': a.qat, 'hard_shifts': a.qat},
                        out / 'model.pt')
         torch.save({'state_dict': model.state_dict(), 'config': config, 'args': vars(a), 'frontend': a.frontend,
-                    'yes_class': YES if a.stage == 1 else 2,
+                    'yes_class': YES if a.stage == 1 else 2, 'keyword': K.KEYWORD,
                     'classes': CLASSES if a.stage == 1 else STREAM_CLASSES, 'threshold': 0.,
                         'qat': a.qat, 'hard_shifts': a.qat}, out / 'last.pt')
     summary = dict(vars(a), best=best, training_seconds=time.perf_counter() - start, history=history)

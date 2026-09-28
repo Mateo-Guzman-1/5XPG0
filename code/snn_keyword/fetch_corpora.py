@@ -31,18 +31,15 @@ import zipfile
 
 import numpy as np
 
+import keyword_config as K
+
 ROOT = Path(__file__).resolve().parent
 HF = 'https://huggingface.co/datasets/MLCommons/ml_spoken_words/resolve/main/data'
 LIBRISPEECH = 'https://www.openslr.org/resources/12/{subset}.tar.gz'
 RIRS = 'https://www.openslr.org/resources/28/rirs_noises.zip'
 MUSAN = 'https://www.openslr.org/resources/17/musan.tar.gz'
-# Real English words that share the vowel, the /s/ ending, or a /ts/, /tʃ/ ending with "yes".
-NEAR_MISS = ('yet', 'yeah', 'yesterday', 'yellow', 'yell', 'yep', 'year', 'years', 'young', 'you',
-             'guess', 'less', 'mess', 'bless', 'dress', 'press', 'chess', 'address', 'unless', 'success',
-             'says', 'this', 'us', 'plus', 'yes', 'its', 'gets', 'lets', 'sets', 'bets', 'jets', 'pets',
-             'eats', 'meets', 'seats', 'streets', 'each', 'reach', 'beach', 'peach', 'teach', 'speech',
-             'fetch', 'sketch', 'stretch', 'check', 'jess', 'tess', 'nest', 'best', 'rest', 'west', 'test',
-             'said', 'set', 'sex', 'next', 'ex', 'text', 'pizza', 'jazz', 'cheese', 'ease', 'these')
+# Real English words that sound like the keyword (keyword_config.NEAR_MISS; KWS_KEYWORD).
+NEAR_MISS = K.NEAR_MISS[K.KEYWORD]
 
 
 def write_wav(path, audio):
@@ -101,13 +98,14 @@ def mswc_select(split, per_near_miss, n_random, seed, archives=None):
     by_word = {}
     for r in rows:
         by_word.setdefault(r['WORD'], []).append(r)
-    chosen = list(by_word.get('yes', []))
+    chosen = list(by_word.get(K.KEYWORD, []))
     for w in NEAR_MISS:
-        if w != 'yes' and w in by_word:
+        if w != K.KEYWORD and w in by_word:
             group = by_word[w]
             chosen += [group[i] for i in sorted(rng.choice(len(group), min(per_near_miss, len(group)), replace=False))]
     taken = {r['LINK'] for r in chosen}
-    rest = [r for r in rows if r['LINK'] not in taken and r['WORD'] not in NEAR_MISS]
+    rest = [r for r in rows if r['LINK'] not in taken and r['WORD'] not in NEAR_MISS
+            and r['WORD'] != K.KEYWORD and not K.excluded_negative(r['WORD'])]
     if archives is not None:
         first = archive_first_words(split)
         ok = {w for w in {r['WORD'] for r in rest} if word_archives(w, first) <= archives}
@@ -182,7 +180,7 @@ def fetch_mswc(split, per_near_miss, n_random, seed, workers, needed_only=False,
     if needed_only:
         first = archive_first_words(split)
         archives = set(extra_archives)
-        for w in set(NEAR_MISS) | {'yes'}:
+        for w in set(NEAR_MISS) | {K.KEYWORD}:
             archives |= word_archives(w, first)
     chosen = mswc_select(split, per_near_miss, n_random, seed, archives)
     # Archive member names flatten "word/file.opus" to "word_file.opus".
@@ -197,7 +195,7 @@ def fetch_mswc(split, per_near_miss, n_random, seed, workers, needed_only=False,
     print(f'MSWC {split}: {len(chosen)} clips, {len(urls)} of {n_files} archives to fetch', flush=True)
     with ThreadPoolExecutor(workers) as pool:
         counts = list(pool.map(lambda u: extract_archive(u, wanted, base), urls))
-    with open(base / f'{split}_selected.csv', 'w', newline='', encoding='utf-8') as f:
+    with open(K.mswc_table(base, split), 'w', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, fieldnames=['path', 'word', 'speaker', 'gender', 'link'])
         w.writeheader()
         for r in chosen:

@@ -12,7 +12,7 @@ import queue
 import socket
 from pathlib import Path
 import numpy as np
-from features import SAMPLE_RATE, features, frame_power, logmel_frames, pcen_frames, read_wav
+from features import SAMPLE_RATE, features, frame_power, logmel_agc_frames, logmel_frames, pcen_frames, read_wav
 from protocol import MODE_RESET, MODE_SINGLE, MODE_STREAM, info, request, request_frames
 
 HOP_FRAMES = 25
@@ -22,7 +22,7 @@ class FrameStream:
     """Continuous 10 ms frames from audio chunks; frame k starts at sample 160 k of the stream."""
     def __init__(self, frontend='logmel'):
         self.pending = np.empty(0, np.float32)
-        self.frontend, self.pcen_state = frontend, None
+        self.frontend, self.pcen_state, self.agc_state = frontend, None, None
 
     def push(self, chunk):
         self.pending = np.concatenate((self.pending, np.asarray(chunk, np.float32)))
@@ -33,6 +33,9 @@ class FrameStream:
         self.pending = self.pending[n * 160:]
         if self.frontend == 'pcen':
             frames, self.pcen_state = pcen_frames(power, self.pcen_state)
+            return frames
+        if self.frontend == 'logmel_agc':
+            frames, self.agc_state = logmel_agc_frames(power, self.agc_state)
             return frames
         return logmel_frames(power, self.frontend)
 
@@ -70,7 +73,7 @@ def main():
     p.add_argument('--device', help='sounddevice input name or ID')
     p.add_argument('--single', action='store_true',
                    help='ABI v2 live: decide on each window alone instead of requiring 2 of 3 consecutive windows')
-    p.add_argument('--frontend', choices=['logmel', 'logmel_w', 'pcen'], default='logmel', help='ABI v3: the model\'s front end')
+    p.add_argument('--frontend', choices=['logmel', 'logmel_w', 'logmel_agc', 'pcen'], default='logmel', help='ABI v3: the model\'s front end')
     a = p.parse_args()
     abi = model_abi(a.host, a.port)
     stream = abi['abi'] == 3

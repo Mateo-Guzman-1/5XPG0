@@ -24,6 +24,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
+import keyword_config as K
 from model import decision_scores
 from robust_eval import build_sets, detections, load_detector, negative_traces, score_stream, yes_prefixed
 
@@ -57,7 +58,7 @@ def select(det, sets, neg, max_live_fa, max_fa_hour, w=1):
         neg_tr, neg_hours = [(t, moving_sum(s, w)) for t, s, _ in neg[0]], neg[1]
     mswc_audio, words, _ = sets['mswc']
     mswc = np.array([moving_sum(r, w).max() for _, _, r in det.traces(mswc_audio)])
-    other = (words != 'yes') & ~np.vectorize(yes_prefixed)(words)   # yesterday etc. are don't care
+    other = (words != K.KEYWORD) & ~np.vectorize(yes_prefixed)(words)   # prefixed words are don't care
     best = None
     for t in np.unique(live[y == 1])[::-1]:            # highest threshold first: recall rises
         fa = (live[y == 0] >= t).mean()
@@ -73,7 +74,7 @@ def select(det, sets, neg, max_live_fa, max_fa_hour, w=1):
             best = dict(threshold=float(t), window=w, live_recall=float(rec), live_fa=float(fa),
                         fa_per_hour=round(fph, 3), fa_hours=round(neg_hours, 2),
                         stream=score_stream(times, score, t, marks, hours),
-                        mswc_recall=float((mswc[words == 'yes'] >= t).mean()),
+                        mswc_recall=float((mswc[words == K.KEYWORD] >= t).mean()),
                         mswc_other_fa=float((mswc[other] >= t).mean()))
     return best
 
@@ -90,7 +91,7 @@ def main():
     p.add_argument('--out', type=Path, default=ROOT / 'results/stream_selection.json')
     a = p.parse_args()
     sets, info = build_sets(a.data, 'validation', None, 3600, {'device', 'tts'})
-    report = {'config': info, 'rule': vars(a) | {'checkpoints': [str(c) for c in a.checkpoints]}, 'models': {}}
+    report = {'keyword': K.KEYWORD, 'config': info, 'rule': vars(a) | {'checkpoints': [str(c) for c in a.checkpoints]}, 'models': {}}
     for path in a.checkpoints:
         det = load_detector(path)
         neg = negative_traces(det, a.data, 'validation') if a.fa_source == 'negatives' else None
