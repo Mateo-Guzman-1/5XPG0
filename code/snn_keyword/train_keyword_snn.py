@@ -24,6 +24,8 @@ from snntorch import surrogate
 
 from audio_features import (
     N_INPUTS,
+    N_MELS,
+    N_TIME,
     SAMPLE_RATE,
     WINDOW_SAMPLES,
     extract_features,
@@ -94,7 +96,7 @@ def download_dataset(data_dir: Path) -> Path:
 def load_feature_cache(root: Path, data_dir: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     # v2 records the energy-aware frontend.  Keeping a version in the name
     # prevents an old peak-normalised cache from silently training a new model.
-    cache = data_dir / "mini_speech_commands_16x16_v2.npz"
+    cache = data_dir / "mini_speech_commands_8x16_v3.npz"
     if cache.is_file():
         d = np.load(cache, allow_pickle=False)
         return d["x"], d["labels"], d["paths"]
@@ -140,12 +142,12 @@ def real_dataset(
 def synthetic_dataset(n: int, seed: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     rng = np.random.default_rng(seed)
     y = rng.integers(0, 2, size=n, dtype=np.int64)
-    x = rng.random((n, 16, 16), dtype=np.float32) * 0.35
+    x = rng.random((n, N_MELS, N_TIME), dtype=np.float32) * 0.35
     for i, label in enumerate(y):
         if label:
-            x[i, 2:7, 5:12] += 0.65
+            x[i, 1:4, 5:12] += 0.65
         else:
-            x[i, 9:14, 2:9] += 0.65
+            x[i, 4:7, 2:9] += 0.65
     return np.clip(x, 0, 1).reshape(n, -1), y, np.full(n, "synthetic", dtype="<U16")
 
 
@@ -171,8 +173,11 @@ def fit_audio_window(wav: np.ndarray) -> np.ndarray:
     """Match the live client's one-second window before augmentation."""
     wav = np.asarray(wav, dtype=np.float32).reshape(-1)
     if wav.size >= WINDOW_SAMPLES:
-        return wav[-WINDOW_SAMPLES:].copy()
-    return np.pad(wav, (WINDOW_SAMPLES - wav.size, 0))
+        start = (wav.size - WINDOW_SAMPLES) // 2
+        return wav[start:start + WINDOW_SAMPLES].copy()
+    padding = WINDOW_SAMPLES - wav.size
+    left = padding // 2
+    return np.pad(wav, (left, padding - left))
 
 
 def generated_noise(rng: np.random.Generator, target_rms: float) -> np.ndarray:
@@ -545,7 +550,7 @@ def main() -> int:
             "keyword": args.keyword,
             "hidden": args.hidden,
             "timesteps": args.timesteps,
-            "feature_shape": (16, 16),
+            "feature_shape": (N_MELS, N_TIME),
             "float_val_accuracy": float_acc,
             "integer_val_accuracy": int_acc,
             "decision_margin": args.decision_margin,

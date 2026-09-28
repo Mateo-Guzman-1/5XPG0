@@ -2,7 +2,7 @@
 """Capture audio, create a fixed spectrogram, and classify it on the board.
 
 The board-side ``keyword_bridge.py`` owns TCP port 5556. Each request carries
-one 16x16 uint8 feature map; the reply contains the PicoRV32 decision, spike
+one 8x16 uint8 feature map; the reply contains the PicoRV32 decision, spike
 counts, and measured inference cycles.
 
 Examples:

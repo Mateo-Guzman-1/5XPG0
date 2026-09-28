@@ -1,10 +1,11 @@
 # Group 2 - single-keyword detection SNN
 
-This directory now contains a complete reference path for detecting **"yes"**:
+This directory contains the deployed reference path for detecting **"Sheila"**
+from Google Speech Commands v2:
 
 ```text
 PC microphone/WAV
-  -> 16x16 log-frequency feature map
+  -> 8x16 log-frequency feature map (40-5120 Hz, 1.0 s, 8 bit)
   -> uint8 request over ZeroMQ/TCP
   -> PYNQ Linux bridge
   -> dual-port BRAM + mailbox
@@ -13,41 +14,42 @@ PC microphone/WAV
 ```
 
 The network really executes on the RISC-V soft core. The ARM processing system
-only terminates Ethernet, copies 256 input bytes into BRAM, and relays the
+only terminates Ethernet, copies 128 input bytes into BRAM, and relays the
 mailbox result.
 
 ## Current reference result
 
-The checked-in model was trained with seed 0 on a balanced subset of
-TensorFlow Mini Speech Commands: 800 `yes` clips and 800 clips sampled from
-the other seven commands. The 1,280 clean training clips are supplemented by
-1,280 gain-shifted/noise-mixed variants and 600 explicit silence/background
-negatives. On its fixed 320-clip validation split it reached:
+The data preparation keeps every v2 `sheila` clip and a deterministic,
+label-balanced sample from all other command directories. The official
+speaker-disjoint split contains 9,606 training, 2,704 validation, and 3,212
+test clips. Across three floating-model seeds, the selected frontend reached
+**98.27% mean test accuracy**. The deployed seed-0 integer model reached
+**98.07% test accuracy**, **85.71% F1**, and **93.27% balanced accuracy**.
 
-- clean floating SNN accuracy: **90.00%**;
-- clean exported integer SNN accuracy: **89.06%**;
-- 10 dB SNR integer accuracy: **87.81%**;
-- 5 dB SNR integer accuracy: **82.50%**;
-- generated silence/background false positives: **0/400**;
-- floating/integer prediction agreement: **99.06%**.
+On synthetic additive noise, the deployed integer recurrence reached **97.38%**
+accuracy at 10 dB SNR and **96.73%** at 5 dB SNR. It produced **0/400** false
+accepts on generated background and silence, including **0/100** exact-silence
+frames.
 
-A full replay of all 1,360 clean, noisy, and background-only feature maps
-through the physical PYNQ-Z2 matched the Python integer model's output spike
-counts and decisions for **1,360/1,360** frames. Mean PicoRV32 inference time
-was **17.54 ms** at 100 MHz. A five-second live ambient-microphone run produced
-zero detections across sixteen windows.
+The PYNQ-Z2 reproduced the Python integer spike counts for **40/40** exported
+golden vectors. Mean PicoRV32 inference latency is **10.39 ms** at 100 MHz;
+mean Ethernet request/reply latency was **13.72 ms** on the test connection.
+The quantized parameters occupy **6,440 bytes**, the input frame 128 bytes,
+and the complete firmware binary 8,192 bytes.
 
-These figures establish a reproducible baseline, not a final scientific
-claim. The split is clip-random rather than speaker-independent, only the
-eight-command mini dataset is used, much of the added noise is generated, and
-long-duration false accepts per hour have not yet been measured.
+The current research plan and full results are in
+[`research/SHEILA_V2_PLAN.md`](research/SHEILA_V2_PLAN.md) and
+[`research/SHEILA_V2_REPORT.md`](research/SHEILA_V2_REPORT.md).
 
 ## Files
 
 | File | Purpose |
 |---|---|
 | `audio_features.py` | Shared WAV/microphone preprocessing and packet format |
-| `train_keyword_snn.py` | Real-data training, integer validation, C-header export |
+| `research/prepare_speech_commands_v2.py` | Reproducible v2 Sheila subset preparation |
+| `research/frontend_sweep.py` | Encoding sweep and three-seed confirmation |
+| `research/export_frontend_candidate.py` | Integer validation and C-header export |
+| `train_keyword_snn.py` | Legacy Mini Speech Commands training baseline |
 | `pc_keyword_demo.py` | Live microphone or WAV client |
 | `install_keyword_demo.sh` | Builds if needed, deploys, loads, and starts the board chain |
 | `../pynqz2_riscv_flow/firmware/keyword_main.c` | Integer LIF inference and one-second LED control |
@@ -71,7 +73,7 @@ cd code/snn_keyword
 ./install_keyword_demo.sh 192.168.2.99
 ```
 
-Then run the live PC microphone client in PowerShell and say **"yes"**:
+Then run the live PC microphone client in PowerShell and say **"Sheila"**:
 
 ```powershell
 Set-Location code\snn_keyword
@@ -96,20 +98,31 @@ ssh xilinx@192.168.2.99 'cd /home/xilinx/snn_keyword && ./keyword_service.sh log
 ssh xilinx@192.168.2.99 'cd /home/xilinx/snn_keyword && ./keyword_service.sh stop'
 ```
 
-## Retrain and rebuild
+## Reproduce, retrain, and rebuild
 
-Training automatically downloads the approximately 182 MB Mini Speech
-Commands archive on first use. Data and run artifacts are git-ignored.
+Prepare the v2 subset, run the controlled encoding sweep, and export the
+selected seed-0 8-band model. Data, caches, and checkpoints are git-ignored.
 
 ```powershell
 Set-Location code\snn_keyword
-.\.venv\Scripts\python.exe .\train_keyword_snn.py `
-    --keyword yes --epochs 12 --max-per-class 800
+.\.venv\Scripts\python.exe .\research\prepare_speech_commands_v2.py `
+    --archive .\data\speech_commands_v0.02.tar.gz `
+    --output .\data\speech_commands_v2_sheila_subset
+.\.venv\Scripts\python.exe .\research\frontend_sweep.py `
+    --dataset .\data\speech_commands_v2_sheila_subset `
+    --keyword sheila `
+    --cache-dir .\data\frontend_sweep_cache_sheila_v2 `
+    --output .\research\results\frontend_sweep_sheila_v2.json
+.\.venv\Scripts\python.exe .\research\export_frontend_candidate.py `
+    .\research\results\frontend_sweep_sheila_v2_models\b8_f8_hz40-5120_t1000_seed0.pt `
+    --dataset .\data\speech_commands_v2_sheila_subset `
+    --keyword sheila `
+    --feature-cache .\data\frontend_sweep_cache_sheila_v2\b8_f8_hz40-5120_t1000.npy `
+    --output .\research\results\sheila_v2_deployment
 ```
 
-This writes `runs/keyword_snn.pt`, validation examples, and overwrites the
-firmware's generated `keyword_model.h`. Rebuild with an RV32-capable GNU
-toolchain:
+Copy the exported `keyword_model.h` into the firmware directory, then rebuild
+with an RV32-capable GNU toolchain:
 
 ```bash
 cd code/pynqz2_riscv_flow/firmware
@@ -126,9 +139,9 @@ peak-normalised into a full-strength spectrogram.
 
 ## Interface contract
 
-- Feature shape: 16 frequency bands by 16 time bins, row-major, uint8.
+- Feature shape: 8 frequency bands by 16 time bins, row-major, uint8.
 - Network transport: request/reply ZeroMQ on board TCP port 5556.
-- BRAM input window: RISC-V/BRAM offset `0x22000`, 256 bytes.
+- BRAM input window: RISC-V/BRAM offset `0x22000`, 128 bytes used.
 - Mailbox command: `MB_CMD_CLASSIFY` (`8`), returning decision, two spike
   counts, and inference cycles.
 - Positive class: output neuron 1 must emit at least two spikes and lead the
@@ -141,14 +154,14 @@ mismatch.
 
 ## Recommended experiment plan
 
-1. Replace the clip-random split with a speaker-disjoint train/validation/test
-   manifest and reserve the test set before tuning.
-2. Measure precision, recall, false accepts per hour, and missed detections on
+1. Measure precision, recall, false accepts per hour, and missed detections on
    continuous audio; add temporal debounce on top of the existing two-spike
    confidence margin.
-3. Compare direct current input against rate, latency, and delta encoding at a
+2. Compare direct current input against rate, latency, and delta encoding at a
    fixed memory/latency budget. Report several seeds and confidence intervals.
-4. Sweep hidden width, time steps, and int8/int16 quantization; measure board
+3. Implement a packed 4-bit input ABI, then remeasure memory and Ethernet
+   latency; the current ABI cannot realize the theoretical 64-byte frame.
+4. Sweep hidden width, time steps, and int8/int16 weight quantization; measure board
    cycles and memory alongside accuracy.
 5. Replace or supplement generated noise with recorded room, fan, keyboard,
    music, and overlapping-speech backgrounds plus locally recorded speakers.

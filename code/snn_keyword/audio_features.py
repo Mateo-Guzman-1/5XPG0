@@ -20,9 +20,11 @@ SAMPLE_RATE = 16_000
 WINDOW_SAMPLES = SAMPLE_RATE
 FFT_WINDOW = 400          # 25 ms
 FFT_HOP = 160             # 10 ms
-N_MELS = 16               # compact, mel-ish frequency bands
+N_MELS = 8                # selected compact frequency-band count
 N_TIME = 16               # fixed board input length
 N_INPUTS = N_MELS * N_TIME
+LOW_HZ = 40
+HIGH_HZ = 5120
 
 # Peak-normalising every window makes electrical hiss look as strong as
 # speech.  Preserve spectral shape, but scale it by a logarithmic activity
@@ -40,8 +42,11 @@ def _fit_one_second(wav: np.ndarray) -> np.ndarray:
     """Return exactly one second of mono float32 audio."""
     wav = np.asarray(wav, dtype=np.float32).reshape(-1)
     if wav.size >= WINDOW_SAMPLES:
-        return wav[-WINDOW_SAMPLES:]
-    return np.pad(wav, (WINDOW_SAMPLES - wav.size, 0))
+        start = (wav.size - WINDOW_SAMPLES) // 2
+        return wav[start:start + WINDOW_SAMPLES]
+    padding = WINDOW_SAMPLES - wav.size
+    left = padding // 2
+    return np.pad(wav, (left, padding - left))
 
 
 def resample_linear(wav: np.ndarray, source_rate: int) -> np.ndarray:
@@ -78,11 +83,11 @@ def read_wav(path: str | Path) -> np.ndarray:
 
 
 def extract_features(wav: np.ndarray) -> np.ndarray:
-    """Create a fixed 16x16 log-frequency/time map in the range [0, 1].
+    """Create a fixed 8x16 log-frequency/time map in the range [0, 1].
 
     This deliberately uses grouped FFT bins rather than a large mel-filterbank
-    dependency.  Sixteen groups of eight bins cover roughly 40 Hz to 5.1 kHz,
-    and 98 short-time frames are mean-pooled into sixteen time bins.
+    dependency. Eight equal groups cover 40 Hz to 5.12 kHz, and 98 short-time
+    frames are mean-pooled into sixteen time bins.
     """
     wav = _fit_one_second(wav)
     rms = float(np.sqrt(np.mean(wav * wav)))
@@ -97,14 +102,19 @@ def extract_features(wav: np.ndarray) -> np.ndarray:
         np.fft.rfft(frames * np.hanning(FFT_WINDOW), axis=1)
     )
 
-    # Drop DC, retain 128 frequency bins, and group them 8-at-a-time.
-    bands = spectrum[:, 1:1 + N_MELS * 8]
-    bands = bands.reshape(bands.shape[0], N_MELS, 8).mean(axis=2)
-    bands = np.log1p(bands).T  # [frequency, short-time frame]
+    frequencies = np.fft.rfftfreq(FFT_WINDOW, 1.0 / SAMPLE_RATE)
+    selected = np.flatnonzero(
+        (frequencies >= LOW_HZ) & (frequencies <= HIGH_HZ)
+    )
+    groups = np.array_split(selected, N_MELS)
+    bands = np.stack(
+        [spectrum[:, group].mean(axis=1) for group in groups], axis=0
+    )
+    bands = np.log1p(bands)  # [frequency, short-time frame]
 
-    edges = np.linspace(0, bands.shape[1], N_TIME + 1, dtype=np.int32)
+    frame_groups = np.array_split(np.arange(bands.shape[1]), N_TIME)
     pooled = np.stack(
-        [bands[:, edges[i]:edges[i + 1]].mean(axis=1) for i in range(N_TIME)],
+        [bands[:, group].mean(axis=1) for group in frame_groups],
         axis=1,
     )
     peak = float(pooled.max())

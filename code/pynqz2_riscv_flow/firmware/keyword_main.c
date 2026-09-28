@@ -1,6 +1,6 @@
 // Group-2 keyword detector firmware for PicoRV32.
 //
-// A board-side Python bridge writes one 16x16 uint8 spectrogram to BRAM and
+// A board-side Python bridge writes one uint8 spectrogram to BRAM and
 // submits MB_CMD_CLASSIFY.  This firmware runs the exported two-layer LIF SNN
 // with integer arithmetic, returns both output spike counts and the measured
 // cycle count, and lights all board LEDs for one second on a keyword decision.
@@ -148,7 +148,10 @@ static void mb_service(void)
     } else if (cmd == MB_CMD_STATUS) {
         mb_reply(last_sequence, last_decision, last_cycles, classifications);
     } else if (cmd == MB_CMD_CLASSIFY) {
-        if (a0 != INPUT_FRAME_BASE || a1 != INPUT_FRAME_BYTES) {
+        // The generated model is the authority for the frontend shape.  This
+        // keeps sweep candidates with a different band count deployable
+        // without editing the board-wide memory-map header.
+        if (a0 != INPUT_FRAME_BASE || a1 != KW_INPUTS) {
             mb_reply(0xFFFFFFFFu, a0, a1, 0);
             return;
         }
