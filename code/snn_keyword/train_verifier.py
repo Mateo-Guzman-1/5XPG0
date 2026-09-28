@@ -51,9 +51,10 @@ class LibriBatches:
         self.phones, self.off = ix['phones'], ix['phone_off']
         self.rng = rng
 
-    def batch(self, seconds):
-        """Utterances of similar length whose total is about `seconds`."""
-        k = self.rng.integers(len(self.order))
+    def batch(self, seconds, max_seconds=None):
+        """Utterances of similar length whose total is about `seconds` (optionally only short ones)."""
+        top = len(self.order) if max_seconds is None else int(np.searchsorted(self.length[self.order], max_seconds * SR))
+        k = self.rng.integers(max(top, 1))
         n = max(1, int(seconds * SR // self.length[self.order[k]]))
         ids = self.order[max(0, min(k, len(self.order) - n)):][:n]
         L = int(np.ceil(self.length[ids].max() / SR)) * SR     # 1 s buckets: fewer distinct shapes
@@ -110,14 +111,17 @@ def ctc(model, x, tg, dev):
     return F.ctc_loss(lp, flat, il, lens, blank=0, reduction='mean', zero_infinity=True)
 
 
+FRONTEND = 'logmel'   # set from --frontend; must match stage 1's frames on the board
+
+
 def features(aug, wave, dev, pad=.12, train=True):
     w = torch.tensor(wave, device=dev)
     w = F.pad(w, (0, int(pad * w.shape[1]) + 400))
     if train:
         w, mic = aug.waveform(w)
-        return aug.spectral(w, mic, 'logmel')
+        return aug.spectral(w, mic, FRONTEND)
     power = aug.front.power(w)
-    return aug.front.frames(aug.front.mel(power), 'logmel')
+    return aug.front.frames(aug.front.mel(power), FRONTEND)
 
 
 def phase(x, rng):
@@ -186,11 +190,18 @@ def main():
     p.add_argument('--kw-weight', type=float, default=1.)
     p.add_argument('--lr', type=float, default=3e-3)
     p.add_argument('--seed', type=int, default=0)
+    p.add_argument('--clean-steps', type=int, default=0,
+                   help='curriculum: first steps without augmentation, LibriSpeech <= --warm-seconds long')
+    p.add_argument('--warm-seconds', type=float, default=6.)
     p.add_argument('--force-start', action='store_true')
     p.add_argument('--gpu-fraction', type=float, default=.28, help='cap on the GPU memory share (~2.3 GB)')
+    p.add_argument('--frontend', choices=['logmel', 'logmel_w'], default='logmel',
+                   help='logmel_w: -120..-20 dB (main JOURNAL entry 20); the floor of logmel erases quiet /s/')
     p.add_argument('--name', default='v1')
     p.add_argument('--out', type=Path, default=ROOT / 'runs_verifier')
     a = p.parse_args()
+    global FRONTEND
+    FRONTEND = a.frontend
     # Jobs cannot be stopped from outside on this machine: a stop file, and one instance only.
     if (DV / 'STOP_TRAINING').exists():
         print('data_verifier/STOP_TRAINING exists; not starting', flush=True)
@@ -247,17 +258,22 @@ def main():
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, a.lr, total_steps=total, pct_start=.05)
     out = a.out / a.name
     out.mkdir(parents=True, exist_ok=True)
-    history, best, t0 = [], -1., time.perf_counter()
+    history, best, t0, gstep = [], -1., time.perf_counter(), 0
     for epoch in range(a.epochs):
         sums = {'libri': 0., 'kw': 0.}
         for step in range(a.steps_per_epoch):
             if step % 50 == 0:
                 memguard.check(f'epoch {epoch + 1} step {step}')
+                if (DV / 'STOP_TRAINING').exists():
+                    print('data_verifier/STOP_TRAINING: stopping', flush=True)
+                    sys.exit(0)
+            warm = gstep < a.clean_steps
+            gstep += 1
             with torch.no_grad():
-                wl, tl = libri.batch(a.libri_seconds)
-                xl = phase(features(aug, wl, dev), rng)
+                wl, tl = libri.batch(a.libri_seconds, a.warm_seconds if warm else None)
+                xl = phase(features(aug, wl, dev, train=not warm), rng)
                 wk, tk = kw.waves(kw.draw(a.kw_batch))
-                xk = phase(features(aug, wk, dev), rng)
+                xk = phase(features(aug, wk, dev, train=not warm), rng)
             ll = ctc(model, xl, tl, dev)
             lk = ctc(model, xk, tk, dev)
             loss = ll + a.kw_weight * lk
@@ -276,7 +292,7 @@ def main():
         history.append(r)
         print(json.dumps(r), flush=True)
         ck = {'state_dict': copy.deepcopy(model.state_dict()), 'config': model.cfg, 'args': vars(a), 'epoch': epoch + 1,
-              'frontend': 'logmel', 'symbols': SYMBOLS}
+              'frontend': FRONTEND, 'symbols': SYMBOLS}
         torch.save(ck, out / 'last.pt')
         if r['kw_auc'] > best:
             best = r['kw_auc']
