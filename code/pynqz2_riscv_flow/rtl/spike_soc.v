@@ -10,7 +10,8 @@
 //   0x1000_1000  TIMER          0x00 TIME   (32-bit free-running counter)
 //   0x1000_2000  LED            0x00 OUT    ([9:0] PYNQ-Z2 board LEDs)
 //   0x1000_3000  POISSON        hardware spike generator (see rtl/poisson.v)
-//   PCPI custom-0               kdot/klen dot-product coprocessor (rtl/kdot_pcpi.v)
+//   0x1000_4000  SNN WEIGHTS    write-only weight window, 16 KB (see rtl/snn_layer.v)
+//   0x1000_8000  SNN REGS       control / status / counters   (see rtl/snn_layer.v)
 //
 // The BRAM has two ports: port A belongs to the PS (via ps_if, used to load
 // the program and read the console / spike log), port B belongs to the CPU.
@@ -60,12 +61,7 @@ module spike_soc #(
     reg        xfer_bram;            // 1 = data comes from BRAM
     reg  [31:0] peri_rdata_r;        // peripheral value captured at accept
 
-    // The kdot coprocessor borrows port B while the CPU is stalled on it.
-    wire        kd_busy;
-    wire [15:0] kd_addr;
-    wire acc_req = cpu_mem_valid && !cpu_mem_ready && (xfer == 4'd0);
-    wire acc     = acc_req && !kd_busy;
-    wire kd_mem_idle = (xfer == 4'd0) && !acc_req;
+    wire acc     = cpu_mem_valid && !cpu_mem_ready && (xfer == 4'd0);
     wire acc_wr  = acc && req_write;
     wire acc_rd  = acc && !req_write;
     wire bram_wr_now = acc_wr && sel_bram;
@@ -80,7 +76,7 @@ module spike_soc #(
     reg  [31:0] pa_rdata_i;          // port A read data (PS)
     assign pa_rdata = pa_rdata_i;
 
-    wire [15:0] pb_word_addr = kd_busy ? kd_addr : cpu_mem_addr[17:2];
+    wire [15:0] pb_word_addr = cpu_mem_addr[17:2];
 
     // Port A (PS)
     always @(posedge clk) begin
@@ -108,10 +104,6 @@ module spike_soc #(
     // Peripherals
     // ------------------------------------------------------------------
     reg [31:0] sys_scratch;
-    // LED pulse duration in fabric clocks; independent of firmware workload.
-    reg [31:0] led_remaining;
-    // FPGA register INIT also gives a defined timer in four-state simulation.
-    initial timer_lo = 32'd0;
 
     // Hardware Poisson spike generator.
     wire        po_wr  = acc_wr && sel_peri && (cpu_mem_addr[15:12] == 4'h3);
@@ -134,6 +126,33 @@ module spike_soc #(
         .total   (po_total)
     );
 
+    // SNN layer: P parallel LIF neurons + row-wide weight BRAM (rtl/snn_layer.v).
+    // Weight window 0x1000_4000..0x1000_7FFF (cpu_mem_addr[15:14] == 2'b01),
+    // register window 0x1000_8000..0x1000_8FFF (cpu_mem_addr[15:12] == 4'h8).
+    wire        snn_reg_wr = acc_wr && sel_peri && (cpu_mem_addr[15:12] == 4'h8);
+    wire        snn_wgt_wr = acc_wr && sel_peri && (cpu_mem_addr[15:14] == 2'b01);
+    wire [31:0] snn_rdata;
+
+    snn_layer #(
+        .P          (64),        // parallel neurons (sweep this!)
+        .N_IN       (256),       // 16 x 16 spectrogram inputs
+        .XBITS      (1),         // 1 = binary spikes, 8 = direct 8-bit input
+        .LEAK_SHIFT (3)          // beta = 1 - 2^-3 = 0.875
+    ) u_snn (
+        .clk       (clk),
+        .rst_n     (core_rst_n),
+        .reg_wr    (snn_reg_wr),
+        .reg_waddr (cpu_mem_addr[11:0]),
+        .reg_wdata (cpu_mem_wdata),
+        .reg_raddr (cpu_mem_addr[11:0]),
+        .reg_rdata (snn_rdata),
+        .wgt_wr    (snn_wgt_wr),
+        .wgt_waddr (cpu_mem_addr[13:0]),
+        .wgt_wdata (cpu_mem_wdata),
+        .out_spk   (),
+        .out_valid ()
+    );
+
     // Free-running timer (not reset by core_rst_n, so the PS can tell the
     // fabric is alive even while the CPU is held in reset).
     always @(posedge clk)
@@ -148,13 +167,8 @@ module spike_soc #(
             xfer          <= 4'd0;
             sys_scratch   <= 32'h0;
             led_o         <= 10'h0;
-            led_remaining <= 32'd0;
         end else begin
             cpu_mem_ready <= 1'b0;
-            if (led_remaining != 0) begin
-                led_remaining <= led_remaining - 1'b1;
-                if (led_remaining == 1) led_o <= 10'd0;
-            end
 
             if (xfer == 4'd0) begin
                 if (acc_wr) begin
@@ -163,17 +177,8 @@ module spike_soc #(
                         case (cpu_mem_addr[15:12])
                         4'h0: if (cpu_mem_addr[3:2] == 2'd2)        // SYSCTRL SCRATCH
                                   sys_scratch <= cpu_mem_wdata;
-                        4'h2: begin
-                            if (cpu_mem_addr[3:2] == 2'd0) begin
-                                led_o <= cpu_mem_wdata[9:0];
-                                led_remaining <= 0;
-                            end
-                            // Writing duration starts/retriggers LED0 atomically.
-                            if (cpu_mem_addr[3:2] == 2'd1) begin
-                                led_remaining <= cpu_mem_wdata;
-                                led_o <= cpu_mem_wdata == 0 ? 10'd0 : 10'd1;
-                            end
-                        end
+                        4'h2: if (cpu_mem_addr[3:2] == 2'd0)        // LED OUT
+                                  led_o <= cpu_mem_wdata[9:0];
                         default: ;   // TIMER/POISSON have no CPU writes here
                         endcase
                     end
@@ -184,13 +189,14 @@ module spike_soc #(
                     case (cpu_mem_addr[15:12])
                     4'h0: case (cpu_mem_addr[3:2])                  // SYSCTRL
                           2'd0: peri_rdata_r <= 32'h534B_454C;     // "SKEL"
-                          2'd1: peri_rdata_r <= 32'h0002_0001;     // v2.0 + bit0: kdot coprocessor
+                          2'd1: peri_rdata_r <= 32'h0001_0000;     // v1.0
                           2'd2: peri_rdata_r <= sys_scratch;
                           2'd3: peri_rdata_r <= {31'b0, core_trap};
                           endcase
                     4'h1: peri_rdata_r <= timer_lo;                 // TIMER
-                    4'h2: peri_rdata_r <= cpu_mem_addr[3:2] == 2'd1 ? led_remaining : {22'b0, led_o};
+                    4'h2: peri_rdata_r <= {22'b0, led_o};           // LED
                     4'h3: peri_rdata_r <= po_rdata;                 // POISSON
+                    4'h8: peri_rdata_r <= snn_rdata;                // SNN regs
                     default: peri_rdata_r <= 32'hDEAD_BEEF;
                     endcase
                 end
@@ -210,28 +216,7 @@ module spike_soc #(
     // ------------------------------------------------------------------
     // CPU
     // ------------------------------------------------------------------
-    wire        pcpi_valid, pcpi_wr, pcpi_wait, pcpi_ready;
-    wire [31:0] pcpi_insn, pcpi_rs1, pcpi_rs2, pcpi_rd;
-
-    kdot_pcpi u_kdot (
-        .clk        (clk),
-        .resetn     (core_rst_n),
-        .pcpi_valid (pcpi_valid),
-        .pcpi_insn  (pcpi_insn),
-        .pcpi_rs1   (pcpi_rs1),
-        .pcpi_rs2   (pcpi_rs2),
-        .pcpi_wr    (pcpi_wr),
-        .pcpi_rd    (pcpi_rd),
-        .pcpi_wait  (pcpi_wait),
-        .pcpi_ready (pcpi_ready),
-        .mem_idle   (kd_mem_idle),
-        .mem_busy   (kd_busy),
-        .mem_addr   (kd_addr),
-        .mem_rdata  (pb_rdata)
-    );
-
     picorv32 #(
-        .ENABLE_PCPI       (1),
         .ENABLE_COUNTERS   (1),
         .ENABLE_COUNTERS64 (0),
         .ENABLE_MUL        (0),
@@ -252,8 +237,8 @@ module spike_soc #(
         .mem_wdata   (cpu_mem_wdata),
         .mem_wstrb   (cpu_mem_wstrb),
         .mem_rdata   (cpu_mem_rdata),
-        .pcpi_valid  (pcpi_valid), .pcpi_insn (pcpi_insn), .pcpi_rs1 (pcpi_rs1), .pcpi_rs2 (pcpi_rs2),
-        .pcpi_wr     (pcpi_wr), .pcpi_rd (pcpi_rd), .pcpi_wait (pcpi_wait), .pcpi_ready (pcpi_ready),
+        .pcpi_valid  (), .pcpi_insn (), .pcpi_rs1 (), .pcpi_rs2 (),
+        .pcpi_wr     (1'b0), .pcpi_rd (32'h0), .pcpi_wait (1'b0), .pcpi_ready (1'b0),
         .irq         (32'h0),
         .eoi         (),
         .trace_valid (), .trace_data ()
