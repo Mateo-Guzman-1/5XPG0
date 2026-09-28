@@ -15,6 +15,8 @@ Validation (every epoch): CTC loss on LibriSpeech dev-clean utterances, and the
 float keyword score (verifier_model.keyword_score_torch) on validation keyword
 clips placed in noise: AUC of "yes" against the other words.
 """
+import os
+os.environ.setdefault('OPENBLAS_NUM_THREADS', '4')   # OpenBLAS buffers per thread count as private memory
 import argparse
 import copy
 import csv
@@ -179,7 +181,7 @@ def main():
     p.add_argument('--h2', type=int, default=64)
     p.add_argument('--epochs', type=int, default=40)
     p.add_argument('--steps-per-epoch', type=int, default=500)
-    p.add_argument('--libri-seconds', type=float, default=240., help='audio per LibriSpeech sub-batch')
+    p.add_argument('--libri-seconds', type=float, default=180., help='audio per LibriSpeech sub-batch')
     p.add_argument('--kw-batch', type=int, default=128)
     p.add_argument('--kw-weight', type=float, default=1.)
     p.add_argument('--lr', type=float, default=3e-3)
@@ -197,7 +199,7 @@ def main():
     dev = torch.device('cuda')
     # Shared 8 GB GPU: a hard cap turns an overrun into an OOM error here instead of WDDM
     # paging GPU memory into host RAM (which exhausted system commit memory on the first run).
-    torch.cuda.set_per_process_memory_fraction(a.gpu_fraction, dev)
+    torch.cuda.set_per_process_memory_fraction(a.gpu_fraction, 0)
     torch.manual_seed(a.seed)
     rng = np.random.default_rng(a.seed)
     libri = LibriBatches(rng)
@@ -209,8 +211,9 @@ def main():
     val_noise = np.asarray(noise[:SR * 600]).astype(np.float32) / 32768
     aug = Augmenter(dev, None, seed=a.seed, mic_ranges='wide')
     # Noise to the GPU in chunks from the memmap (Augmenter would hold ~3 GB of host RAM on the way).
+    # Half of the noise (about 2.3 h): on Windows GPU memory also counts against private memory.
     aug.noise = torch.cat([torch.tensor(np.asarray(noise[i:i + 2 ** 24]), device=dev).half() / 32768
-                           for i in range(0, len(noise), 2 ** 24)])
+                           for i in range(0, len(noise) // 2, 2 ** 24)])
     libri_val = dev_clean()
     model = Verifier(a.h1, a.h2).to(dev)
     print('parameters', n_params(model), flush=True)
