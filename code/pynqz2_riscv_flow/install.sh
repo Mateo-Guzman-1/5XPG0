@@ -29,8 +29,8 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 
-REMOTE_USER=xilinx
-REMOTE_DIR=/home/xilinx/snn
+REMOTE_USER="${PYNQ_USER:-xilinx}"     # e.g. PYNQ_USER=student ./install.sh ...
+REMOTE_DIR="/home/$REMOTE_USER/snn"
 VENV_PY=/usr/local/share/pynq-venv/bin/python3
 PREBUILT_BIT="$HERE/vivado/spike_top.bit"
 FIRMWARE_BIN="$HERE/firmware/spike.bin"
@@ -79,7 +79,8 @@ echo "ok  - ssh + passwordless sudo"
 step "1. deploy bitstream, firmware, host tool"
 ssh "$BOARD_HOST" "mkdir -p $REMOTE_DIR"
 scp -q "$PREBUILT_BIT" "$FIRMWARE_BIN" \
-    "$HERE/host/spike_pynq.py" "$HERE/host/smoke_test.sh" "$HERE/host/demo.sh" \
+    "$HERE/host/spike_pynq.py" "$HERE/host/keyword_bridge.py" \
+    "$HERE/host/smoke_test.sh" "$HERE/host/demo.sh" \
     "$BOARD_HOST:$REMOTE_DIR/"
 ssh "$BOARD_HOST" "chmod +x $REMOTE_DIR/smoke_test.sh $REMOTE_DIR/demo.sh"
 echo "deployed to $BOARD_HOST:$REMOTE_DIR"
@@ -103,7 +104,8 @@ Board $BOARD_IP is ready. On the board ($REMOTE_DIR):
   ... spike_pynq.py load-elf spike.bin
   ... spike_pynq.py start
   ... spike_pynq.py console      # firmware banner
-  ... spike_pynq.py spikes       # output spikes from the demo neuron
+  ... keyword_bridge.py          # receive frames from pc_keyword_demo.py
 
 Easiest: from this PC run  ./run_demo.sh $BOARD_IP
+and in a second terminal   python code/snn_keyword/pc_keyword_demo.py $BOARD_IP
 EOF

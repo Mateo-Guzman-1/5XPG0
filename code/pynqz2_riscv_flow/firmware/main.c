@@ -1,25 +1,24 @@
-// main.c — minimal SNN bring-up demo: ONE leaky integrate-and-fire (LIF)
-// neuron running in software on PicoRV32.
+// main.c — keyword spotting ("sheila") with a 2-layer SNN on PicoRV32.
 //
-// The input spikes are produced by the HARDWARE Poisson generator
-// (rtl/poisson.v). The firmware:
-//   1. enables NCH Poisson channels at different rates,
-//   2. polls POIS_PENDING for input spikes,
-//   3. integrates each spike into a membrane potential v with a per-channel
-//      weight, leaks v once every millisecond, and
-//   4. fires an OUTPUT spike when v crosses the threshold.
+// Data path:
+//   PC mic -> 16x16 spectrogram -> ZeroMQ -> board (host/keyword_bridge.py)
+//   -> frame buffer in BRAM (FRAME_BASE) -> this firmware -> LEDs
 //
-// Output spikes are written to the spike-log ring in BRAM (the PS reads them
-// over AXI), and the board LEDs flash on every spike.
-//
-// THIS IS A SKELETON, NOT A SOLUTION. Natural next steps for the project:
-//   * replace the single neuron with a small layer / MLP,
-//   * change the input encoding (rates, more channels, real data),
-//   * make the leak use the measured time step dt instead of a fixed 1 ms,
-//   * use fixed-point weights (Q8/Q16) and study the accuracy/area trade-off.
+// The firmware:
+//   1. polls the frame buffer for a new spectrogram frame,
+//   2. runs the integer SNN forward pass (snn.c, weights in weights.h),
+//   3. writes the output spike counts back for the PS,
+//   4. when the keyword wins KW_CONSECUTIVE frames in a row, lights all
+//      LEDs for 1 s, logs an output spike (id 1) and prints to the console.
 
 #include "board.h"
 #include "hal.h"
+#include "snn.h"
+
+// frames in a row that must say "keyword" before the LED fires. The PC
+// sends a 1 s window every 0.25 s, so one spoken word spans ~3 frames;
+// requiring 2 suppresses most single-frame false alarms.
+#define KW_CONSECUTIVE 2
 
 // ------------------------------------------------------------------
 // console ring (in BRAM, drained by the PS)
@@ -116,14 +115,30 @@ static void spike_log_push(u32 out_id)
 }
 
 // ------------------------------------------------------------------
-// the demo neuron (LIF, integer arithmetic)
+// keyword-spotter state
 // ------------------------------------------------------------------
-static s32 weight[NCH];      // per-channel input weight
-static s32 v = 0;            // membrane potential
-static s32 leak = 1;         // leak applied once per millisecond
-static s32 threshold = 20;   // fire threshold
-static u32 n_spikes = 0;
-static u32 err_count = 0;
+static frame_buf_t *const fb = (frame_buf_t *)FRAME_BASE;
+
+// Measured on the board: while the PS is writing frame data into the BRAM,
+// CPU reads of seq_in can come back as 0 (even twice in a row), which made
+// the CPU classify frames twice (12 passes for 8 frames) and fire the LED
+// one frame early. Two defenses: read seq_in until two reads agree, and
+// only accept seq_done + 1 as a new frame (the PS always bumps by exactly
+// one), so a bogus value is simply ignored. The frame data itself is safe:
+// the PS writes it before seq_in and never while the CPU is classifying.
+static u32 stable_rd(volatile u32 *p)
+{
+    u32 a, b;
+    do {
+        a = *p;
+        b = *p;
+    } while (a != b);
+    return a;
+}
+
+static u32 n_frames = 0;       // frames classified
+static u32 n_detect = 0;       // LED triggers
+static u32 last_cycles = 0;    // forward-pass time of the last frame
 
 // ------------------------------------------------------------------
 // mailbox (commands from the PS)
@@ -145,6 +160,7 @@ static void mb_service(void)
         return;
 
     u32 c = mb->cmd[0], a0 = mb->cmd[1], a1 = mb->cmd[2], a2 = mb->cmd[3];
+    (void)a0; (void)a1; (void)a2;
 
     switch (c) {
     case MB_CMD_NOP:
@@ -154,37 +170,9 @@ static void mb_service(void)
         mb_reply(a0, a1, a2, 0);
         break;
     case MB_CMD_STATUS:
-        mb_reply(timer_now(), n_spikes, (u32)v, err_count);
+        mb_reply(timer_now(), n_frames, n_detect, last_cycles);
         break;
-    case MB_CMD_SET_RATE:
-        if (a0 < NCH) {
-            wr32(POIS_RATE(a0), a1);
-            mb_reply(a0, a1, 0, 0);
-        } else {
-            mb_reply(0xFFFFFFFFu, 0, 0, 0);
-        }
-        break;
-    case MB_CMD_SET_WEIGHT:
-        if (a0 < NCH) {
-            weight[a0] = (s32)a1;
-            mb_reply(a0, (u32)weight[a0], 0, 0);
-        } else {
-            mb_reply(0xFFFFFFFFu, 0, 0, 0);
-        }
-        break;
-    case MB_CMD_SET_THRESHOLD:
-        threshold = (s32)a0;
-        mb_reply((u32)threshold, 0, 0, 0);
-        break;
-    case MB_CMD_SET_LEAK:
-        leak = (s32)a0;
-        mb_reply((u32)leak, 0, 0, 0);
-        break;
-    case MB_CMD_RESET_V:
-        v = 0;
-        mb_reply(0, 0, 0, 0);
-        break;
-    default:
+    default:            // the Poisson demo-neuron commands are gone
         mb_reply(0xDEADBEEFu, 0, 0, 0);
         break;
     }
@@ -201,61 +189,54 @@ void main(void)
     con->tail = 0;
     spike_log_init();
     mb->seq_out = 0;
-
-    // default weights + Poisson rates (Hz) for the 8 input channels
-    for (int i = 0; i < NCH; i++)
-        weight[i] = 3;
-    wr32(POIS_RATE(0), 20);
-    wr32(POIS_RATE(1), 30);
-    wr32(POIS_RATE(2), 40);
-    wr32(POIS_RATE(3), 50);
-    wr32(POIS_RATE(4), 60);
-    wr32(POIS_RATE(5), 70);
-    wr32(POIS_RATE(6), 80);
-    wr32(POIS_RATE(7), 90);
-    wr32(POIS_CH_EN, 0xFFu);
-    wr32(POIS_CTRL, 1u);
+    fb->seq_done = stable_rd(&fb->seq_in);   // ignore a stale frame
 
     led_write(0x001u);   // solid "alive" LED
 
-    con_printf("SKEL rv firmware v1.0 (picorv32 rv32im @ %x Hz)\n", CLK_HZ);
-    con_printf("single LIF neuron, %d Poisson input channels\n", NCH);
+    con_printf("SKEL rv firmware v2.0 (picorv32 rv32im @ %x Hz)\n", CLK_HZ);
+    con_printf("keyword SNN: 256-64-2 LIF, waiting for frames\n");
 
-    u32 leak_next = timer_now() + (CLK_HZ / 1000u);   // 1 kHz leak tick
+    static u8 x[FRAME_BYTES];
     u32 led_off_at = 0;
     int led_on = 0;
+    int streak = 0;
 
     for (;;) {
         mb_service();
 
-        // --- input spikes from the hardware Poisson generator ---
-        u32 pend = rd32(POIS_PENDING) & ((1u << NCH) - 1u);
-        if (pend) {
-            wr32(POIS_ACK, pend);            // clear the handled channels
-            for (int c = 0; c < NCH; c++)
-                if (pend & (1u << c))
-                    v += weight[c];
+        // --- new spectrogram frame from the PS ---
+        u32 seq = stable_rd(&fb->seq_in);
+        if (seq == fb->seq_done + 1u) {     // the PS always bumps by exactly 1
+            for (int i = 0; i < FRAME_BYTES; i++)
+                x[i] = fb->data[i];
+
+            u32 counts[2];
+            u32 t0 = timer_now();
+            snn_run(x, counts);
+            last_cycles = timer_now() - t0;
+            n_frames++;
+
+            int kw = counts[1] > counts[0];
+            streak = kw ? streak + 1 : 0;
+            int trigger = (streak == KW_CONSECUTIVE);   // once per utterance
+
+            if (trigger) {
+                n_detect++;
+                spike_log_push(1);                      // output id 1 = keyword
+                led_write(0x3FFu);                      // all LEDs on ...
+                led_off_at = timer_now() + CLK_HZ;      // ... for 1 s
+                led_on = 1;
+                con_printf("sheila! (%u vs %u spikes, %u cycles)\n",
+                           counts[1], counts[0], last_cycles);
+            }
+
+            fb->result = (counts[0] & 0xFFu) | ((counts[1] & 0xFFu) << 8) |
+                         ((u32)kw << 16) | ((u32)trigger << 17);
+            fb->cycles = last_cycles;
+            fb->seq_done = seq;
         }
 
-        // --- leak once per millisecond ---
-        if ((s32)(timer_now() - leak_next) >= 0) {
-            leak_next += (CLK_HZ / 1000u);
-            v -= leak;
-            if (v < 0)
-                v = 0;
-        }
-
-        // --- fire when the membrane crosses threshold ---
-        if (v >= threshold) {
-            v = 0;
-            n_spikes++;
-            spike_log_push(0);              // output id 0
-            led_write(0x3FFu);              // flash all LEDs
-            led_off_at = timer_now() + (CLK_HZ / 10u);   // for 100 ms
-            led_on = 1;
-        }
-
-        // --- LED off after the flash ---
+        // --- LED off after 1 s ---
         if (led_on && (s32)(timer_now() - led_off_at) >= 0) {
             led_write(0x001u);
             led_on = 0;

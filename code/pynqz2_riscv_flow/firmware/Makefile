@@ -11,15 +11,22 @@ CFLAGS    := $(ARCHFLAGS) -O2 -Wall -Wextra -Werror -ffreestanding -fno-builtin 
 LDFLAGS   := $(ARCHFLAGS) -T linker.ld -static -nostdlib -Wl,--build-id=none \
              -Wl,--gc-sections -Wl,-Map=spike.map
 
-OBJS := start.o main.o
+OBJS := start.o main.o snn.o
+
+HOSTCC ?= cc
 
 all: spike.bin
 
 %.o: %.S
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-%.o: %.c board.h hal.h
+%.o: %.c board.h hal.h snn.h weights.h
 	$(CC) $(CFLAGS) -c -o $@ $<
+
+# host-side check that snn.c matches the Python integer model
+test: test_snn.c snn.c snn.h weights.h test_vectors.h
+	$(HOSTCC) -O2 -Wall -Wextra -I. test_snn.c snn.c -o test_snn
+	./test_snn
 
 spike.elf: $(OBJS) linker.ld
 	$(CC) $(LDFLAGS) $(OBJS) -o $@ -lgcc
@@ -29,6 +36,6 @@ spike.bin: spike.elf
 	$(OBJCOPY) -O binary $< $@
 
 clean:
-	rm -f $(OBJS) spike.elf spike.bin spike.map
+	rm -f $(OBJS) spike.elf spike.bin spike.map test_snn test_snn.exe
 
-.PHONY: all clean
+.PHONY: all clean test

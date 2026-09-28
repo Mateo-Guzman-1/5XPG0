@@ -55,11 +55,13 @@ typedef int32_t  s32;
 //   0x10000             console ring             (1 KB)
 //   0x10400             mailbox                  (1 KB)
 //   0x11000 ..          spike log ring
+//   0x22000             keyword frame buffer     (1 KB)
 //   0x3D000 .. 0x3FFFF  stack
 // ------------------------------------------------------------------
 #define CONSOLE_BASE  0x10000u
 #define MAILBOX_BASE  0x10400u
 #define SPIKE_LOG_BASE 0x11000u
+#define FRAME_BASE    0x22000u
 #define STACK_TOP     0x40000u
 
 // console ring: head/tail free-running, 512-byte buffer.
@@ -79,7 +81,7 @@ typedef int32_t  s32;
 // bumps seq_out to match seq_in.
 #define MB_CMD_NOP          0
 #define MB_CMD_ECHO         1   // a0,a1 -> resp0,resp1
-#define MB_CMD_STATUS       2   // -> resp0=time, resp1=n_spikes, resp2=v, resp3=err
+#define MB_CMD_STATUS       2   // -> resp0=time, resp1=frames, resp2=detections, resp3=last cycles
 #define MB_CMD_SET_RATE     3   // a0=channel a1=rate_hz
 #define MB_CMD_SET_WEIGHT   4   // a0=channel a1=weight
 #define MB_CMD_SET_THRESHOLD 5  // a0=threshold
@@ -98,5 +100,20 @@ typedef volatile struct {
     u32 tail;
     char buf[512];
 } console_ring_t;
+
+// keyword frame buffer: the PS writes one spectrogram frame into data[],
+// then bumps seq_in. The CPU classifies it, writes result/cycles and sets
+// seq_done = seq_in.
+//   result [7:0] count class 0 (other)  [15:8] count class 1 (keyword)
+//          [16] keyword detected in this frame  [17] LED triggered
+#define FRAME_BYTES 256                  // 16 mel x 16 time, uint8 (x/256)
+
+typedef volatile struct {
+    u32 seq_in;      // PS bumps after writing data
+    u32 seq_done;    // CPU sets to seq_in when the result is ready
+    u32 result;
+    u32 cycles;      // TIMER ticks spent in the forward pass
+    u8  data[FRAME_BYTES];
+} frame_buf_t;
 
 #endif // BOARD_H

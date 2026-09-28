@@ -42,20 +42,17 @@ echo "$S" | grep -E "^STATUS" | grep -q "0x1$" || fail "core not running (STATUS
 echo "== 6. console banner"
 C=$(run console)
 echo "$C"
-echo "$C" | grep -q "single LIF neuron" || fail "no console output - CPU not executing firmware"
+echo "$C" | grep -q "keyword SNN" || fail "no console output - CPU not executing firmware"
 
 echo "== 7. mailbox echo"
 E=$(run cmd echo 3735928559 7 8)
 echo "$E"
 echo "$E" | grep -qi "deadbeef" || fail "mailbox echo did not return 0xdeadbeef"
 
-sleep 1
-echo "== 8. output spikes from the Poisson-stimulated neuron"
-OUT=$(run spikes) || fail "spike log read"
-printf '%s\n' "$OUT" | head -20
-N=$(printf '%s\n' "$OUT" | grep -c "^out=" || true)
-echo "collected $N new spikes (expected > 0)"
-[ "$N" -gt 0 ] || fail "no output spikes - Poisson generator or neuron not running"
+echo "== 8. SNN inference on a silent frame"
+R=$(run infer) || fail "frame not processed - SNN firmware not running"
+echo "$R"
+echo "$R" | grep -q "^result" || fail "no inference result"
 
 echo
-echo "SMOKE TEST PASSED - fabric, CPU, XIP, console, mailbox and spiking all work."
+echo "SMOKE TEST PASSED - fabric, CPU, XIP, console, mailbox and the SNN all work."

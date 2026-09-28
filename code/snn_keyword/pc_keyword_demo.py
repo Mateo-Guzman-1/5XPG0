@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
-"""pc_keyword_demo.py — SKELETON for GROUP 2 (PC side).
+"""pc_keyword_demo.py — GROUP 2, PC side of the "sheila" demo.
 
-Captures microphone audio, turns each short window into a small mel
-spectrogram "frame" and publishes it over Ethernet with ZeroMQ. The board
-(see the README) is meant to subscribe, run the SNN and flash an LED.
+Captures microphone audio, turns each 1 s window into a 16x16 spectrogram
+frame (features.py, same as training) every 0.25 s and publishes it over
+Ethernet with ZeroMQ. On the board, host/keyword_bridge.py receives and
+hands the frames to the RISC-V SNN, which lights the LEDs on "sheila".
 
-This is an un-finished skeleton: it captures + encodes + sends, but the
-packet format, the frame rate, the size and the board-side handling are all
-DESIGN CHOICES left to you.
+Packet: int32 shape (mels, frames) + float32 data, little endian.
 
 Needs on the PC:  pip install sounddevice numpy pyzmq
 
 Run:  python pc_keyword_demo.py <board-ip>
+      python pc_keyword_demo.py --local     # no board: run the integer
+                                            # firmware model on the PC
 """
 
 import sys
@@ -25,60 +26,93 @@ try:
 except ImportError:
     sd = None
 
-SAMPLE_RATE = 16000
-WIN_MS = 500            # 0.5 s window
+# same front-end as training, so the board sees what the SNN was trained on
+from features import CLIP_SAMPLES, SAMPLE_RATE, clip_features
+
 HOP_MS = 250            # send a frame every 0.25 s
-N_MELS = 16             # keep it small: the board is a tiny CPU
 PORT = 5556
+KW_CONSECUTIVE = 2      # same rule as firmware/main.c (only for --local)
 
 
-def mel_spectrogram(wav):
-    """Very small hand-rolled mel-ish spectrogram -> [N_MELS, n_frames], [0,1]."""
-    win = int(SAMPLE_RATE * 0.025)
-    hop = int(SAMPLE_RATE * 0.010)
-    frames = [wav[i:i + win] for i in range(0, len(wav) - win, hop)]
-    if not frames:
-        return np.zeros((N_MELS, 1), dtype=np.float32)
-    spec = np.abs(np.fft.rfft(np.stack(frames) * np.hanning(win), axis=1))
-    # crude band grouping instead of a real mel filterbank (a design choice!)
-    spec = spec[:N_MELS * 8].reshape(len(frames), N_MELS, 8).mean(axis=2)
-    spec = np.log1p(spec).T                     # [N_MELS, n_frames]
-    m = spec.max()
-    return (spec / m).astype(np.float32) if m > 0 else spec.astype(np.float32)
+def local_classifier():
+    """Bit-exact PC copy of the firmware SNN, for testing without a board."""
+    import os
+    import torch
+    from export_weights import int_forward, quantize, quantize_input
+    from train_keyword_snn import OUT_DIR, SpikeMLP
+
+    net = SpikeMLP()
+    net.load_state_dict(torch.load(os.path.join(OUT_DIR, "keyword_snn.pt")))
+    p = quantize(net)
+    state = {"streak": 0}
+
+    def classify(frame):
+        c = int_forward(p, quantize_input(frame.reshape(1, -1)))[0]
+        state["streak"] = state["streak"] + 1 if c[1] > c[0] else 0
+        bar = "#" * int(c[1])
+        print(f"keyword={c[1]:2d} other={c[0]:2d} {bar}")
+        if state["streak"] == KW_CONSECUTIVE:
+            print(">>> sheila! (LED would light for 1 s)")
+
+    return classify
 
 
 def main():
     if len(sys.argv) < 2:
-        print("usage: pc_keyword_demo.py <board-ip>")
+        print("usage: pc_keyword_demo.py <board-ip> | --local")
         return 2
-    board_ip = sys.argv[1]
     if sd is None:
         print("sounddevice not installed: pip install sounddevice")
         return 1
 
-    ctx = zmq.Context()
-    sock = ctx.socket(zmq.PUB)
-    sock.bind(f"tcp://*:{PORT}")
-    print(f"publishing spectrogram frames on tcp://*:{PORT} "
-          f"(board {board_ip} should SUB to it)")
+    if sys.argv[1] == "--local":
+        handle = local_classifier()
+        print("local mode: say 'sheila' (Ctrl-C to stop)")
+    else:
+        # the board binds (host/keyword_bridge.py), the PC connects: this
+        # needs no inbound firewall rule on the PC
+        ctx = zmq.Context()
+        sock = ctx.socket(zmq.PUB)
+        sock.connect(f"tcp://{sys.argv[1]}:{PORT}")
+        print(f"sending spectrogram frames to tcp://{sys.argv[1]}:{PORT} "
+              f"- say 'sheila' (Ctrl-C to stop)")
 
-    win = int(SAMPLE_RATE * WIN_MS / 1000)
-    hop = int(SAMPLE_RATE * HOP_MS / 1000)
-
-    def callback(indata, frames, t, status):
-        callback.buf = np.append(callback.buf, indata[:, 0])
-        if len(callback.buf) >= win:
-            frame = mel_spectrogram(callback.buf[-win:])
-            # payload = int32 shape (mels, n_frames) + float32 data, little endian
+        def handle(frame):
             hdr = np.array(frame.shape, dtype="<i4").tobytes()
             sock.send(hdr + frame.astype("<f4").tobytes())
 
-    callback.buf = np.zeros(0, dtype=np.float32)
+    win = CLIP_SAMPLES      # 1 s sliding window, like the training clips
+    hop = int(SAMPLE_RATE * HOP_MS / 1000)
 
-    with sd.InputStream(channels=1, samplerate=SAMPLE_RATE,
-                        blocksize=hop, callback=callback):
-        while True:
-            time.sleep(0.5)
+    # the audio callback only buffers; frames are built in the main loop
+    buf = {"wav": np.zeros(0, dtype=np.float32), "new": False}
+
+    def callback(indata, frames, t, status):
+        buf["wav"] = np.append(buf["wav"], indata[:, 0])[-win:]
+        buf["new"] = True
+
+    # a muted mic still delivers audio, just ~1e-4 full scale: every frame
+    # then looks like silence and nothing is ever detected. Warn about it.
+    quiet_since = time.time()
+    warned = False
+    try:
+        with sd.InputStream(channels=1, samplerate=SAMPLE_RATE,
+                            blocksize=hop, callback=callback):
+            while True:
+                time.sleep(0.01)
+                if buf["new"] and len(buf["wav"]) >= win:
+                    buf["new"] = False
+                    handle(clip_features(buf["wav"]))   # [N_MELS, N_TIME]
+                    if np.abs(buf["wav"]).max() > 1e-3:
+                        quiet_since = time.time()
+                        warned = False
+                    elif time.time() - quiet_since > 5 and not warned:
+                        warned = True
+                        print("WARNING: microphone is (almost) silent - is it "
+                              "muted? Check the mic-mute key and Windows "
+                              "Settings > System > Sound > Input volume.")
+    except KeyboardInterrupt:
+        print()
 
 
 if __name__ == "__main__":

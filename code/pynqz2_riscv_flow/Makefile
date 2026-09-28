@@ -4,7 +4,7 @@
 #   make firmware    build firmware/spike.bin           (riscv gcc, seconds)
 #   make install     install.sh <BOARD_IP>
 #   make smoke       install + run the smoke test on the board
-#   make demo        run the interactive demo on the board
+#   make demo        run the keyword demo on the board
 #   make clean       remove build artifacts
 #
 # BOARD_IP defaults to the value remembered in .board-ip.

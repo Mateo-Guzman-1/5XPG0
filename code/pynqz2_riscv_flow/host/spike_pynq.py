@@ -17,10 +17,8 @@ Subcommands:
     console -f           follow console (Ctrl-C to stop)
     spikes               print new output-spike records
     spikes -c            ... as csv
-    cmd <name> [args]    mailbox command (echo, status, set_rate, set_weight,
-                         set_threshold, set_leak, reset_v)
-    rate <ch> <hz>       shortcut for set_rate
-    weight <ch> <w>      shortcut for set_weight
+    cmd <name> [args]    mailbox command (echo, status)
+    infer [file]         classify one 256-byte uint8 frame (default: silence)
 
 Memory-map constants are duplicated from firmware/board.h — keep in sync.
 """
@@ -47,16 +45,13 @@ SPIKE_LOG_BASE = 0x11000
 SPIKE_LOG_DATA = SPIKE_LOG_BASE + 16
 SPIKE_LOG_NWORDS = 16384
 SPIKE_LOG_VERSION = 0x5A110001
+FRAME_BASE = 0x22000            # seq_in, seq_done, result, cycles, data[256]
+FRAME_DATA = FRAME_BASE + 16
+FRAME_BYTES = 256
 
 # mailbox opcodes (mirror of board.h)
-MB = {
-    "nop": 0, "echo": 1, "status": 2, "set_rate": 3, "set_weight": 4,
-    "set_threshold": 5, "set_leak": 6, "reset_v": 7,
-}
-MB_ARGC = {
-    "nop": 0, "echo": 3, "status": 0, "set_rate": 2, "set_weight": 2,
-    "set_threshold": 1, "set_leak": 1, "reset_v": 0,
-}
+MB = {"nop": 0, "echo": 1, "status": 2}
+MB_ARGC = {"nop": 0, "echo": 3, "status": 0}
 
 _devmem = None
 
@@ -113,9 +108,35 @@ class Bram:
             raise ValueError("image too big")
         self.m[0:len(image)] = image
         self.m[len(image):CONSOLE_BASE] = b"\x00" * (CONSOLE_BASE - len(image))
-        # console + mailbox + spike-log header get a clean start
+        # console + mailbox + spike-log header + frame buffer get a clean start
         self.m[CONSOLE_BASE:SPIKE_LOG_DATA + 4 * 64] = (
             b"\x00" * (SPIKE_LOG_DATA + 4 * 64 - CONSOLE_BASE))
+        self.m[FRAME_BASE:FRAME_DATA + FRAME_BYTES] = (
+            b"\x00" * (FRAME_DATA + FRAME_BYTES - FRAME_BASE))
+
+    def write_frame(self, data):
+        """Hand one uint8 spectrogram frame to the CPU; returns its seq."""
+        if len(data) != FRAME_BYTES:
+            raise ValueError(f"frame must be {FRAME_BYTES} bytes")
+        self.m[FRAME_DATA:FRAME_DATA + FRAME_BYTES] = bytes(data)
+        seq = (self.rd32(FRAME_BASE) + 1) & 0xFFFFFFFF
+        self.wr32(FRAME_BASE, seq)
+        return seq
+
+    def frame_result(self, seq, timeout=2.0):
+        """Wait for the CPU to finish frame `seq` -> dict."""
+        t0 = time.time()
+        # read seq_done twice: a read that collides with the CPU's write of
+        # the same word returns garbage (dual-port BRAM, see firmware)
+        while not (self.rd32(FRAME_BASE + 4) == seq ==
+                   self.rd32(FRAME_BASE + 4)):
+            if time.time() - t0 > timeout:
+                raise TimeoutError("frame not processed - CPU not running?")
+            time.sleep(0.001)
+        r = self.rd32(FRAME_BASE + 8)
+        return {"other": r & 0xFF, "keyword": (r >> 8) & 0xFF,
+                "detected": (r >> 16) & 1, "led": (r >> 17) & 1,
+                "cycles": self.rd32(FRAME_BASE + 12)}
 
     def console_read(self):
         head = self.rd32(CONSOLE_BASE)
@@ -206,10 +227,7 @@ def main():
     sub.add_parser("stop")
     sp = sub.add_parser("console"); sp.add_argument("-f", "--follow", action="store_true")
     sp = sub.add_parser("spikes"); sp.add_argument("-c", "--csv", action="store_true")
-    sp = sub.add_parser("rate")
-    sp.add_argument("ch", type=int); sp.add_argument("hz", type=lambda x: int(x, 0))
-    sp = sub.add_parser("weight")
-    sp.add_argument("ch", type=int); sp.add_argument("w", type=lambda x: int(x, 0))
+    sp = sub.add_parser("infer"); sp.add_argument("file", nargs="?")
     sp = sub.add_parser("cmd")
     sp.add_argument("name", choices=sorted(MB))
     sp.add_argument("args", nargs="*", type=lambda x: int(x, 0))
@@ -247,12 +265,11 @@ def main():
                 print(f"out={e['out_id']} ts={e['ts']}")
         if dropped:
             print(f"# dropped: {dropped}", file=sys.stderr)
-    elif a.cmd == "rate":
-        r = bram.mb_cmd(MB["set_rate"], [a.ch, a.hz])
-        print(" ".join(f"{x:#x}" for x in r))
-    elif a.cmd == "weight":
-        r = bram.mb_cmd(MB["set_weight"], [a.ch, a.w])
-        print(" ".join(f"{x:#x}" for x in r))
+    elif a.cmd == "infer":
+        data = open(a.file, "rb").read() if a.file else bytes(FRAME_BYTES)
+        r = bram.frame_result(bram.write_frame(data))
+        print(f"result other={r['other']} keyword={r['keyword']} "
+              f"detected={r['detected']} cycles={r['cycles']}")
     elif a.cmd == "cmd":
         name = a.name
         if len(a.args) != MB_ARGC[name]:

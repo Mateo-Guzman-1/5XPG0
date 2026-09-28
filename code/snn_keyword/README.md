@@ -8,23 +8,41 @@ spoken into the PC microphone.
 
 | File                    | Purpose                                                    |
 |-------------------------|------------------------------------------------------------|
-| `train_keyword_snn.py`  | snnTorch 2-layer SNN, ONE epoch, synthetic spectrograms    |
-| `pc_keyword_demo.py`    | PC side: mic → mel spectrogram → ZeroMQ publisher          |
+| `train_keyword_snn.py`  | snnTorch 2-layer SNN, "sheila" vs other words/noise/silence|
+| `features.py`           | shared 1 s → 16x16 spectrogram front-end (train + demo)    |
+| `export_weights.py`     | quantize → `firmware/weights.h` + bit-exact integer check  |
+| `pc_keyword_demo.py`    | PC side: mic → spectrogram → ZeroMQ (`--local`: no board)  |
 | `requirements.txt`      | Python deps for training                                   |
 | `setup_venv.sh`         | create `.venv` and install the deps                        |
 
-The training script is a **skeleton**: it runs end-to-end but is
-intentionally under-trained and uses fake data. The board side (receive the
-spectrogram, run the SNN, drive the LED) is left to you — see the PYNQ flow in
-`../pynqz2_riscv_flow/`.
+Board side: `../pynqz2_riscv_flow/firmware/` (`snn.c`, `main.c`) and
+`../pynqz2_riscv_flow/host/keyword_bridge.py`.
 
-## Setup & run the training example
+## Full pipeline (Windows PowerShell; on Linux use `setup_venv.sh`)
+
+```powershell
+python -m venv .venv; .venv\Scripts\Activate.ps1
+pip install -r requirements.txt ziglang pyzmq sounddevice
+
+python train_keyword_snn.py        # downloads Speech Commands (~2.3 GB) once
+python export_weights.py           # -> firmware/weights.h, float vs int accuracy
+python ..\pynqz2_riscv_flow\firmware\build_zig.py   # -> firmware/spike.bin
+python pc_keyword_demo.py --local  # try it on the PC mic, no board needed
+```
+
+Changing `features.py` invalidates the cached features: delete
+`data/sheila_*_features.pt` and retrain.
+
+On the board (bash, e.g. Git Bash), from `../pynqz2_riscv_flow/`:
 
 ```bash
-./setup_venv.sh
-source .venv/bin/activate
-python train_keyword_snn.py
+./install.sh <board-ip>                  # copies bitstream, spike.bin, bridge
+./run_demo.sh <board-ip>                 # terminal 1: loads + runs the bridge
+python ../snn_keyword/pc_keyword_demo.py <board-ip>   # terminal 2 (PC mic)
 ```
+
+Board login is `xilinx` by default; for a lab board with another account
+prefix the scripts with e.g. `PYNQ_USER=student`.
 
 ## Suggested plan
 
