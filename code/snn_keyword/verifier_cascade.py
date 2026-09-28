@@ -129,8 +129,8 @@ def cache(a):
 # --------------------------------------------------------------------------- helpers
 
 def split_items(c, name):
-    off = c[f'{name}_off']
-    return [(c[f'{name}_frames'][off[i]:off[i + 1]], c[f'{name}_raw'][off[i]:off[i + 1]]) for i in range(len(off) - 1)]
+    off, fr, raw = c[f'{name}_off'], c[f'{name}_frames'], c[f'{name}_raw']   # each npz member read once
+    return [(fr[off[i]:off[i + 1]], raw[off[i]:off[i + 1]]) for i in range(len(off) - 1)]
 
 
 def hop_ends(n):
@@ -162,7 +162,7 @@ def score(a):
     torch.set_num_threads(a.threads)
     q = load_quantized(a.checkpoint)
     model = IntegerTorch(q, 'cpu')
-    c = np.load(DV / f'cache_{a.split}.npz')
+    c = dict(np.load(DV / f'cache_{a.split}.npz'))
     out, t0 = {}, time.perf_counter()
     for g in GROUPS:
         items = split_items(c, g)
@@ -301,8 +301,8 @@ def mcnemar(a_hits, b_hits):
 
 
 def select(a):
-    c = np.load(DV / f'cache_{a.split}.npz')
-    v = np.load(a.scores)
+    c = dict(np.load(DV / f'cache_{a.split}.npz'))
+    v = dict(np.load(a.scores))
     report = {'scores': str(a.scores), 'verify_ms': a.verify_ms,
               'rule': 'live other words <= 0.2%, <= 2 FA/h on the negatives stream (policy b: + yes-prefixed utterances)',
               'runs': []}
