@@ -47,6 +47,10 @@ class Verifier(nn.Module):
         self.gru1 = nn.GRU(N_MELS * stack, h1, batch_first=True)
         self.gru2 = nn.GRU(h1, h2, batch_first=True)
         self.out = nn.Linear(h2, classes)
+        # Per-input normalisation (x - mu) / sd, folded into layer 1 by quantize(). Without it
+        # CTC training stays on the "same label sequence for every input" plateau (JOURNAL).
+        self.register_buffer('mu', torch.zeros(N_MELS * stack))
+        self.register_buffer('sd', torch.full((N_MELS * stack,), 256.))
 
     def stack_frames(self, x):
         b, t, m = x.shape
@@ -55,7 +59,7 @@ class Verifier(nn.Module):
 
     def forward(self, x):
         """x: (B, T, 24) uint8-valued frames -> logits (B, T // stack, classes)."""
-        h, _ = self.gru1(self.stack_frames(x) / 256)
+        h, _ = self.gru1((self.stack_frames(x) - self.mu) / self.sd)
         h, _ = self.gru2(h)
         return self.out(h)
 
@@ -90,10 +94,14 @@ def quantize_rows(w, e):
 def quantize(model):
     """Float Verifier -> dict of numpy arrays for integer_forward (and the C export)."""
     q = {k: np.array(v) for k, v in model.cfg.items()}
+    mu, sd = model.mu.detach().cpu().double().numpy(), model.sd.detach().cpu().double().numpy()
     for name, gru in (('l1', model.gru1), ('l2', model.gru2)):
         wi = gru.weight_ih_l0.detach().cpu().double().numpy()
         wh = gru.weight_hh_l0.detach().cpu().double().numpy()
         bi = gru.bias_ih_l0.detach().cpu().double().numpy()
+        if name == 'l1':   # W (x - mu) / sd = (W 256 / sd) (x / 256) - W mu / sd; the integer input is x / 256
+            bi = bi - wi @ (mu / sd)
+            wi = wi * (256 / sd)[None]
         bh = gru.bias_hh_l0.detach().cpu().double().numpy()
         H = wh.shape[1]
         w = np.concatenate([wi, wh], 1)           # (3H, in + H)

@@ -40,3 +40,19 @@ def free_ok(min_ram_gb=10., min_gpu_gb=2.5):
         gpu = free / 2 ** 30
     ok = ram >= min_ram_gb and (gpu is None or gpu >= min_gpu_gb)
     return ok, {'free_ram_gb': round(ram, 2), 'free_gpu_gb': None if gpu is None else round(gpu, 2)}
+
+
+def other_instances(script):
+    """PIDs of other processes running `script`, excluding this process, its parents and children
+    (the venv launcher on Windows starts the real interpreter as a child with the same command line)."""
+    me = psutil.Process()
+    mine = {me.pid} | {q.pid for q in me.parents()} | {q.pid for q in me.children(recursive=True)}
+    out = []
+    for q in psutil.process_iter(['pid', 'cmdline', 'name']):
+        try:
+            cmd = ' '.join(q.info['cmdline'] or [])
+        except Exception:
+            continue
+        if q.info['pid'] not in mine and 'python' in (q.info['name'] or '').lower() and script in cmd:
+            out.append(q.info['pid'])
+    return out

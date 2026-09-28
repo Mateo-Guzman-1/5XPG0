@@ -191,6 +191,14 @@ def main():
     p.add_argument('--name', default='v1')
     p.add_argument('--out', type=Path, default=ROOT / 'runs_verifier')
     a = p.parse_args()
+    # Jobs cannot be stopped from outside on this machine: a stop file, and one instance only.
+    if (DV / 'STOP_TRAINING').exists():
+        print('data_verifier/STOP_TRAINING exists; not starting', flush=True)
+        sys.exit(0)
+    others = memguard.other_instances('train_verifier.py')
+    if others:
+        print('another train_verifier.py is running', others, '; not starting', flush=True)
+        sys.exit(0)
     ok, free = memguard.free_ok()
     print('free at start', free, flush=True)
     if not ok and not a.force_start:
@@ -219,6 +227,20 @@ def main():
                            for i in range(0, len(noise) // 2, 2 ** 24)])
     libri_val = dev_clean()
     model = Verifier(a.h1, a.h2).to(dev)
+    with torch.no_grad():   # input statistics of augmented training features, per band
+        xs = []
+        for _ in range(8):
+            wl, _ = libri.batch(a.libri_seconds)
+            xs.append(model.stack_frames(features(aug, wl, dev)).reshape(-1, model.mu.numel()))
+            wk, _ = kw.waves(kw.draw(a.kw_batch))
+            xs.append(model.stack_frames(features(aug, wk, dev)).reshape(-1, model.mu.numel()))
+        xs = torch.cat(xs)
+        band_mu = xs.reshape(len(xs), -1, 24).mean((0, 1)).repeat(model.stack)
+        band_sd = xs.reshape(len(xs), -1, 24).std((0, 1)).clamp_min(1.).repeat(model.stack)
+        model.mu.copy_(band_mu); model.sd.copy_(band_sd)
+        print('input mu', [round(v, 1) for v in band_mu[:24].tolist()], 'sd', [round(v, 1) for v in band_sd[:24].tolist()],
+              flush=True)
+        del xs
     print('parameters', n_params(model), flush=True)
     opt = torch.optim.AdamW(model.parameters(), lr=a.lr, weight_decay=1e-4)
     total = a.epochs * a.steps_per_epoch
