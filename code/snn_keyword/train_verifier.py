@@ -164,7 +164,7 @@ def validate(model, aug, dev, libri_val, kw_val, kw_ids, noise):
     scores = []
     for i in range(0, len(w), 512):
         x = features(aug, w[i:i + 512], dev, pad=0, train=False)
-        scores.append(keyword_score_torch(model(x).double(), warmup=0).cpu().numpy())
+        scores.append(keyword_score_torch(model(x).double(), warmup=5).cpu().numpy())   # as the cascade
     s = np.concatenate(scores)
     word = np.char.lower(kw_val.word[kw_ids].astype(str))
     yes = word == 'yes'
@@ -200,6 +200,9 @@ def main():
     # Shared 8 GB GPU: a hard cap turns an overrun into an OOM error here instead of WDDM
     # paging GPU memory into host RAM (which exhausted system commit memory on the first run).
     torch.cuda.set_per_process_memory_fraction(a.gpu_fraction, 0)
+    # Every distinct FFT length (room convolution: utterance length + RIR) caches a cuFFT plan,
+    # whose host-side memory grew private memory past 6 GB in 6 epochs.
+    torch.backends.cuda.cufft_plan_cache[0].max_size = 8
     torch.manual_seed(a.seed)
     rng = np.random.default_rng(a.seed)
     libri = LibriBatches(rng)
@@ -244,8 +247,10 @@ def main():
         torch.cuda.empty_cache()
         r = {k: round(v / a.steps_per_epoch, 4) for k, v in sums.items()}
         r.update(validate(model, aug, dev, libri_val, kw_val, kw_ids, val_noise))
+        torch.cuda.empty_cache()
         r.update(epoch=epoch + 1, minutes=round((time.perf_counter() - t0) / 60, 1),
-                 gpu_mb=round(torch.cuda.max_memory_allocated() / 2 ** 20))
+                 gpu_mb=round(torch.cuda.max_memory_allocated() / 2 ** 20),
+                 private_gb=round(memguard.private_bytes() / 2 ** 30, 2))
         history.append(r)
         print(json.dumps(r), flush=True)
         ck = {'state_dict': copy.deepcopy(model.state_dict()), 'config': model.cfg, 'args': vars(a), 'epoch': epoch + 1,
