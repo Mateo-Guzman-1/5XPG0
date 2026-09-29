@@ -1,6 +1,6 @@
 #ifndef VERIFIER_H
 #define VERIFIER_H
-/* Second-stage "yes" verifier: causal CTC phoneme GRU + keyword score (verifier_model.py).
+/* Second-stage keyword verifier: causal CTC phoneme GRU + keyword score (verifier_model.py).
  * Bit-exact with verifier_model.integer_forward + keyword_score. */
 #include <stdint.h>
 #include "verifier_config.h"

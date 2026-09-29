@@ -1,7 +1,7 @@
 """Verifier track: cycles of the phoneme verifier on the PicoRV32 SoC RTL (Verilator), bit-exact.
 
-Builds the stage-1 headers (export_model.export_stream, the W=20 model of the
-main worktree, read only), the verifier headers (verifier_export.export), the
+Builds the stage-1 headers (export_model.export_stream, the keyword's stage-1
+model of the main worktree, read only: "yes" W=20, "sheila" the QAT candidate), the verifier headers (verifier_export.export), the
 firmware with -DUSE_VERIFIER (kdot + neuron engine, and pure RV32IM with
 --rv32im), and sim/soc_verifier.cpp against rtl/spike_soc.v. Records are
 validation windows: each record is streamed through stage 1 in 250 ms
@@ -20,13 +20,15 @@ from pathlib import Path
 
 import numpy as np
 
+import keyword_config as K
 from export_model import export_stream
 from verifier_export import export, load_quantized, oracle, records
 from verify import command
 
 ROOT = Path(__file__).resolve().parent
 RTL = ROOT.parent / 'pynqz2_riscv_flow' / 'rtl'
-STAGE1_W20 = Path(r'C:\Users\matut\FULL_AI\5XPG0\code\snn_keyword\runs_stream\s2_nokd_qat\int_last_w20.npz')
+STAGE1_W20 = Path(r'C:\Users\matut\FULL_AI\5XPG0\code\snn_keyword\runs_stream') / \
+    {'yes': 's2_nokd_qat/int_last_w20.npz', 'sheila': 'sheila_qat_seed2/int_model.npz'}[K.KEYWORD]
 
 
 def section_sizes(mapfile):

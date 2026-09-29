@@ -2,7 +2,8 @@
 
 Stage 2 of the cascade. It sees the last ~1.5 s of the stage-1 input frames
 (features.frame_features, 24 uint8 log-mel bands per 10 ms) and checks for
-the phoneme sequence Y EH S (CMUdict "yes").
+the keyword's phoneme sequence (verifier_data.KEYWORD: CMUdict "yes" Y EH S,
+"sheila" SH IY L AH).
 
 Float model (training):
   two 10 ms frames stacked -> 48 inputs per 20 ms step, scaled x / 256
@@ -19,11 +20,13 @@ Integer model (quantize / integer_forward; firmware/verifier.c is bit-exact):
   logits Q10.
 
 Keyword score (keyword_score): with c_t(k) = logit_t(k) - max_j logit_t(j) <= 0,
-the best-scoring path Y+ b* EH+ b* S+ (b = blank) over any segment of the
-window, where the unconstrained best path costs 0. The softmax normaliser
-cancels, so no exp or log is needed. The segment must start at step >= warmup.
-Policy (b) (reject-prefix) appends `boundary` steps after the S in which no
-new phoneme may start: each costs max(c_t(blank), c_t(S)).
+the best-scoring path p1+ b* p2+ b* ... pN+ (b = blank; CTC: a blank is
+required between two equal phonemes) over any segment of the window, where
+the unconstrained best path costs 0. The softmax normaliser cancels, so no
+exp or log is needed. The segment must start at step >= warmup. States:
+2i = phoneme i, 2i+1 = blank after phoneme i (i < N-1).
+Policy (b) (reject-prefix) appends `boundary` steps after the last phoneme in
+which no new phoneme may start: each costs max(c_t(blank), c_t(pN)).
 """
 import numpy as np
 import torch
@@ -211,32 +214,36 @@ class IntegerTorch:
 # --------------------------------------------------------------------------- keyword score
 
 def keyword_score(logits, warmup=0, boundary=0, keyword=KEYWORD, return_end=False):
-    """Best Y+ b* EH+ b* S+ [boundary] path score per window (int64, <= 0; NEG if none fits).
+    """Best p1+ b* ... pN+ [boundary] path score per window (int64, <= 0; NEG if none fits).
 
     logits: (B, T, C) integer (or float) array. Works on numpy int64 exactly as
     firmware/verifier.c does in int32. boundary > 0: that many steps after the
-    last S step, each costing max(c(blank), c(S)) (policy b).
+    last phoneme, each costing max(c(blank), c(pN)) (policy b).
     """
     lg = np.asarray(logits)
     c = lg - lg.max(-1, keepdims=True)
     b_, t_, _ = c.shape
-    k1, k2, k3 = keyword
-    cy, ce, cs, cb = c[..., k1], c[..., k2], c[..., k3], c[..., BLANK]
-    cp = np.maximum(cb, cs)
-    ns = 5 + boundary
+    n = len(keyword)
+    cph, cb = [c[..., k] for k in keyword], c[..., BLANK]
+    cp = np.maximum(cb, cph[-1])
+    last = 2 * n - 2                    # state of the last phoneme
+    ns = last + 1 + boundary
     D = np.full((b_, ns), NEG, np.int64)
     best = np.full(b_, NEG, np.int64)
     end = np.full(b_, -1, np.int64)
     for t in range(t_):
         P = D.copy()
         start = 0 if t >= warmup else NEG
-        D[:, 0] = np.maximum(P[:, 0], start) + cy[:, t]
-        D[:, 1] = np.maximum(P[:, 0], P[:, 1]) + cb[:, t]
-        D[:, 2] = np.maximum(np.maximum(P[:, 0], P[:, 1]), P[:, 2]) + ce[:, t]
-        D[:, 3] = np.maximum(P[:, 2], P[:, 3]) + cb[:, t]
-        D[:, 4] = np.maximum(np.maximum(P[:, 2], P[:, 3]), P[:, 4]) + cs[:, t]
+        D[:, 0] = np.maximum(P[:, 0], start) + cph[0][:, t]
+        for i in range(1, n):
+            s = 2 * i
+            D[:, s - 1] = np.maximum(P[:, s - 2], P[:, s - 1]) + cb[:, t]
+            prev = np.maximum(P[:, s - 1], P[:, s])
+            if keyword[i] != keyword[i - 1]:
+                prev = np.maximum(prev, P[:, s - 2])
+            D[:, s] = prev + cph[i][:, t]
         for j in range(boundary):
-            D[:, 5 + j] = P[:, 4 + j] + cp[:, t]
+            D[:, last + 1 + j] = P[:, last + j] + cp[:, t]
         D = np.maximum(D, NEG)             # keep "impossible" from drifting (int32 in C)
         fin = D[:, ns - 1]
         upd = fin > best
@@ -249,21 +256,25 @@ def keyword_score_torch(logits, warmup=0, boundary=0, keyword=KEYWORD):
     """keyword_score on a torch tensor (float64 of integers, or float for training diagnostics)."""
     c = logits - logits.max(-1, keepdim=True)[0]
     b_, t_, _ = c.shape
-    k1, k2, k3 = keyword
-    cy, ce, cs, cb = c[..., k1], c[..., k2], c[..., k3], c[..., BLANK]
-    cp = torch.maximum(cb, cs)
+    n = len(keyword)
+    cph, cb = [c[..., k] for k in keyword], c[..., BLANK]
+    cp = torch.maximum(cb, cph[-1])
+    last = 2 * n - 2
     neg = torch.full((b_,), float(NEG), dtype=c.dtype, device=c.device)
-    D = [neg.clone() for _ in range(5 + boundary)]
+    D = [neg.clone() for _ in range(last + 1 + boundary)]
     best = neg.clone()
     for t in range(t_):
         P = D
         start = torch.zeros_like(neg) if t >= warmup else neg
-        D = [torch.maximum(P[0], start) + cy[:, t],
-             torch.maximum(P[0], P[1]) + cb[:, t],
-             torch.maximum(torch.maximum(P[0], P[1]), P[2]) + ce[:, t],
-             torch.maximum(P[2], P[3]) + cb[:, t],
-             torch.maximum(torch.maximum(P[2], P[3]), P[4]) + cs[:, t]]
-        D += [P[4 + j] + cp[:, t] for j in range(boundary)]
+        D = [torch.maximum(P[0], start) + cph[0][:, t]]
+        for i in range(1, n):
+            s = 2 * i
+            D.append(torch.maximum(P[s - 2], P[s - 1]) + cb[:, t])
+            prev = torch.maximum(P[s - 1], P[s])
+            if keyword[i] != keyword[i - 1]:
+                prev = torch.maximum(prev, P[s - 2])
+            D.append(prev + cph[i][:, t])
+        D += [P[last + j] + cp[:, t] for j in range(boundary)]
         D = [torch.maximum(d, neg) for d in D]
         best = torch.maximum(best, D[-1])
     return best

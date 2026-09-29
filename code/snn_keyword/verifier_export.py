@@ -15,6 +15,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
+import keyword_config as K
 from verifier_data import BLANK, KEYWORD
 from verifier_model import NEG, ONE, Verifier, integer_forward, keyword_score, quantize
 
@@ -23,6 +24,7 @@ ROOT = Path(__file__).resolve().parent
 
 def load_quantized(path):
     ck = torch.load(path, map_location='cpu', weights_only=False)
+    K.check_model_keyword(ck.get('keyword'), 'verifier')     # checkpoints before the setting are "yes"
     m = Verifier(**ck['config'])
     m.load_state_dict(ck['state_dict'])
     return quantize(m)
@@ -59,12 +61,12 @@ def export(q, out, frames=150, warmup=5, boundary=10, thresholds=(NEG, NEG)):
     out = Path(out); out.mkdir(parents=True, exist_ok=True)
     stack = int(q['stack'])
     checks = range_checks(q, frames // stack)
-    y, eh, s = KEYWORD
     cfg = ['#ifndef VERIFIER_CONFIG_H', '#define VERIFIER_CONFIG_H',
            f'#define VERIFIER_STACK {stack}', f'#define VERIFIER_IN {24 * stack}',
            f'#define VERIFIER_H1 {int(q["h1"])}', f'#define VERIFIER_H2 {int(q["h2"])}',
            f'#define VERIFIER_CLASSES {len(q["out_b"])}', f'#define VERIFIER_BLANK {BLANK}',
-           f'#define VERIFIER_Y {y}', f'#define VERIFIER_EH {eh}', f'#define VERIFIER_S {s}',
+           f'#define VERIFIER_NPH {len(KEYWORD)}',
+           f'#define VERIFIER_PHONES {{{", ".join(str(int(k)) for k in KEYWORD)}}}',
            f'#define VERIFIER_FRAMES {frames}', f'#define VERIFIER_WARMUP {warmup}',
            f'#define VERIFIER_BOUNDARY {boundary}', f'#define VERIFIER_NEG ({NEG})',
            f'#define VERIFIER_THRESHOLD_A ({int(thresholds[0])})', f'#define VERIFIER_THRESHOLD_B ({int(thresholds[1])})',

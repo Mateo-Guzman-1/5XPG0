@@ -4,16 +4,19 @@ Every step has two sub-batches, both through augment_online.Augmenter
 (mic_ranges 'wide', waveform() then spectral(), logmel frames):
   libri     LibriSpeech train-clean-100 utterances (verifier_data.py), in
             length buckets, whole utterances with their phoneme sequence.
-  keywords  1 s clips of data/multi train (Speech Commands, MSWC, TTS) at a
-            random offset in 1.6 s, target = the word's phonemes. "yes"
-            (and yes-prefixed words: yesterday, yesd, ...) are oversampled.
+  keywords  1 s clips of the keyword's multi-corpus train split
+            (keyword_config.MULTI: Speech Commands, MSWC, TTS) at a random
+            offset in 1.6 s, target = the word's phonemes. The keyword (and
+            words that begin with it: yesterday, sheila's) is oversampled;
+            other spellings of the keyword (keyword_config.ALIASES) are left out.
 Waveforms are zero-padded by 12% before augmentation, because a 0.9 speed
 change stretches them and would cut off the last phonemes.
 The frame-stacking phase is random (the first frame is dropped half the time).
 
 Validation (every epoch): CTC loss on LibriSpeech dev-clean utterances, and the
 float keyword score (verifier_model.keyword_score_torch) on validation keyword
-clips placed in noise: AUC of "yes" against the other words.
+clips placed in noise: AUC of the keyword against the other words, and the
+share of keyword clips above the 99th percentile of the other words.
 """
 import os
 os.environ.setdefault('OPENBLAS_NUM_THREADS', '4')   # OpenBLAS buffers per thread count as private memory
@@ -30,9 +33,10 @@ from torch.nn import functional as F
 
 import sys
 
+import keyword_config as K
 import memguard
 from augment_online import Augmenter
-from verifier_data import SYMBOLS, encode, text_phones
+from verifier_data import KEYWORD, SYMBOLS, encode, targets_file, text_phones
 from verifier_model import Verifier, keyword_score_torch, n_params
 
 ROOT = Path(__file__).resolve().parent
@@ -65,18 +69,21 @@ class LibriBatches:
 
 
 class KeywordBatches:
-    def __init__(self, split, rng, yes_share=.25, prefixed_share=.05):
-        t = np.load(DV / f'keyword_targets_{split}.npz')
-        self.clips = np.load(ROOT / f'data/multi/clips_{split}.npy', mmap_mode='r')
+    def __init__(self, split, rng, kw_share=.25, prefixed_share=.05):
+        t = np.load(targets_file(split))
+        self.clips = np.load(K.MULTI / f'clips_{split}.npy', mmap_mode='r')
         keep = t['keep']
         self.row, self.word, self.corpus = t['row'][keep], t['word'][keep], t['corpus'][keep]
         off, ph = t['phone_off'], t['phones']      # read each npz member once
         self.tg = [ph[off[i]:off[i + 1]] for i in np.flatnonzero(keep)]
         w = np.char.lower(self.word.astype(str))
-        self.pools = {'yes': np.flatnonzero(w == 'yes'),
-                      'prefixed': np.flatnonzero(np.char.startswith(w, 'yes') & (w != 'yes')),
-                      'other': np.flatnonzero(~np.char.startswith(w, 'yes'))}
-        self.share = {'yes': yes_share, 'prefixed': prefixed_share, 'other': 1 - yes_share - prefixed_share}
+        kw = w == K.KEYWORD
+        pre = np.char.startswith(w, K.KEYWORD) & ~kw          # keyword_config.prefixed
+        alias = np.isin(w, list(K.ALIASES))
+        self.pools = {'kw': np.flatnonzero(kw), 'prefixed': np.flatnonzero(pre),
+                      'other': np.flatnonzero(~kw & ~pre & ~alias)}
+        share = {k: v for k, v in (('kw', kw_share), ('prefixed', prefixed_share)) if len(self.pools[k])}
+        self.share = dict(share, other=1 - sum(share.values()))    # an empty pool's share goes to "other"
         self.rng = rng
 
     def draw(self, n):
@@ -149,6 +156,12 @@ def auc(pos, neg):
     return float((r[:len(pos)].sum() - len(pos) * (len(pos) + 1) / 2) / (len(pos) * len(neg)))
 
 
+def tpr_at(pos, neg, fpr=.01):
+    """Share of positives accepted by the loosest threshold (score >= t) that accepts <= fpr of neg."""
+    k = int(np.floor(fpr * len(neg)))
+    return float((pos > np.sort(neg)[::-1][k]).mean()) if k < len(neg) else 1.
+
+
 @torch.no_grad()
 def validate(model, aug, dev, libri_val, kw_val, kw_ids, noise):
     model.eval()
@@ -170,12 +183,12 @@ def validate(model, aug, dev, libri_val, kw_val, kw_ids, noise):
         x = features(aug, w[i:i + 512], dev, pad=0, train=False)
         scores.append(keyword_score_torch(model(x).double(), warmup=5).cpu().numpy())   # as the cascade
     s = np.concatenate(scores)
-    word = np.char.lower(kw_val.word[kw_ids].astype(str))
-    yes = word == 'yes'
-    other = ~np.char.startswith(word, 'yes')
+    pos = np.isin(kw_ids, kw_val.pools['kw'])
+    other = np.isin(kw_ids, kw_val.pools['other'])
     model.train()
-    return {'val_ctc': round(float(np.mean(losses)), 4), 'kw_auc': round(auc(s[yes], s[other]), 5),
-            'kw_yes_median': float(np.median(s[yes])),
+    return {'val_ctc': round(float(np.mean(losses)), 4), 'kw_auc': round(auc(s[pos], s[other]), 5),
+            'kw_tpr_at_1pct': round(tpr_at(s[pos], s[other]), 4),
+            'kw_pos_median': float(np.median(s[pos])),
             'kw_other_p99': float(np.percentile(s[other], 99))}
 
 
@@ -188,6 +201,7 @@ def main():
     p.add_argument('--libri-seconds', type=float, default=180., help='audio per LibriSpeech sub-batch')
     p.add_argument('--kw-batch', type=int, default=128)
     p.add_argument('--kw-weight', type=float, default=1.)
+    p.add_argument('--kw-share', type=float, default=.25, help='share of keyword clips in a keyword sub-batch')
     p.add_argument('--lr', type=float, default=3e-3)
     p.add_argument('--seed', type=int, default=0)
     p.add_argument('--clean-steps', type=int, default=0,
@@ -197,6 +211,7 @@ def main():
     p.add_argument('--gpu-fraction', type=float, default=.28, help='cap on the GPU memory share (~2.3 GB)')
     p.add_argument('--frontend', choices=['logmel', 'logmel_w'], default='logmel',
                    help='logmel_w: -120..-20 dB (main JOURNAL entry 20); the floor of logmel erases quiet /s/')
+    p.add_argument('--max-instances', type=int, default=1, help='train_verifier.py jobs allowed at once')
     p.add_argument('--name', default='v1')
     p.add_argument('--out', type=Path, default=ROOT / 'runs_verifier')
     a = p.parse_args()
@@ -207,8 +222,8 @@ def main():
         print('data_verifier/STOP_TRAINING exists; not starting', flush=True)
         sys.exit(0)
     others = memguard.other_instances('train_verifier.py')
-    if others:
-        print('another train_verifier.py is running', others, '; not starting', flush=True)
+    if memguard.count_instances(others) >= a.max_instances:
+        print('train_verifier.py already running', others, '; not starting', flush=True)
         sys.exit(0)
     ok, free = memguard.free_ok()
     print('free at start', free, flush=True)
@@ -225,10 +240,12 @@ def main():
     torch.manual_seed(a.seed)
     rng = np.random.default_rng(a.seed)
     libri = LibriBatches(rng)
-    kw = KeywordBatches('train', rng)
+    kw = KeywordBatches('train', rng, a.kw_share)
     kw_val = KeywordBatches('validation', np.random.default_rng(5))
     vrng = np.random.default_rng(3)
-    kw_ids = np.r_[kw_val.pools['yes'], vrng.choice(kw_val.pools['other'], 4000, replace=False)]
+    kw_ids = np.r_[kw_val.pools['kw'], vrng.choice(kw_val.pools['other'], 4000, replace=False)]
+    print('keyword', K.KEYWORD, [SYMBOLS[k] for k in KEYWORD], 'multi', K.MULTI.name,
+          {k: len(v) for k, v in kw.pools.items()}, 'shares', kw.share, flush=True)
     noise = np.load(ROOT / 'data/multi/noise_train.npy', mmap_mode='r')
     val_noise = np.asarray(noise[:SR * 600]).astype(np.float32) / 32768
     aug = Augmenter(dev, None, seed=a.seed, mic_ranges='wide')
@@ -292,7 +309,8 @@ def main():
         history.append(r)
         print(json.dumps(r), flush=True)
         ck = {'state_dict': copy.deepcopy(model.state_dict()), 'config': model.cfg, 'args': vars(a), 'epoch': epoch + 1,
-              'frontend': FRONTEND, 'symbols': SYMBOLS}
+              'frontend': FRONTEND, 'symbols': SYMBOLS, 'keyword': K.KEYWORD, 'keyword_phones': list(KEYWORD),
+              'multi': K.MULTI.name}
         torch.save(ck, out / 'last.pt')
         if r['kw_auc'] > best:
             best = r['kw_auc']

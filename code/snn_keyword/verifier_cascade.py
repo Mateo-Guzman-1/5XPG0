@@ -9,20 +9,23 @@ stream start) ending with request k. At most one verification per request.
 A detection is the verifier accepting (score >= t2); its time is the end of
 request k plus the verifier run time (--verify-ms).
 
-  cache    frames (logmel) and stage-1 raw scores for every validation set,
-           once (data_verifier/cache_<split>.npz): live clips (clean),
-           MSWC dev, the 1 h stream, the 17.85 h negatives-only stream and
-           the yes-prefixed extras (policy b).
+  cache    frames (stage 1's front end) and stage-1 raw scores for every
+           validation set, once (data_verifier/cache_<split>[_<keyword>].npz):
+           live clips (clean), MSWC dev, the 1 h stream, the 17.85 h
+           negatives-only stream and the keyword-prefixed extras (policy b).
   score    verifier scores at every request end, policies a and b
            (verifier_model.keyword_score), for one quantized verifier.
   select   thresholds with stream_select.py's rule (live other-word accepts
            <= 0.2%, <= 2 FA/h on the negatives stream), stage 1 alone and
            the cascades; report recall, false accepts and latency.
 
-Policy (b) counts yes-prefixed words as false accepts: MSWC "yesterday"
-joins the other words, and the yes-prefixed extras (LibriSpeech dev
-utterances with a YES... word but no "yes", validation TTS/MSWC yes+letters
-clips) are reported and their utterances join the negatives stream.
+Policy (b) counts keyword-prefixed words as false accepts: MSWC "yesterday"
+joins the other words, and the prefixed extras (LibriSpeech dev utterances
+with a YES... word but no "yes", validation TTS/MSWC yes+letters clips) are
+reported and their utterances join the negatives stream.
+
+The keyword is keyword_config.KEYWORD (KWS_KEYWORD); the stage-1 model and
+the cache follow it ("yes": the W=20 line, "sheila": the QAT candidate).
 """
 import argparse
 import csv
@@ -32,6 +35,7 @@ from pathlib import Path
 
 import numpy as np
 
+import keyword_config as K
 import memguard
 import robust_eval as R
 from features import frame_features
@@ -39,12 +43,17 @@ from model import decision_scores, integer_forward_stream
 
 ROOT = Path(__file__).resolve().parent
 DV = ROOT / 'data_verifier'
-STAGE1 = Path(r'C:\Users\matut\FULL_AI\5XPG0\code\snn_keyword\runs_stream\s2_nokd_qat\int_last.npz')
+MAIN = Path(r'C:\Users\matut\FULL_AI\5XPG0\code\snn_keyword\runs_stream')
+STAGE1 = MAIN / {'yes': 's2_nokd_qat/int_last.npz', 'sheila': 'sheila_qat_seed2/int_model.npz'}[K.KEYWORD]
 HOP = 25
 NEG = np.iinfo(np.int64).min // 4
 
 
 # --------------------------------------------------------------------------- cache
+
+def cache_file(split):
+    return DV / (f'cache_{split}.npz' if K.KEYWORD == 'yes' else f'cache_{split}_{K.KEYWORD}.npz')
+
 
 def stage1_raw(q, feats, batch=16):
     out = [None] * len(feats)
@@ -63,8 +72,8 @@ def stage1_raw(q, feats, batch=16):
 
 
 def prefixed_extras(data, split):
-    """Yes-prefixed negatives for policy (b): LibriSpeech dev utterances with a YES... word
-    and no YES, and validation multi-corpus clips of yes-prefixed words, placed in noise."""
+    """Keyword-prefixed negatives for policy (b): LibriSpeech dev utterances with a word that
+    begins with the keyword and no keyword, and validation multi-corpus clips of such words, placed in noise."""
     import soundfile as sf
     utts = []
     for subset in R.NEG_LIBRI[split]:
@@ -73,14 +82,14 @@ def prefixed_extras(data, split):
             for line in t.read_text().splitlines():
                 uid, text = line.split(' ', 1)
                 ws = text.split()
-                if any(R.yes_prefixed(w) for w in ws) and 'YES' not in ws:
+                if any(K.prefixed(w) for w in ws) and K.KEYWORD.upper() not in ws:
                     utts.append((uid, text, sf.read(t.parent / f'{uid}.flac', dtype='float32')[0]))
-    rows = [r for r in csv.DictReader(open(data / 'multi/manifest.csv', encoding='utf-8'))
-            if r['split'] == 'validation' and R.yes_prefixed(r['word'])]
-    clips = np.load(data / 'multi/clips_validation.npy', mmap_mode='r')
+    rows = [r for r in csv.DictReader(open(K.MULTI / 'manifest.csv', encoding='utf-8'))
+            if r['split'] == 'validation' and K.prefixed(r['word'])]
+    clips = np.load(K.MULTI / 'clips_validation.npy', mmap_mode='r')
     audios = [clips[int(r['row'])].astype(np.float32) / 32768 for r in rows]
     noise = R.bg_noise(data)
-    placed = R.place_clips(audios, noise, np.random.default_rng(77))
+    placed = R.place_clips(audios, noise, np.random.default_rng(77)) if audios else []
     # Utterances: 0.5 s of noise before and 1 s after, as in the negatives stream.
     rng = np.random.default_rng(78)
     lib = []
@@ -94,19 +103,22 @@ def prefixed_extras(data, split):
 
 def cache(a):
     q = dict(np.load(a.stage1))
+    K.check_model_keyword(q.get('keyword'), 'stage 1')
     front = str(q.get('frontend', 'logmel'))
     t0 = time.perf_counter()
     sets, info = R.build_sets(a.data, a.split, None, R.STREAM_SECONDS, {'device', 'tts'})
     groups = {'live': sets['live']['clean'], 'mswc': sets['mswc'][0], 'stream': [sets['stream'][0]]}
     lib, lib_text, pre, pre_words = prefixed_extras(a.data, a.split)
     groups['prefixed_libri'], groups['prefixed_clips'] = lib, pre
-    out = {'live_y': sets['live_y'], 'mswc_words': sets['mswc'][1], 'stream_marks': sets['stream'][1],
+    out = {'live_y': sets['live_y'], 'live_clipped': sets['live_clipped'], 'mswc_words': sets['mswc'][1],
+           'mswc_clipped': sets['mswc'][2], 'stream_marks': sets['stream'][1],
+           'decision_window': np.array(int(q.get('decision_window', 1))), 'keyword': np.array(K.KEYWORD),
            'stream_seconds': np.array(sets['stream'][2]['seconds']), 'prefixed_libri_text': np.array(lib_text),
            'prefixed_clip_words': np.array(pre_words)}
-    def put(name, feats):
+    def put(name, feats):   # a group may be empty ("sheila" has no keyword-prefixed words)
         raw = stage1_raw(q, feats)
-        out[f'{name}_frames'] = np.concatenate(feats)
-        out[f'{name}_raw'] = np.concatenate(raw)
+        out[f'{name}_frames'] = np.concatenate(feats) if feats else np.zeros((0, 24), np.uint8)
+        out[f'{name}_raw'] = np.concatenate(raw) if raw else np.zeros(0, np.int32)
         out[f'{name}_off'] = np.r_[0, np.cumsum([len(f) for f in feats])].astype(np.int64)
         print(name, len(feats), 'items', len(out[f'{name}_frames']), 'frames', round(time.perf_counter() - t0), 's', flush=True)
     for name, audios in groups.items():
@@ -122,7 +134,7 @@ def cache(a):
     out['neg_segments'] = np.array(kinds)
     put('neg', feats)
     out['stage1'] = np.array(str(a.stage1))
-    np.savez(DV / f'cache_{a.split}.npz', **out)
+    np.savez(cache_file(a.split), **out)
     print('cached', round(time.perf_counter() - t0), 's')
 
 
@@ -162,7 +174,7 @@ def score(a):
     torch.set_num_threads(a.threads)
     q = load_quantized(a.checkpoint)
     model = IntegerTorch(q, 'cpu')
-    c = dict(np.load(DV / f'cache_{a.split}.npz'))
+    c = dict(np.load(cache_file(a.split)))
     out, t0 = {}, time.perf_counter()
     for g in GROUPS:
         items = split_items(c, g)
@@ -185,7 +197,8 @@ def score(a):
                     flush()
         if pend:
             flush()
-        out[f'{g}_va'], out[f'{g}_vb'] = np.concatenate(va), np.concatenate(vb)
+        empty = np.zeros(0, np.int64)
+        out[f'{g}_va'], out[f'{g}_vb'] = (np.concatenate(va), np.concatenate(vb)) if va else (empty, empty)
         out[f'{g}_voff'] = np.array(off, np.int64)
         print(g, len(items), 'items', off[-1], 'windows', round(time.perf_counter() - t0), 's', flush=True)
     out.update(checkpoint=np.array(str(a.checkpoint)), warmup=np.array(a.warmup), boundary=np.array(a.boundary),
@@ -265,6 +278,8 @@ def operating(cas, mode, t2, policy, max_live_fa=.002, max_fa_hour=2.):
         if best is None or rec > best['live_recall']:
             best = dict(t1=int(t1), t2=None if t2 is None else int(t2), live_recall=round(float(rec), 4),
                         live_fa=round(float(fa), 4), fa_per_hour=round(fph, 3), neg_hours=round(hours, 2))
+            if 'live_clipped' in c:   # recall on keyword recordings that are not cut off
+                best['live_recall_complete'] = round(float((live[(y == 1) & ~c['live_clipped']] >= t1).mean()), 4)
     if best is None:
         return None
     t1 = best['t1']
@@ -274,11 +289,11 @@ def operating(cas, mode, t2, policy, max_live_fa=.002, max_fa_hour=2.):
                 latency_p90_s=st['latency_p90_s'])
     mw = c['mswc_words']
     ms = np.array([s.max() for _, s in cas.traces('mswc', mode, t2, policy)])
-    pre = np.vectorize(R.yes_prefixed)(mw)
-    other = (mw != 'yes') & (~pre if policy == 'a' else True)
-    best.update(mswc_recall=round(float((ms[mw == 'yes'] >= t1).mean()), 4),
+    pre = np.vectorize(K.prefixed)(mw) if len(mw) else np.zeros(0, bool)
+    other = (mw != K.KEYWORD) & (~pre if policy == 'a' else True)
+    best.update(mswc_recall=round(float((ms[mw == K.KEYWORD] >= t1).mean()), 4) if (mw == K.KEYWORD).any() else None,
                 mswc_other_fa=round(float((ms[other] >= t1).mean()), 4),
-                mswc_yesterday_accepted=f'{int((ms[pre] >= t1).sum())}/{int(pre.sum())}')
+                mswc_prefixed_accepted=f'{int((ms[pre] >= t1).sum())}/{int(pre.sum())}')
     pc = np.array([s.max() for _, s in cas.traces('prefixed_clips', mode, t2, policy)])
     best['prefixed_clips_accepted'] = f'{int((pc >= t1).sum())}/{len(pc)}'
     pl = sum(len(R.detections(t, s, t1)) > 0 for t, s in cas.traces('prefixed_libri', mode, t2, policy))
@@ -301,13 +316,14 @@ def mcnemar(a_hits, b_hits):
 
 
 def select(a):
-    c = dict(np.load(DV / f'cache_{a.split}.npz'))
+    c = dict(np.load(cache_file(a.split)))
     v = dict(np.load(a.scores))
     report = {'scores': str(a.scores), 'verify_ms': a.verify_ms,
-              'rule': 'live other words <= 0.2%, <= 2 FA/h on the negatives stream (policy b: + yes-prefixed utterances)',
+              'keyword': K.KEYWORD,
+              'rule': 'live other words <= 0.2%, <= 2 FA/h on the negatives stream (policy b: + prefixed utterances)',
               'runs': []}
     y = c['live_y']
-    for w in a.windows:
+    for w in a.windows or [int(c.get('decision_window', 20))]:
         cas = Cascade(c, v, w, a.verify_ms)
         for policy in ('a', 'b'):
             rows = {'stage1_frame': operating(cas, 'frame', None, policy),
@@ -352,7 +368,7 @@ def main():
     e = sub.add_parser('select')
     e.add_argument('scores', type=Path)
     e.add_argument('--split', choices=['validation'], default='validation')
-    e.add_argument('--windows', type=int, nargs='+', default=[20, 1], help='stage-1 decision windows')
+    e.add_argument('--windows', type=int, nargs='+', help='stage-1 decision windows (default: the model\'s own)')
     e.add_argument('--verify-ms', type=float, default=0., help='verifier run time added to cascade detections')
     e.add_argument('--out', type=Path, required=True)
     a = p.parse_args()

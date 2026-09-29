@@ -1,4 +1,4 @@
-/* Second-stage "yes" verifier, bit-exact with verifier_model.integer_forward and keyword_score.
+/* Second-stage keyword verifier, bit-exact with verifier_model.integer_forward and keyword_score.
  *
  * Two GRU layers and a linear readout per 20 ms step (two stacked frames), Q10
  * activations in int16, int8 weights stored offset by +128 as uint8 with one
@@ -84,7 +84,9 @@ static void gru(int16_t *a, unsigned nin, unsigned H, const uint8_t *w, const ui
     for (unsigned j = 0; j < H; ++j) a[nin + j] = hnew[j];
 }
 
-#define NS (5 + VERIFIER_BOUNDARY)
+#define LAST (2 * VERIFIER_NPH - 2)          /* state of the last phoneme; 2i+1: blank after phoneme i */
+#define NS (LAST + 1 + VERIFIER_BOUNDARY)
+static const uint8_t phones[VERIFIER_NPH] = VERIFIER_PHONES;
 static inline int32_t max2(int32_t x, int32_t y) { return x > y ? x : y; }
 
 void verifier_run(const uint8_t *frames, unsigned n, verifier_result_t *res, int32_t *logits)
@@ -110,18 +112,20 @@ void verifier_run(const uint8_t *frames, unsigned n, verifier_result_t *res, int
             if (logits) logits[t * VERIFIER_CLASSES + c] = lg[c];
         }
         /* Keyword path (verifier_model.keyword_score); costs c(k) = logit(k) - max <= 0. */
-        const int32_t cy = lg[VERIFIER_Y] - top, ce = lg[VERIFIER_EH] - top, cs = lg[VERIFIER_S] - top;
-        const int32_t cb = lg[VERIFIER_BLANK] - top, cp = max2(cb, cs);
+        const int32_t cb = lg[VERIFIER_BLANK] - top, cp = max2(cb, lg[phones[VERIFIER_NPH - 1]] - top);
         for (unsigned s = 0; s < NS; ++s) P[s] = D[s];
         const int32_t start = t >= VERIFIER_WARMUP ? 0 : VERIFIER_NEG;
-        D[0] = max2(P[0], start) + cy;
-        D[1] = max2(P[0], P[1]) + cb;
-        D[2] = max2(max2(P[0], P[1]), P[2]) + ce;
-        D[3] = max2(P[2], P[3]) + cb;
-        D[4] = max2(max2(P[2], P[3]), P[4]) + cs;
-        for (unsigned j = 0; j < VERIFIER_BOUNDARY; ++j) D[5 + j] = P[4 + j] + cp;
+        D[0] = max2(P[0], start) + (lg[phones[0]] - top);
+        for (unsigned i = 1; i < VERIFIER_NPH; ++i) {
+            const unsigned s = 2 * i;
+            D[s - 1] = max2(P[s - 2], P[s - 1]) + cb;
+            int32_t prev = max2(P[s - 1], P[s]);
+            if (phones[i] != phones[i - 1]) prev = max2(prev, P[s - 2]);   /* CTC: equal phonemes need a blank */
+            D[s] = prev + (lg[phones[i]] - top);
+        }
+        for (unsigned j = 0; j < VERIFIER_BOUNDARY; ++j) D[LAST + 1 + j] = P[LAST + j] + cp;
         for (unsigned s = 0; s < NS; ++s) D[s] = max2(D[s], VERIFIER_NEG);
-        if (D[4] > res->score_a) { res->score_a = D[4]; res->end_a = (int32_t)t; }
+        if (D[LAST] > res->score_a) { res->score_a = D[LAST]; res->end_a = (int32_t)t; }
         if (D[NS - 1] > res->score_b) { res->score_b = D[NS - 1]; res->end_b = (int32_t)t; }
     }
 }

@@ -42,6 +42,17 @@ def free_ok(min_ram_gb=10., min_gpu_gb=2.5):
     return ok, {'free_ram_gb': round(ram, 2), 'free_gpu_gb': None if gpu is None else round(gpu, 2)}
 
 
+def count_instances(pids):
+    """Distinct jobs among `pids`: a venv launcher and its interpreter child count once."""
+    s, n = set(pids), 0
+    for p in pids:
+        try:
+            n += psutil.Process(p).ppid() not in s
+        except psutil.Error:
+            pass
+    return n
+
+
 def other_instances(script):
     """PIDs of other processes running `script`, excluding this process, its parents and children
     (the venv launcher on Windows starts the real interpreter as a child with the same command line)."""
