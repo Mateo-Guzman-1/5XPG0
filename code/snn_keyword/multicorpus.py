@@ -73,7 +73,9 @@ class ClipSampler:
     def yes_batch(self, n):
         """n "yes" clips, corpora in the batch mix's proportions (unshifted waveforms, numpy)."""
         yes_cls = CLASSES.index(K.KEYWORD)
-        corp = [c for c in self.pools if (self.cls[self.pools[c]] == yes_cls).any()]
+        # A corpus supplies positives only with >= 100 keyword clips: MSWC has 8 "sheila" clips,
+        # which would otherwise be 18% of all positives, endlessly repeated.
+        corp = [c for c in self.pools if (self.cls[self.pools[c]] == yes_cls).sum() >= 100]
         p = np.array([self.mix.get(c, 0) for c in corp]); p = p / p.sum()
         ids = np.concatenate([self.rng.choice(self.pools[c][self.cls[self.pools[c]] == yes_cls], k)
                               for c, k in zip(corp, self.rng.multinomial(n, p)) if k])

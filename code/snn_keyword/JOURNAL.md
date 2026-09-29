@@ -853,11 +853,202 @@ construction, with a causal gain control relative to a running peak
   144 KB model region with stage 1.
 - Its keyword target changes to SH IY L AH.
 
+### 23. "sheila": first baseline, the teammate's clip model under our rule, AGC stage 1
+
+**First "sheila" baseline** (`sheila_s2_wide`, stage 2 on `s1_wide`,
+validation, ≤ 2 FA/h on 17.85 h of negatives):
+
+| W | Live recall | Complete recordings | Other words accepted | 1 h stream recall |
+|---|---|---|---|---|
+| 1 | 62.7% | | 0.00% | 72.1% |
+| 10 | 63.7% | 70.3% | 0.00% | 73.5% |
+| 20 | 61.3% | | 0.00% | 70.6% |
+
+- The word limit never binds: false accepts come from continuous speech,
+  and "zero" becomes the main word false accept above 70% recall.
+- 22.5% of the "sheila" positives (46/204) are cut off by the 1 s
+  recording window. Their recall is 41%, against 70% for complete ones;
+  stream_select now reports `live_recall_complete`.
+- `sheila_s2_clip` (`--clipped-dontcare`: truncated positives get no
+  target) is trained and being selected.
+
+**Teammate's model (`upstream/damien-dicking-around`, "sheila v2")** scored
+with our harness (`damien_detector.py`, `results/sheila_damien_ourrule.json`):
+- The port is bit-exact: all 40 of his board vectors, and his features
+  computed from the WAVs.
+- It runs a 1 s window every 250 ms, as in his live demo; the score is his
+  spike margin.
+- At his margin 2: 83.3% live recall, but 2.8% other words accepted and
+  **324 FA/h** on the negatives.
+- At ≤ 2 FA/h: **8.3%** live recall.
+- Our streaming SNN reaches 63.7% at the same rate. His 98% clip accuracy
+  (with 1.2% word false accepts on the test clips) does not carry over to
+  continuous audio.
+- His finding worth keeping: for "sheila" the information sits below about
+  5.1 kHz (no gain from a 6.5 kHz cutoff), unlike the /s/ of "yes".
+  `band_sensitivity.py` for "sheila" is queued to check this for our models.
+
+**Alex's `snn_layer.v`** (`upstream/Alex-parallel`):
+- 64 parallel LIF neurons fed by a row-wide weight BRAM, the same idea as
+  the neuron engine.
+- The file itself says "SKETCH. NOT compiled, NOT simulated, NOT
+  synthesized".
+- It removes kdot and the hardware LED timer from `spike_soc.v`, and uses
+  0x1000_4000, where the engine sits. Merging would conflict.
+
+**`s1_agc`** (AGC front end) reaches 75.5% 35-word accuracy, against 79.4%
+for `s1_wide`: level invariance costs 4 points on clean clips.
+`sheila_s2_agc` is training.
+
+**Resources:**
+- My own TTS generation (6 Piper workers of 1.9 GB) exhausted memory and
+  killed `s1_agc` at epoch 31; it was rerun, and TTS now runs with 2
+  workers.
+- A `pytest` from 2026-09-27 had hung for two days (1.6 GB); it was
+  stopped.
+
+### 24. "sheila": truncated positives, band sensitivity, dedicated data
+
+**Ignoring truncated positives hurts.** `sheila_s2_clip` (W=10) reaches
+51.0% live recall and 60.1% on complete recordings, against 63.7% and 70.3%
+for the baseline. With only 1,606 real positives, dropping 22% costs more
+than the truncation noise does. Positive data is the bottleneck.
+
+**Band sensitivity** (`results/sheila_band_sensitivity.json`, same clips,
+baseline model):
+- Low-pass at 4.5 kHz: 70.1% against 63.7% clean; at 3.5 kHz: 61.8%.
+- For "yes", a 5 kHz low-pass halved recall. "sheila" does not need the high
+  band, which confirms the teammate's finding; the held-out microphone
+  problem should be much milder.
+- The high band seems to add distracting variation. A front end limited to
+  about 5 kHz, with the 24 bands placed where the information is, is a
+  candidate.
+- Level still matters: −20 dB costs 10 points and +10 dB costs 5. The AGC
+  run is in progress.
+
+**Dedicated data:**
+- TTS for "sheila" is done: 55,000 utterances in `data/tts_sheila`, 8,000
+  training positives, plus a held-out voice-model test set.
+- `data/multi_sheila_full` (`KWS_MULTI`) is being built from Speech
+  Commands v2, the "sheila" MSWC selection and this TTS.
+- `keyword_config.TTS` and `KWS_MULTI` make these paths per keyword; "yes"
+  keeps `data/multi` and `data/tts`.
+
+### 25. "sheila": four attempts fail to beat the baseline; seed variance first
+
+Validation, ≤ 2 FA/h on 17.85 h of negatives, best window per model:
+
+| Model | Live recall | Complete recordings | Other words accepted |
+|---|---|---|---|
+| baseline `sheila_s2_wide` (W=10) | **63.7%** | 70.3% | 0.00% |
+| `--clipped-dontcare` (W=10) | 51.0% | 60.1% | 0.00% |
+| AGC front end `sheila_s2_agc` (W=20) | 57.8% | 67.7% | 0.13% |
+| + MSWC + TTS data `sheila_s2_tts` (W=10) | 57.8% | 62.0% | 0.03% |
+| baseline + PC low-pass 4.5 / 5.5 kHz | no threshold meets the rule | | |
+
+- **AGC:** level-invariant as designed (−20 and −10 dB give identical
+  recall), but it costs about 6 points at normal level and breaks under
+  low-pass filtering (48.5% against 70.1%): its reference is the loudest
+  band. Across `logmel_w`, AGC and earlier PCEN, the plain log-mel stays best.
+- **Low-pass:** the band sweep showed 70.1% recall under a 4.5 kHz low-pass
+  at the model's own threshold. Under the full rule no threshold is
+  feasible: the filtered negatives score above every positive. A
+  recall-only robustness sweep must not drive a decision; only the full
+  rule (both false-accept limits) counts.
+- **TTS + MSWC data:** worse on real speech (the live set is Speech
+  Commands). Synthetic positives and extra near-misses shift the model away
+  from the target domain. Recall on the held-out TTS voices was not measured.
+
+**Method check before a fifth attempt:**
+- 204 positives mean an SE of about 3.4 points per model. Seed-to-seed
+  training variance is unknown, so "63.7% against 57.8%" may be partly
+  noise.
+- Two more seeds of the baseline recipe (`sheila_s2_wide_seed1`,
+  `_seed2`) are training. Differences smaller than their spread will not be
+  called.
+
+### 26. Seed variance of the "sheila" baseline, and the revised verdicts
+
+Same recipe as `sheila_s2_wide`, seeds 0/1/2 (best window per seed):
+
+| Seed | Live recall | Complete recordings |
+|---|---|---|
+| 0 | 63.7% | 70.3% |
+| 1 | 57.4% | 62.0% |
+| 2 | 63.7% | 72.8% |
+
+Mean 61.6% ± 3.6 (SD); complete recordings 68.4% ± 5.6.
+
+Revised verdicts from entry 25:
+- AGC and TTS data (57.8%) are within one SD of the recipe's own seed mean.
+  The verdict is "no measurable gain", not "worse".
+- Ignoring truncated clips (51.0%) and the low-pass (no feasible
+  threshold) are genuinely worse.
+
+Rule from here: a single-run difference under about 7 points (2 SD) is not
+called. Changes need several seeds or a paired comparison.
+
+**Next:** QAT of seeds 0 and 2 (`sheila_qat_seed0/2`, 8 epochs, as the
+"yes" QAT). Then integer export, the long-negatives selection on the integer
+model, and the RTL check.
+
+### 27. "sheila" candidate: QAT, RTL, and the one-time test run
+
+**QAT and integer export** (`sheila_qat_seed0/2`, 8 epochs from the float
+seeds). Validation, integer models, full rule:
+
+| Model | Live recall | Complete recordings | FA/h |
+|---|---|---|---|
+| **seed 2, W=1** | **66.7%** | **75.9%** | 1.44 |
+| seed 0, W=1 | 59.3% | 67.1% | 1.99 |
+
+- As for "yes", QAT costs nothing: seed 2 went from 63.7% as a float model
+  to 66.7% as an integer model.
+- The selection picks W=1 (W=10 ties).
+- Candidate: `runs_stream/sheila_qat_seed2/int_model.npz`
+  (stream_threshold 18462, decision_window 1, logmel).
+
+**RTL** (`verify_stream_rtl.py --engine --tag sheila`): 40 streams (20
+"sheila" and 20 other test clips), 355 hops, bit-exact with the oracle,
+including detections, malformed requests, reset, duplicate sequence and the
+1 s LED pulse. Worst hop 1,029,278 cycles (10.29 ms at 100 MHz), mean 9.89 ms.
+
+**Test split, once** (`final_eval.py`, `results/final_sheila_test.json`).
+Thresholds were fixed on validation; the negatives are 18.97 h of
+LibriSpeech test-clean + test-other and every non-"sheila" Speech Commands
+test word.
+
+| Model | Live recall | Complete recordings | Other words accepted | FA/h |
+|---|---|---|---|---|
+| ours, clean | 63.7% | 70.7% | 0.00% | **1.58** |
+| ours, held-out mics | 66.5% | 70.1% | 0.03% | |
+| ours, real rooms | 60.9% | 69.5% | 0.20% | |
+| ours, mics + rooms | 58.0% | 64.9% | 0.40% | |
+| teammate's clip model, threshold for ≤ 2 FA/h (validation) | 7.1% | 8.1% | 0.00% | 2.11 |
+| teammate's clip model, his margin 2 | 80.2% | 85.1% | 3.53% | 366 |
+
+- Validation predicted the test well: recall 66.7% → 63.7% (SE about
+  3.3), false accepts 1.44 → 1.58 per hour, within the ≤ 2/h target.
+- No microphone drop for "sheila" (+2.8 points, noise), where "yes" lost
+  17-20 points: the word does not depend on the band above 5 kHz. Rooms cost
+  about 3 points, mics + rooms about 6.
+- 1 h test stream: 69.3% recall at 1 FA/h, median latency 0.04 s after
+  the end of the word.
+- At an equal false-accept rate the streaming SNN detects 9× more
+  "sheila"s than the clip classifier.
+
+**Not done yet:**
+- The board test of this model (JTAG or the Ethernet path, needs the user's
+  go-ahead).
+- Native C on the full test set (`verify_stream.py`).
+- The phoneme verifier retargeted to SH IY L AH.
+
 ## Open items
 
 Status of `IMPLEMENTATION_PLAN.md`: Phases 0-6 done; the streaming firmware and
 engine are verified on the board (entry 18); Phase 7 evaluated, candidate not
-promoted (entry 17). The iteration loop from entry 19 is running.
+promoted (entry 17). The iteration loop from entry 19 is running; the keyword
+is now "sheila" (entry 22).
 
 1. Rebuild `keyword_engine.bit` with the `ps_if.v` ABI fix (`0x00020003`).
 2. The SD card now boots PYNQ Linux: test the standard Ethernet path

@@ -48,6 +48,9 @@ if KEYWORD not in NEAR_MISS:
     raise ValueError(f'KWS_KEYWORD={KEYWORD!r}: add its NEAR_MISS and TTS_GROUPS to keyword_config.py')
 
 MULTI = ROOT / ('data/multi' if KEYWORD == 'yes' else f'data/multi_{KEYWORD}')
+if os.environ.get('KWS_MULTI'):   # e.g. data/multi_sheila_full while another build is in use
+    MULTI = Path(os.environ['KWS_MULTI']) if Path(os.environ['KWS_MULTI']).is_absolute() else ROOT / os.environ['KWS_MULTI']
+TTS = ROOT / ('data/tts' if KEYWORD == 'yes' else f'data/tts_{KEYWORD}')   # make_tts_negatives.py output
 
 # MSWC near-miss groups for the evaluation (the prefixed group is added by robust_eval).
 MSWC_GROUPS = {

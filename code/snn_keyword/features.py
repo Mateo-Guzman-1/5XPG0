@@ -76,7 +76,9 @@ def frame_power(audio):
 # its values sit on the -80 dB floor (46% of the /s/ bands at -20 dB input), so
 # 'logmel_w' moves the window down and widens it (JOURNAL entry 20).
 LOGMEL_RANGE = {'logmel': (-80., 0.), 'logmel_w': (-120., -20.)}
-FRONTENDS = ('logmel', 'logmel_w', 'logmel_agc', 'pcen')
+FRONTENDS = ('logmel', 'logmel_w', 'logmel_agc', 'pcen', 'logmel_lp<Hz>')
+# logmel_lp<Hz> (e.g. logmel_lp4500): the logmel front end after an 8th-order
+# Butterworth low-pass on the PC (JOURNAL entry 24: "sheila" needs no high band).
 # logmel_agc: log-mel relative to a causal peak-level tracker (JOURNAL entry 22).
 # The level of a frame is its loudest band (dB); the tracker follows it up at
 # once and falls by `release` dB per frame, never below `floor`. Features are
@@ -129,6 +131,10 @@ def pcen_frames(power, state=None, p=PCEN):
 
 
 def frame_features(audio, frontend='logmel'):
+    if frontend.startswith('logmel_lp'):
+        from scipy.signal import butter, sosfilt
+        audio = sosfilt(butter(8, float(frontend[9:]), 'lowpass', fs=SAMPLE_RATE, output='sos'), audio).astype(np.float32)
+        frontend = 'logmel'
     power = frame_power(audio)
     if frontend == 'pcen':
         return pcen_frames(power)[0]

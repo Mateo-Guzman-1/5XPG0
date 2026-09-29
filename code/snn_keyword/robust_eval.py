@@ -464,7 +464,9 @@ def build_sets(data, split, probe, stream_seconds, skip):
     cfg = SPLITS[split]
     clips, y, rng = sc_live_clips(data, cfg['sc'], seed=cfg['seed'])
     noise = bg_noise(data)
-    sets = {'live_y': y, 'live': {}}
+    # Keyword clips cut off by the 1 s recording window (22% of "sheila", 5% of "yes"):
+    # recall on complete recordings is reported next to the overall recall.
+    sets = {'live_y': y, 'live': {}, 'live_clipped': np.array([edge_clipped(c) for c in clips])}
     for cond in ('clean', 'mic', 'room', 'mic+room'):
         if cond != 'clean' and 'device' in skip:
             continue

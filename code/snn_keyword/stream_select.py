@@ -71,7 +71,9 @@ def select(det, sets, neg, max_live_fa, max_fa_hour, w=1):
             continue
         rec = (live[y == 1] >= t).mean()
         if best is None or rec > best['live_recall']:
+            complete = (y == 1) & ~sets['live_clipped']
             best = dict(threshold=float(t), window=w, live_recall=float(rec), live_fa=float(fa),
+                        live_recall_complete=float((live[complete] >= t).mean()),
                         fa_per_hour=round(fph, 3), fa_hours=round(neg_hours, 2),
                         stream=score_stream(times, score, t, marks, hours),
                         mswc_recall=float((mswc[words == K.KEYWORD] >= t).mean()),

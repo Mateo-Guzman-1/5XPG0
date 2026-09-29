@@ -1,0 +1,206 @@
+{
+ "model": "runs_stream/sheila_s2_wide/model.pt",
+ "rules": {
+  "raw1": {
+   "threshold": 74.34854505653661,
+   "live_recall": 0.6373,
+   "live_fa": 0.0,
+   "stream_recall": 0.7426,
+   "fa_per_hour": 2.0,
+   "recall_if_only_live_fa": 0.7549,
+   "recall_if_only_stream_fa": 0.6373,
+   "mswc_recall": 1.0
+  },
+  "mean3": {
+   "threshold": 73.31398990936964,
+   "live_recall": 0.6324,
+   "live_fa": 0.0,
+   "stream_recall": 0.7426,
+   "fa_per_hour": 2.0,
+   "recall_if_only_live_fa": 0.75,
+   "recall_if_only_stream_fa": 0.6324,
+   "mswc_recall": 1.0
+  },
+  "mean5": {
+   "threshold": 72.87193434148668,
+   "live_recall": 0.6176,
+   "live_fa": 0.0,
+   "stream_recall": 0.7353,
+   "fa_per_hour": 2.0,
+   "recall_if_only_live_fa": 0.7549,
+   "recall_if_only_stream_fa": 0.6176,
+   "mswc_recall": 1.0
+  },
+  "mean10": {
+   "threshold": 70.88335607858482,
+   "live_recall": 0.5833,
+   "live_fa": 0.0,
+   "stream_recall": 0.7353,
+   "fa_per_hour": 2.0,
+   "recall_if_only_live_fa": 0.7304,
+   "recall_if_only_stream_fa": 0.5833,
+   "mswc_recall": 1.0
+  },
+  "min2": {
+   "threshold": 71.85727171073272,
+   "live_recall": 0.6569,
+   "live_fa": 0.0003,
+   "stream_recall": 0.7426,
+   "fa_per_hour": 2.0,
+   "recall_if_only_live_fa": 0.7794,
+   "recall_if_only_stream_fa": 0.6569,
+   "mswc_recall": 1.0
+  },
+  "min3": {
+   "threshold": 70.02352491536469,
+   "live_recall": 0.6618,
+   "live_fa": 0.0,
+   "stream_recall": 0.75,
+   "fa_per_hour": 2.0,
+   "recall_if_only_live_fa": 0.7892,
+   "recall_if_only_stream_fa": 0.6618,
+   "mswc_recall": 1.0
+  },
+  "min5": {
+   "threshold": 72.2842594973723,
+   "live_recall": 0.5931,
+   "live_fa": 0.0,
+   "stream_recall": 0.7279,
+   "fa_per_hour": 2.0,
+   "recall_if_only_live_fa": 0.7353,
+   "recall_if_only_stream_fa": 0.5931,
+   "mswc_recall": 1.0
+  }
+ },
+ "false_accepts_at_threshold": [
+  [
+   903.27,
+   "libri",
+   "libri",
+   "3081-166546-0023.flac"
+  ],
+  [
+   1937.82,
+   "word",
+   "zero",
+   "8335f893_nohash_0.wav"
+  ]
+ ],
+ "looser": {
+  "live_recall_0.65": {
+   "threshold": 73.62482279539108,
+   "fa_per_hour": 2.0,
+   "live_fa": 0.0,
+   "by_kind": {
+    "libri": 1,
+    "word": 1
+   },
+   "top_words": [
+    [
+     "libri",
+     1
+    ],
+    [
+     "zero",
+     1
+    ]
+   ]
+  },
+  "live_recall_0.7": {
+   "threshold": 67.6559690952301,
+   "fa_per_hour": 4.0,
+   "live_fa": 0.0003,
+   "by_kind": {
+    "libri": 1,
+    "word": 3
+   },
+   "top_words": [
+    [
+     "zero",
+     3
+    ],
+    [
+     "libri",
+     1
+    ]
+   ]
+  },
+  "live_recall_0.75": {
+   "threshold": 62.91358870267868,
+   "fa_per_hour": 5.0,
+   "live_fa": 0.0003,
+   "by_kind": {
+    "libri": 2,
+    "word": 3
+   },
+   "top_words": [
+    [
+     "zero",
+     3
+    ],
+    [
+     "libri",
+     2
+    ]
+   ]
+  }
+ },
+ "misses": {
+  "snr_db": [
+   {
+    "range": [
+     -19.2,
+     -3.4
+    ],
+    "recall": 0.559
+   },
+   {
+    "range": [
+     -3.4,
+     4.4
+    ],
+    "recall": 0.721
+   },
+   {
+    "range": [
+     4.4,
+     30.6
+    ],
+    "recall": 0.632
+   }
+  ],
+  "level_dbfs": [
+   {
+    "range": [
+     -41.5,
+     -28.2
+    ],
+    "recall": 0.559
+   },
+   {
+    "range": [
+     -28.2,
+     -21.3
+    ],
+    "recall": 0.735
+   },
+   {
+    "range": [
+     -21.3,
+     -1.6
+    ],
+    "recall": 0.618
+   }
+  ],
+  "edge_clipped": {
+   "n": 46,
+   "recall": 0.413,
+   "recall_not_clipped": 0.703
+  },
+  "missed_margin_sd": [
+   -1.82,
+   -0.51,
+   -0.09
+  ]
+ }
+}

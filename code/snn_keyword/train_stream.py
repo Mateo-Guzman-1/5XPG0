@@ -87,7 +87,8 @@ def clip_val(model, sampler, aug, device, frontend, corpus='sc', batch=1024):
     return float((pred == cls).mean())
 
 
-def build_streams(sampler, aug, n, seconds, device, rng, yes_share=.25, hard_words=None, hard_share=0.):
+def build_streams(sampler, aug, n, seconds, device, rng, yes_share=.25, hard_words=None, hard_share=0.,
+                  clipped_dontcare=False):
     """n waveforms of `seconds` with 3-class frame targets and yes windows.
 
     yes_share of the clips are replaced by "yes" clips (about 5% at the corpus mix).
@@ -113,6 +114,15 @@ def build_streams(sampler, aug, n, seconds, device, rng, yes_share=.25, hard_wor
             rows = hard_words.draw(len(free))
             clip[torch.tensor(free, device=device)] = torch.tensor(sampler._wave(sampler.row[rows]), device=device)
             cls[torch.tensor(free, device=device)] = torch.tensor(sampler.cls[rows], device=device)
+    # Keyword clips cut off by the 1 s recording window (robust_eval.edge_clipped) can be
+    # "don't care" instead of positives: they teach that the start of the word suffices.
+    clipped = np.zeros(k, bool)
+    if clipped_dontcare:
+        from robust_eval import edge_clipped
+        kw = np.flatnonzero(cls.cpu().numpy() == YES)
+        if len(kw):
+            waves = clip[torch.tensor(kw, device=device)].cpu().numpy()
+            clipped[kw] = [edge_clipped(w) for w in waves]
     clip = aug.speed(clip, torch.rand(k, device=device) < aug.cfg['p_speed'])
     start, end = word_bounds(clip)
     slots = rng.integers(0, 3, k)  # 0: empty, 1-2: clip; about one empty slot in three
@@ -132,7 +142,7 @@ def build_streams(sampler, aug, n, seconds, device, rng, yes_share=.25, hard_wor
             f1 = min(T - 1, (t + (e0 - max(0, s0 - 800))) // HOP)
             if cls[c] == YES:
                 labels[i, f0:min(T, f1 + 35)] = -1
-                if f1 + 5 < T:
+                if f1 + 5 < T and not clipped[c]:
                     windows.append((i, f1, min(T - 1, f1 + 35)))
             else:
                 labels[i, max(0, f0 - 2):min(T, f1 + 3)] = torch.where(
@@ -257,6 +267,8 @@ def main():
     p.add_argument('--exclude-words', default=None,
                    help="regex of training words to leave out; 'yes.+' drops every word that begins with a "
                         "complete yes (don't care for a causal detector, JOURNAL entries 20-21)")
+    p.add_argument('--clipped-dontcare', action='store_true',
+                   help='keyword clips cut off at the end of the recording are ignored (no positive target)')
     p.add_argument('--word-mine-share', type=float, default=0., help='stage 2: share of word slots taken by mined words')
     p.add_argument('--mine-pool', type=int, default=2048)
     p.add_argument('--mine-keep', type=int, default=256)
@@ -314,7 +326,8 @@ def main():
                         if hard_words is not None:
                             sums.setdefault('mined_word_margin', []).append(hard_words.mine(model, aug, a.frontend, dev))
                     wave, labels, windows = build_streams(train, aug, a.batch - n_speech, a.seconds, dev, rng,
-                                                          hard_words=hard_words, hard_share=a.word_mine_share)
+                                                          hard_words=hard_words, hard_share=a.word_mine_share,
+                                                          clipped_dontcare=a.clipped_dontcare)
                     speed = aug.cfg['p_speed']; aug.cfg['p_speed'] = 0.  # clips were sped up before placement
                     wave, mic = aug.waveform(wave)
                     aug.cfg['p_speed'] = speed
