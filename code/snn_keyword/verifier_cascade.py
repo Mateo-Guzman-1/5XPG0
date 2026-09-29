@@ -18,6 +18,11 @@ request k plus the verifier run time (--verify-ms).
   select   thresholds with stream_select.py's rule (live other-word accepts
            <= 0.2%, <= 2 FA/h on the negatives stream), stage 1 alone and
            the cascades; report recall, false accepts and latency.
+  sources  stage 1 alone at looser thresholds (given live recalls): false
+           accepts per hour on the negatives stream, what they are (Speech
+           Commands word, or the LibriSpeech words around the detection),
+           and the live other words accepted. This is what the verifier
+           has to reject.
 
 Policy (b) counts keyword-prefixed words as false accepts: MSWC "yesterday"
 joins the other words, and the prefixed extras (LibriSpeech dev utterances
@@ -349,6 +354,65 @@ def select(a):
     a.out.write_text(json.dumps(report, indent=1, default=int))
 
 
+def libri_texts(data, split):
+    out = {}
+    for subset in R.NEG_LIBRI[split]:
+        for t in (data / 'librispeech' / 'LibriSpeech' / subset).rglob('*.trans.txt'):
+            for line in t.read_text().splitlines():
+                uid, text = line.split(' ', 1)
+                out[uid] = text
+    return out
+
+
+def describe(t, segments, texts, span=1.0):
+    """The inserted item overlapping most with the last `span` s before t: SC word, or LibriSpeech
+    words around the proportional position of t in the utterance (no alignment; a rough pointer)."""
+    best, item = 0., None
+    for s, e, kind, name in segments:
+        o = min(e, t) - max(s, t - span)
+        if o > best:
+            best, item = o, (s, e, kind, name)
+    if item is None:
+        return 'noise', 'noise only'
+    s, e, kind, name = item
+    if kind == 'word':
+        return 'word', name.replace('\\', '/').split('/')[0]
+    words = texts.get(Path(name).stem, '?').split()
+    i = int(np.clip((t - s) / max(e - s, 1e-3), 0, 1) * len(words))
+    return 'libri', ' '.join(words[max(0, i - 4):i + 1]).lower()
+
+
+def sources(a):
+    import collections
+    c = dict(np.load(cache_file(a.split)))
+    w = a.window or int(c.get('decision_window', 1))
+    y, clipped = c['live_y'], c.get('live_clipped')
+    live = np.array([decision_scores(r.astype(np.int64), w).max() for _, r in split_items(c, 'live')])
+    pos = np.sort(live[y == 1])[::-1]
+    hours = float(c['neg_seconds']) / 3600
+    segs = [json.loads(s) for s in c['neg_segments']]
+    negd = [decision_scores(r.astype(np.int64), w) for _, r in split_items(c, 'neg')]
+    texts = libri_texts(a.data, a.split)
+    report = {'keyword': K.KEYWORD, 'stage1': str(c['stage1']), 'window': w, 'neg_hours': round(hours, 2), 'levels': []}
+    for rec in a.recalls:
+        t1 = int(pos[min(len(pos) - 1, int(np.ceil(rec * len(pos))) - 1)])
+        events = []
+        for d, seg in zip(negd, segs):
+            for t in R.detections(frame_times(len(d)), d, t1):
+                events.append(describe(t, seg, texts))
+        kinds = collections.Counter(k for k, _ in events)
+        row = {'live_recall': round(float((live[y == 1] >= t1).mean()), 4), 't1': t1,
+               'live_other_accepted': round(float((live[y == 0] >= t1).mean()), 4),
+               'fa_per_hour': round(len(events) / hours, 2), 'by_kind': dict(kinds),
+               'sc_words': collections.Counter(n for k, n in events if k == 'word').most_common(12),
+               'libri_examples': [n for k, n in events if k == 'libri'][:a.examples]}
+        if clipped is not None:
+            row['live_recall_complete'] = round(float((live[(y == 1) & ~clipped] >= t1).mean()), 4)
+        report['levels'].append(row)
+        print(json.dumps({k: v for k, v in row.items() if k != 'libri_examples'}), flush=True)
+    a.out.write_text(json.dumps(report, indent=1))
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest='cmd', required=True)
@@ -371,8 +435,15 @@ def main():
     e.add_argument('--windows', type=int, nargs='+', help='stage-1 decision windows (default: the model\'s own)')
     e.add_argument('--verify-ms', type=float, default=0., help='verifier run time added to cascade detections')
     e.add_argument('--out', type=Path, required=True)
+    o = sub.add_parser('sources')
+    o.add_argument('--split', choices=['validation'], default='validation')
+    o.add_argument('--data', type=Path, default=ROOT / 'data')
+    o.add_argument('--window', type=int, help='stage-1 decision window (default: the model\'s own)')
+    o.add_argument('--recalls', type=float, nargs='+', default=[.65, .7, .75, .8, .85, .9])
+    o.add_argument('--examples', type=int, default=40, help='LibriSpeech examples per level')
+    o.add_argument('--out', type=Path, required=True)
     a = p.parse_args()
-    {'cache': cache, 'score': score, 'select': select}[a.cmd](a)
+    {'cache': cache, 'score': score, 'select': select, 'sources': sources}[a.cmd](a)
 
 
 if __name__ == '__main__':
