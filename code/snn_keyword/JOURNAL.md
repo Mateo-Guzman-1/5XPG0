@@ -606,6 +606,56 @@ Afterwards the release (`deploy/keyword_kdot.bit` / `.bin`) was reloaded
 and the user's `jtag_server.py` relay restarted. An INFO request plus vector 0
 through the relay returned the oracle scores.
 
+### 18b. (Pedro, second board) Standard Ethernet path on PYNQ Linux; requests processed twice
+
+*Merged from branch `Pedro` (his entry 8). The fix below is in `board_server.py`;
+it applies to the v3 streaming requests as well.*
+
+- **Motivation.** Open item 1: run the intended deployment (`board_server.py`
+  on PYNQ Linux) instead of the JTAG relay.
+- **Board.** A second PYNQ-Z2 boots from SD (BootROM status `0x00400000`, no
+  error) into PYNQ Linux 3.0.1, user `student`, passwordless sudo. It is
+  cabled directly to the PC: board 10.43.0.1, PC 10.43.0.2. No rebuild was
+  needed. The Vitis 2026.1 `riscv64-unknown-elf-gcc` (GCC 13.4) reproduces
+  both released firmware images byte for byte.
+- **Change 1: start-up scripts.** Under `sudo`, PYNQ reported "No Devices
+  Found" because `sudo` drops `XILINX_XRT`. `start_board.sh` (runs on the
+  board) sets it, loads the bitstream and starts the server in the background.
+  `run_board.ps1` (PC) copies the files over SSH and runs it.
+- **Finding.** 40/40 vectors were bit-exact at once, but a stream probe with
+  known vectors showed every positive window as *confirmed*, even a single one
+  after two negatives (expected: +,+,−,+ → 2,3,0,3; measured 3,3,0,3).
+  Evidence:
+  - The disassembled firmware implements "2 of 3" correctly.
+  - The history words on the stack showed a stream window that ended 747
+    cycles before the current one started, with no request sent in between.
+    Every request ran twice, so its second pass confirmed its first.
+  - A debug firmware recorded the sequence number it accepted. It was 0.
+    The core then acknowledged 0 and ran the real request again.
+  - Cause: `struct.pack_into('<I', mmap, …)` in `board_server.py`. CPython
+    zeroes the four bytes and then writes them one byte at a time, so the
+    polling core briefly sees `seq_in = 0`. The JTAG relay writes whole words
+    (`mwr`), so it never showed this. The same pattern also briefly released
+    the CPU reset whenever the server tried to hold it.
+- **Change 2: `board_server.py`.** All register and mailbox words go through
+  32-bit `memoryview`s (one bus access each). Firmware and bitstreams are
+  unchanged. A firmware-side double read of `seq_in` was tried first; it
+  reduced but did not remove the problem, because the zero is a real
+  intermediate value, not a read glitch. It was discarded.
+- **Outcome** (both `keyword.bin` and `keyword_kdot.bin`, over Ethernet):
+  - 40/40 vectors bit-exact (3 × 40 for RV32IM). Cycles equal RTL; worst
+    `kdot` case 267,393 cycles = 2.67 ms.
+  - Stream sequences as specified, 3 repetitions each: + → 2;
+    −,−,+ → 0,0,2; +,+,−,+ → 2,3,0,3; −,+,−,+ → 0,2,0,3.
+  - LED0 went off 999 ms after a detection (read back from syscon `LED`).
+  - PC round trip about 7 ms per window (JTAG relay: 30–45 ms). The live
+    microphone demo streams one window per 250 ms.
+  - Windows voices (David, Zira): "yes" detected in both single and stream
+    mode (first window unconfirmed, then confirmed); "no", "pizza" and
+    "hello" rejected in both modes.
+- **Unaffected earlier results.** `confusables.json`, `tune_stream.py` and
+  the manual microphone test (over JTAG) did not use `board_server.py`.
+
 ### 19. Iteration loop, round 1: what limits the streaming SNN
 
 All numbers below are validation data. The test split is untouched.
@@ -1046,18 +1096,31 @@ test word.
 ## Open items
 
 Status of `IMPLEMENTATION_PLAN.md`: Phases 0-6 done; the streaming firmware and
-engine are verified on the board (entry 18); Phase 7 evaluated, candidate not
-promoted (entry 17). The iteration loop from entry 19 is running; the keyword
-is now "sheila" (entry 22).
+engine are verified on the board over JTAG (entry 18); Phase 7 evaluated for "yes",
+not promoted (entry 17). The keyword is now "sheila" (entry 22); its candidate
+`runs_stream/sheila_qat_seed2/int_model.npz` is RTL bit-exact and has had its one
+test run (entry 27). See `MERGE_SUMMARY.md` at the repository root for all branches.
 
-1. Rebuild `keyword_engine.bit` with the `ps_if.v` ABI fix (`0x00020003`).
-2. The SD card now boots PYNQ Linux: test the standard Ethernet path
-   (`board_server.py`), loading the overlay through PYNQ.
-3. Recall of the streaming SNN (57.8% live on test against 67.3% for the
-   release): longer training, a larger or 64-neuron variant, and a looser
-   false-accept budget are the next levers (entries 14, 17).
-4. Microphone robustness (drop 17-20 points for every model): apply the
-   training microphones in the time domain, or add real device recordings
-   from public corpora; PCEN alone did not help on validation.
-5. Leave-one-source-out for the new route: train without MSWC, test on it.
+1. **Board test of the "sheila" candidate**, with `build/keyword_engine_abi3.bit`
+   and `keyword_stream_engine.bin`: over JTAG (`jtag/stream_board_test.tcl`) or
+   the Ethernet path (`start_board.sh`, `run_board.ps1`, `net_board_test.py`).
+   Needs a board and the team's go-ahead.
+2. **v3 streaming over Ethernet.** Pedro's run (entry 18b) covers the v2
+   release. `board_server.py` serves v3 and has his fix; `net_board_test.py`
+   checks it against the oracle. Not yet run on a board.
+3. **Engine timing margin.** The rebuilt ABI bitstream met timing only with
+   Performance_ExplorePostRoutePhysOpt (WNS +0.348 ns, entry 19). Pipeline
+   the `acc[idx] += w` read-modify-write with forwarding.
+4. **"sheila" recall.** Test: 63.7% live, 70.7% on complete recordings, at
+   1.58 FA/h. Speech Commands has only 1,606 training positives. Compare
+   changes over several seeds (SD 3.6 points, entry 26).
+5. **Phoneme verifier** (`explore-verifier`, merged): retarget from Y EH S to
+   SH IY L AH; score the cascade under the full rule; gate the LED. It fits:
+   105 ms per check with kdot, 121 KB with stage 1.
 6. Recordings of the actual user and microphone, for evaluation only.
+7. From Pedro's list:
+   - "release or trial model": superseded by the streaming SNN (entries 17, 27);
+   - time-convolutional first layer: the streaming SNN's learnable delays
+     cover this;
+   - lower `READ_WAIT`: done (entry 13);
+   - LIF unit: the neuron engine (entry 16).

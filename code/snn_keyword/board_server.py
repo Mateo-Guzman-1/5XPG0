@@ -30,6 +30,12 @@ class Board:
             self.reg = mmap.mmap(fd, 4096, offset=0x40040000)
         finally:
             os.close(fd)
+        # Access registers and mailbox words through 32-bit views: each access
+        # is one store/load. struct.pack_into first zeroes the word, then writes
+        # it byte by byte, so the running core saw a transient seq 0, acknowledged
+        # it and ran every request twice (and CTRL briefly released reset).
+        self.ram32 = memoryview(self.ram).cast('I')
+        self.reg32 = memoryview(self.reg).cast('I')
         if self.read_reg(0x14) != 0x534b454c:
             raise RuntimeError('Expected spike SoC bitstream is not loaded')
         abi = self.read_reg(0x1c)
@@ -43,14 +49,14 @@ class Board:
         image = Path(firmware).read_bytes()
         if not 0 < len(image) <= 0x3c000:
             raise ValueError('Invalid firmware image size')
-        struct.pack_into('<I', self.reg, 0, 1)
+        self.reg32[0] = 1
         # Configure the physical PS clock while the core is held in reset.
         Clocks.fclk0_mhz = 100.0
         if abs(Clocks.fclk0_mhz - 100.0) > .01:
             raise RuntimeError('Could not configure the physical FCLK0 to 100 MHz')
         self.ram[:] = bytes(0x40000)
         self.ram[:len(image)] = image
-        struct.pack_into('<I', self.reg, 0, 0)
+        self.reg32[0] = 0
         deadline = time.monotonic() + 5
         while self.read(0x10430) not in FIRMWARE_ABI:
             if time.monotonic() > deadline:
@@ -59,13 +65,13 @@ class Board:
         self.abi = FIRMWARE_ABI[self.read(0x10430)]
 
     def read_reg(self, offset):
-        return struct.unpack_from('<I', self.reg, offset)[0]
+        return self.reg32[offset // 4]
 
     def read(self, offset):
-        return struct.unpack_from('<I', self.ram, offset)[0]
+        return self.ram32[offset // 4]
 
     def write(self, offset, value):
-        struct.pack_into('<I', self.ram, offset, value)
+        self.ram32[offset // 4] = value
 
     def info(self):
         threshold = struct.unpack('<i', struct.pack('<I', self.read(0x10434)))[0]
@@ -99,10 +105,10 @@ class Board:
         deadline = time.monotonic() + 5
         while self.read(0x10404) != seq:
             if self.read_reg(4) & 2:
-                struct.pack_into('<I', self.reg, 0, 1)
+                self.reg32[0] = 1
                 raise RuntimeError('RISC-V trap')
             if time.monotonic() >= deadline:
-                struct.pack_into('<I', self.reg, 0, 1)
+                self.reg32[0] = 1
                 raise RuntimeError('RISC-V inference timed out; core stopped, restart server')
             time.sleep(.001)
 

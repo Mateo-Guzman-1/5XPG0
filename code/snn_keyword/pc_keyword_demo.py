@@ -14,6 +14,7 @@ from pathlib import Path
 import numpy as np
 from features import SAMPLE_RATE, features, frame_power, logmel_agc_frames, logmel_frames, pcen_frames, read_wav
 from protocol import MODE_RESET, MODE_SINGLE, MODE_STREAM, info, request, request_frames
+import keyword_config as K
 
 HOP_FRAMES = 25
 
@@ -52,9 +53,9 @@ def model_abi(host, port):
         return {'abi': 2}
 
 
-def run_stream(sock, frames_iter, max_frames):
-    """Send frame blocks in hops; print one JSON line per hop."""
-    seq = 1
+def run_stream(sock, frames_iter, max_frames, raw=True):
+    """Send frame blocks in hops; raw: one JSON line per hop, else one line per detection."""
+    seq, detections = 1, 0
     request_frames(sock, seq, b'', MODE_RESET)
     buffered = np.zeros((0, 24), np.uint8)
     for block in frames_iter:
@@ -62,7 +63,15 @@ def run_stream(sock, frames_iter, max_frames):
         while len(buffered) >= HOP_FRAMES:
             hop, buffered = buffered[:min(HOP_FRAMES, max_frames)], buffered[min(HOP_FRAMES, max_frames):]
             seq = (seq + 1) & 0xffffffff
-            print(json.dumps(request_frames(sock, seq, hop.tobytes())), flush=True)
+            result = request_frames(sock, seq, hop.tobytes())
+            if raw:
+                print(json.dumps(result), flush=True)
+            elif result['detected']:
+                detections += 1
+                print(f'\n{K.KEYWORD.upper()} detected ({detections}), frame {result["at_frame"]} of the hop, '
+                      f'{result["cycles"]} cycles on the RISC-V core', flush=True)
+            else:
+                print('.', end='', flush=True)   # one dot per hop: still listening
 
 
 def main():
@@ -74,6 +83,8 @@ def main():
     p.add_argument('--single', action='store_true',
                    help='ABI v2 live: decide on each window alone instead of requiring 2 of 3 consecutive windows')
     p.add_argument('--frontend', choices=['logmel', 'logmel_w', 'logmel_agc', 'pcen'], default='logmel', help='ABI v3: the model\'s front end')
+    p.add_argument('--json', action='store_true',
+                   help='Live: print every board reply as JSON instead of one line per detected keyword')
     a = p.parse_args()
     abi = model_abi(a.host, a.port)
     stream = abi['abi'] == 3
@@ -103,10 +114,10 @@ def main():
                     except queue.Empty: break
                 chunks.put_nowait(None)
         if stream:
-            print('Listening for "yes"; streaming SNN, 10 ms frames in 250 ms hops, 1 s hold-off. Ctrl-C stops.')
+            print(f'Listening for "{K.KEYWORD}"; streaming SNN, 10 ms frames in 250 ms hops, 1 s hold-off. Ctrl-C stops.')
         else:
             rule = 'each window' if a.single else '2 of 3 consecutive windows'
-            print(f'Listening for "yes"; 1 s windows / 250 ms hop; detection needs {rule}. Ctrl-C stops.')
+            print(f'Listening for "{K.KEYWORD}"; 1 s windows / 250 ms hop; detection needs {rule}. Ctrl-C stops.')
         with sd.InputStream(channels=1, samplerate=SAMPLE_RATE, blocksize=4000,
                             dtype='float32', device=a.device, callback=callback):
             if stream:
@@ -119,11 +130,12 @@ def main():
                             fs = FrameStream(a.frontend)
                             continue
                         yield fs.push(chunk)
-                run_stream(sock, frames_iter(), abi['max_frames'])
+                run_stream(sock, frames_iter(), abi['max_frames'], raw=a.json)
                 return
             buffer = np.empty(0, dtype=np.float32)
             seq = 0
             mode = MODE_SINGLE if a.single else MODE_STREAM
+            detections, previous = 0, False
             while True:
                 chunk = chunks.get()
                 if chunk is None:
@@ -134,7 +146,16 @@ def main():
                     continue
                 seq = (seq + 1) & 0xffffffff
                 result = request(sock, seq, features(buffer), mode)
-                print(json.dumps(result), flush=True)
+                if a.json:
+                    print(json.dumps(result), flush=True)
+                elif result['detected'] and not previous:
+                    # One spoken keyword confirms several consecutive windows; report it once.
+                    detections += 1
+                    print(f'\n{K.KEYWORD.upper()} detected ({detections}), score margin {result["score1"] - result["score0"]}, '
+                          f'{result["cycles"]} cycles on the RISC-V core', flush=True)
+                else:
+                    print('.', end='', flush=True)   # one dot per window: still listening
+                previous = result['detected']
 
 
 if __name__ == '__main__':
