@@ -18,9 +18,36 @@
  * (model.decision_scores; a partial sum after a reset); best and last in
  * MB[7..8] stay the raw frame scores.
  * A v2 client reads magic 0x4b575331 ("KWS1") and the window model instead.
+ *
+ * USE_VERIFIER builds (verifier track): the last VERIFIER_FRAMES frames are kept
+ * (zeros after a reset) and command 6 runs the second-stage phoneme verifier
+ * (firmware/verifier.c) on them: MB[26..29] = score_a, end_a, score_b, end_b,
+ * MB[30] = a hash of the logits (sum of logit * (index + 1)), MB[9] = cycles.
+ * Command 6 with length 0 verifies the history; with length = VERIFIER_FRAMES
+ * frames it verifies the frames in the input buffer (test vectors).
  */
 #include <stdint.h>
 #include "stream_infer.h"
+#ifdef USE_VERIFIER
+#include "verifier.h"
+/* Each frame is written twice (pos and pos + N), so the last N frames are always contiguous. */
+static uint8_t vhist[2 * VERIFIER_FRAMES * STREAM_BANDS] __attribute__((aligned(4)));
+static uint32_t vpos;
+static int32_t vlogits[VERIFIER_FRAMES / VERIFIER_STACK * VERIFIER_CLASSES];
+
+static void vhist_reset(void)
+{
+    for (unsigned i = 0; i < sizeof vhist; ++i) vhist[i] = 0;
+    vpos = 0;
+}
+
+static void vhist_push(const uint8_t *frame)
+{
+    for (unsigned i = 0; i < STREAM_BANDS; ++i)
+        vhist[vpos * STREAM_BANDS + i] = vhist[(vpos + VERIFIER_FRAMES) * STREAM_BANDS + i] = frame[i];
+    if (++vpos == VERIFIER_FRAMES) vpos = 0;
+}
+#endif
 
 #define MMIO(a) (*(volatile uint32_t *)(a))
 #define TIMER MMIO(0x10001000u)
@@ -57,6 +84,9 @@ void main(void)
     stream_init();
     stream_reset(&state);
     decision_reset();
+#ifdef USE_VERIFIER
+    vhist_reset();
+#endif
     MB[13] = (uint32_t)STREAM_THRESHOLD;
     MB[19] = STREAM_WINDOW;
     MB[14] = STREAM_BANDS;
@@ -79,6 +109,9 @@ void main(void)
             for (uint32_t f = 0; f < k; ++f, ++frames) {
                 uint32_t sp[2], ev;
                 score = stream_step(&state, INPUT + f * STREAM_BANDS, sp, &ev);
+#ifdef USE_VERIFIER
+                vhist_push(INPUT + f * STREAM_BANDS);
+#endif
                 spikes += sp[0] + sp[1]; events += ev;
                 if (score > best) best = score;
                 dsum += (int64_t)score - hist[hpos];
@@ -103,8 +136,24 @@ void main(void)
         } else if (opcode == 5) {
             stream_reset(&state);
             decision_reset();
+#ifdef USE_VERIFIER
+            vhist_reset();
+#endif
             frames = 0; have_event = 0;
             MB[6] = 0; MB[18] = 0;
+#ifdef USE_VERIFIER
+        } else if (opcode == 6 && (length == 0 || length == VERIFIER_FRAMES * STREAM_BANDS)) {
+            verifier_result_t r;
+            const uint8_t *win = length ? INPUT : vhist + vpos * STREAM_BANDS;
+            uint32_t start = TIMER;
+            verifier_run(win, VERIFIER_FRAMES, &r, vlogits);
+            MB[9] = TIMER - start;
+            uint32_t hash = 0;
+            for (unsigned i = 0; i < VERIFIER_FRAMES / VERIFIER_STACK * VERIFIER_CLASSES; ++i)
+                hash += (uint32_t)vlogits[i] * (i + 1);
+            MB[6] = 0; MB[26] = (uint32_t)r.score_a; MB[27] = (uint32_t)r.end_a;
+            MB[28] = (uint32_t)r.score_b; MB[29] = (uint32_t)r.end_b; MB[30] = hash;
+#endif
         } else if (opcode == 2) {
             MB[6] = 0;
         } else {

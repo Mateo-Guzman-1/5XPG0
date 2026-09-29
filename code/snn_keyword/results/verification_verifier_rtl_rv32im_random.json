@@ -1,0 +1,33 @@
+{
+  "checkpoint": "build/rand_verifier.pt",
+  "firmware": "build/keyword_stream_verifier.bin",
+  "records": 2,
+  "bit_exact": true,
+  "cycles": {
+    "max": 183312660,
+    "mean": 183312655.33333334,
+    "min": 183312653
+  },
+  "ms_at_100MHz": 1833.1266,
+  "verifier_export": {
+    "model_bytes": 53320,
+    "weights": 48640,
+    "range_checks": {
+      "l1 accumulator": 35514368,
+      "l1 r * gh": 15390720,
+      "l2 accumulator": 40686592,
+      "l2 r * gh": 14918656,
+      "keyword path sum": 2157450
+    }
+  },
+  "sections_bytes": {
+    ".text": 8440,
+    ".data": 0,
+    ".bss": 27000,
+    ".model": 120580
+  },
+  "model_region_used": "120580 of 147456",
+  "code_region_used": "35440 of 65536",
+  "simulation_seconds": 630.1,
+  "harness": "PASS: 2 records, 3 verifier calls bit-exact with the oracle; worst 183312660 cycles per verification, mean 183312655; total cycles=727640311"
+}
