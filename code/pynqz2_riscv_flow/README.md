@@ -9,9 +9,9 @@ Everything a last-year EE student needs is here; nothing is solved for you.
 
 ```
 rtl/       picorv32.v (core, vendored)  spike_soc.v  poisson.v  ps_if.v  spike_top.v
-firmware/  main.c (the demo neuron)     board.h     hal.h     start.S   linker.ld
-vivado/    build.tcl  spike_top.xdc  spike_top.bit (prebuilt)  board_files/
-host/      spike_pynq.py (load/run/read)  demo.sh  smoke_test.sh
+    firmware/  main.c (demo neuron)  keyword_main.c (Group 2)  board.h  hal.h
+    vivado/    build.tcl  spike_top.xdc  spike_top.bit (prebuilt)  board_files/
+    host/      spike_pynq.py  keyword_bridge.py  demo.sh  smoke_test.sh
 install.sh  run_demo.sh  Makefile  requirements.txt
 ```
 
@@ -82,6 +82,7 @@ sudo bash -c "source /etc/profile.d/xrt_setup.sh && $PY spike_pynq.py spikes"
 
 ```bash
 make firmware                 # RISC-V toolchain (riscv64-unknown-elf-gcc)
+make -C firmware keyword.bin  # Group 2 quantized keyword firmware
 make bitstream                # Vivado 2024.1, ~15 min
 ```
 

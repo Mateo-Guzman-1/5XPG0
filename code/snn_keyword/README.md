@@ -19,6 +19,15 @@ standard PYNQ Linux/Ethernet path, which also runs the live microphone demo
 (see [Run on the PYNQ board](#run-on-the-pynq-board-standard-ethernet-path)
 and [Live confirmation](#live-confirmation-and-confusable-words)).
 
+
+> **Also in this folder** (merged from branch `damien-dicking-around`): a second,
+> independent pipeline, the 1 s clip classifier with 8x16 features, deployed
+> over ZeroMQ (`keyword_bridge.py`). See [README_clip_pipeline.md](README_clip_pipeline.md);
+> its files are `audio_features.py`, `train_keyword_snn_clip.py`,
+> `pc_keyword_demo_zmq.py`, `install_keyword_demo.sh` and `research/`. The two
+> pipelines are compared under one rule in `JOURNAL.md` entries 23 and 27 and in
+> `../../MERGE_SUMMARY.md`.
+
 ## What was measured
 
 - Six GPU training runs: current/rate encoding, seeds 0/1/2, 35 epochs each,

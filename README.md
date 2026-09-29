@@ -43,8 +43,8 @@ code/
     vivado/              #   build scripts + the released bitstream
     host/                #   spike_pynq.py, demo/smoke scripts
     install.sh           #   deploy everything to the board
-  snn_keyword/           # Group 2: snnTorch training + PC demo skeleton
-  ann_vs_snn_mnist/      # Group 4: ANN/SNN training + benchmark skeleton
+  snn_keyword/           # Group 2: training + deployable PC/board keyword demo
+                         #   (ann_vs_snn_mnist/, Group 4, removed on the Group 2 branches)
 PresentationInstruction/  # kick-off presentation (PDF)
 ProjectPitch/             # original project description (PDF)
 ```
@@ -92,12 +92,11 @@ Set-Location code\snn_keyword
 python prepare_data.py
 python train_keyword_snn.py
 
-# Group 4
-Set-Location ..\ann_vs_snn_mnist
-.\setup_venv.ps1
-.\.venv\Scripts\Activate.ps1
-python train_mnist.py
-python benchmark.py
+# Deploy the exported model (Git Bash / MSYS2)
+# ./install_keyword_demo.sh 192.168.2.99
+# Then, in PowerShell: python pc_keyword_demo_zmq.py 192.168.2.99
+
+# Group 4: code/ann_vs_snn_mnist is not on the Group 2 branches (see upstream main).
 ```
 
 If PowerShell blocks local scripts, run `Set-ExecutionPolicy -Scope Process
@@ -111,15 +110,14 @@ PowerShell process. Pass `-Recreate` to a setup script to rebuild its venv.
 cd code/snn_keyword && ./setup_venv.sh && source .venv/bin/activate
 python prepare_data.py
 python train_keyword_snn.py
-
-# Group 4
-cd code/ann_vs_snn_mnist && ./setup_venv.sh && source .venv/bin/activate
-python train_mnist.py && python benchmark.py
 ```
 
-The Group 4 training script remains a one-epoch starting point. Group 2 now
-uses real Speech Commands data and six 35-epoch GPU training runs; follow
-its README to prepare data and reproduce the full deployment verification.
+Group 2 has two pipelines in `code/snn_keyword`. The main one is the
+streaming delay-SNN ("sheila", 10 ms frames; `README.md`, `JOURNAL.md`) with the
+window-SNN release in `deploy/`. The clip pipeline (1 s windows of 8x16
+features over ZeroMQ, `README_clip_pipeline.md`) is the second.
+`MERGE_SUMMARY.md` compares them. `code/ann_vs_snn_mnist` (Group 4) was
+removed on the Group 2 branches.
 
 The FPGA deployment scripts and Makefiles require a Unix-like shell. On a
 Windows PC, use WSL or Git Bash for that hardware flow; the Python training
