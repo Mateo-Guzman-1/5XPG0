@@ -57,8 +57,15 @@ SPLITS = {'test': dict(sc=2, mswc='test', libri='test-clean', seed=1),
 YES_PREFIXED = f'{K.KEYWORD}-prefixed (not a false accept)'
 
 
+# 'dontcare' (default, JOURNAL entry 21) or 'negative': words beginning with the keyword
+# are false accepts (explore-yes-boundary: the policy that rejects "yesterday", "sheila's").
+PREFIX_POLICY = 'dontcare'
+
+
 def yes_prefixed(word):
-    return K.prefixed(word)
+    """True for a "don't care" word under PREFIX_POLICY: it begins with the complete keyword
+    (yesterday, sheila's). Always False when such words count as negatives."""
+    return PREFIX_POLICY == 'dontcare' and K.prefixed(word)
 
 
 MSWC_GROUPS = {YES_PREFIXED: [w for w in K.NEAR_MISS[K.KEYWORD] if K.prefixed(w)], **K.MSWC_GROUPS}
@@ -192,7 +199,11 @@ def libri_utterances(data, subset):
     for t in sorted(base.rglob('*.trans.txt')):
         for line in t.read_text().splitlines():
             uid, text = line.split(' ', 1)
-            if not any(w.lower().startswith(K.KEYWORD) for w in text.split()):   # the keyword and prefixed words
+            toks = [w.lower() for w in text.split()]
+            # The keyword itself always leaves the negatives; words that begin with it
+            # (YESTERDAY, SHEILA'S) only when they are "don't care" (PREFIX_POLICY).
+            drop = any(w.startswith(K.KEYWORD) for w in toks) if PREFIX_POLICY == 'dontcare' else K.KEYWORD in toks
+            if not drop:
                 keep.append(t.parent / f'{uid}.flac')
     return keep
 

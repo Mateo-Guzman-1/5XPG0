@@ -59,6 +59,7 @@ def select(det, sets, neg, max_live_fa, max_fa_hour, w=1):
     mswc_audio, words, _ = sets['mswc']
     mswc = np.array([moving_sum(r, w).max() for _, _, r in det.traces(mswc_audio)])
     other = (words != K.KEYWORD) & ~np.vectorize(yes_prefixed)(words)   # prefixed words are don't care
+    prefixed = np.vectorize(K.prefixed)(words)   # yesterday, sheila's: reported either way
     best = None
     for t in np.unique(live[y == 1])[::-1]:            # highest threshold first: recall rises
         fa = (live[y == 0] >= t).mean()
@@ -77,7 +78,8 @@ def select(det, sets, neg, max_live_fa, max_fa_hour, w=1):
                         fa_per_hour=round(fph, 3), fa_hours=round(neg_hours, 2),
                         stream=score_stream(times, score, t, marks, hours),
                         mswc_recall=float((mswc[words == K.KEYWORD] >= t).mean()),
-                        mswc_other_fa=float((mswc[other] >= t).mean()))
+                        mswc_other_fa=float((mswc[other] >= t).mean()),
+                        mswc_prefixed_accepted=float((mswc[prefixed] >= t).mean()) if prefixed.any() else None)
     return best
 
 
@@ -89,9 +91,13 @@ def main():
     p.add_argument('--max-fa-hour', type=float, default=2.)
     p.add_argument('--fa-source', choices=['negatives', 'stream'], default='negatives')
     p.add_argument('--window', type=int, nargs='+', default=[1], help='moving-sum lengths to try (frames)')
+    p.add_argument('--prefix-policy', choices=['dontcare', 'negative'], default='dontcare',
+                   help='negative: words beginning with "yes" (yesterday) count as false accepts')
     p.add_argument('--no-write', action='store_true', help='only report; leave the checkpoints unchanged')
     p.add_argument('--out', type=Path, default=ROOT / 'results/stream_selection.json')
     a = p.parse_args()
+    import robust_eval
+    robust_eval.PREFIX_POLICY = a.prefix_policy
     sets, info = build_sets(a.data, 'validation', None, 3600, {'device', 'tts'})
     report = {'keyword': K.KEYWORD, 'config': info, 'rule': vars(a) | {'checkpoints': [str(c) for c in a.checkpoints]}, 'models': {}}
     for path in a.checkpoints:
