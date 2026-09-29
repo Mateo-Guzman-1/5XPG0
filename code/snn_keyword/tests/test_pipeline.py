@@ -159,6 +159,8 @@ def test_board_mailbox_layout_and_sequence_wrap():
     import struct
     board=Board.__new__(Board)
     board.ram=bytearray(0x40000);board.reg=bytearray(4096)
+    # The 32-bit views Board.__init__ creates (one bus access per word, JOURNAL entry 18b).
+    board.ram32=memoryview(board.ram).cast('I');board.reg32=memoryview(board.reg).cast('I')
     struct.pack_into('<I',board.ram,0x10400,0xffffffff)
     struct.pack_into('<I',board.ram,0x10404,0xffffffff)
     original_write=board.write
@@ -179,6 +181,8 @@ def test_board_timeout_stops_core(monkeypatch):
     import board_server
     board=Board.__new__(Board)
     board.ram=bytearray(0x40000);board.reg=bytearray(4096)
+    # The 32-bit views Board.__init__ creates (one bus access per word, JOURNAL entry 18b).
+    board.ram32=memoryview(board.ram).cast('I');board.reg32=memoryview(board.reg).cast('I')
     clock=iter([0,6])
     monkeypatch.setattr(board_server.time,'monotonic',lambda:next(clock))
     with pytest.raises(RuntimeError,match='timed out'): board.infer(bytes(768))

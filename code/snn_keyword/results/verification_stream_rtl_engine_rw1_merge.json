@@ -1,0 +1,24 @@
+{
+  "model": "C:/Users/matut/FULL_AI/5XPG0/code/snn_keyword/runs_stream/sheila_qat_seed2/int_model.npz",
+  "firmware": "build/keyword_stream_engine.bin",
+  "read_wait": 1,
+  "kdot": false,
+  "streams": 40,
+  "hops": 355,
+  "bit_exact": true,
+  "cycles_per_hop": {
+    "max": 1029278,
+    "mean": 988684.106918239,
+    "p99": 1022794.84
+  },
+  "ms_per_hop_at_100MHz": {
+    "max": 10.29278,
+    "mean": 9.88684106918239
+  },
+  "events_per_hop": {
+    "max": 81543,
+    "mean": 40267.84905660377
+  },
+  "simulation_seconds": 72.0,
+  "harness": "PASS: 40 streams, 355 hops bit-exact with the oracle; malformed requests, reset, duplicate sequence, 1 s LED pulse; worst 1029278 cycles per 25-frame hop, mean 988684; total cycles=437579098"
+}
