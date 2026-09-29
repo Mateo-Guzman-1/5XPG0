@@ -65,8 +65,9 @@ def main():
         if op is None:
             return None
         m = np.array([s.max() for s in gated('mswc', t_w)])
-        op['mswc_recall'] = round(float((m[words == 'yes'] >= op['threshold']).mean()), 4)
-        op['mswc_other_fa'] = round(float((m[(words != 'yes') & ~np.vectorize(R.yes_prefixed)(words)] >= op['threshold']).mean()), 4)
+        kw = R.K.KEYWORD
+        op['mswc_recall'] = round(float((m[words == kw] >= op['threshold']).mean()), 4)
+        op['mswc_other_fa'] = round(float((m[(words != kw) & ~np.vectorize(R.yes_prefixed)(words)] >= op['threshold']).mean()), 4)
         op['t_win'] = None if t_w == NEG else int(t_w)
         return op
 

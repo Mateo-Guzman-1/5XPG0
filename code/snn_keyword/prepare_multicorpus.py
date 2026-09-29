@@ -34,10 +34,11 @@ import numpy as np
 
 from features import read_wav
 from robust_eval import edge_clipped
+import keyword_config as K
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / 'data'
-OUT = DATA / 'multi'
+OUT = K.MULTI   # data/multi for "yes"; per keyword otherwise (KWS_KEYWORD, KWS_MULTI)
 SR = 16000
 WORDS = sorted(p.name for p in (DATA / 'speech_commands_v0.02').iterdir()
                if p.is_dir() and not p.name.startswith('_'))
@@ -72,7 +73,7 @@ def rows_sc(split):
 
 
 def mswc_speakers(split):
-    table = DATA / 'mswc' / f'{split}_selected.csv'
+    table = K.mswc_table(DATA / 'mswc', split)
     return {r['speaker'] for r in csv.DictReader(open(table, encoding='utf-8'))} if table.exists() else set()
 
 
@@ -80,7 +81,7 @@ def rows_mswc(split):
     """MSWC's own splits share speakers (about 10k of 33k), so speakers are made
     disjoint here: test speakers are removed from dev and train, dev speakers from train."""
     name = {'train': 'train', 'validation': 'dev'}[split]
-    table = DATA / 'mswc' / f'{name}_selected.csv'
+    table = K.mswc_table(DATA / 'mswc', name)
     if not table.exists():
         print(f'missing {table}: MSWC skipped for {split}', flush=True)
         return [], 0
@@ -92,11 +93,11 @@ def rows_mswc(split):
 
 
 def rows_tts(split):
-    table = DATA / 'tts' / 'manifest.csv'
+    table = K.TTS / 'manifest.csv'
     if not table.exists():
         print('missing TTS manifest: TTS skipped', flush=True)
         return []
-    return [dict(corpus='tts', word=r['word'], speaker=f"tts:{r['model']}:{r['speaker']}", source=f"tts/{r['path']}")
+    return [dict(corpus='tts', word=r['word'], speaker=f"tts:{r['model']}:{r['speaker']}", source=f"{K.TTS.name}/{r['path']}")
             for r in csv.DictReader(open(table, encoding='utf-8')) if r['split'] == split]
 
 
@@ -111,7 +112,7 @@ def pack_clips(split, workers):
     with ThreadPoolExecutor(workers) as pool:
         list(pool.map(load, range(len(rows))))
     keep = [i for i, r in enumerate(rows)
-            if not (r['corpus'] == 'mswc' and r['word'] == 'yes' and edge_clipped(audio[i]))]
+            if not (r['corpus'] == 'mswc' and r['word'] == K.KEYWORD and edge_clipped(audio[i]))]
     dropped = len(rows) - len(keep)
     arr = np.lib.format.open_memmap(OUT / f'clips_{split}.npy', 'w+', np.int16, (len(keep), SR))
     for j, i in enumerate(keep):
@@ -190,7 +191,7 @@ def main():
             by = {}
             for x in r:
                 by.setdefault(x['corpus'], {'clips': 0, 'yes': 0, 'speakers': set()})
-                by[x['corpus']]['clips'] += 1; by[x['corpus']]['yes'] += x['word'] == 'yes'
+                by[x['corpus']]['clips'] += 1; by[x['corpus']]['yes'] += x['word'] == K.KEYWORD
                 by[x['corpus']]['speakers'].add(x['speaker'])
             summary[split] = {c: {'clips': v['clips'], 'yes': v['yes'], 'speakers': len(v['speakers'])} for c, v in by.items()}
             summary[split].update(drops)

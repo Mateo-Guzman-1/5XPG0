@@ -204,6 +204,8 @@ class StreamDetector:
             l.hard = ck.get('hard_shifts', False)
         self.model.qat = ck.get('qat', False)
         self.model.eval()
+        from keyword_config import check_model_keyword
+        check_model_keyword(ck.get('keyword'), str(path))
         self.threshold = float(ck['threshold'])
         self.window = int(ck.get('window', 1))   # moving-sum decision (model.decision_scores)
         self.yes = ck['yes_class']
@@ -248,6 +250,8 @@ class IntegerStreamDetector:
     def __init__(self, q, batch=256):
         from features import frame_features
         self.q = q
+        from keyword_config import check_model_keyword
+        check_model_keyword(q['keyword'] if 'keyword' in q else None, 'integer stream model')
         self.threshold = int(q['stream_threshold'])
         self.window = int(q.get('decision_window', 1))   # moving-sum decision (model.decision_scores)
         self.frontend = str(q.get('frontend', 'logmel'))

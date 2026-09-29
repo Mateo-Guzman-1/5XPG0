@@ -15,7 +15,9 @@ import torch
 from prepare_multicorpus import CLASSES, SILENCE, UNKNOWN
 
 ROOT = Path(__file__).resolve().parent
-MULTI = ROOT / 'data/multi'
+import keyword_config as K
+
+MULTI = K.MULTI   # data/multi for "yes", data/multi_<keyword> otherwise
 SR = 16000
 MIX = {'sc': .55, 'mswc': .15, 'tts': .12, 'libri': .10, 'silence': .08}
 
@@ -70,8 +72,10 @@ class ClipSampler:
 
     def yes_batch(self, n):
         """n "yes" clips, corpora in the batch mix's proportions (unshifted waveforms, numpy)."""
-        yes_cls = CLASSES.index('yes')
-        corp = [c for c in self.pools if (self.cls[self.pools[c]] == yes_cls).any()]
+        yes_cls = CLASSES.index(K.KEYWORD)
+        # A corpus supplies positives only with >= 100 keyword clips: MSWC has 8 "sheila" clips,
+        # which would otherwise be 18% of all positives, endlessly repeated.
+        corp = [c for c in self.pools if (self.cls[self.pools[c]] == yes_cls).sum() >= 100]
         p = np.array([self.mix.get(c, 0) for c in corp]); p = p / p.sum()
         ids = np.concatenate([self.rng.choice(self.pools[c][self.cls[self.pools[c]] == yes_cls], k)
                               for c, k in zip(corp, self.rng.multinomial(n, p)) if k])

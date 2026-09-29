@@ -1,0 +1,709 @@
+{
+  "model": "upstream/damien-dicking-around:code/snn_keyword/research/results/sheila_v2_deployment/keyword_model.h (sheila_v2, 8 bands x 16 bins, 48 hidden, 16 steps)",
+  "keyword": "sheila",
+  "config": {
+    "keyword": "sheila",
+    "split": "validation",
+    "time_bins": 32,
+    "live": {
+      "yes": 204,
+      "other": 3000
+    },
+    "device": {
+      "mic_profiles": 16,
+      "mic_seed": 20260925,
+      "real_rirs": 0
+    },
+    "mswc": {
+      "split": "dev",
+      "yes": 2,
+      "yes_edge_clipped": 0,
+      "near_miss": {
+        "sheila-prefixed (not a false accept)": 0,
+        "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": 183,
+        "/\u0283\u025b/ (shell, shelf, shelter, ...)": 118,
+        "/t\u0283i\u02d0/ (cheap, cheese, chief)": 179,
+        "-ila/-ela names (leila, delilah, stella, ...)": 32,
+        "-illa (tequila, vanilla, gorilla, ...)": 25,
+        "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": 95
+      },
+      "random_other": 3000
+    },
+    "stream": {
+      "seconds": 3600,
+      "clips": {
+        "yes": 136,
+        "word": 494,
+        "libri": 271
+      },
+      "speech_seconds": {
+        "yes": 130.7,
+        "word": 483.2,
+        "libri": 1936.5
+      },
+      "libri_subset": "dev-clean",
+      "seed": 7,
+      "yes_inserted": 136,
+      "holdoff_s": 1.0,
+      "hit_tolerance_s": 1.25
+    }
+  },
+  "verification": {
+    "vectors": 40,
+    "npz_keys": [
+      "x",
+      "y",
+      "counts",
+      "paths"
+    ],
+    "counts_bit_exact": true,
+    "count_mismatches": 0,
+    "int32_overflows": 0,
+    "decisions_margin2": {
+      "keyword_vectors_accepted": 18,
+      "other_vectors_accepted": 0
+    },
+    "features_from_wav": {
+      "wavs_found": 40,
+      "demo_path_exact_vectors": 40,
+      "demo_path_max_lsb_diff": 0,
+      "training_path_exact_vectors": 40,
+      "training_path_max_lsb_diff": 0,
+      "demo_path_counts_equal_board": true
+    }
+  },
+  "detector": {
+    "window_s": 1.0,
+    "hop_ms": 250,
+    "confirmation": "none (pc_keyword_demo.py decides every window)",
+    "score": "spike_count[keyword] - spike_count[other]",
+    "his_decision_margin": 2,
+    "int32_overflows": 0
+  },
+  "rule": {
+    "split": "validation",
+    "max_live_fa": 0.002,
+    "max_fa_hour": 2.0,
+    "fa_source": "robust_eval.negative_traces",
+    "negatives_hours": 18.109,
+    "holdoff_s": 1.0,
+    "candidates": "every distinct score value"
+  },
+  "best_under_our_rule": {
+    "threshold": 12,
+    "live_recall": 0.08333333333333333,
+    "live_fa": 0.0,
+    "live_recall_complete": 0.10126582278481013,
+    "fa_per_hour": 1.16,
+    "fa_hours": 18.11,
+    "stream": {
+      "recall": 0.1324,
+      "false_accepts": 3,
+      "fa_per_hour": 3.0,
+      "latency_median_s": 0.286,
+      "latency_p90_s": 0.411
+    },
+    "mswc_recall": 0.0,
+    "mswc_other_fa": 0.0013766519823788547
+  },
+  "stream_select_select_crosscheck": {
+    "threshold": 12.0,
+    "window": 1,
+    "live_recall": 0.08333333333333333,
+    "live_fa": 0.0,
+    "live_recall_complete": 0.10126582278481013,
+    "fa_per_hour": 1.16,
+    "fa_hours": 18.11,
+    "stream": {
+      "recall": 0.1324,
+      "false_accepts": 3,
+      "fa_per_hour": 3.0,
+      "latency_median_s": 0.286,
+      "latency_p90_s": 0.411
+    },
+    "mswc_recall": 0.0,
+    "mswc_other_fa": 0.0013766519823788547
+  },
+  "his_operating_point": {
+    "threshold": 2,
+    "live_recall": 0.8333333333333334,
+    "live_fa": 0.028333333333333332,
+    "live_recall_complete": 0.879746835443038,
+    "fa_per_hour": 323.869,
+    "fa_hours": 18.11,
+    "stream": {
+      "recall": 0.8309,
+      "false_accepts": 288,
+      "fa_per_hour": 288.0,
+      "latency_median_s": -0.169,
+      "latency_p90_s": 0.099
+    },
+    "mswc_recall": 1.0,
+    "mswc_other_fa": 0.10352422907488987
+  },
+  "sweep": [
+    {
+      "threshold": -16,
+      "live_recall": 1.0,
+      "live_fa": 1.0,
+      "live_recall_complete": 1.0,
+      "fa_per_hour": 3597.518,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 1.0,
+        "false_accepts": 3343,
+        "fa_per_hour": 3343.0,
+        "latency_median_s": -0.216,
+        "latency_p90_s": 0.279
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 1.0
+    },
+    {
+      "threshold": -15,
+      "live_recall": 1.0,
+      "live_fa": 1.0,
+      "live_recall_complete": 1.0,
+      "fa_per_hour": 3597.462,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 1.0,
+        "false_accepts": 3343,
+        "fa_per_hour": 3343.0,
+        "latency_median_s": -0.216,
+        "latency_p90_s": 0.279
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 1.0
+    },
+    {
+      "threshold": -14,
+      "live_recall": 1.0,
+      "live_fa": 1.0,
+      "live_recall_complete": 1.0,
+      "fa_per_hour": 3595.254,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 1.0,
+        "false_accepts": 3341,
+        "fa_per_hour": 3341.0,
+        "latency_median_s": -0.216,
+        "latency_p90_s": 0.287
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 1.0
+    },
+    {
+      "threshold": -13,
+      "live_recall": 1.0,
+      "live_fa": 1.0,
+      "live_recall_complete": 1.0,
+      "fa_per_hour": 3593.818,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 1.0,
+        "false_accepts": 3341,
+        "fa_per_hour": 3341.0,
+        "latency_median_s": -0.257,
+        "latency_p90_s": 0.307
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 1.0
+    },
+    {
+      "threshold": -12,
+      "live_recall": 1.0,
+      "live_fa": 1.0,
+      "live_recall_complete": 1.0,
+      "fa_per_hour": 3591.167,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 1.0,
+        "false_accepts": 3333,
+        "fa_per_hour": 3333.0,
+        "latency_median_s": -0.183,
+        "latency_p90_s": 0.291
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 1.0
+    },
+    {
+      "threshold": -11,
+      "live_recall": 1.0,
+      "live_fa": 1.0,
+      "live_recall_complete": 1.0,
+      "fa_per_hour": 3586.087,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 1.0,
+        "false_accepts": 3329,
+        "fa_per_hour": 3329.0,
+        "latency_median_s": -0.211,
+        "latency_p90_s": 0.29
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 1.0
+    },
+    {
+      "threshold": -10,
+      "live_recall": 1.0,
+      "live_fa": 1.0,
+      "live_recall_complete": 1.0,
+      "fa_per_hour": 3576.479,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 1.0,
+        "false_accepts": 3317,
+        "fa_per_hour": 3317.0,
+        "latency_median_s": -0.196,
+        "latency_p90_s": 0.327
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 1.0
+    },
+    {
+      "threshold": -9,
+      "live_recall": 1.0,
+      "live_fa": 1.0,
+      "live_recall_complete": 1.0,
+      "fa_per_hour": 3559.415,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 1.0,
+        "false_accepts": 3309,
+        "fa_per_hour": 3309.0,
+        "latency_median_s": -0.183,
+        "latency_p90_s": 0.307
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 1.0
+    },
+    {
+      "threshold": -8,
+      "live_recall": 1.0,
+      "live_fa": 1.0,
+      "live_recall_complete": 1.0,
+      "fa_per_hour": 3534.677,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 1.0,
+        "false_accepts": 3289,
+        "fa_per_hour": 3289.0,
+        "latency_median_s": -0.183,
+        "latency_p90_s": 0.281
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 1.0
+    },
+    {
+      "threshold": -7,
+      "live_recall": 1.0,
+      "live_fa": 1.0,
+      "live_recall_complete": 1.0,
+      "fa_per_hour": 3493.261,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 1.0,
+        "false_accepts": 3256,
+        "fa_per_hour": 3256.0,
+        "latency_median_s": -0.143,
+        "latency_p90_s": 0.323
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 1.0
+    },
+    {
+      "threshold": -6,
+      "live_recall": 1.0,
+      "live_fa": 1.0,
+      "live_recall_complete": 1.0,
+      "fa_per_hour": 3432.132,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 1.0,
+        "false_accepts": 3210,
+        "fa_per_hour": 3210.0,
+        "latency_median_s": -0.171,
+        "latency_p90_s": 0.35
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 1.0
+    },
+    {
+      "threshold": -5,
+      "live_recall": 1.0,
+      "live_fa": 0.999,
+      "live_recall_complete": 1.0,
+      "fa_per_hour": 3343.999,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 1.0,
+        "false_accepts": 3120,
+        "fa_per_hour": 3120.0,
+        "latency_median_s": -0.216,
+        "latency_p90_s": 0.368
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 0.9997246696035242
+    },
+    {
+      "threshold": -4,
+      "live_recall": 1.0,
+      "live_fa": 0.9963333333333333,
+      "live_recall_complete": 1.0,
+      "fa_per_hour": 3216.771,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 1.0,
+        "false_accepts": 3015,
+        "fa_per_hour": 3015.0,
+        "latency_median_s": -0.183,
+        "latency_p90_s": 0.393
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 0.998898678414097
+    },
+    {
+      "threshold": -3,
+      "live_recall": 1.0,
+      "live_fa": 0.9886666666666667,
+      "live_recall_complete": 1.0,
+      "fa_per_hour": 3031.229,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 1.0,
+        "false_accepts": 2824,
+        "fa_per_hour": 2824.0,
+        "latency_median_s": -0.151,
+        "latency_p90_s": 0.324
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 0.9933920704845814
+    },
+    {
+      "threshold": -2,
+      "live_recall": 0.9950980392156863,
+      "live_fa": 0.9523333333333334,
+      "live_recall_complete": 0.9936708860759493,
+      "fa_per_hour": 2728.731,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 1.0,
+        "false_accepts": 2530,
+        "fa_per_hour": 2530.0,
+        "latency_median_s": -0.16,
+        "latency_p90_s": 0.331
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 0.9686123348017621
+    },
+    {
+      "threshold": -1,
+      "live_recall": 0.9754901960784313,
+      "live_fa": 0.7863333333333333,
+      "live_recall_complete": 0.9936708860759493,
+      "fa_per_hour": 2226.277,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 0.9926,
+        "false_accepts": 2021,
+        "fa_per_hour": 2021.0,
+        "latency_median_s": -0.208,
+        "latency_p90_s": 0.169
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 0.8537995594713657
+    },
+    {
+      "threshold": 0,
+      "live_recall": 0.9264705882352942,
+      "live_fa": 0.23133333333333334,
+      "live_recall_complete": 0.9493670886075949,
+      "fa_per_hour": 1091.713,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 0.9706,
+        "false_accepts": 985,
+        "fa_per_hour": 985.0,
+        "latency_median_s": -0.241,
+        "latency_p90_s": 0.026
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 0.34030837004405284
+    },
+    {
+      "threshold": 1,
+      "live_recall": 0.8627450980392157,
+      "live_fa": 0.07666666666666666,
+      "live_recall_complete": 0.8987341772151899,
+      "fa_per_hour": 572.031,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 0.9191,
+        "false_accepts": 500,
+        "fa_per_hour": 500.0,
+        "latency_median_s": -0.215,
+        "latency_p90_s": 0.056
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 0.15666299559471367
+    },
+    {
+      "threshold": 2,
+      "live_recall": 0.8333333333333334,
+      "live_fa": 0.028333333333333332,
+      "live_recall_complete": 0.879746835443038,
+      "fa_per_hour": 323.869,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 0.8309,
+        "false_accepts": 288,
+        "fa_per_hour": 288.0,
+        "latency_median_s": -0.169,
+        "latency_p90_s": 0.099
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 0.10352422907488987
+    },
+    {
+      "threshold": 3,
+      "live_recall": 0.7598039215686274,
+      "live_fa": 0.010666666666666666,
+      "live_recall_complete": 0.7911392405063291,
+      "fa_per_hour": 180.958,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 0.7574,
+        "false_accepts": 148,
+        "fa_per_hour": 148.0,
+        "latency_median_s": -0.077,
+        "latency_p90_s": 0.174
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 0.06828193832599119
+    },
+    {
+      "threshold": 4,
+      "live_recall": 0.6519607843137255,
+      "live_fa": 0.005333333333333333,
+      "live_recall_complete": 0.6835443037974683,
+      "fa_per_hour": 105.858,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 0.6618,
+        "false_accepts": 96,
+        "fa_per_hour": 96.0,
+        "latency_median_s": -0.051,
+        "latency_p90_s": 0.174
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 0.05011013215859031
+    },
+    {
+      "threshold": 5,
+      "live_recall": 0.5392156862745098,
+      "live_fa": 0.003,
+      "live_recall_complete": 0.5886075949367089,
+      "fa_per_hour": 64.332,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 0.5809,
+        "false_accepts": 53,
+        "fa_per_hour": 53.0,
+        "latency_median_s": -0.015,
+        "latency_p90_s": 0.163
+      },
+      "mswc_recall": 1.0,
+      "mswc_other_fa": 0.03303964757709251
+    },
+    {
+      "threshold": 6,
+      "live_recall": 0.4803921568627451,
+      "live_fa": 0.0023333333333333335,
+      "live_recall_complete": 0.5379746835443038,
+      "fa_per_hour": 39.648,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 0.5147,
+        "false_accepts": 31,
+        "fa_per_hour": 31.0,
+        "latency_median_s": 0.033,
+        "latency_p90_s": 0.194
+      },
+      "mswc_recall": 0.5,
+      "mswc_other_fa": 0.020374449339207047
+    },
+    {
+      "threshold": 7,
+      "live_recall": 0.4019607843137255,
+      "live_fa": 0.0013333333333333333,
+      "live_recall_complete": 0.46835443037974683,
+      "fa_per_hour": 22.088,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 0.4559,
+        "false_accepts": 21,
+        "fa_per_hour": 21.0,
+        "latency_median_s": 0.04,
+        "latency_p90_s": 0.208
+      },
+      "mswc_recall": 0.5,
+      "mswc_other_fa": 0.012114537444933921
+    },
+    {
+      "threshold": 8,
+      "live_recall": 0.29901960784313725,
+      "live_fa": 0.0006666666666666666,
+      "live_recall_complete": 0.36075949367088606,
+      "fa_per_hour": 14.468,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 0.3676,
+        "false_accepts": 12,
+        "fa_per_hour": 12.0,
+        "latency_median_s": 0.046,
+        "latency_p90_s": 0.201
+      },
+      "mswc_recall": 0.5,
+      "mswc_other_fa": 0.007433920704845815
+    },
+    {
+      "threshold": 9,
+      "live_recall": 0.24509803921568626,
+      "live_fa": 0.0006666666666666666,
+      "live_recall_complete": 0.2911392405063291,
+      "fa_per_hour": 8.394,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 0.2868,
+        "false_accepts": 11,
+        "fa_per_hour": 11.0,
+        "latency_median_s": 0.042,
+        "latency_p90_s": 0.249
+      },
+      "mswc_recall": 0.0,
+      "mswc_other_fa": 0.004680616740088106
+    },
+    {
+      "threshold": 10,
+      "live_recall": 0.19117647058823528,
+      "live_fa": 0.0003333333333333333,
+      "live_recall_complete": 0.23417721518987342,
+      "fa_per_hour": 5.025,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 0.2426,
+        "false_accepts": 6,
+        "fa_per_hour": 6.0,
+        "latency_median_s": 0.12,
+        "latency_p90_s": 0.392
+      },
+      "mswc_recall": 0.0,
+      "mswc_other_fa": 0.0027533039647577094
+    },
+    {
+      "threshold": 11,
+      "live_recall": 0.11274509803921569,
+      "live_fa": 0.0,
+      "live_recall_complete": 0.13291139240506328,
+      "fa_per_hour": 2.374,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 0.1985,
+        "false_accepts": 3,
+        "fa_per_hour": 3.0,
+        "latency_median_s": 0.225,
+        "latency_p90_s": 0.409
+      },
+      "mswc_recall": 0.0,
+      "mswc_other_fa": 0.0016519823788546256
+    },
+    {
+      "threshold": 12,
+      "live_recall": 0.08333333333333333,
+      "live_fa": 0.0,
+      "live_recall_complete": 0.10126582278481013,
+      "fa_per_hour": 1.16,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 0.1324,
+        "false_accepts": 3,
+        "fa_per_hour": 3.0,
+        "latency_median_s": 0.286,
+        "latency_p90_s": 0.411
+      },
+      "mswc_recall": 0.0,
+      "mswc_other_fa": 0.0013766519823788547
+    },
+    {
+      "threshold": 13,
+      "live_recall": 0.058823529411764705,
+      "live_fa": 0.0,
+      "live_recall_complete": 0.06962025316455696,
+      "fa_per_hour": 0.828,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 0.0956,
+        "false_accepts": 2,
+        "fa_per_hour": 2.0,
+        "latency_median_s": 0.295,
+        "latency_p90_s": 0.415
+      },
+      "mswc_recall": 0.0,
+      "mswc_other_fa": 0.0011013215859030838
+    },
+    {
+      "threshold": 14,
+      "live_recall": 0.04411764705882353,
+      "live_fa": 0.0,
+      "live_recall_complete": 0.05063291139240506,
+      "fa_per_hour": 0.497,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 0.0588,
+        "false_accepts": 2,
+        "fa_per_hour": 2.0,
+        "latency_median_s": 0.358,
+        "latency_p90_s": 0.426
+      },
+      "mswc_recall": 0.0,
+      "mswc_other_fa": 0.00027533039647577095
+    },
+    {
+      "threshold": 15,
+      "live_recall": 0.03431372549019608,
+      "live_fa": 0.0,
+      "live_recall_complete": 0.0379746835443038,
+      "fa_per_hour": 0.166,
+      "fa_hours": 18.11,
+      "stream": {
+        "recall": 0.0221,
+        "false_accepts": 0,
+        "fa_per_hour": 0.0,
+        "latency_median_s": 0.396,
+        "latency_p90_s": 0.413
+      },
+      "mswc_recall": 0.0,
+      "mswc_other_fa": 0.00027533039647577095
+    }
+  ],
+  "cost": {
+    "board_benchmark": {
+      "label": "sheila-v2-8band",
+      "vectors": 40,
+      "score_mismatches": 0,
+      "cycles_min": 1034471,
+      "cycles_mean": 1039190.975,
+      "cycles_max": 1046013,
+      "milliseconds_mean_at_100mhz": 10.39190975,
+      "milliseconds_max_at_100mhz": 10.46013,
+      "ethernet_roundtrip_ms_mean": 13.721165000242763,
+      "ethernet_roundtrip_ms_max": 26.370699997642078
+    },
+    "windows_per_second": 4.0,
+    "cpu_duty_at_250ms_hop": 0.0416,
+    "cycles_per_second_at_250ms_hop": 4156764,
+    "note": "PicoRV32 at 100 MHz; front end (FFT) runs on the PC, not counted"
+  },
+  "seconds": 1747.4
+}

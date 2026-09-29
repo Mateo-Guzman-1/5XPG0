@@ -1,0 +1,332 @@
+{
+ "clean": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5718,
+   "other_accepted": 0.0017
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4811,
+   "other_accepted": 0.0013
+  }
+ },
+ "lowpass 3500 Hz": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.1587,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.2166,
+   "other_accepted": 0.0003
+  }
+ },
+ "lowpass 4000 Hz": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.2217,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.2746,
+   "other_accepted": 0.0003
+  }
+ },
+ "lowpass 4500 Hz": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.2997,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.3728,
+   "other_accepted": 0.0007
+  }
+ },
+ "lowpass 5000 Hz": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.3778,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.3829,
+   "other_accepted": 0.0007
+  }
+ },
+ "lowpass 5500 Hz": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.4559,
+   "other_accepted": 0.0007
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4207,
+   "other_accepted": 0.0007
+  }
+ },
+ "lowpass 6000 Hz": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.4962,
+   "other_accepted": 0.0007
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4786,
+   "other_accepted": 0.0017
+  }
+ },
+ "lowpass 7000 Hz": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5491,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4937,
+   "other_accepted": 0.001
+  }
+ },
+ "lowpass 7500 Hz": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5567,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4861,
+   "other_accepted": 0.002
+  }
+ },
+ "highpass 100 Hz": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5567,
+   "other_accepted": 0.0023
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.466,
+   "other_accepted": 0.0003
+  }
+ },
+ "highpass 200 Hz": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5491,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4861,
+   "other_accepted": 0.0007
+  }
+ },
+ "highpass 300 Hz": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5516,
+   "other_accepted": 0.0013
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.5264,
+   "other_accepted": 0.0017
+  }
+ },
+ "highpass 400 Hz": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5466,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.5113,
+   "other_accepted": 0.001
+  }
+ },
+ "highpass 500 Hz": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.534,
+   "other_accepted": 0.0023
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4987,
+   "other_accepted": 0.001
+  }
+ },
+ "peak 250 Hz -9 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5592,
+   "other_accepted": 0.0023
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.5088,
+   "other_accepted": 0.0013
+  }
+ },
+ "peak 250 Hz +9 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5743,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4408,
+   "other_accepted": 0.001
+  }
+ },
+ "peak 500 Hz -9 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.6297,
+   "other_accepted": 0.0013
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4836,
+   "other_accepted": 0.0007
+  }
+ },
+ "peak 500 Hz +9 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.4786,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4861,
+   "other_accepted": 0.0003
+  }
+ },
+ "peak 1000 Hz -9 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5844,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4836,
+   "other_accepted": 0.0013
+  }
+ },
+ "peak 1000 Hz +9 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5113,
+   "other_accepted": 0.0017
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4509,
+   "other_accepted": 0.0003
+  }
+ },
+ "peak 2000 Hz -9 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5466,
+   "other_accepted": 0.0013
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.5113,
+   "other_accepted": 0.001
+  }
+ },
+ "peak 2000 Hz +9 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5315,
+   "other_accepted": 0.0013
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4937,
+   "other_accepted": 0.0013
+  }
+ },
+ "peak 3000 Hz -9 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.534,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.466,
+   "other_accepted": 0.001
+  }
+ },
+ "peak 3000 Hz +9 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5491,
+   "other_accepted": 0.0023
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4887,
+   "other_accepted": 0.0003
+  }
+ },
+ "peak 4000 Hz -9 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5214,
+   "other_accepted": 0.0007
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4811,
+   "other_accepted": 0.0007
+  }
+ },
+ "peak 4000 Hz +9 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5718,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4836,
+   "other_accepted": 0.0007
+  }
+ },
+ "peak 5000 Hz -9 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.4887,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4786,
+   "other_accepted": 0.001
+  }
+ },
+ "peak 5000 Hz +9 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.6146,
+   "other_accepted": 0.0023
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4811,
+   "other_accepted": 0.0013
+  }
+ },
+ "peak 6000 Hz -9 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.471,
+   "other_accepted": 0.0007
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.4509,
+   "other_accepted": 0.001
+  }
+ },
+ "peak 6000 Hz +9 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5945,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.466,
+   "other_accepted": 0.001
+  }
+ },
+ "gain -20 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.2997,
+   "other_accepted": 0.0007
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.539,
+   "other_accepted": 0.0027
+  }
+ },
+ "gain -10 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.4458,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.5315,
+   "other_accepted": 0.0007
+  }
+ },
+ "gain +10 dB": {
+  "runs_stream\\s2_wide\\model.pt": {
+   "recall": 0.5264,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\s2_logw\\model.pt": {
+   "recall": 0.3552,
+   "other_accepted": 0.0
+  }
+ }
+}

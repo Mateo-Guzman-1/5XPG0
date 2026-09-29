@@ -27,6 +27,7 @@ def main():
     q = quantize_stream(model, float(ck['threshold']))
     q['yes_class'] = np.array(ck['yes_class'])
     q['frontend'] = np.array(ck.get('frontend', 'logmel'))
+    q['keyword'] = np.array(ck.get('keyword', 'yes'))
     q['source'] = np.array(str(a.checkpoint.as_posix()))
     a.out.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(a.out, **q)

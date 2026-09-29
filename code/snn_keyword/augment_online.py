@@ -23,7 +23,7 @@ import torch
 from scipy.signal import butter, sosfreqz
 
 import channels
-from features import LOGMEL_RANGE, N_MELS, PCEN, SAMPLE_RATE, mel_bank
+from features import AGC, LOGMEL_RANGE, N_MELS, PCEN, SAMPLE_RATE, mel_bank
 
 N_FFT_BINS = 257
 DEFAULTS = dict(p_speed=.8, p_room=.4, p_noise=.8, p_mic=.7, p_vtlp=.8, p_specaug=.5,
@@ -100,9 +100,26 @@ class FrontEnd:
         y = (e / (1e-6 + out) ** p['alpha'] + p['delta']) ** p['r'] - p['delta'] ** p['r']
         return torch.round((y / p['top']).clamp(0, 1) * 255).float()
 
+    @staticmethod
+    def logmel_agc(mel, p=AGC):
+        """features.logmel_agc_frames in torch (float64 tracker, as numpy)."""
+        db = 10 * torch.log10(mel.double().clamp_min(10 ** (p['min_db'] / 10)))
+        level = db.max(2)[0]
+        y = torch.empty_like(level)
+        prev = torch.full_like(level[:, 0], p['floor'])
+        for t in range(level.shape[1]):
+            prev = torch.maximum(torch.maximum(level[:, t], prev - p['release']), torch.full_like(prev, p['floor']))
+            y[:, t] = prev
+        rel = db - y[..., None]
+        return torch.round(((rel + p['range']) / p['range']).clamp(0, 1) * 255).float()
+
     def frames(self, mel, frontend='logmel'):
         """uint8-valued float frames (B, T, 24)."""
-        return self.pcen(mel) if frontend == 'pcen' else self.logmel(mel, frontend)
+        if frontend == 'pcen':
+            return self.pcen(mel)
+        if frontend == 'logmel_agc':
+            return self.logmel_agc(mel)
+        return self.logmel(mel, frontend)
 
     def pooled(self, mel, n_time=32):
         """Release window features (B, 24 * n_time), mel-major, from a 1 s mel sequence."""
