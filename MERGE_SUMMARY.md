@@ -105,7 +105,7 @@ Status: ✅ worked and kept · ⚠️ partly / open · ❌ did not work.
 | Event-driven **neuron engine** (`rtl/neuron_engine.v`) | Streaming SNN: 113 ms (software) → 77 ms (`kdot`) → **10.2 ms per hop**. Bit-exact on 40 streams in RTL and on the board over JTAG. 12.9k LUT, 88 BRAM36. 20× fewer synaptic operations than a dense equivalent. | ✅ | JOURNAL 16, 18 |
 | Engine timing margin | Rebuild with the host ABI fix: WNS −0.023 ns with the default strategy, +0.348 ns with Performance_ExplorePostRoutePhysOpt. The `acc[idx] += w` path was at the edge of 10 ns. | ✅ fixed | JOURNAL 19 |
 | **Pipelined accumulator** (read with forwarding, then add and write) | Default strategy: **WNS +0.406 ns**, hold met; 14.6k LUTs (27%). RTL bit-exact (stage 1 and the cascade); +1 clock per frame. Worst path now in the Poisson encoder. | ✅ | JOURNAL 31 |
-| 64 parallel LIF neurons, row-wide weight BRAM (Alex) | Sketch; its header says "not compiled, simulated or synthesized" (it lints). Removes `kdot` and the LED timer from `spike_soc.v`, and maps to the engine's address. | ⚠️ idea only | `rtl_sketches/snn_layer.v` |
+| 64 parallel LIF neurons, row-wide weight BRAM (Alex) | His layer has a golden-model smoke test (`firmware/snn_smoke.c`, `host/snn_smoke_test.sh`); his latest commit (`ed0d724`, 2026-09-29) says it passed on his PYNQ with his own bitstream. We did not run it: the firmware compiles here (47,328 bytes, his committed binary is 47,364), but it addresses the layer at `0x1000_4000`, which is our neuron engine in `spike_soc.v`, so it cannot run on `merge-all`'s SoC. The layer's header still says "not compiled, simulated or synthesized" (it lints). Removes `kdot` and the LED timer from `spike_soc.v`, and maps to the engine's address. | ⚠️ idea only | `rtl_sketches/snn_layer.v` |
 
 ### C. The "yes" window model (the current release)
 
@@ -326,6 +326,7 @@ branch:
 | `engine-timing` | `ddc95d0` | Journal: entry 31 after 30 (conflict at the same place, both kept). Open item "timing margin" closed. |
 | `explore-verifier` a third time | `65bb65d` | Entry 32 and the built-in keyword phonemes (the verifier runtime no longer needs `data_verifier/cmudict.dict`). The candidate verifier as `results/models/sheila_verifier_head_near.pt`. |
 | `explore-verifier` (sentence probe) | `52c3ce5` | none: entries 33-34, `tts_sentence_probe.py`, `--context-p`, hard training words. |
+| `Alex-parallel` again | `e4067fc` | none: his new commit `ed0d724` only adds the smoke test files (`firmware/`, `host/`); left where he put them. |
 | `explore-verifier` (documentation review) | `95d6154` | Four files. `README.md`: the two-stage README of `explore-verifier` taken, then Pedro's Ethernet section and facts, Damien's note and Alex's demo text re-applied by hand (both sides had restructured the same regions). `pc_keyword_demo.py`: Pedro's `--json` and our `--keyword`, one keyword label. `train_stream.py`: `--pos-delay` from the yes-boundary branch with the keyword wording. `JOURNAL.md`: one merged open-items list. |
 | `engine-timing` (its Rework merge) | `6b1cb28` | `JOURNAL.md` open items only; the list of `merge-all` already covered it. |
 
