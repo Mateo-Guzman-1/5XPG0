@@ -1043,6 +1043,103 @@ test word.
 - Native C on the full test set (`verify_stream.py`).
 - The phoneme verifier retargeted to SH IY L AH.
 
+### 28. The phoneme verifier for "sheila": stage 1 proposes, the verifier confirms
+
+Branch `explore-verifier` (Rework merged into it). The verifier of entry 22 was
+retargeted from Y EH S to SH IY L AH and put behind the "sheila" candidate
+(`runs_stream/sheila_qat_seed2/int_model.npz`).
+
+**Retargeting.**
+- `verifier_model.keyword_score` and `firmware/verifier.c` now score any
+  phoneme sequence. A CTC blank is required between two equal phonemes.
+  On random logits the result is identical to the old Y EH S code (numpy
+  and torch). Native C is bit-exact.
+- Training (`train_verifier.py`, `KWS_KEYWORD=sheila`):
+  - LibriSpeech train-clean-100 plus the keyword clips of `data/multi_sheila`,
+    with "sheila" as 25% of each keyword sub-batch;
+  - the stage-1 front end (`logmel`), so the board needs no second frame stream;
+  - 4000 steps of clean warm-up, 40 epochs, 47 min.
+- Validation clips: AUC 0.993; 95.6% of "sheila" clips score above the 99th
+  percentile of other words. For "yes" the verifier reached AUC 0.976, and the
+  99th percentile of other words was already a perfect path. Four phonemes
+  are easier to verify than three.
+- The last epoch is used (no checkpoint selection): the verifier's
+  validation clips are the same Speech Commands speakers as the live set.
+
+**Where stage 1 alone stands** (`verifier_cascade.py sources`, validation,
+18.1 h of negatives, integer model):
+
+| Stage-1 live recall | FA/h | Other words accepted |
+|---|---|---|
+| 65% | 1.2 | 0.00% |
+| 75% | 8.1 | 0.20% |
+| 85% | 30.3 | 1.07% |
+| 90% | 59.5 | 2.67% |
+
+The false accepts are LibriSpeech "she ..." phrases and Speech Commands
+clips labelled "zero", "four" and "two".
+
+**The cascade.** When stage 1 reaches t1 in request k or k-1, the verifier
+scores the last 1.5 s (150 frames) at the end of request k. The selection
+rule is unchanged: ≤ 0.2% of live other words and ≤ 2 FA/h on the negatives.
+Results are on validation, with t1 and t2 chosen there
+(`results/sheila_cascade_logmel.json`):
+
+| | Live recall | Complete recordings | Other words | FA/h | 1 h stream recall | Latency (median) |
+|---|---|---|---|---|---|---|
+| stage 1 alone (t = 18462) | 66.7% | 76.0% | 0.03% | 1.44 | 58.1% | 0.07 s |
+| **cascade** (t1 = 13744, t2 = −11) | **82.8%** | **90.5%** | 0.00% | 1.99 | 82.4% | 0.27 s |
+| stage 1 alone, held-out mics | 61.8% | 70.3% | 0.03% | | | |
+| cascade, held-out mics | 85.3% | 91.8% | 0.07% | | | |
+| stage 1 alone, mics + rooms | 59.3% | 65.8% | 0.20% | | | |
+| cascade, mics + rooms | 86.8% | 93.7% | 0.23% | | | |
+
+- **Gain:** +16.2 points of live recall. 35 clips are found only by the
+  cascade and 2 only by stage 1 (exact McNemar p < 0.001). That is well
+  outside the seed noise of stage 1 (SD 3.6 points).
+- **Microphones and rooms:** under held-out mics and rooms the cascade does
+  not lose recall. These conditions flatten stage 1's scores: fewer clips
+  exceed 18462, more exceed 13744. The verifier passes 89-91% of keyword
+  clips in every condition.
+- **Cost:** 53 verifier calls per hour of negatives. The latency grows by
+  the 107 ms verifier run and one 250 ms request.
+- **MSWC near-miss words:** the /ʃiː/-onset group (she, sheep, shield, ...)
+  goes from 13/183 to 26/183 accepted. Random MSWC words are unchanged at
+  2/3000.
+
+**What remains** (the 36 false accepts in 18.1 h at the operating point):
+- 25 are LibriSpeech phrases where "she", "sure" or "shore" is followed by a
+  vowel, L, W or N ("she added", "she laughed", "she will", "sure thing").
+  These are true acoustic neighbours of SH IY L AH.
+- 11 are Speech Commands clips labelled "zero", "two" or "four". The
+  verifier's greedy decoding of every one of them is SH IY L AH, and stage 1
+  also fires on them. They are probably mislabelled "sheila" recordings; one
+  speaker (e11fbc6e) has two. Across all 9,777 negative Speech Commands
+  clips, 30 get a perfect verifier path (18 "zero"). The list is in
+  `results/sheila_suspected_label_errors_validation.json`. They stay in the
+  evaluation until someone listens to them.
+
+**Firmware and RTL.** A `-DCASCADE` build of the stream firmware runs the
+cascade on the PicoRV32 itself: the LED follows confirmed detections only.
+- `verifier_cascade.cascade_requests` is its oracle. It equals the
+  evaluation code on 240 validation clips (269 verifier runs).
+- `verify_verifier_rtl.py --cascade 13744 -11` on the SoC RTL: 30 records
+  (keyword clips, other words, 30 s pieces of the negatives stream), 934
+  requests, bit-exact, 41 verifier runs, 13 detections with the LED on.
+- Worst request (stage 1 plus the verifier): 11.72M cycles, 117 ms at
+  100 MHz, within the 250 ms request.
+- Both models use 121 KB of the 144 KB model region.
+
+**Critique.**
+- t1 and t2 were chosen on the same validation data, from about 31
+  verifier thresholds times all stage-1 thresholds, so the numbers above
+  are optimistic. The test split has to confirm them.
+- One verifier seed so far.
+- The remaining acoustic false accepts ("she l...") need a verifier that
+  separates L AH from L AE / W / N after SH IY. Near-miss words in training
+  (MSWC "she", "sheep", "shell", ...: `data/multi_sheila_full`) are the
+  next experiment.
+
 ## Open items
 
 Status of `IMPLEMENTATION_PLAN.md`: Phases 0-6 done; the streaming firmware and
