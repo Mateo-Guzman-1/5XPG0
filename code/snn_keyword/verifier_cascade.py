@@ -18,6 +18,10 @@ request k plus the verifier run time (--verify-ms).
   select   thresholds with stream_select.py's rule (live other-word accepts
            <= 0.2%, <= 2 FA/h on the negatives stream), stage 1 alone and
            the cascades; report recall, false accepts and latency.
+  final    every metric at fixed thresholds (stage 1 alone and the cascade),
+           no selection: the one-time test report (cache --split test first).
+           Live recall also under the held-out microphones and rooms when the
+           cache has them (cache --device, or --add-device to an existing cache).
   sources  stage 1 alone at looser thresholds (given live recalls): false
            accepts per hour on the negatives stream, what they are (Speech
            Commands word, or the LibriSpeech words around the detection),
@@ -90,9 +94,11 @@ def prefixed_extras(data, split):
                 if any(K.prefixed(w) for w in ws) and K.KEYWORD.upper() not in ws:
                     utts.append((uid, text, sf.read(t.parent / f'{uid}.flac', dtype='float32')[0]))
     rows = [r for r in csv.DictReader(open(K.MULTI / 'manifest.csv', encoding='utf-8'))
-            if r['split'] == 'validation' and K.prefixed(r['word'])]
-    clips = np.load(K.MULTI / 'clips_validation.npy', mmap_mode='r')
-    audios = [clips[int(r['row'])].astype(np.float32) / 32768 for r in rows]
+            if r['split'] == split and K.prefixed(r['word'])]
+    audios = []
+    if rows:
+        clips = np.load(K.MULTI / f'clips_{split}.npy', mmap_mode='r')
+        audios = [clips[int(r['row'])].astype(np.float32) / 32768 for r in rows]
     noise = R.bg_noise(data)
     placed = R.place_clips(audios, noise, np.random.default_rng(77)) if audios else []
     # Utterances: 0.5 s of noise before and 1 s after, as in the negatives stream.
@@ -106,26 +112,45 @@ def prefixed_extras(data, split):
     return lib, [u[1] for u in utts], placed, [f"{r['corpus']}:{r['word']}" for r in rows]
 
 
+DEVICE = ('mic', 'room', 'mic+room')     # robust_eval live conditions besides clean
+
+
 def cache(a):
     q = dict(np.load(a.stage1))
     K.check_model_keyword(q.get('keyword'), 'stage 1')
     front = str(q.get('frontend', 'logmel'))
     t0 = time.perf_counter()
-    sets, info = R.build_sets(a.data, a.split, None, R.STREAM_SECONDS, {'device', 'tts'})
-    groups = {'live': sets['live']['clean'], 'mswc': sets['mswc'][0], 'stream': [sets['stream'][0]]}
-    lib, lib_text, pre, pre_words = prefixed_extras(a.data, a.split)
-    groups['prefixed_libri'], groups['prefixed_clips'] = lib, pre
-    out = {'live_y': sets['live_y'], 'live_clipped': sets['live_clipped'], 'mswc_words': sets['mswc'][1],
-           'mswc_clipped': sets['mswc'][2], 'stream_marks': sets['stream'][1],
-           'decision_window': np.array(int(q.get('decision_window', 1))), 'keyword': np.array(K.KEYWORD),
-           'stream_seconds': np.array(sets['stream'][2]['seconds']), 'prefixed_libri_text': np.array(lib_text),
-           'prefixed_clip_words': np.array(pre_words)}
+    if a.add_device:   # only the live set under the held-out channels, into the existing cache
+        out = dict(np.load(cache_file(a.split)))
+        sets, _ = R.build_sets(a.data, a.split, None, R.STREAM_SECONDS, {'corpus', 'stream', 'tts'})
+        assert (sets['live_y'] == out['live_y']).all()
+        first = frame_features(sets['live']['clean'][0], front)    # same clips and placement as the cache
+        assert (first == out['live_frames'][:len(first)]).all(), 'live clips differ from the cache'
+    else:
+        skip = {'tts'} | (set() if a.device else {'device'})
+        sets, info = R.build_sets(a.data, a.split, None, R.STREAM_SECONDS, skip)
     def put(name, feats):   # a group may be empty ("sheila" has no keyword-prefixed words)
         raw = stage1_raw(q, feats)
         out[f'{name}_frames'] = np.concatenate(feats) if feats else np.zeros((0, 24), np.uint8)
         out[f'{name}_raw'] = np.concatenate(raw) if raw else np.zeros(0, np.int32)
         out[f'{name}_off'] = np.r_[0, np.cumsum([len(f) for f in feats])].astype(np.int64)
         print(name, len(feats), 'items', len(out[f'{name}_frames']), 'frames', round(time.perf_counter() - t0), 's', flush=True)
+    if a.add_device:
+        for cond in DEVICE:
+            put(f'live_{cond}', [frame_features(x, front) for x in sets['live'][cond]])
+        np.savez(cache_file(a.split), **out)
+        print('added', DEVICE, round(time.perf_counter() - t0), 's')
+        return
+    groups = {'live': sets['live']['clean'], 'mswc': sets['mswc'][0], 'stream': [sets['stream'][0]]}
+    groups.update({f'live_{cond}': sets['live'][cond] for cond in DEVICE if cond in sets['live']})
+    lib, lib_text, pre, pre_words = prefixed_extras(a.data, a.split)
+    groups['prefixed_libri'], groups['prefixed_clips'] = lib, pre
+    out = {'split': np.array(a.split), 'live_y': sets['live_y'], 'live_clipped': sets['live_clipped'],
+           'mswc_words': sets['mswc'][1],
+           'mswc_clipped': sets['mswc'][2], 'stream_marks': sets['stream'][1],
+           'decision_window': np.array(int(q.get('decision_window', 1))), 'keyword': np.array(K.KEYWORD),
+           'stream_seconds': np.array(sets['stream'][2]['seconds']), 'prefixed_libri_text': np.array(lib_text),
+           'prefixed_clip_words': np.array(pre_words)}
     for name, audios in groups.items():
         put(name, [frame_features(x, front) for x in audios])
     # Negatives stream, in its 600 s chunks (state reset per chunk, as robust_eval.negative_traces).
@@ -166,7 +191,11 @@ def windows(frames, ends, length):
     return pad[idx]
 
 
-GROUPS = ('live', 'mswc', 'stream', 'neg', 'prefixed_libri', 'prefixed_clips')
+GROUPS = ('live', 'live_mic', 'live_room', 'live_mic+room', 'mswc', 'stream', 'neg', 'prefixed_libri', 'prefixed_clips')
+
+
+def present(c):
+    return [g for g in GROUPS if f'{g}_off' in c]
 
 
 # --------------------------------------------------------------------------- verifier scores
@@ -181,7 +210,7 @@ def score(a):
     model = IntegerTorch(q, 'cpu')
     c = dict(np.load(cache_file(a.split)))
     out, t0 = {}, time.perf_counter()
-    for g in GROUPS:
+    for g in present(c):
         items = split_items(c, g)
         va, vb, off, pend = [], [], [0], []
 
@@ -224,8 +253,8 @@ class Cascade:
 
     def __init__(self, c, v, w, verify_ms):
         self.c, self.v, self.w, self.verify_ms = c, v, w, verify_ms
-        self.items = {g: split_items(c, g) for g in GROUPS}
-        self.d1 = {g: [decision_scores(r.astype(np.int64), w) for _, r in self.items[g]] for g in GROUPS}
+        self.items = {g: split_items(c, g) for g in present(c) if f'{g}_voff' in v}
+        self.d1 = {g: [decision_scores(r.astype(np.int64), w) for _, r in self.items[g]] for g in self.items}
 
     def traces(self, g, mode, t2=None, policy='a'):
         """mode 'frame': stage 1 alone per frame (stream_select.py); 'hop': stage 1 alone at request
@@ -287,30 +316,60 @@ def operating(cas, mode, t2, policy, max_live_fa=.002, max_fa_hour=2.):
                 best['live_recall_complete'] = round(float((live[(y == 1) & ~c['live_clipped']] >= t1).mean()), 4)
     if best is None:
         return None
-    t1 = best['t1']
+    return metrics(cas, mode, best['t1'], t2, policy)
+
+
+def rate(hits):
+    return round(float(np.mean(hits)), 4) if len(hits) else None
+
+
+def metrics(cas, mode, t1, t2, policy):
+    """Every reported number at fixed thresholds (no selection)."""
+    c = cas.c
+    y = c['live_y']
+    out = {'t1': int(t1), 't2': None if t2 is None else int(t2)}
+    for g in [g for g in cas.items if g.startswith('live')]:
+        s = np.array([x.max() for _, x in cas.traces(g, mode, t2, policy)])
+        r = {'recall': rate(s[y == 1] >= t1), 'other_accepted': rate(s[y == 0] >= t1)}
+        if 'live_clipped' in c:   # recall on keyword recordings that are not cut off
+            r['recall_complete'] = rate(s[(y == 1) & ~c['live_clipped']] >= t1)
+        if g == 'live':
+            out.update(live_recall=r['recall'], live_recall_complete=r.get('recall_complete'),
+                       live_fa=r['other_accepted'])
+            out['_live_hits'] = s[y == 1] >= t1
+        else:
+            out[g] = r
+    neg = cas.traces('neg', mode, t2, policy)
+    hours = float(c['neg_seconds']) / 3600
+    if policy == 'b' and 'prefixed_libri' in cas.items:    # prefixed LibriSpeech utterances are negatives too
+        neg = neg + cas.traces('prefixed_libri', mode, t2, policy)
+        hours += sum(len(f) for f, _ in cas.items['prefixed_libri']) * .01 / 3600
+    out.update(fa_per_hour=round(fa_hour(neg, hours, t1), 3), neg_hours=round(hours, 2))
     (ts, ss), = cas.traces('stream', mode, t2, policy)
     st = R.score_stream(ts, ss, t1, c['stream_marks'], float(c['stream_seconds']) / 3600)
-    best.update(stream_recall=st['recall'], stream_fa=st['false_accepts'], latency_median_s=st['latency_median_s'],
-                latency_p90_s=st['latency_p90_s'])
+    out.update(stream_recall=st['recall'], stream_fa=st['false_accepts'], latency_median_s=st['latency_median_s'],
+               latency_p90_s=st['latency_p90_s'])
     mw = c['mswc_words']
     ms = np.array([s.max() for _, s in cas.traces('mswc', mode, t2, policy)])
     pre = np.vectorize(K.prefixed)(mw) if len(mw) else np.zeros(0, bool)
     other = (mw != K.KEYWORD) & (~pre if policy == 'a' else True)
-    best.update(mswc_recall=round(float((ms[mw == K.KEYWORD] >= t1).mean()), 4) if (mw == K.KEYWORD).any() else None,
-                mswc_other_fa=round(float((ms[other] >= t1).mean()), 4),
-                mswc_prefixed_accepted=f'{int((ms[pre] >= t1).sum())}/{int(pre.sum())}')
-    pc = np.array([s.max() for _, s in cas.traces('prefixed_clips', mode, t2, policy)])
-    best['prefixed_clips_accepted'] = f'{int((pc >= t1).sum())}/{len(pc)}'
-    pl = sum(len(R.detections(t, s, t1)) > 0 for t, s in cas.traces('prefixed_libri', mode, t2, policy))
-    best['prefixed_libri_with_detection'] = f'{int(pl)}/{len(cas.items["prefixed_libri"])}'
+    out.update(mswc_recall=rate(ms[mw == K.KEYWORD] >= t1), mswc_other_fa=rate(ms[other] >= t1),
+               mswc_prefixed_accepted=f'{int((ms[pre] >= t1).sum())}/{int(pre.sum())}')
+    groups = {g: np.isin(mw, ws) for g, ws in K.MSWC_GROUPS.items()}
+    groups['random other words'] = ~np.isin(mw, sum(K.MSWC_GROUPS.values(), []) + [K.KEYWORD])
+    out['mswc_groups_accepted'] = {g: f'{int((ms[m] >= t1).sum())}/{int(m.sum())}' for g, m in groups.items()}
+    if 'prefixed_clips' in cas.items:
+        pc = np.array([s.max() for _, s in cas.traces('prefixed_clips', mode, t2, policy)])
+        out['prefixed_clips_accepted'] = f'{int((pc >= t1).sum())}/{len(pc)}'
+        pl = sum(len(R.detections(t, s, t1)) > 0 for t, s in cas.traces('prefixed_libri', mode, t2, policy))
+        out['prefixed_libri_with_detection'] = f'{int(pl)}/{len(cas.items["prefixed_libri"])}'
     if mode == 'cascade':   # verifier calls per hour on the negatives at t1 (CPU load)
         calls = 0
         for d in cas.d1['neg']:
             hm = hop_max(d)
             calls += int((np.maximum(hm, np.r_[NEG, hm[:-1]]) >= t1).sum())
-        best['verifier_calls_per_hour'] = round(calls / (float(c['neg_seconds']) / 3600), 1)
-    best['_live_hits'] = live[y == 1] >= t1
-    return best
+        out['verifier_calls_per_hour'] = round(calls / hours, 1)
+    return out
 
 
 def mcnemar(a_hits, b_hits):
@@ -352,6 +411,25 @@ def select(a):
             report['runs'].append({'window': w, 'policy': policy, **rows, 'grid': cands})
             print('W', w, 'policy', policy, json.dumps(rows), flush=True)
     a.out.write_text(json.dumps(report, indent=1, default=int))
+
+
+def final(a):
+    """All metrics at the thresholds chosen on validation: stage 1 alone and the cascade."""
+    c = dict(np.load(cache_file(a.split)))
+    v = dict(np.load(a.scores))
+    assert str(v['checkpoint']) == str(a.checkpoint_name) if a.checkpoint_name else True
+    cas = Cascade(c, v, a.window, a.verify_ms)
+    rows = {'stage1_frame': metrics(cas, 'frame', a.stage1_threshold, None, a.policy),
+            'stage1_hop': metrics(cas, 'hop', a.stage1_threshold, None, a.policy),
+            'cascade': metrics(cas, 'cascade', a.t1, a.t2, a.policy)}
+    rows['cascade']['paired_vs_stage1_frame'] = mcnemar(rows['stage1_frame']['_live_hits'], rows['cascade']['_live_hits'])
+    for r in rows.values():
+        r.pop('_live_hits')
+    report = {'split': a.split, 'keyword': K.KEYWORD, 'stage1': str(c['stage1']), 'scores': str(a.scores),
+              'verifier': str(v['checkpoint']), 'window': a.window, 'policy': a.policy, 'verify_ms': a.verify_ms,
+              'fixed_thresholds': 'chosen on validation (select); nothing is selected here', **rows}
+    a.out.write_text(json.dumps(report, indent=1, default=int))
+    print(json.dumps(report, indent=1, default=int))
 
 
 def libri_texts(data, split):
@@ -419,10 +497,13 @@ def main():
     c = sub.add_parser('cache')
     c.add_argument('--stage1', type=Path, default=STAGE1)
     c.add_argument('--data', type=Path, default=ROOT / 'data')
-    c.add_argument('--split', choices=['validation'], default='validation')   # never the test split
+    c.add_argument('--split', choices=['validation', 'test'], default='validation',
+                   help='test: only for the one-time final report')
+    c.add_argument('--device', action='store_true', help='also the live set under held-out microphones and rooms')
+    c.add_argument('--add-device', action='store_true', help='add only those to an existing cache')
     s = sub.add_parser('score')
     s.add_argument('checkpoint', type=Path)
-    s.add_argument('--split', choices=['validation'], default='validation')
+    s.add_argument('--split', choices=['validation', 'test'], default='validation')
     s.add_argument('--window', type=int, default=150, help='frames (10 ms) given to the verifier')
     s.add_argument('--warmup', type=int, default=5, help='20 ms steps before a keyword may start')
     s.add_argument('--boundary', type=int, default=10, help='policy b: 20 ms steps without a new phoneme after S')
@@ -435,6 +516,17 @@ def main():
     e.add_argument('--windows', type=int, nargs='+', help='stage-1 decision windows (default: the model\'s own)')
     e.add_argument('--verify-ms', type=float, default=0., help='verifier run time added to cascade detections')
     e.add_argument('--out', type=Path, required=True)
+    f = sub.add_parser('final')
+    f.add_argument('scores', type=Path)
+    f.add_argument('--split', choices=['validation', 'test'], default='test')
+    f.add_argument('--t1', type=int, required=True)
+    f.add_argument('--t2', type=int, required=True)
+    f.add_argument('--stage1-threshold', type=int, required=True, help='stage 1 alone (its own selection)')
+    f.add_argument('--window', type=int, default=1)
+    f.add_argument('--policy', choices=['a', 'b'], default='a')
+    f.add_argument('--verify-ms', type=float, default=0.)
+    f.add_argument('--checkpoint-name', help='refuse scores of another verifier')
+    f.add_argument('--out', type=Path, required=True)
     o = sub.add_parser('sources')
     o.add_argument('--split', choices=['validation'], default='validation')
     o.add_argument('--data', type=Path, default=ROOT / 'data')
@@ -443,7 +535,7 @@ def main():
     o.add_argument('--examples', type=int, default=40, help='LibriSpeech examples per level')
     o.add_argument('--out', type=Path, required=True)
     a = p.parse_args()
-    {'cache': cache, 'score': score, 'select': select, 'sources': sources}[a.cmd](a)
+    {'cache': cache, 'score': score, 'select': select, 'final': final, 'sources': sources}[a.cmd](a)
 
 
 if __name__ == '__main__':

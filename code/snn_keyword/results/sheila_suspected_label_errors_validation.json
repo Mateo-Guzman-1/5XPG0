@@ -1,0 +1,72 @@
+[
+ {
+  "file": "four/1657c9fa_nohash_0.wav",
+  "verifier_score": 0.0,
+  "stage1_max": 20123
+ },
+ {
+  "file": "four/7be5a0f3_nohash_0.wav",
+  "verifier_score": 0.0,
+  "stage1_max": 17479
+ },
+ {
+  "file": "two/86478fab_nohash_0.wav",
+  "verifier_score": 0.0,
+  "stage1_max": 17387
+ },
+ {
+  "file": "zero/e11fbc6e_nohash_1.wav",
+  "verifier_score": 0.0,
+  "stage1_max": 17110
+ },
+ {
+  "file": "zero/ef77b778_nohash_4.wav",
+  "verifier_score": 0.0,
+  "stage1_max": 16694
+ },
+ {
+  "file": "zero/dca2797e_nohash_3.wav",
+  "verifier_score": 0.0,
+  "stage1_max": 16075
+ },
+ {
+  "file": "zero/7c1d8533_nohash_2.wav",
+  "verifier_score": 0.0,
+  "stage1_max": 15767
+ },
+ {
+  "file": "zero/64e48f55_nohash_2.wav",
+  "verifier_score": 0.0,
+  "stage1_max": 15695
+ },
+ {
+  "file": "zero/cab100c9_nohash_2.wav",
+  "verifier_score": 0.0,
+  "stage1_max": 15595
+ },
+ {
+  "file": "zero/2296b1af_nohash_0.wav",
+  "verifier_score": 0.0,
+  "stage1_max": 15466
+ },
+ {
+  "file": "zero/e11fbc6e_nohash_0.wav",
+  "verifier_score": 0.0,
+  "stage1_max": 15212
+ },
+ {
+  "file": "two/28ef2a01_nohash_0.wav",
+  "verifier_score": 0.0,
+  "stage1_max": 14842
+ },
+ {
+  "file": "zero/96c67073_nohash_0.wav",
+  "verifier_score": 0.0,
+  "stage1_max": 14407
+ },
+ {
+  "file": "zero/257e17e0_nohash_0.wav",
+  "verifier_score": 0.0,
+  "stage1_max": 13997
+ }
+]

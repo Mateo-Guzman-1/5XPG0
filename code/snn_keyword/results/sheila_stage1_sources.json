@@ -1,0 +1,529 @@
+{
+ "keyword": "sheila",
+ "stage1": "C:\\Users\\matut\\FULL_AI\\5XPG0\\code\\snn_keyword\\runs_stream\\sheila_qat_seed2\\int_model.npz",
+ "window": 1,
+ "neg_hours": 18.11,
+ "levels": [
+  {
+   "live_recall": 0.652,
+   "t1": 18715,
+   "live_other_accepted": 0.0,
+   "fa_per_hour": 1.16,
+   "by_kind": {
+    "word": 10,
+    "libri": 11
+   },
+   "sc_words": [
+    [
+     "zero",
+     5
+    ],
+    [
+     "four",
+     4
+    ],
+    [
+     "left",
+     1
+    ]
+   ],
+   "libri_examples": [
+    "heart i told my guide",
+    "if you do",
+    "she added",
+    "like manner she was asking",
+    "constable de montmorency soon arrived",
+    "hi there hissed lumpy",
+    "it was a theatre",
+    "seen anything to shoot at",
+    "what does he care care",
+    "placed on the table and",
+    "to come out mister north"
+   ],
+   "live_recall_complete": 0.7405
+  },
+  {
+   "live_recall": 0.701,
+   "t1": 17637,
+   "live_other_accepted": 0.0007,
+   "fa_per_hour": 3.09,
+   "by_kind": {
+    "word": 20,
+    "libri": 36
+   },
+   "sc_words": [
+    [
+     "zero",
+     9
+    ],
+    [
+     "four",
+     7
+    ],
+    [
+     "left",
+     1
+    ],
+    [
+     "right",
+     1
+    ],
+    [
+     "no",
+     1
+    ],
+    [
+     "down",
+     1
+    ]
+   ],
+   "libri_examples": [
+    "mother and he knew not",
+    "new england from the beginning",
+    "heart i told my guide",
+    "and went to her chamber",
+    "thou guarding so carefully shriya",
+    "if you do",
+    "was fastened a heavy rope",
+    "had designs upon the hacienda",
+    "she added",
+    "she knew that",
+    "instalments on two lots far",
+    "the frontiers of new york",
+    "could see now that though",
+    "like manner she was asking",
+    "constable de montmorency soon arrived",
+    "she knows",
+    "he gave up work",
+    "hi there hissed lumpy",
+    "preacher he went to the",
+    "will you let me hear",
+    "it was a theatre",
+    "you say you like to",
+    "go do you hear",
+    "seen anything to shoot at",
+    "detected she would have been",
+    "was vain about my hair",
+    "the fort and the shore",
+    "harrier and beagle association was",
+    "what does he care care",
+    "very wise decision she remarked",
+    "very truly yours",
+    "to her he asked she",
+    "placed on the table and",
+    "to come out mister north",
+    "see if it was safely",
+    "machinery as a source of"
+   ],
+   "live_recall_complete": 0.7911
+  },
+  {
+   "live_recall": 0.75,
+   "t1": 16144,
+   "live_other_accepted": 0.002,
+   "fa_per_hour": 8.06,
+   "by_kind": {
+    "libri": 84,
+    "word": 62
+   },
+   "sc_words": [
+    [
+     "four",
+     24
+    ],
+    [
+     "zero",
+     23
+    ],
+    [
+     "two",
+     6
+    ],
+    [
+     "visual",
+     2
+    ],
+    [
+     "left",
+     1
+    ],
+    [
+     "tree",
+     1
+    ],
+    [
+     "right",
+     1
+    ],
+    [
+     "no",
+     1
+    ],
+    [
+     "down",
+     1
+    ],
+    [
+     "one",
+     1
+    ],
+    [
+     "stop",
+     1
+    ]
+   ],
+   "libri_examples": [
+    "she forgot that he had",
+    "effect upon old mister shimerda",
+    "octavia is most happy",
+    "the confederacy was now secure",
+    "mother and he knew not",
+    "stopped at the kitchen door",
+    "the evil and",
+    "new england from the beginning",
+    "be yours seeing that when",
+    "heart i told my guide",
+    "and went to her chamber",
+    "thou guarding so carefully shriya",
+    "brave man should yield aught",
+    "if you do",
+    "city of aea and they",
+    "was fastened a heavy rope",
+    "why asked fedosya with curiosity",
+    "had designs upon the hacienda",
+    "she added",
+    "she had lost",
+    "on my mound and within",
+    "bewitchingly with the simple foolish",
+    "minister in the church of",
+    "she knew that",
+    "psha look",
+    "instalments on two lots far",
+    "the frontiers of new york",
+    "my house winter came on",
+    "he moaned",
+    "he could see now that",
+    "like manner she was asking",
+    "constable de montmorency soon arrived",
+    "the universal mysteries of despair",
+    "but the duty of the",
+    "she knows",
+    "he gave up work",
+    "she looked as he had",
+    "hi there hissed lumpy",
+    "and looked ingratiatingly at pierre",
+    "preacher he went to the"
+   ],
+   "live_recall_complete": 0.8418
+  },
+  {
+   "live_recall": 0.8039,
+   "t1": 14817,
+   "live_other_accepted": 0.0033,
+   "fa_per_hour": 16.07,
+   "by_kind": {
+    "libri": 183,
+    "word": 108
+   },
+   "sc_words": [
+    [
+     "zero",
+     50
+    ],
+    [
+     "four",
+     37
+    ],
+    [
+     "two",
+     7
+    ],
+    [
+     "visual",
+     3
+    ],
+    [
+     "tree",
+     2
+    ],
+    [
+     "no",
+     2
+    ],
+    [
+     "left",
+     1
+    ],
+    [
+     "right",
+     1
+    ],
+    [
+     "forward",
+     1
+    ],
+    [
+     "down",
+     1
+    ],
+    [
+     "one",
+     1
+    ],
+    [
+     "cat",
+     1
+    ]
+   ],
+   "libri_examples": [
+    "she forgot that he",
+    "placed the green box which",
+    "and then almost before",
+    "old fairy might wish to",
+    "william could not have been",
+    "are strongly questionable and the",
+    "effect upon old mister shimerda",
+    "shell you can split off",
+    "was a note for a",
+    "shouted little nao from his",
+    "she is a",
+    "octavia is most happy",
+    "ice cliffs sixty feet high",
+    "the confederacy was now secure",
+    "mother and he knew not",
+    "stopped at the kitchen door",
+    "a fellow of much humour",
+    "the evil and",
+    "new england from the beginning",
+    "be yours seeing that when",
+    "heart i told my guide",
+    "and went to her chamber",
+    "boy into his new life",
+    "die who bore the hero",
+    "of heresy cyril auspiciously opened",
+    "thou guarding so carefully shriya",
+    "meanwhile the haughty little",
+    "to be sure i",
+    "sir said she when thinkest",
+    "put the two more quickly",
+    "brave man should yield aught",
+    "how hold out our sweethearts",
+    "smelling and to the aroma",
+    "if you do",
+    "city of aea and they",
+    "was that she was lost",
+    "was fastened a heavy rope",
+    "stay and she was his",
+    "his mind the chief still",
+    "could stoop to hate i"
+   ],
+   "live_recall_complete": 0.8987
+  },
+  {
+   "live_recall": 0.8529,
+   "t1": 13005,
+   "live_other_accepted": 0.0107,
+   "fa_per_hour": 30.26,
+   "by_kind": {
+    "libri": 359,
+    "word": 189
+   },
+   "sc_words": [
+    [
+     "zero",
+     79
+    ],
+    [
+     "four",
+     56
+    ],
+    [
+     "two",
+     21
+    ],
+    [
+     "tree",
+     6
+    ],
+    [
+     "visual",
+     6
+    ],
+    [
+     "no",
+     5
+    ],
+    [
+     "one",
+     3
+    ],
+    [
+     "yes",
+     2
+    ],
+    [
+     "eight",
+     2
+    ],
+    [
+     "left",
+     1
+    ],
+    [
+     "go",
+     1
+    ],
+    [
+     "right",
+     1
+    ]
+   ],
+   "libri_examples": [
+    "she forgot that he",
+    "placed the green box which",
+    "and then almost before",
+    "old fairy might wish to",
+    "william could not have been",
+    "and bali meet in yama's",
+    "are strongly questionable and the",
+    "look here lads i've",
+    "depressing effect upon old mister",
+    "shell you can split off",
+    "for the",
+    "was a note for a",
+    "in various parts of the",
+    "shouted little nao from his",
+    "she is a",
+    "octavia is most happy",
+    "ice cliffs sixty feet high",
+    "the confederacy was now secure",
+    "mother and he knew not",
+    "sobbing and she wailed loudly",
+    "stopped at the kitchen door",
+    "one it would seem that",
+    "a fellow of much humour",
+    "the hoosier listened without ever",
+    "the evil and",
+    "the robbers filled the air",
+    "new england from the beginning",
+    "be yours seeing that when",
+    "better to share the last",
+    "heart i told my guide",
+    "beenie and went to her",
+    "boy into his new life",
+    "die who bore the hero",
+    "or the sparkling mediterranean beyond",
+    "of heresy cyril auspiciously opened",
+    "face behind the curtains near",
+    "thou guarding so carefully shriya",
+    "meanwhile the haughty little",
+    "in the meantime there is",
+    "to be sure i"
+   ],
+   "live_recall_complete": 0.9241
+  },
+  {
+   "live_recall": 0.902,
+   "t1": 10976,
+   "live_other_accepted": 0.0267,
+   "fa_per_hour": 59.53,
+   "by_kind": {
+    "word": 351,
+    "libri": 727
+   },
+   "sc_words": [
+    [
+     "zero",
+     129
+    ],
+    [
+     "four",
+     74
+    ],
+    [
+     "two",
+     61
+    ],
+    [
+     "tree",
+     14
+    ],
+    [
+     "visual",
+     13
+    ],
+    [
+     "no",
+     8
+    ],
+    [
+     "stop",
+     7
+    ],
+    [
+     "yes",
+     5
+    ],
+    [
+     "down",
+     5
+    ],
+    [
+     "six",
+     4
+    ],
+    [
+     "one",
+     4
+    ],
+    [
+     "eight",
+     4
+    ]
+   ],
+   "libri_examples": [
+    "she forgot that he",
+    "placed the green box which",
+    "and then almost before",
+    "but she knew nobody",
+    "old fairy might wish to",
+    "william could not have been",
+    "and bali meet in yama's",
+    "the keen wind thrust itself",
+    "but somehow the very",
+    "five six and no letter",
+    "are strongly questionable and the",
+    "look here lads i've",
+    "son on his hard couch",
+    "as a crowd collected around",
+    "depressing effect upon old mister",
+    "here is something",
+    "shell you can split off",
+    "spot stopped and dwindled smaller",
+    "day that came showed the",
+    "for the",
+    "was a note for a",
+    "soon they were to be",
+    "in various parts of the",
+    "shouted little nao from his",
+    "little longer and she was",
+    "she was compelled to yield",
+    "to four hours each day",
+    "i will said the man",
+    "she is a",
+    "being different from the ruled",
+    "the officers of",
+    "by appointment from civil life",
+    "he's my father indeed",
+    "perhaps after all she may",
+    "octavia is most happy",
+    "stamping with her plump little",
+    "ice cliffs sixty feet high",
+    "perceived each other they recognized",
+    "the confederacy was now secure",
+    "a mother and he knew"
+   ],
+   "live_recall_complete": 0.9747
+  }
+ ]
+}
