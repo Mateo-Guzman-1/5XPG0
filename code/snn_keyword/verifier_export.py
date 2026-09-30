@@ -57,7 +57,7 @@ def range_checks(q, steps):
     return checks
 
 
-def export(q, out, frames=150, warmup=5, boundary=10, thresholds=(NEG, NEG)):
+def export(q, out, frames=150, warmup=5, boundary=10, thresholds=(NEG, NEG), cascade_t1=None):
     out = Path(out); out.mkdir(parents=True, exist_ok=True)
     stack = int(q['stack'])
     checks = range_checks(q, frames // stack)
@@ -69,8 +69,10 @@ def export(q, out, frames=150, warmup=5, boundary=10, thresholds=(NEG, NEG)):
            f'#define VERIFIER_PHONES {{{", ".join(str(int(k)) for k in KEYWORD)}}}',
            f'#define VERIFIER_FRAMES {frames}', f'#define VERIFIER_WARMUP {warmup}',
            f'#define VERIFIER_BOUNDARY {boundary}', f'#define VERIFIER_NEG ({NEG})',
-           f'#define VERIFIER_THRESHOLD_A ({int(thresholds[0])})', f'#define VERIFIER_THRESHOLD_B ({int(thresholds[1])})',
-           '#endif', '']
+           f'#define VERIFIER_THRESHOLD_A ({int(thresholds[0])})', f'#define VERIFIER_THRESHOLD_B ({int(thresholds[1])})']
+    if cascade_t1 is not None:   # stage-1 decision score that asks the verifier (firmware CASCADE builds)
+        cfg.append(f'#define CASCADE_T1 ({int(cascade_t1)})')
+    cfg += ['#endif', '']
     (out / 'verifier_config.h').write_bytes('\n'.join(cfg).encode())
     lines = ['#include <stdint.h>', '#include "verifier_config.h"']
     for name in ('l1', 'l2'):

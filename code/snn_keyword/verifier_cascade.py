@@ -240,6 +240,39 @@ def score(a):
     np.savez(a.out, **out)
 
 
+# --------------------------------------------------------------------------- firmware oracle
+
+def cascade_requests(frames, q1, qv, t1, t2, window=1, warmup=5, boundary=10, vframes=150, holdoff=100):
+    """Per 25-frame request, what the CASCADE firmware reports: (detected bits, score_a, score_b).
+
+    bit0 detection (verifier score_a >= t2 while stage 1 reached t1 in this request or the
+    previous one, >= holdoff frames after the previous detection, counted at request ends),
+    bit1 stage 1 reached t1 in this request, bit2 the verifier ran. Scores are
+    verifier_model.NEG when it did not run. Same decision as Cascade.traces('cascade'),
+    with the hold-off in whole frames instead of float seconds.
+    """
+    from verifier_model import NEG as VNEG, integer_forward, keyword_score
+    from model import integer_forward_stream
+    s, _, _ = integer_forward_stream(np.asarray(frames, np.uint8)[None], q1)
+    d = decision_scores(s[0].astype(np.int64), window)
+    ends = hop_ends(len(frames))
+    reach = np.maximum.reduceat(d, np.r_[0, ends[:-1] + 1]) >= t1
+    run = reach | np.r_[False, reach[:-1]]
+    sa = np.full(len(ends), VNEG, np.int64)
+    sb = np.full(len(ends), VNEG, np.int64)
+    if run.any():
+        lg = integer_forward(windows(np.asarray(frames, np.uint8), ends[run], vframes), qv)
+        sa[run], sb[run] = keyword_score(lg, warmup, 0), keyword_score(lg, warmup, boundary)
+    out, last = [], None
+    for k, e in enumerate(ends):
+        bits = 2 * int(reach[k]) + 4 * int(run[k])
+        if run[k] and sa[k] >= t2 and (last is None or e - last >= holdoff):
+            bits |= 1
+            last = e
+        out.append((bits, int(sa[k]), int(sb[k])))
+    return out
+
+
 # --------------------------------------------------------------------------- selection
 
 def hop_max(d):

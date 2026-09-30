@@ -25,6 +25,16 @@
  * MB[30] = a hash of the logits (sum of logit * (index + 1)), MB[9] = cycles.
  * Command 6 with length 0 verifies the history; with length = VERIFIER_FRAMES
  * frames it verifies the frames in the input buffer (test vectors).
+ *
+ * CASCADE builds (verifier_cascade.py, mode 'cascade'): after each command 4,
+ * if the decision score reached CASCADE_T1 in this request or the previous one,
+ * the verifier scores the last VERIFIER_FRAMES frames. A detection is
+ * score_a >= VERIFIER_THRESHOLD_A at least HOLDOFF frames (counted at request
+ * ends) after the previous one; it lights LED0. MB[11] bit0 detection, bit1
+ * the decision score reached CASCADE_T1 in this request, bit2 the verifier ran;
+ * MB[26..29] its scores (VERIFIER_NEG, -1 when it did not run); MB[17] the
+ * last frame of the request on a detection; MB[9] cycles of stage 1 and the
+ * verifier; MB[13] = CASCADE_T1, MB[25] = VERIFIER_THRESHOLD_A, MB[31] = 1.
  */
 #include <stdint.h>
 #include "stream_infer.h"
@@ -47,6 +57,9 @@ static void vhist_push(const uint8_t *frame)
         vhist[vpos * STREAM_BANDS + i] = vhist[(vpos + VERIFIER_FRAMES) * STREAM_BANDS + i] = frame[i];
     if (++vpos == VERIFIER_FRAMES) vpos = 0;
 }
+#endif
+#if defined(CASCADE) && !(defined(USE_VERIFIER) && defined(CASCADE_T1))
+#error "CASCADE needs USE_VERIFIER and CASCADE_T1 (verifier_export.export(cascade_t1=...))"
 #endif
 
 #define MMIO(a) (*(volatile uint32_t *)(a))
@@ -81,13 +94,22 @@ extern uint32_t stream_prof[5];
 void main(void)
 {
     uint32_t frames = 0, last_event = 0, have_event = 0;
+#ifdef CASCADE
+    uint32_t prev_reach = 0;
+#endif
     stream_init();
     stream_reset(&state);
     decision_reset();
 #ifdef USE_VERIFIER
     vhist_reset();
 #endif
+#ifdef CASCADE
+    MB[13] = (uint32_t)CASCADE_T1;
+    MB[25] = (uint32_t)VERIFIER_THRESHOLD_A;
+    MB[31] = 1;
+#else
     MB[13] = (uint32_t)STREAM_THRESHOLD;
+#endif
     MB[19] = STREAM_WINDOW;
     MB[14] = STREAM_BANDS;
     MB[15] = MAX_FRAMES;
@@ -103,6 +125,9 @@ void main(void)
             int32_t best = INT32_MIN, score = 0;
             uint32_t spikes = 0, events = 0, detected = 0, at = ~0u;
             uint32_t start = TIMER;
+#ifdef CASCADE
+            int64_t hop_best = INT64_MIN;
+#endif
 #ifdef PROFILE
             for (unsigned i = 0; i < 5; ++i) stream_prof[i] = 0;
 #endif
@@ -117,6 +142,9 @@ void main(void)
                 dsum += (int64_t)score - hist[hpos];
                 hist[hpos] = score;
                 if (++hpos == STREAM_WINDOW) hpos = 0;
+#ifdef CASCADE
+                if (dsum > hop_best) hop_best = dsum;
+#else
                 if (dsum >= STREAM_THRESHOLD) {
                     detected |= 2;
                     if (!have_event || frames - last_event >= HOLDOFF) {
@@ -125,7 +153,27 @@ void main(void)
                         detected |= 1;
                     }
                 }
+#endif
             }
+#ifdef CASCADE
+            {
+                const uint32_t reach = hop_best >= (int64_t)CASCADE_T1;
+                int32_t v[4] = {VERIFIER_NEG, -1, VERIFIER_NEG, -1};
+                if (reach) detected |= 2;
+                if (reach || prev_reach) {
+                    verifier_result_t r;
+                    verifier_run(vhist + vpos * STREAM_BANDS, VERIFIER_FRAMES, &r, 0);
+                    v[0] = r.score_a; v[1] = r.end_a; v[2] = r.score_b; v[3] = r.end_b;
+                    detected |= 4;
+                    if (r.score_a >= VERIFIER_THRESHOLD_A && (!have_event || frames - last_event >= HOLDOFF)) {
+                        have_event = 1; last_event = frames;
+                        detected |= 1; at = k - 1;
+                    }
+                }
+                prev_reach = reach;
+                for (unsigned i = 0; i < 4; ++i) MB[26 + i] = (uint32_t)v[i];
+            }
+#endif
             uint32_t elapsed = TIMER - start;
             MB[6] = 0; MB[7] = (uint32_t)best; MB[8] = (uint32_t)score; MB[9] = elapsed;
             MB[10] = spikes; MB[11] = detected; MB[16] = events; MB[17] = at; MB[18] = frames;
@@ -140,6 +188,9 @@ void main(void)
             vhist_reset();
 #endif
             frames = 0; have_event = 0;
+#ifdef CASCADE
+            prev_reach = 0;
+#endif
             MB[6] = 0; MB[18] = 0;
 #ifdef USE_VERIFIER
         } else if (opcode == 6 && (length == 0 || length == VERIFIER_FRAMES * STREAM_BANDS)) {

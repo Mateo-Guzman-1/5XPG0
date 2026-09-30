@@ -37,4 +37,9 @@ $(BUILD)/keyword_stream_verifier_engine.elf: $(VER_SRC)
 $(BUILD)/keyword_stream_verifier.elf: $(VER_SRC)
 	$(CC) $(FLAGS) -DUSE_VERIFIER -I$(BUILD)/stream -I$(BUILD)/verifier -T linker.ld -Wl,--build-id=none,-Map=$(BUILD)/keyword_stream_verifier.map ../../pynqz2_riscv_flow/firmware/start.S stream_main.c stream_infer.c verifier.c runtime.c -o $@ -lgcc
 	$(CROSS)size $@
-.PHONY: verifier
+# Cascade: stage 1 proposes at CASCADE_T1, the verifier confirms (kdot + engine); LED on confirmed detections.
+cascade: $(BUILD)/keyword_stream_cascade_engine.bin
+$(BUILD)/keyword_stream_cascade_engine.elf: $(VER_SRC)
+	$(CC) $(FLAGS) -DUSE_KDOT -DUSE_ENGINE -DUSE_VERIFIER -DCASCADE -I$(BUILD)/stream -I$(BUILD)/verifier -T linker.ld -Wl,--build-id=none,-Map=$(BUILD)/keyword_stream_cascade_engine.map ../../pynqz2_riscv_flow/firmware/start.S stream_main.c stream_infer.c verifier.c runtime.c -o $@ -lgcc
+	$(CROSS)size $@
+.PHONY: verifier cascade

@@ -9,14 +9,19 @@ Every step has two sub-batches, both through augment_online.Augmenter
             offset in 1.6 s, target = the word's phonemes. The keyword (and
             words that begin with it: yesterday, sheila's) is oversampled;
             other spellings of the keyword (keyword_config.ALIASES) are left out.
+            --near-share: a pool of the keyword's near-miss words
+            (keyword_config.NEAR_MISS: she, sheep, shell, ...);
+            --kw-real-only: keyword clips from recorded speech only (the
+            synthetic ones of data/multi_sheila_full are left out).
 Waveforms are zero-padded by 12% before augmentation, because a 0.9 speed
 change stretches them and would cut off the last phonemes.
 The frame-stacking phase is random (the first frame is dropped half the time).
 
 Validation (every epoch): CTC loss on LibriSpeech dev-clean utterances, and the
 float keyword score (verifier_model.keyword_score_torch) on validation keyword
-clips placed in noise: AUC of the keyword against the other words, and the
-share of keyword clips above the 99th percentile of the other words.
+clips placed in noise: AUC of the keyword against the other words and
+against the near-miss words, and the share of keyword clips above the 99th
+percentile of the other words.
 """
 import os
 os.environ.setdefault('OPENBLAS_NUM_THREADS', '4')   # OpenBLAS buffers per thread count as private memory
@@ -69,7 +74,7 @@ class LibriBatches:
 
 
 class KeywordBatches:
-    def __init__(self, split, rng, kw_share=.25, prefixed_share=.05):
+    def __init__(self, split, rng, kw_share=.25, prefixed_share=.05, near_share=0., kw_real_only=False):
         t = np.load(targets_file(split))
         self.clips = np.load(K.MULTI / f'clips_{split}.npy', mmap_mode='r')
         keep = t['keep']
@@ -80,9 +85,13 @@ class KeywordBatches:
         kw = w == K.KEYWORD
         pre = np.char.startswith(w, K.KEYWORD) & ~kw          # keyword_config.prefixed
         alias = np.isin(w, list(K.ALIASES))
-        self.pools = {'kw': np.flatnonzero(kw), 'prefixed': np.flatnonzero(pre),
-                      'other': np.flatnonzero(~kw & ~pre & ~alias)}
-        share = {k: v for k, v in (('kw', kw_share), ('prefixed', prefixed_share)) if len(self.pools[k])}
+        near = np.isin(w, list(K.NEAR_MISS[K.KEYWORD])) & ~kw & ~pre & ~alias
+        synthetic_kw = kw & (self.corpus == 'tts') if kw_real_only else np.zeros_like(kw)
+        self.pools = {'kw': np.flatnonzero(kw & ~synthetic_kw), 'prefixed': np.flatnonzero(pre),
+                      'near': np.flatnonzero(near),
+                      'other': np.flatnonzero(~kw & ~pre & ~alias & ~near)}
+        share = {k: v for k, v in (('kw', kw_share), ('prefixed', prefixed_share), ('near', near_share))
+                 if v > 0 and len(self.pools[k])}
         self.share = dict(share, other=1 - sum(share.values()))    # an empty pool's share goes to "other"
         self.rng = rng
 
@@ -185,8 +194,10 @@ def validate(model, aug, dev, libri_val, kw_val, kw_ids, noise):
     s = np.concatenate(scores)
     pos = np.isin(kw_ids, kw_val.pools['kw'])
     other = np.isin(kw_ids, kw_val.pools['other'])
+    near = np.isin(kw_ids, kw_val.pools['near'])
     model.train()
     return {'val_ctc': round(float(np.mean(losses)), 4), 'kw_auc': round(auc(s[pos], s[other]), 5),
+            'kw_auc_near': round(auc(s[pos], s[near]), 5) if near.any() else None,
             'kw_tpr_at_1pct': round(tpr_at(s[pos], s[other]), 4),
             'kw_pos_median': float(np.median(s[pos])),
             'kw_other_p99': float(np.percentile(s[other], 99))}
@@ -202,6 +213,8 @@ def main():
     p.add_argument('--kw-batch', type=int, default=128)
     p.add_argument('--kw-weight', type=float, default=1.)
     p.add_argument('--kw-share', type=float, default=.25, help='share of keyword clips in a keyword sub-batch')
+    p.add_argument('--near-share', type=float, default=0., help='share of near-miss words (keyword_config.NEAR_MISS)')
+    p.add_argument('--kw-real-only', action='store_true', help='no synthetic keyword clips')
     p.add_argument('--lr', type=float, default=3e-3)
     p.add_argument('--seed', type=int, default=0)
     p.add_argument('--clean-steps', type=int, default=0,
@@ -240,10 +253,10 @@ def main():
     torch.manual_seed(a.seed)
     rng = np.random.default_rng(a.seed)
     libri = LibriBatches(rng)
-    kw = KeywordBatches('train', rng, a.kw_share)
-    kw_val = KeywordBatches('validation', np.random.default_rng(5))
+    kw = KeywordBatches('train', rng, a.kw_share, near_share=a.near_share, kw_real_only=a.kw_real_only)
+    kw_val = KeywordBatches('validation', np.random.default_rng(5), kw_real_only=a.kw_real_only)
     vrng = np.random.default_rng(3)
-    kw_ids = np.r_[kw_val.pools['kw'], vrng.choice(kw_val.pools['other'], 4000, replace=False)]
+    kw_ids = np.r_[kw_val.pools['kw'], vrng.choice(kw_val.pools['other'], 4000, replace=False), kw_val.pools['near']]
     print('keyword', K.KEYWORD, [SYMBOLS[k] for k in KEYWORD], 'multi', K.MULTI.name,
           {k: len(v) for k, v in kw.pools.items()}, 'shares', kw.share, flush=True)
     noise = np.load(ROOT / 'data/multi/noise_train.npy', mmap_mode='r')
