@@ -13,6 +13,9 @@ Every step has two sub-batches, both through augment_online.Augmenter
             (keyword_config.NEAR_MISS: she, sheep, shell, ...);
             --kw-real-only: keyword clips from recorded speech only (the
             synthetic ones of data/multi_sheila_full are left out).
+            --hardwords: a pool of the training words that stage 1 proposes
+            most (mine_verifier_negatives.py --words), --hardword-share of
+            each keyword sub-batch.
 Waveforms are zero-padded by 12% before augmentation, because a 0.9 speed
 change stretches them and would cut off the last phonemes.
 The frame-stacking phase is random (the first frame is dropped half the time).
@@ -87,7 +90,8 @@ class LibriBatches:
 
 
 class KeywordBatches:
-    def __init__(self, split, rng, kw_share=.25, prefixed_share=.05, near_share=0., kw_real_only=False):
+    def __init__(self, split, rng, kw_share=.25, prefixed_share=.05, near_share=0., kw_real_only=False,
+                 hardwords=None, hardword_share=0.):
         t = np.load(targets_file(split))
         self.clips = np.load(K.MULTI / f'clips_{split}.npy', mmap_mode='r')
         keep = t['keep']
@@ -103,7 +107,10 @@ class KeywordBatches:
         self.pools = {'kw': np.flatnonzero(kw & ~synthetic_kw), 'prefixed': np.flatnonzero(pre),
                       'near': np.flatnonzero(near),
                       'other': np.flatnonzero(~kw & ~pre & ~alias & ~near)}
-        share = {k: v for k, v in (('kw', kw_share), ('prefixed', prefixed_share), ('near', near_share))
+        hard = np.isin(self.row, np.load(hardwords)['row']) & ~kw & ~pre & ~alias if hardwords else np.zeros_like(kw)
+        self.pools['hardword'] = np.flatnonzero(hard)
+        share = {k: v for k, v in (('kw', kw_share), ('prefixed', prefixed_share), ('near', near_share),
+                                   ('hardword', hardword_share))
                  if v > 0 and len(self.pools[k])}
         self.share = dict(share, other=1 - sum(share.values()))    # an empty pool's share goes to "other"
         self.rng = rng
@@ -264,6 +271,8 @@ def main():
     p.add_argument('--kw-share', type=float, default=.25, help='share of keyword clips in a keyword sub-batch')
     p.add_argument('--near-share', type=float, default=0., help='share of near-miss words (keyword_config.NEAR_MISS)')
     p.add_argument('--kw-real-only', action='store_true', help='no synthetic keyword clips')
+    p.add_argument('--hardwords', type=Path, help='mined training words (mine_verifier_negatives.py --words)')
+    p.add_argument('--hardword-share', type=float, default=.1)
     p.add_argument('--lr', type=float, default=3e-3)
     p.add_argument('--seed', type=int, default=0)
     p.add_argument('--clean-steps', type=int, default=0,
@@ -310,7 +319,8 @@ def main():
     torch.manual_seed(a.seed)
     rng = np.random.default_rng(a.seed)
     libri = LibriBatches(rng)
-    kw = KeywordBatches('train', rng, a.kw_share, near_share=a.near_share, kw_real_only=a.kw_real_only)
+    kw = KeywordBatches('train', rng, a.kw_share, near_share=a.near_share, kw_real_only=a.kw_real_only,
+                        hardwords=a.hardwords, hardword_share=a.hardword_share if a.hardwords else 0.)
     kw_val = KeywordBatches('validation', np.random.default_rng(5), kw_real_only=a.kw_real_only)
     vrng = np.random.default_rng(3)
     kw_ids = np.r_[kw_val.pools['kw'], vrng.choice(kw_val.pools['other'], 4000, replace=False), kw_val.pools['near']]

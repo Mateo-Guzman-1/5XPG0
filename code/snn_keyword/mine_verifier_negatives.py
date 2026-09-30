@@ -10,6 +10,16 @@ offsets of the peak into libri100_audio.npy, with the score, the utterance id
 and its transcript. These are the places where the cascade asks the verifier
 on speech that is not the keyword: train_verifier.py --hard trains the
 verifier to score them low. Validation and test speech are not touched.
+
+--words: the same for single words. Every kept training clip of the keyword's
+multi-corpus (verifier_data.targets_file, keyword_config.MULTI) that is not
+the keyword, a word that begins with it or another spelling of it is placed
+at a random offset in 1.6 s and augmented as in training (microphones, rooms,
+noise), `--passes` times. Its score is stage 1's highest decision score over
+the passes. The `--keep-words` highest go to
+data_verifier/hardwords_<keyword>_<multi>.npz (manifest rows, words,
+scores) for train_verifier.py --hardwords. For "sheila" they are mostly
+"zero" (JOURNAL entry 32).
 """
 import argparse
 import json
@@ -44,9 +54,48 @@ def peaks(score, min_gap):
     return np.array(out, np.int64)
 
 
+def mine_words(a, det, aug, dev):
+    from verifier_data import targets_file
+    t = np.load(targets_file('train'))
+    keep = t['keep']
+    rows, words = t['row'][keep], np.char.lower(t['word'][keep].astype(str))
+    bad = np.array([w == K.KEYWORD or K.prefixed(w) or w in K.ALIASES for w in words])
+    rows, words = rows[~bad], words[~bad]
+    clips = np.load(K.MULTI / 'clips_train.npy', mmap_mode='r')
+    rng = np.random.default_rng(0)
+    best = np.full(len(rows), -np.inf)
+    t0, n = time.perf_counter(), int(1.6 * SR)
+    order = np.argsort(rows)                         # memmap reads in file order
+    for ps in range(a.passes):
+        for i in range(0, len(order), a.batch):
+            ids = order[i:i + a.batch]
+            w = np.zeros((len(ids), n), np.float32)
+            off = rng.integers(0, n - SR + 1, len(ids))
+            c = clips[rows[ids]].astype(np.float32) / 32768
+            for j in range(len(ids)):
+                w[j, off[j]:off[j] + SR] = c[j]
+            with torch.no_grad():
+                wt, mic = aug.waveform(torch.tensor(w, device=dev))
+                x = aug.spectral(wt, mic, det.frontend)
+                s = det.scores(x.float()).max(1)[0].cpu().numpy()
+            best[ids] = np.maximum(best[ids], s)
+            memguard.check('mining words')
+        print(f'pass {ps + 1}/{a.passes}: {len(rows)} clips, {time.perf_counter() - t0:.0f} s', flush=True)
+    top = np.argsort(best)[::-1][:a.keep_words]
+    out = DV / f'hardwords_{K.KEYWORD}_{K.MULTI.name}.npz'
+    np.savez(out, row=rows[top], word=words[top], score=best[top], stage1=str(a.stage1))
+    import collections
+    print(json.dumps({'clips': int(len(rows)), 'kept': int(len(top)), 'score_min': float(best[top].min()),
+                      'top_words': collections.Counter(words[top]).most_common(15)}), flush=True)
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--stage1', type=Path, default=STAGE1)
+    p.add_argument('--words', action='store_true', help='mine training words instead of LibriSpeech')
+    p.add_argument('--passes', type=int, default=3, help='--words: augmented passes over the clips')
+    p.add_argument('--batch', type=int, default=256, help='--words: clips per batch')
+    p.add_argument('--keep-words', type=int, default=3000)
     p.add_argument('--keep', type=int, default=8000)
     p.add_argument('--per-utt', type=int, default=3, help='peaks kept per utterance before the global cut')
     p.add_argument('--batch-seconds', type=float, default=600.)
@@ -56,6 +105,12 @@ def main():
     torch.cuda.set_per_process_memory_fraction(a.gpu_fraction, 0)
     det = StreamDetector(a.stage1, 'cuda')
     aug = Augmenter(dev, None, seed=0, mic_ranges='wide')
+    if a.words:
+        noise = np.load(K.MULTI / 'noise_train.npy', mmap_mode='r') if (K.MULTI / 'noise_train.npy').exists() \
+            else np.load(ROOT / 'data/multi/noise_train.npy', mmap_mode='r')
+        aug.noise = torch.cat([torch.tensor(np.asarray(noise[i:i + 2 ** 24]), device=dev).half() / 32768
+                               for i in range(0, len(noise) // 4, 2 ** 24)])
+        return mine_words(a, det, aug, dev)
     ix = np.load(DV / 'libri100_index.npz')
     audio = np.load(DV / 'libri100_audio.npy', mmap_mode='r')
     start, length, text, uid = ix['start'], ix['length'], ix['text'], ix['uid']
