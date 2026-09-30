@@ -265,7 +265,7 @@ branch:
 | `damien-dicking-around` | `6d2e54c` | Separate lineage. Our `train_keyword_snn.py`, `pc_keyword_demo.py` and `README.md` keep their names; his become `train_keyword_snn_clip.py`, `pc_keyword_demo_zmq.py` and `README_clip_pipeline.md` (importer, install script and README updated). Root README describes both. |
 | Follow-up | `df165ad` | Tests fixed for Pedro's views (his branch did not update them; they failed there too). The two candidate models added to `results/models/`. This summary. |
 | `explore-verifier` again | `3d03ecb` | Journal merged automatically (entries 28-30), open items rewritten. The verifier with keyword head added as `results/models/sheila_verifier_head.pt`. |
-| `engine-timing` | `(merge)` | Journal: entry 31 after 30 (conflict at the same place, both kept). Open item "timing margin" closed. |
+| `engine-timing` | `ddc95d0` | Journal: entry 31 after 30 (conflict at the same place, both kept). Open item "timing margin" closed. |
 | `explore-verifier` a third time | (this commit) | Entry 32 and the built-in keyword phonemes (the verifier runtime no longer needs `data_verifier/cmudict.dict`). The candidate verifier as `results/models/sheila_verifier_head_near.pt`. |
 
 **Verified on `merge-all`:**
