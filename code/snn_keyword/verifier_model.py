@@ -277,28 +277,35 @@ def keyword_score(logits, warmup=0, boundary=0, keyword=KEYWORD, return_end=Fals
 
 
 def keyword_score_torch(logits, warmup=0, boundary=0, keyword=KEYWORD, cap=0):
-    """keyword_score on a torch tensor (float64 of integers, or float for training diagnostics)."""
+    """keyword_score on a torch tensor (float64 of integers, or float for training diagnostics).
+
+    All states of a step are one (B, S) tensor: state s pays the cost of its
+    label and comes from itself (phoneme and blank states), from s-1, or from
+    s-2 (a phoneme after a different phoneme, skipping the blank). Boundary
+    states only come from s-1.
+    """
     c = step_costs_torch(logits, cap)
     b_, t_, _ = c.shape
-    n = len(keyword)
-    cph, cb = [c[..., k] for k in keyword], c[..., BLANK]
-    cp = torch.maximum(cb, cph[-1])
-    last = 2 * n - 2
-    neg = torch.full((b_,), float(NEG), dtype=c.dtype, device=c.device)
-    D = [neg.clone() for _ in range(last + 1 + boundary)]
-    best = neg.clone()
+    last = 2 * len(keyword) - 2
+    S = last + 1 + boundary
+    cb = c[..., BLANK]
+    cols = [c[..., keyword[s // 2]] if s % 2 == 0 else cb for s in range(last + 1)]
+    cols += [torch.maximum(cb, cols[last])] * boundary
+    C = torch.stack(cols, -1)                                    # (B, T, S)
+    dev, dt = c.device, c.dtype
+    stay_ok = torch.tensor([s <= last for s in range(S)], device=dev)
+    skip_ok = torch.tensor([s <= last and s >= 2 and s % 2 == 0 and keyword[s // 2] != keyword[s // 2 - 1]
+                            for s in range(S)], device=dev)
+    neg = torch.tensor(float(NEG), dtype=dt, device=dev)
+    pad1 = torch.full((b_, 1), float(NEG), dtype=dt, device=dev)
+    pad2 = torch.full((b_, 2), float(NEG), dtype=dt, device=dev)
+    D = torch.full((b_, S), float(NEG), dtype=dt, device=dev)
+    best = torch.full((b_,), float(NEG), dtype=dt, device=dev)
     for t in range(t_):
-        P = D
-        start = torch.zeros_like(neg) if t >= warmup else neg
-        D = [torch.maximum(P[0], start) + cph[0][:, t]]
-        for i in range(1, n):
-            s = 2 * i
-            D.append(torch.maximum(P[s - 2], P[s - 1]) + cb[:, t])
-            prev = torch.maximum(P[s - 1], P[s])
-            if keyword[i] != keyword[i - 1]:
-                prev = torch.maximum(prev, P[s - 2])
-            D.append(prev + cph[i][:, t])
-        D += [P[last + j] + cp[:, t] for j in range(boundary)]
-        D = [torch.maximum(d, neg) for d in D]
-        best = torch.maximum(best, D[-1])
+        m = torch.maximum(torch.where(stay_ok, D, neg), torch.cat([pad1, D[:, :-1]], 1))
+        m = torch.maximum(m, torch.where(skip_ok, torch.cat([pad2, D[:, :-2]], 1), neg))
+        if t >= warmup:                                          # a keyword may start here
+            m = torch.cat([m[:, :1].clamp(min=0.), m[:, 1:]], 1)
+        D = (m + C[:, t]).clamp(min=float(NEG))
+        best = torch.maximum(best, D[:, -1])
     return best

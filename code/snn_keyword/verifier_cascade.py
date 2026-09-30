@@ -417,20 +417,21 @@ def select(a):
     v = dict(np.load(a.scores))
     report = {'scores': str(a.scores), 'verify_ms': a.verify_ms,
               'keyword': K.KEYWORD,
-              'rule': 'live other words <= 0.2%, <= 2 FA/h on the negatives stream (policy b: + prefixed utterances)',
+              'rule': f'live other words <= 0.2%, <= {a.max_fa_hour} FA/h on the negatives stream '
+                      '(policy b: + prefixed utterances)',
               'runs': []}
     y = c['live_y']
     for w in a.windows or [int(c.get('decision_window', 20))]:
         cas = Cascade(c, v, w, a.verify_ms)
         for policy in ('a', 'b'):
-            rows = {'stage1_frame': operating(cas, 'frame', None, policy),
-                    'stage1_hop': operating(cas, 'hop', None, policy)}
+            rows = {'stage1_frame': operating(cas, 'frame', None, policy, max_fa_hour=a.max_fa_hour),
+                    'stage1_hop': operating(cas, 'hop', None, policy, max_fa_hour=a.max_fa_hour)}
             vv, voff = v[f'live_v{policy}'], v['live_voff']
             vmax = np.array([vv[voff[i]:voff[i + 1]].max() for i in range(len(voff) - 1)])
             grid = np.unique(np.quantile(vmax[y == 1], np.linspace(0, .6, 31)).astype(np.int64))
             cands = []
             for t2 in grid[grid > NEG // 2]:
-                r = operating(cas, 'cascade', int(t2), policy)
+                r = operating(cas, 'cascade', int(t2), policy, max_fa_hour=a.max_fa_hour)
                 if r:
                     cands.append(r)
                     print(w, policy, {k: x for k, x in r.items() if not k.startswith('_')}, flush=True)
@@ -552,6 +553,8 @@ def main():
     e.add_argument('--split', choices=['validation'], default='validation')
     e.add_argument('--windows', type=int, nargs='+', help='stage-1 decision windows (default: the model\'s own)')
     e.add_argument('--verify-ms', type=float, default=0., help='verifier run time added to cascade detections')
+    e.add_argument('--max-fa-hour', type=float, default=2., help='false-accept budget on the negatives stream; '
+                   'JOURNAL entry 29: 1.6 for candidates after the first test run (validation-to-test margin)')
     e.add_argument('--out', type=Path, required=True)
     f = sub.add_parser('final')
     f.add_argument('scores', type=Path)

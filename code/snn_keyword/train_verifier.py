@@ -17,6 +17,14 @@ Waveforms are zero-padded by 12% before augmentation, because a 0.9 speed
 change stretches them and would cut off the last phonemes.
 The frame-stacking phase is random (the first frame is dropped half the time).
 
+--hard (with --init, fine-tuning a trained verifier): a third sub-batch of
+1.6 s LibriSpeech train-clean-100 windows that end 0-0.5 s after a place where
+stage 1 proposes the keyword (mine_verifier_negatives.py). Their keyword score
+(verifier_model.keyword_score_torch, float, as the cascade computes it) gets a
+hinge loss relu(score + margin_neg); the keyword clips of the keyword
+sub-batch get relu(-margin_pos - score). Both work on the decision itself
+instead of on phoneme labels, which these windows do not have.
+
 Validation (every epoch): CTC loss on LibriSpeech dev-clean utterances, and the
 float keyword score (verifier_model.keyword_score_torch) on validation keyword
 clips placed in noise: AUC of the keyword against the other words and
@@ -113,14 +121,33 @@ class KeywordBatches:
         return w, [self.tg[i] for i in ids]
 
 
+class HardWindows:
+    """1.6 s LibriSpeech windows ending 0-0.5 s after a mined stage-1 proposal (mine_verifier_negatives.py)."""
+    def __init__(self, path, rng, seconds=1.6, delay=(0., .5)):
+        h = np.load(path)
+        self.offset = h['offset']
+        self.audio = np.load(DV / 'libri100_audio.npy', mmap_mode='r')
+        self.n, self.delay, self.rng = int(seconds * SR), delay, rng
+
+    def waves(self, count, rng=None):
+        rng = rng or self.rng
+        pick = self.offset[rng.integers(0, len(self.offset), count)]
+        end = np.clip(pick + (rng.uniform(*self.delay, count) * SR).astype(np.int64), self.n, len(self.audio))
+        order = np.argsort(end)                     # memmap reads in file order
+        w = np.empty((count, self.n), np.float32)
+        for j in order:
+            w[j] = self.audio[end[j] - self.n:end[j]] / 32768
+        return w
+
+
 def pad_targets(tg, dev):
     lens = torch.tensor([len(t) for t in tg], device=dev)
     flat = torch.tensor(np.concatenate(tg).astype(np.int64), device=dev)
     return flat, lens
 
 
-def ctc(model, x, tg, dev):
-    logits = model(x)
+def ctc(model, x, tg, dev, logits=None):
+    logits = model(x) if logits is None else logits
     lp = F.log_softmax(logits.float(), -1).transpose(0, 1)
     flat, lens = pad_targets(tg, dev)
     il = torch.full((x.shape[0],), lp.shape[0], dtype=torch.long, device=dev)
@@ -225,6 +252,13 @@ def main():
     p.add_argument('--frontend', choices=['logmel', 'logmel_w'], default='logmel',
                    help='logmel_w: -120..-20 dB (main JOURNAL entry 20); the floor of logmel erases quiet /s/')
     p.add_argument('--max-instances', type=int, default=1, help='train_verifier.py jobs allowed at once')
+    p.add_argument('--init', type=Path, help='start from this verifier checkpoint (keeps its input normalisation)')
+    p.add_argument('--hard', type=Path, help='mined stage-1 proposals (data_verifier/hard_<keyword>.npz)')
+    p.add_argument('--hard-batch', type=int, default=64)
+    p.add_argument('--hard-weight', type=float, default=1.)
+    p.add_argument('--pos-weight', type=float, default=1.)
+    p.add_argument('--margin-neg', type=float, default=2., help='hinge: hard windows should score below -margin (logits)')
+    p.add_argument('--margin-pos', type=float, default=.5, help='hinge: keyword clips should score above -margin')
     p.add_argument('--name', default='v1')
     p.add_argument('--out', type=Path, default=ROOT / 'runs_verifier')
     a = p.parse_args()
@@ -267,20 +301,29 @@ def main():
     aug.noise = torch.cat([torch.tensor(np.asarray(noise[i:i + 2 ** 24]), device=dev).half() / 32768
                            for i in range(0, len(noise) // 2, 2 ** 24)])
     libri_val = dev_clean()
-    model = Verifier(a.h1, a.h2).to(dev)
+    hard = HardWindows(a.hard, rng) if a.hard else None
+    if a.init:
+        ck0 = torch.load(a.init, map_location='cpu', weights_only=False)
+        K.check_model_keyword(ck0.get('keyword'), str(a.init))
+        model = Verifier(**ck0['config']).to(dev)
+        model.load_state_dict(ck0['state_dict'])
+        print('initialised from', a.init, 'epoch', ck0.get('epoch'), flush=True)
+    else:
+        model = Verifier(a.h1, a.h2).to(dev)
     with torch.no_grad():   # input statistics of augmented training features, per band
         xs = []
-        for _ in range(8):
+        for _ in range(0 if a.init else 8):
             wl, _ = libri.batch(a.libri_seconds)
             xs.append(model.stack_frames(features(aug, wl, dev)).reshape(-1, model.mu.numel()))
             wk, _ = kw.waves(kw.draw(a.kw_batch))
             xs.append(model.stack_frames(features(aug, wk, dev)).reshape(-1, model.mu.numel()))
-        xs = torch.cat(xs)
-        band_mu = xs.reshape(len(xs), -1, 24).mean((0, 1)).repeat(model.stack)
-        band_sd = xs.reshape(len(xs), -1, 24).std((0, 1)).clamp_min(1.).repeat(model.stack)
-        model.mu.copy_(band_mu); model.sd.copy_(band_sd)
-        print('input mu', [round(v, 1) for v in band_mu[:24].tolist()], 'sd', [round(v, 1) for v in band_sd[:24].tolist()],
-              flush=True)
+        if xs:
+            xs = torch.cat(xs)
+            band_mu = xs.reshape(len(xs), -1, 24).mean((0, 1)).repeat(model.stack)
+            band_sd = xs.reshape(len(xs), -1, 24).std((0, 1)).clamp_min(1.).repeat(model.stack)
+            model.mu.copy_(band_mu); model.sd.copy_(band_sd)
+            print('input mu', [round(v, 1) for v in band_mu[:24].tolist()],
+                  'sd', [round(v, 1) for v in band_sd[:24].tolist()], flush=True)
         del xs
     print('parameters', n_params(model), flush=True)
     opt = torch.optim.AdamW(model.parameters(), lr=a.lr, weight_decay=1e-4)
@@ -290,7 +333,7 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     history, best, t0, gstep = [], -1., time.perf_counter(), 0
     for epoch in range(a.epochs):
-        sums = {'libri': 0., 'kw': 0.}
+        sums = {'libri': 0., 'kw': 0., 'hard': 0., 'pos': 0.}
         for step in range(a.steps_per_epoch):
             if step % 50 == 0:
                 memguard.check(f'epoch {epoch + 1} step {step}')
@@ -302,11 +345,24 @@ def main():
             with torch.no_grad():
                 wl, tl = libri.batch(a.libri_seconds, a.warm_seconds if warm else None)
                 xl = phase(features(aug, wl, dev, train=not warm), rng)
-                wk, tk = kw.waves(kw.draw(a.kw_batch))
+                ids = kw.draw(a.kw_batch)
+                wk, tk = kw.waves(ids)
                 xk = phase(features(aug, wk, dev, train=not warm), rng)
+                if hard is not None:
+                    xh = phase(features(aug, hard.waves(a.hard_batch), dev, train=not warm), rng)
             ll = ctc(model, xl, tl, dev)
-            lk = ctc(model, xk, tk, dev)
+            logits_k = model(xk)
+            lk = ctc(model, xk, tk, dev, logits_k)
             loss = ll + a.kw_weight * lk
+            if hard is not None:
+                # The path DP is many tiny operations: faster on the CPU (autograd moves the gradient back).
+                sh = keyword_score_torch(model(xh).float().cpu(), warmup=5)
+                lh = F.relu(sh + a.margin_neg).mean()
+                pos = torch.tensor(np.isin(ids, kw.pools['kw']), device=dev)
+                sp = keyword_score_torch(logits_k[pos].float().cpu(), warmup=5)
+                lp = F.relu(-a.margin_pos - sp).mean() if len(sp) else torch.zeros(())
+                loss = loss + a.hard_weight * lh + a.pos_weight * lp
+                sums['hard'] += lh.item(); sums['pos'] += lp.item()
             opt.zero_grad(set_to_none=True)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.)
