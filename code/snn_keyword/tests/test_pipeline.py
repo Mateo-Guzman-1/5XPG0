@@ -26,6 +26,30 @@ def test_frontend_contract():
     with pytest.raises(ValueError): features([np.nan])
 
 
+def _keyword_in_fresh_interpreter(env_value=None):
+    import os
+    import subprocess
+    env = {k: v for k, v in os.environ.items() if k != 'KWS_KEYWORD'}
+    if env_value is not None:
+        env['KWS_KEYWORD'] = env_value
+    code = ("import keyword_config as K; print(K.KEYWORD, K.MULTI.name);"
+            "import numpy as np; from robust_eval import WindowDetector;"
+            "q = dict(np.load('deploy/model.npz'))\n"
+            "try:\n    WindowDetector(q); print('window model accepted')\n"
+            "except ValueError as e: print('window model refused:', e)")
+    r = subprocess.run([sys.executable, '-c', code], cwd=ROOT, env=env, capture_output=True, text=True, check=True)
+    return r.stdout.strip().splitlines()
+
+
+def test_the_project_keyword_is_sheila_and_yes_models_are_guarded():
+    default = _keyword_in_fresh_interpreter()
+    assert default[0] == 'sheila multi_sheila'
+    assert default[1].startswith('window model refused: window model was trained for \'yes\'')
+    assert 'KWS_KEYWORD=yes' in default[1]
+    # The earlier keyword stays available, with its own data folder and its release model.
+    assert _keyword_in_fresh_interpreter('yes') == ['yes multi', 'window model accepted']
+
+
 def test_signed_division_and_threshold_ties():
     assert trunc_div(np.array([-9,-8,-7,0,7,8,9]),8).tolist() == [-1,-1,0,0,0,1,1]
     scores = np.array([2,2,1,0]); y=np.array([1,0,1,0])

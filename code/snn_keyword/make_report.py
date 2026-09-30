@@ -65,6 +65,12 @@ def main():
     later=later_work(read)
     report=f'''# Group 2: spiking keyword detection on PicoRV32
 
+> **Scope.** This report documents the first release: the two-class window model
+> for the keyword **"yes"** in `deploy/`. The project's keyword is now
+> **"sheila"**, detected against everything else by a streaming SNN; its results
+> are in README.md and JOURNAL.md entries 22 onwards. This report has not been
+> rewritten for "sheila".
+
 ## Research question and outcome
 
 Can an integer SNN detect **yes** while fitting the PYNQ-Z2's 256 KiB

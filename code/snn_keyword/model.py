@@ -140,7 +140,7 @@ def choose_threshold(y, scores):
 # scales are needed at run time. Adaptation traces are Q8 (256 = one spike);
 # the adaptive threshold is theta + (bq * a) >> 8 with bq = beta * theta.
 # Readout: one scale for all classes (theta_o), so the decision score
-# o[yes] - max(o[other]) and its threshold are plain integers.
+# o[keyword] - max(o[other]) and its threshold are plain integers.
 
 I16 = (-32768, 32767)
 I32 = (-2 ** 31, 2 ** 31 - 1)

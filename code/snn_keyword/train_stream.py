@@ -6,8 +6,10 @@ stage 1  35 words + _unknown_ + _silence_ on 1 s clips (multicorpus.ClipSampler)
          (teacher.py) on the same augmented audio.
 stage 2  streaming fine-tune [11]: 3 s streams of up to three clips (and
          LibriSpeech speech) at random positions, augmented as a whole.
-         Classes _silence_, _unknown_, yes. A "yes" is rewarded at its best
-         frame within 0.35 s after the end of the word (max-pooling loss);
+         Classes _silence_, _unknown_ and the keyword (keyword_config.KEYWORD,
+         "sheila": the keyword against everything else). The keyword is
+         rewarded at its best frame within 0.35 s after the end of the word
+         (max-pooling loss);
          the frames while it is being spoken are "don't care"; every other
          frame is labelled unknown (speech) or silence.
 Both stages: surrogate gradients through time [2], learnable time constants
@@ -25,8 +27,8 @@ Stage 2 options against false accepts on running speech (JOURNAL entry 19):
                     ones; half of the speech-only streams come from that pool
                     (online hard-negative mining).
 --word-mine-share f the same for words: every --mine-every steps the
-                    --mine-keep highest-"yes" of --mine-pool random non-"yes"
-                    training words (all corpora) are kept, and a fraction f of
+                    --mine-keep highest-keyword-scoring of --mine-pool random
+                    non-keyword training words (all corpora) are kept, and a fraction f of
                     the word slots in the streams take one of them.
 """
 import argparse
@@ -46,7 +48,7 @@ from snn_stream import MAX_DELAY, StreamSNN
 ROOT = Path(__file__).resolve().parent
 SR, HOP = 16000, 160
 import keyword_config as K
-YES = CLASSES.index(K.KEYWORD)   # the keyword (KWS_KEYWORD; "yes" by default)
+YES = CLASSES.index(K.KEYWORD)   # the keyword (KWS_KEYWORD; "sheila" by default); the name is historical
 STREAM_CLASSES = ['_silence_', '_unknown_', K.KEYWORD]
 
 
@@ -71,7 +73,7 @@ def rates_penalty(rates, target):
 
 
 def clip_val(model, sampler, aug, device, frontend, corpus='sc', batch=1024):
-    """35-word accuracy and yes-vs-rest recall on clean validation clips."""
+    """35-word accuracy and keyword-vs-rest recall on clean validation clips."""
     clips, rows, cls, _ = sampler.all_clips(corpus)
     order = np.argsort(rows); rows, cls = rows[order], cls[order]
     model.eval()
@@ -89,12 +91,12 @@ def clip_val(model, sampler, aug, device, frontend, corpus='sc', batch=1024):
 
 def build_streams(sampler, aug, n, seconds, device, rng, yes_share=.25, hard_words=None, hard_share=0.,
                   clipped_dontcare=False, pos_delay=(0, 35)):
-    """n waveforms of `seconds` with 3-class frame targets and yes windows.
+    """n waveforms of `seconds` with 3-class frame targets and keyword windows.
 
-    yes_share of the clips are replaced by "yes" clips (about 5% at the corpus mix).
+    yes_share of the clips are replaced by keyword clips (about 5% at the corpus mix).
 
     Returns wave (n, L), frame labels (n, T) in {0 silence, 1 unknown, -1 don't care},
-    and a list of (stream, first, last) target frame windows for each "yes".
+    and a list of (stream, first, last) target frame windows for each keyword.
     """
     L = int(seconds * SR)
     T = (L - 400) // HOP + 1
@@ -108,7 +110,7 @@ def build_streams(sampler, aug, n, seconds, device, rng, yes_share=.25, hard_wor
         clip[torch.tensor(swap, device=device)] = torch.tensor(sampler.yes_batch(len(swap)), device=device)
         cls[torch.tensor(swap, device=device)] = YES
     if hard_words is not None and hard_share > 0:
-        # Word slots (not "yes", not silence) take a mined hard negative word.
+        # Word slots (not the keyword, not silence) take a mined hard negative word.
         free = np.flatnonzero((cls.cpu().numpy() != YES) & (cls.cpu().numpy() != SILENCE) & (rng.random(k) < hard_share))
         if len(free):
             rows = hard_words.draw(len(free))
@@ -175,7 +177,7 @@ def speech_streams(sampler, starts, seconds, device):
 
 
 class HardNegatives:
-    """Pool of LibriSpeech offsets the model currently scores highest for "yes"."""
+    """Pool of LibriSpeech offsets the model currently scores highest for the keyword."""
     def __init__(self, sampler, seconds, rng, pool=2048, keep=256):
         self.sampler, self.L, self.rng, self.pool, self.keep = sampler, int(seconds * SR), rng, pool, keep
         self.starts = self.rng.integers(0, len(sampler.speech) - self.L, keep)
@@ -203,7 +205,7 @@ class HardNegatives:
 
 
 class HardWords:
-    """Pool of non-"yes" training words (sampler indices) the model currently scores highest for "yes"."""
+    """Pool of non-keyword training words (sampler indices) the model currently scores highest for the keyword."""
     def __init__(self, sampler, rng, pool=2048, keep=256):
         self.sampler, self.rng, self.pool, self.keep = sampler, rng, pool, keep
         self.ids = np.flatnonzero((sampler.cls != YES) & (sampler.cls != SILENCE))
@@ -269,8 +271,8 @@ def main():
     p.add_argument('--speech-streams', type=float, default=0., help='stage 2: fraction of speech-only streams')
     p.add_argument('--mine-every', type=int, default=0, help='stage 2: hard-negative mining period in steps (0: off)')
     p.add_argument('--exclude-words', default=None,
-                   help="regex of training words to leave out; 'yes.+' drops every word that begins with a "
-                        "complete yes (don't care for a causal detector, JOURNAL entries 20-21)")
+                   help="regex of training words to leave out; 'sheila.+' drops every word that begins with "
+                        "the complete keyword (don't care for a causal detector, JOURNAL entries 20-21)")
     p.add_argument('--clipped-dontcare', action='store_true',
                    help='keyword clips cut off at the end of the recording are ignored (no positive target)')
     p.add_argument('--pos-delay', type=int, nargs=2, default=[0, 35], metavar=('D0', 'D1'),

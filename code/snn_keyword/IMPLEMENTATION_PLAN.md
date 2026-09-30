@@ -1,5 +1,11 @@
 # Implementation plan: streaming delay-SNN keyword detector
 
+> **Keyword.** The plan was written for **"yes"**; its numbers and acceptance
+> targets below are the "yes" ones. The project's keyword is now **"sheila"**,
+> detected against everything else (JOURNAL entry 22): the phases, gates and
+> evaluation rules apply unchanged, and the targets for "sheila" follow the
+> table in "Acceptance targets".
+
 This plan implements the route chosen in
 [OPTIMIZATION_REPORT.md](OPTIMIZATION_REPORT.md) §6. The target model is a
 streaming two-layer adaptive-LIF SNN with learnable delays. It is trained
@@ -48,6 +54,24 @@ produced by `confusables.py` (extended in Phase 0), it meets all of these:
 The targets are ambitious but grounded in the SNN results in the report
 (§2). Phase gates allow the plan to stop early with a documented result if
 they are not reachable.
+
+### Acceptance targets for "sheila" (added 2026-09-30)
+
+There is no "sheila" release to beat, so each target is absolute; the false-accept
+rules are those of JOURNAL entries 19 and 26 (live other words ≤ 0.2%, ≤ 2 false
+accepts per hour on 18-19 h of negatives, thresholds from validation only). Test
+split, stage 1 (`results/final_sheila_test.json`, JOURNAL 27):
+
+| Metric | Target | Stage 1 |
+|---|---|---|
+| Live "sheila" detected (test clips in noise, 250 ms hop) | **≥ 85%** | 63.7% ✗ |
+| Live other words accepted | **≤ 0.2%** | 0.00% ✓ |
+| MSWC near-miss words accepted (she/sheet/shield, shell, cheap, -ila names, -illa, -eeler/-eeling) | **≤ 10% per group** | 23/183 (12.6%) ✗ in the /ʃiː/ group, ≤ 2.3% in the others ✓ |
+| Drop under held-out microphones / rooms / both | **≤ 3 points** | none (+2.8) / 2.8 ✓ / 5.7 ✗ |
+| Drop on a held-out corpus (leave-one-source-out) | ≤ 5 points | not measurable: MSWC has 2 test clips of "sheila" |
+| False accepts per hour (18.97 h of negatives) | **≤ 2** | 1.58 ✓ |
+| Compute per 250 ms hop on the board | **≤ 25 ms** | 10.3 ms ✓ (RTL) |
+| Bit-exact oracle / C / RTL / board | all | oracle = RTL; native C on the full test set and the board not yet |
 
 ---
 

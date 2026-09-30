@@ -7,7 +7,7 @@ highest live recall such that, on validation,
   live other words accepted <= --max-live-fa   and   false accepts/hour <= --max-fa-hour.
 False accepts per hour come from robust_eval.negative_stream (--fa-source
 negatives, default: about 15 h of LibriSpeech dev-clean + dev-other and every
-non-"yes" validation word). The original 1 h stream (--fa-source stream) holds
+non-keyword validation word). The original 1 h stream (--fa-source stream) holds
 only about 2 false accepts at the operating point: a Poisson 95% interval of
 0.2-7 per hour, too wide to set a threshold or to rank models (JOURNAL entry 19).
 Candidate thresholds are the exact recall steps (each positive clip's peak).

@@ -1,56 +1,79 @@
-# Group 2: "yes" keyword detection on PicoRV32
+# Group 2: detecting "sheila" against everything else on a PicoRV32
 
-The completed local pipeline trains a spiking keyword detector on the full
-Speech Commands v0.02 dataset, exports an integer model, executes its C
-inference kernel on the PicoRV32 RTL, and builds the PYNQ-Z2 bitstream.
-The PC computes one-second mel spectrograms every 250 ms; the RISC-V core
-classifies them and a hardware countdown lights LED0 for exactly one second.
+**Task.** Detect one keyword, **"sheila"**, and reject everything else: the 34
+other Speech Commands words, running speech, synthesized near-miss words,
+silence and background noise. The decision is binary (keyword or not), taken
+by a spiking neural network on the PicoRV32 soft core of a PYNQ-Z2. The PC
+computes 24-band log-mel frames every 10 ms; a hardware countdown lights LED0
+for one second per detection. The detector must work for unseen speakers,
+microphones and rooms, so it is trained and evaluated on speaker-disjoint data
+and under held-out microphone and room conditions, and its false accepts are
+counted per hour of speech.
 
-See [REPORT.md](REPORT.md), [presentation.pdf](presentation.pdf),
-[JOURNAL.md](JOURNAL.md) (dated log of every change, its motivation and its
-outcome), and the machine-readable [results](results/). The next steps are
-in [OPTIMIZATION_REPORT.md](OPTIMIZATION_REPORT.md), which compares options
-with references and says which route was chosen, and
-[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md), which lays out phases,
-acceptance targets and gates. Inference is verified in RTL simulation and on
-two physical PYNQ-Z2 boards: first loaded over JTAG (see
-[JTAG workaround](#jtag-workaround-this-board-only)), then through the
-standard PYNQ Linux/Ethernet path, which also runs the live microphone demo
-(see [Run on the PYNQ board](#run-on-the-pynq-board-standard-ethernet-path)
-and [Live confirmation](#live-confirmation-and-confusable-words)).
+**Current system: two stages.** Stage 1, a streaming two-layer adaptive-LIF SNN with
+learnable delays (128 + 128 neurons, 58k parameters, int8), scores every 10 ms
+frame: the score is the readout of "sheila" minus the largest other class
+(`_silence_`, `_unknown_`). An event-driven neuron engine in the fabric runs its
+second layer (10.3 ms of compute per 250 ms of audio). Stage 1 proposes a
+detection at a low threshold. Stage 2, a small GRU verifier with a keyword head
+on the same PicoRV32 (117 ms, only when stage 1 proposes), confirms it; LED0
+follows the confirmed detections. Test split, thresholds fixed on validation,
+one run per candidate (JOURNAL 27 and 32, `results/final_sheila_test.json`,
+`results/final_sheila_head_near_cascade_test.json`):
 
+| "sheila" against everything else | Stage 1 alone | Stage 1 + verifier |
+|---|---|---|
+| Live "sheila" detected, clips in noise (complete recordings only) | 63.7% (70.7%) | **86.8% (92.0%)** |
+| ... through held-out microphones / real rooms / both | 66.5% / 60.9% / 58.0% | 86.3% / 85.9% / 84.9% |
+| Other words accepted, live clips (target ≤ 0.2%) | 0.00% | 0.07% |
+| False accepts per hour, 19 h of unseen speech (target ≤ 2) | 1.58 | 1.42 |
+| Median latency after the end of the word | 0.04 s | 0.18 s |
+| Worst compute per 250 ms of audio | 10.3 ms | 117 ms |
+
+**Limits.**
+- Recall is for "sheila" said on its own (Speech Commands clips in noise). With
+  synthetic voices that neither stage has heard, the system detects the word
+  alone in 72%, at the start of a sentence in 63%, in the middle in 6% and at the
+  end in 13% (JOURNAL 34): both stages were trained on words separated by pauses.
+- Speech Commands clips labelled "zero" (also "two", "four") are the main false
+  accepts; both stages hear "sheila" in them (JOURNAL 32-33).
+- The false-accept rate grew by 10-36% from validation to test for the
+  candidates so far; the margin to the target is thin.
+
+**Status.**
+- Both stages are bit-exact between the Python oracle and the SoC RTL (stage 1:
+  40 streams, 355 hops; both stages: 30 records, 934 requests); native C for
+  the verifier. Native C on the full test set was run for the earlier "yes"
+  model, not yet for "sheila".
+- The streaming firmware and the neuron engine have run on the physical board
+  over JTAG, with the earlier "yes" model (JOURNAL 18); the "yes" window release
+  also ran over the standard PYNQ Linux/Ethernet path on a second board
+  (JOURNAL 18b). **No "sheila" model has run on a board yet.**
+- `deploy/` still holds the first release: a dense window model for **"yes"**
+  (section at the end of this file). It is frozen there until a "sheila" system
+  passes the board test.
 
 > **Also in this folder** (merged from branch `damien-dicking-around`): a second,
-> independent pipeline, the 1 s clip classifier with 8x16 features, deployed
-> over ZeroMQ (`keyword_bridge.py`). See [README_clip_pipeline.md](README_clip_pipeline.md);
-> its files are `audio_features.py`, `train_keyword_snn_clip.py`,
-> `pc_keyword_demo_zmq.py`, `install_keyword_demo.sh` and `research/`. The two
-> pipelines are compared under one rule in `JOURNAL.md` entries 23 and 27 and in
-> `../../MERGE_SUMMARY.md`.
+> independent pipeline for the same task, the 1 s clip classifier with 8x16
+> features, deployed over ZeroMQ (`keyword_bridge.py`). See
+> [README_clip_pipeline.md](README_clip_pipeline.md); its files are
+> `audio_features.py`, `train_keyword_snn_clip.py`, `pc_keyword_demo_zmq.py`,
+> `install_keyword_demo.sh` and `research/`. The two pipelines are compared
+> under one rule in `JOURNAL.md` entries 23 and 27 and in `../../MERGE_SUMMARY.md`.
 
-## What was measured
+**Names.** `KWS_KEYWORD` selects the keyword (default `sheila`; `yes` selects the
+earlier one, see `keyword_config.py`). Every stream model records its keyword
+and the detectors refuse a mismatch; the window models are "yes" models. In
+code and result files, `yes`, `YES`, `yes_class`, `yes_detected` and `o[yes]`
+are historical names for the keyword and its class (class 2 of the three-class
+readout).
 
-- Six GPU training runs: current/rate encoding, seeds 0/1/2, 35 epochs each,
-  including ten epochs of quantization-aware training.
-- Official speaker-disjoint split: 84,843 training, 9,981 validation,
-  11,005 test clips; "yes" versus all other 34 words.
-- Deployed current model: 90.15% precision, 85.20% recall, 87.61% F1.
-- Worst of 40 RTL vectors: 5,981,521 cycles = 59.82 ms at 100 MHz with
-  plain RV32IM, or 267,393 cycles = 2.67 ms with the `kdot` custom instruction.
-- The best rate model took up to 715.52 ms and misses the 250 ms hop budget.
-- Full-test native C and RTL stress vectors match the integer oracle exactly.
-- Zero detections on 398 separate background-noise windows; this is not a
-  continuous-speech false-accepts-per-hour measurement.
-- Physical PYNQ-Z2, loaded over JTAG: the 40 vectors are bit-exact for the
-  RV32IM, `kdot` and augmented-trial firmware. Cycle counts equal RTL, and
-  the LED0 pulse is about 1 s.
-- Physical PYNQ-Z2 on PYNQ Linux over Ethernet (`board_server.py`): the same
-  40 vectors bit-exact for both firmware images (3 × 40 for RV32IM), cycle
-  counts equal RTL, LED0 pulse 999 ms, "2 of 3" sequences as specified, and
-  a 7 ms PC round trip per window (JTAG relay: 30–45 ms).
-- Live windows (held-out clips in noise, 250 ms hop): "2 of 3" confirmation
-  lowers other words accepted from 1.07% to 0.13%, while "yes" detection
-  goes from 74.5% to 67.3%.
+See [JOURNAL.md](JOURNAL.md) (dated log of every change, its motivation and its
+outcome; entries 1-21 are for "yes", from entry 22 the keyword is "sheila"),
+[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) (phases, acceptance targets and
+gates), [OPTIMIZATION_REPORT.md](OPTIMIZATION_REPORT.md) (why this route) and the
+machine-readable [results](results/). [REPORT.md](REPORT.md) and
+[presentation.pdf](presentation.pdf) document the first release ("yes").
 
 ## Local environment
 
@@ -70,77 +93,137 @@ scripts and the Bash scripts directly. `setup_venv.ps1`/`.sh` remain available
 for a separate environment inside this folder; install CUDA PyTorch first if
 using that environment for GPU training.
 
-## Verify the bundled release without training data
+## Streaming SNN for "sheila" (JOURNAL 8-27)
+
+[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) Phases 0-7 built the streaming
+detector; JOURNAL.md entries 8-27 give every step and number. The network reads
+one 24-byte log-mel frame every 10 ms; layer 1 (`kdot`) feeds layer 2 through
+learnable delays of 0-31 frames, and layer 2 is recurrent. The score of a frame
+is o[sheila] - max(o[other]); a detection is a score at or above the model's
+`stream_threshold` (the sum of the last `decision_window` scores; 1 for
+"sheila"), at least 1 s after the previous one. It is bit-exact from the Python
+oracle to the SoC RTL, with an event-driven neuron engine in the fabric
+(10.3 ms per 250 ms hop, timing met at 100 MHz).
+
+Pipeline (each step writes to `results/` or `runs_*`; downloads need about 60 GB
+of disk and several hours). The candidate `sheila_qat_seed2` was trained on the
+corpus built for the earlier keyword (`data/multi`), which `data/multi_sheila`
+links to (JOURNAL 22). A corpus built for "sheila" (`KWS_KEYWORD=sheila
+KWS_MULTI=data/multi_sheila_full python prepare_multicorpus.py`, with its own
+`make_tts_negatives.py` words) gave no measurable gain (JOURNAL 24-26). Stage 1,
+35 words, does not depend on the keyword.
 
 ```powershell
-.venv/Scripts/python.exe code/snn_keyword/export_model.py code/snn_keyword/deploy/model.npz
-wsl -d Ubuntu -- bash code/snn_keyword/sim/build.sh
-wsl -d Ubuntu -- bash code/snn_keyword/sim/unit.sh
-.venv/Scripts/python.exe -m pytest code/snn_keyword/tests -q
-.venv/Scripts/python.exe code/snn_keyword/verify.py --release-only
+python fetch_corpora.py mswc --split test      # also: librispeech, rirs, musan; mswc --split dev/train --needed-only
+$env:KWS_KEYWORD = "yes"                       # the candidate's corpus was built under "yes" ...
+python make_tts_negatives.py                   # Piper voices: 55,000 utterances (data/tts)
+python prepare_multicorpus.py                  # data/multi: clips, LibriSpeech, noise
+$env:KWS_KEYWORD = "sheila"                    # ... and is used for "sheila" through a link (the default keyword)
+cmd /c mklink /J data\multi_sheila data\multi
+python train_stream.py --stage 1 --no-kd --mic-ranges wide --epochs 50 --lr 2e-3 --name s1_wide
+python train_stream.py --stage 2 --init runs_stream/s1_wide/model.pt --mic-ranges wide --exclude-words 'sheila.+' --epochs 20 --steps-per-epoch 200 --batch 128 --lr 1e-3 --seed 2 --name sheila_s2_wide_seed2
+python train_stream.py --stage 2 --qat --init runs_stream/sheila_s2_wide_seed2/model.pt --mic-ranges wide --exclude-words 'sheila.+' --epochs 8 --steps-per-epoch 200 --batch 128 --lr 3e-4 --seed 2 --name sheila_qat_seed2
+python quantize_stream_model.py runs_stream/sheila_qat_seed2/last.pt runs_stream/sheila_qat_seed2/int_model.npz
+python stream_select.py runs_stream/sheila_qat_seed2/int_model.npz --window 1      # threshold on validation only
+python verify_stream.py runs_stream/sheila_qat_seed2/int_model.npz                  # native C = oracle
+python verify_stream_rtl.py runs_stream/sheila_qat_seed2/int_model.npz --engine --streams 40
+python final_eval.py sheila=runs_stream/sheila_qat_seed2/int_model.npz --out results/final_sheila_test.json   # the test split, once
 ```
 
-The release-only check uses the 40 bundled feature vectors; the original
-full-test verification evidence remains in `results/verification.json`.
-The RTL run executes a complete 100,000,000-cycle LED pulse; allow a few
-minutes. It does not contact a PYNQ board.
+The integer model is kept in `results/models/sheila_stream_int8.npz`
+(`yes_stream_int8_w20.npz` is the "yes" streaming model, for `KWS_KEYWORD=yes`).
+The false-accept and selection rules are in JOURNAL entries 19 and 26: live
+other-word accepts at most 0.2%, at most 2 false accepts per hour on 18-19 h of
+negatives, thresholds from validation data only, differences below about 7 points
+not called (seed SD 3.6 points).
 
-## Reproduce all training and experiments
+Streaming firmware and protocol (ABI v3): `export_model.py <int model> --out
+build/stream` writes the model headers; `make -C firmware stream` builds
+`keyword_stream.bin` (RV32IM), `keyword_stream_kdot.bin` and
+`keyword_stream_engine.bin` (needs the engine bitstream). The mailbox magic
+"KWS3" marks it; a request streams 1-100 frames of 24 bytes and the network
+state stays on the core. `board_server.py`, the JTAG relay and
+`pc_keyword_demo.py` detect the loaded ABI and serve v2 and v3. On the board, load
+the engine bitstream (`build/keyword_engine.bit`, not in git) and start
+`board_server.py --firmware build/keyword_stream_engine.bin`, or use the JTAG
+relay below. The bus fix (`READ_WAIT` 8 → 1) is in `rtl/spike_soc.v`.
+
+On the physical board (`build/keyword_engine.bit`, JOURNAL entry 18), 40 live
+test streams (358 hops) of the earlier "yes" model are bit-exact with the
+oracle for all three firmwares. Every field and cycle count equals RTL. Worst
+case per 250 ms hop: 10.2 ms with the engine, 88.8 ms with `kdot`, 125.4 ms with
+RV32IM. For "sheila", the same test with its own vectors:
 
 ```powershell
-.venv/Scripts/python.exe code/snn_keyword/prepare_data.py
-.venv/Scripts/python.exe code/snn_keyword/train_keyword_snn.py
-.venv/Scripts/python.exe code/snn_keyword/evaluate.py
-wsl -d Ubuntu -- bash code/snn_keyword/sim/build.sh
-.venv/Scripts/python.exe code/snn_keyword/verify.py
-.venv/Scripts/python.exe code/snn_keyword/export_model.py code/snn_keyword/runs/current_seed2/model.npz --out code/snn_keyword/build/current
-wsl -d Ubuntu -- make -C code/snn_keyword/firmware BUILD=../build/current
-wsl -d Ubuntu -- code/snn_keyword/build/obj_dir/Vspike_soc code/snn_keyword/build/current/keyword.bin code/snn_keyword/build/vectors.bin code/snn_keyword/results/rtl_current.csv 2674
-.venv/Scripts/python.exe code/snn_keyword/select_deployment.py
-wsl -d Ubuntu -- bash code/snn_keyword/sim/build.sh
-.venv/Scripts/python.exe code/snn_keyword/verify.py
-.venv/Scripts/python.exe code/snn_keyword/robustness.py
+$X = "C:/AMDDesignTools/2025.2/Vivado/bin/xsdb.bat"
+.venv/Scripts/python.exe code/snn_keyword/jtag/make_stream_vectors.py    # default model: results/models/sheila_stream_int8.npz
+& $X code/snn_keyword/jtag/bringup.tcl code/snn_keyword/build/keyword_engine.bit code/snn_keyword/build/keyword_stream_engine.bin
+& $X code/snn_keyword/jtag/stream_board_test.tcl
 ```
 
-Confusable endings, stream confirmation and the held-out word probe
-(JOURNAL.md, 2026-09-24/25):
+## Stage 2: a verifier confirms the SNN's proposals (JOURNAL 28-34)
+
+A small verifier (two GRU layers of 64, 49k parameters, int8) runs on the same
+PicoRV32, only when stage 1's decision score reaches `t1` in the current or the
+previous 250 ms request (about 2,200 calls per hour of speech). It scores the
+last 1.5 s of frames, and the LED lights when its keyword head reaches `t2`.
+- CTC training on phonemes (LibriSpeech train-clean-100 and the keyword clips),
+  then a keyword head: a linear readout of the last GRU layer, maximum over time.
+- The head is trained against stage 1's false proposals, mined from LibriSpeech
+  *training* speech (`mine_verifier_negatives.py`), and against near-miss words
+  ("she", "sheep", "shield", ... from MSWC; `data/multi_sheila_full`).
+- Tried and dropped (JOURNAL 29-35): a capped-margin phoneme-path score, a
+  boundary rule after the last phoneme, hinge fine-tuning of the path score,
+  hard training words, context words around the keyword (a small gain at the
+  end of sentences).
 
 ```powershell
-.venv/Scripts/python.exe code/snn_keyword/augment.py
-.venv/Scripts/python.exe code/snn_keyword/train_keyword_snn.py --encodings current --aug-fraction 0.3 --out code/snn_keyword/runs_aug
-.venv/Scripts/python.exe code/snn_keyword/tune_stream.py code/snn_keyword/deploy/model.npz
-.venv/Scripts/python.exe code/snn_keyword/tune_stream.py code/snn_keyword/runs_aug/current_seed2/model.npz
-powershell -ExecutionPolicy Bypass -File code/snn_keyword/make_tts_probe.ps1
-.venv/Scripts/python.exe code/snn_keyword/confusables.py release=code/snn_keyword/deploy/model.npz trial=code/snn_keyword/runs_aug/current_seed2/model.npz
+$env:KWS_KEYWORD = "sheila"
+# Stage 1 as above; candidate runs_stream/sheila_qat_seed2/int_model.npz.
+python fetch_corpora.py librispeech --subset train-clean-100     # and data_verifier/cmudict.dict (github.com/cmusphinx/cmudict)
+python verifier_data.py                                   # phoneme targets; LibriSpeech train-clean-100 packed
+python train_verifier.py --frontend logmel --clean-steps 4000 --epochs 40 --name sheila_logmel
+python mine_verifier_negatives.py                         # stage 1's proposals on the training speech
+$env:KWS_MULTI = "data/multi_sheila_full"                 # near-miss words (MSWC) for the head
+python train_verifier.py --init runs_verifier/sheila_logmel/last.pt --hard data_verifier/hard_sheila.npz `
+    --head-weight 1 --hard-weight 0 --pos-weight 0 --near-share .15 --kw-real-only --epochs 10 --lr 1e-3 --name sheila_head_near
+Remove-Item Env:KWS_MULTI
+python verifier_cascade.py cache                          # stage-1 scores of every validation set (about 30 min)
+python verifier_cascade.py score runs_verifier/sheila_head_near/last.pt --score head --out data_verifier/v.npz
+python verifier_cascade.py select data_verifier/v.npz --verify-ms 107.3 --max-fa-hour 1.6 --out results/c.json
+python verifier_cascade.py cache --split test --device    # the test run, once per candidate:
+python verifier_cascade.py score runs_verifier/sheila_head_near/last.pt --score head --split test --out data_verifier/vt.npz
+python verifier_cascade.py final data_verifier/vt.npz --t1 3785 --t2 1524 --stage1-threshold 18462 --verify-ms 107.3 --out results/f.json
+python tts_sentence_probe.py --verifier runs_verifier/sheila_head_near/last.pt --t1 3785 --t2 1524   # the keyword inside sentences (a probe, not a test)
 ```
 
-`results/models/augmented_current_seed2.npz` is the trial model that was
-tested on the board. `results/confusables.json` scores it, the release model,
-and every configuration in the journal. The 64-time-bin experiment uses the
-experiment-only `KWS_TIME_BINS` switch. Its data directory needs the dataset
-inside it; a hard link to the archive plus a junction to the extracted
-folder avoid a second copy:
+Firmware and checks. `-DCASCADE` builds the stream firmware with the verifier
+(`firmware/verifier.c`); the LED follows confirmed detections only (MB[11]
+bit0; bit1 stage 1 proposed, bit2 the verifier ran; MB[32] the head score).
+`verify_verifier_rtl.py --cascade` exports both models, builds
+`build/keyword_stream_cascade_engine.bin` and compares every request on the
+SoC RTL with the oracle (`verifier_cascade.cascade_requests`). The board test
+uses the same vectors over JTAG:
 
 ```powershell
-$env:KWS_TIME_BINS = 64
-.venv/Scripts/python.exe code/snn_keyword/prepare_data.py --data code/snn_keyword/data/b64
-.venv/Scripts/python.exe code/snn_keyword/augment.py --data code/snn_keyword/data/b64
-.venv/Scripts/python.exe code/snn_keyword/train_keyword_snn.py --data code/snn_keyword/data/b64 --encodings current --hidden 56 --aug-fraction 0.3 --out code/snn_keyword/runs_b64
-.venv/Scripts/python.exe code/snn_keyword/confusables.py b64=code/snn_keyword/runs_b64/current_seed0/model.npz --data code/snn_keyword/data/b64 --out code/snn_keyword/results/confusables_64bins.json
-Remove-Item Env:KWS_TIME_BINS
+python verify_verifier_rtl.py runs_verifier/sheila_head_near/last.pt --cascade 3785 1524 --frames data_verifier/cache_validation_sheila.npz
+python jtag/make_stream_vectors.py --model runs_stream/sheila_qat_seed2/int_model.npz `
+    --cascade runs_verifier/sheila_head_near/last.pt 3785 1524 --out build/stream_board_vectors_cascade.tcl
+& $X jtag/bringup.tcl build/keyword_engine.bit build/keyword_stream_cascade_engine.bin
+& $X jtag/stream_board_test.tcl build/stream_board_vectors_cascade.tcl
 ```
 
-The explicit current model and threshold above reproduce this release's
-fixed seeds. If changing training settings, choose the current run with the
-best **validation** F1 and use its `decision_threshold` from `training.json`.
-Selection must not use test accuracy. Download is about 2.43 GB; extracted
-audio, caches, CUDA packages, and Vivado output need substantially more space.
-Dataset SHA256 is checked. Raw audio and training checkpoints stay ignored;
-six exported integer models and training histories are retained in `results/`.
+Branch `engine-timing` (JOURNAL 31) pipelines the engine's accumulator so that the
+bitstream meets 100 MHz with Vivado's default strategy; use its
+`keyword_engine_pipe.bit` for the board test. Neither bitstream has been loaded
+with the cascade on a board yet.
 
 ## Build the FPGA image
 
-Vivado **2025.2** with the XC7Z020 device was used successfully locally.
+Vivado **2025.2** with the XC7Z020 device was used successfully locally. The command
+below builds the release image; the neuron engine and the ABI fix (`ps7_init`
+version `0x00020003`) are part of the same project (`rtl/*.v` is added
+automatically), see JOURNAL entries 16 and 19.
 The earlier claim that this design requires only 2024.1 is not applicable
 to this installed toolchain. Run from `code/pynqz2_riscv_flow/vivado`:
 
@@ -196,16 +279,17 @@ the original `keyword.bit` is unchanged.
 
 ## PC simulation demo
 
-In one terminal:
+In one terminal (the simulated board serves the "sheila" streaming model;
+without `--model` it serves the "yes" release):
 
 ```powershell
-.venv/Scripts/python.exe code/snn_keyword/board_server.py --simulate
+.venv/Scripts/python.exe code/snn_keyword/board_server.py --simulate --model code/snn_keyword/results/models/sheila_stream_int8.npz
 ```
 
 In another terminal:
 
 ```powershell
-.venv/Scripts/python.exe code/snn_keyword/pc_keyword_demo.py 127.0.0.1 --wav path/to/yes.wav
+.venv/Scripts/python.exe code/snn_keyword/pc_keyword_demo.py 127.0.0.1 --wav path/to/sheila.wav
 # Or use the actual microphone:
 .venv/Scripts/python.exe code/snn_keyword/pc_keyword_demo.py 127.0.0.1
 ```
@@ -216,196 +300,13 @@ bounded rolling buffer and sends one-second windows with a 250 ms hop.
 The callback only queues audio; feature extraction and networking happen
 on the main thread. Responses contain scores, detection, and hidden spikes.
 Simulation reports zero cycles; only RTL/board execution measures cycles.
-Live microphone mode uses "2 of 3" confirmation (below); `--single`
-restores per-window decisions. WAV mode always classifies a single window.
-Live mode prints one dot per window and one `YES detected` line per spoken
+The streaming model (ABI v3) decides per frame with a 1 s hold-off. The window
+release (ABI v2, "yes") uses "2 of 3" confirmation in live microphone mode
+([below](#live-confirmation-and-confusable-words)); `--single` restores
+per-window decisions, and WAV mode always classifies a single window.
+Live mode prints one dot per window and one `<KEYWORD> detected` line per spoken
 keyword (consecutive confirmed windows count once); `--json` prints every
 reply instead.
-
-## Live confirmation and confusable words
-
-**"2 of 3" confirmation.** A real "yes" spans several overlapping 250 ms-hop
-windows, while most false accepts fire in only one. Protocol mode 1 maps to
-firmware command 3. A window then counts as a detection only if it and one
-of the two previous stream windows (within 750 ms, by the fabric timer)
-reach the model's `stream_threshold`. Only confirmed detections light LED0.
-`detected` bit 0 is the confirmed decision and bit 1 is the window alone.
-Command 1 (single window: WAV mode and all verification) is unchanged.
-`tune_stream.py <model.npz>` picks the stream threshold on validation
-clips only. It places each clip in 2.25 s of background noise, cuts
-consecutive 250 ms-hop windows, and chooses the lowest threshold with at
-most 0.3% confirmed false accepts. `export_model.py` compiles it as
-`MODEL_STREAM_THRESHOLD`.
-
-Held-out test clips, placed the same way, over consecutive 250 ms windows:
-
-| Release model (`deploy/model.npz`) | "yes" detected | Other words accepted |
-|---|---|---|
-| Single window, threshold 2674 | 74.5% | 1.07% |
-| 2 of 3, stream threshold 1553 | 67.3% | 0.13% |
-
-**Confusable endings.** The release model also fires on "yeets", "yets",
-"pizza", "eats", "yetch" and "yeah". Speech Commands has no such words,
-and its clips are centred while the demo slides its window.
-`augment.py` edits real "yes" recordings, keeping their official splits,
-into negatives: /t/ closure plus burst before the /s/ ("yets"), /ʃ/-shifted
-endings ("yetch", "yesh"), a removed /s/ ("yeh"), and window-edge cuts.
-It also makes positives with the full word at random positions.
-`train_keyword_snn.py --aug-fraction 0.3` (default) mixes them into training.
-
-The trial model (current encoding, seed 2) was checked against synthesized
-Windows voices that were never used in training, at the real 250 ms hop:
-
-| Share of utterances detected | "yes" | yeets/yets/yetz | pizza(s) | eats/its | ch words | yeah |
-|---|---|---|---|---|---|---|
-| Release model, single window | 91% | 75% | 31% | 66% | 26% | 33% |
-| Release model, 2 of 3 | 77% | 53% | 11% | 44% | 5% | 15% |
-| Augmented model, 2 of 3 | 56% | 12% | 3% | 7% | 1% | 3% |
-
-On real held-out speakers the augmented model with 2 of 3 detects 60.1% of
-"yes" and accepts 0.50% of other words. It trades recall for rejecting
-these confusions and is not yet the release model. All figures above come
-from `results/confusables.json` (`confusables.py`).
-
-**Manual microphone test (user, board over JTAG).** Spoken made-up words
-ending in /s/ or similar sounds, such as "mes", "ras", "tes", "tos" and "ex",
-were often detected as "yes" when each window decided on its own. With "2 of
-3" confirmation (and the augmented trial model on the board) most of these
-false detections stopped. Detection is still far from perfect. This was an
-informal listening test, not a measurement; the model has never been
-trained on its speaker or microphone.
-
-**Finer time bins do not help this network.** 64 time bins (about 16 ms,
-1536-byte input, 48 or 56 hidden neurons to fit BRAM) scored below 32 bins
-on validation F1 (at most 0.819 against 0.837) and on live recall,
-including with 60 epochs. The dense layer has no time-shift invariance, so
-twice the weights per neuron add variance without new usable structure. A
-time-convolutional front layer is the next step. The firmware already
-publishes its input size (mailbox word 14), and the RTL harness and JTAG
-relay adapt to it.
-
-## Streaming SNN candidate (implementation plan, not promoted)
-
-[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) Phases 0-7 are carried
-out; JOURNAL.md entries 8-17 give every step and number. The result is a
-streaming two-layer adaptive-LIF SNN with learnable delays (58k parameters,
-int8), bit-exact from the Python oracle through native C to the SoC RTL,
-with an event-driven neuron engine in the fabric (10.2 ms per 250 ms hop,
-timing met at 100 MHz). **It does not meet the plan's acceptance targets,
-so `deploy/` still holds the release.** Test split,
-`results/robust_final.json`:
-
-| | Release | Streaming SNN |
-|---|---|---|
-| Live "yes" / other words accepted | 67.3% / 0.13% | 57.8% / 0.27% |
-| Synthesized /ts/ words detected | 11-53% | 0-6% |
-| False accepts per hour (1 h stream) | 52 | 5 |
-| Stream recall at ≤ 2 false accepts per hour | 42% | 54% |
-| Held-out microphone recall drop | 17.7 points | 19.6 points |
-| Compute per hop (engine) | 2.7 ms | 10.2 ms |
-
-Pipeline (each step writes to `results/` or `runs_*`; downloads need about
-60 GB of disk and several hours):
-
-```powershell
-python fetch_corpora.py mswc --split test     # also: librispeech, rirs, musan; mswc --split dev/train --needed-only
-python robust_eval.py release=deploy/model.npz # Phase 0 harness (writes results/robust_baseline.json)
-python make_tts_negatives.py                   # Piper voices and 55,000 utterances
-python prepare_multicorpus.py                  # data/multi: clips, LibriSpeech, noise
-python train_dense_online.py                   # Phase 1 gate: the release model on the new data
-python teacher.py                              # Phase 2: BC-ResNet-8 teacher
-python train_stream.py --stage 1 --no-kd --name s1_nokd_seed0
-python train_stream.py --stage 2 --init runs_stream/s1_nokd_seed0/model.pt --name s2_nokd_seed0
-python train_stream.py --stage 2 --qat --init runs_stream/s2_nokd_seed0/model.pt --lr 3e-4 --epochs 8 --name s2_nokd_qat
-python quantize_stream_model.py runs_stream/s2_nokd_qat/last.pt runs_stream/s2_nokd_qat/int_last.npz
-python stream_select.py runs_stream/s2_nokd_qat/int_last.npz   # threshold on validation only
-python verify_stream.py runs_stream/s2_nokd_qat/int_last.npz   # native C = oracle
-python verify_stream_rtl.py runs_stream/s2_nokd_qat/int_last.npz --engine --streams 40
-python robust_eval.py stream_snn_int8=runs_stream/s2_nokd_qat/int_last.npz --out results/robust_final.json
-```
-
-Streaming firmware and protocol (ABI v3): `make -C firmware stream` builds
-`keyword_stream.bin` (RV32IM), `keyword_stream_kdot.bin` and
-`keyword_stream_engine.bin` (needs the engine bitstream). The mailbox magic
-"KWS3" marks it; a request streams 1-100 frames of 24 bytes and the network
-state stays on the core. `board_server.py`, the JTAG relay and
-`pc_keyword_demo.py` detect the loaded ABI and serve v2 and v3. The bus fix
-(`READ_WAIT` 8 → 1) is in `rtl/spike_soc.v`.
-
-On the physical board (`build/keyword_engine.bit`, JOURNAL entry 18), 40 live
-test streams (358 hops) are bit-exact with the oracle for all three
-firmwares. Every field and cycle count equals RTL. Worst case per 250 ms hop:
-10.2 ms with the engine, 88.8 ms with `kdot`, 125.4 ms with RV32IM.
-
-```powershell
-$X = "C:/AMDDesignTools/2025.2/Vivado/bin/xsdb.bat"
-.venv/Scripts/python.exe code/snn_keyword/jtag/make_stream_vectors.py
-& $X code/snn_keyword/jtag/bringup.tcl code/snn_keyword/build/keyword_engine.bit code/snn_keyword/build/keyword_stream_engine.bin
-& $X code/snn_keyword/jtag/stream_board_test.tcl
-```
-
-## Keyword "sheila": stage 1 proposes, a verifier confirms (JOURNAL 22-32)
-
-With `KWS_KEYWORD=sheila` every script works on "sheila" (Speech Commands v2).
-The streaming SNN above is stage 1. A small verifier (two GRU layers of 64,
-49k parameters, int8) runs on the same PicoRV32, only when stage 1's decision
-score reaches `t1` in the current or the previous 250 ms request. It scores
-the last 1.5 s of frames and confirms when its keyword head reaches `t2`.
-- The verifier is trained with CTC on phonemes (LibriSpeech and the keyword
-  clips).
-- Its keyword head, a linear readout of the last GRU layer with the maximum
-  over time, is trained against:
-  - stage 1's false proposals, mined from LibriSpeech *training* speech;
-  - near-miss words ("she", "sheep", "shield", ...).
-- Test split, one run per candidate, thresholds from validation (≤ 1.6 FA/h
-  there), 18.97 h of negatives:
-
-| | Stage 1 alone | Stage 1 + verifier |
-|---|---|---|
-| Live "sheila" detected (complete recordings) | 63.7% (70.7%) | **86.8% (92.0%)** |
-| Held-out mics / real rooms / both | 66.5 / 60.9 / 58.0% | 86.3 / 85.9 / 84.9% |
-| Other words accepted | 0.00% | 0.07% |
-| False accepts per hour | 1.58 | 1.42 |
-| Median latency after the word | 0.04 s | 0.18 s |
-| Worst compute per 250 ms request | 10.3 ms | 117 ms |
-
-```powershell
-$env:KWS_KEYWORD = "sheila"
-# Stage 1: as above with KWS_KEYWORD=sheila (JOURNAL 23-27); candidate runs_stream/sheila_qat_seed2/int_model.npz
-python verifier_data.py                                   # phoneme targets; LibriSpeech train-clean-100 packed
-python train_verifier.py --frontend logmel --clean-steps 4000 --epochs 40 --name sheila_logmel
-python mine_verifier_negatives.py                         # stage 1's proposals on the training speech
-$env:KWS_MULTI = "data/multi_sheila_full"                 # near-miss words (MSWC) for the head
-python train_verifier.py --init runs_verifier/sheila_logmel/last.pt --hard data_verifier/hard_sheila.npz `
-    --head-weight 1 --hard-weight 0 --pos-weight 0 --near-share .15 --kw-real-only --epochs 10 --lr 1e-3 --name sheila_head_near
-Remove-Item Env:KWS_MULTI
-python verifier_cascade.py cache                          # stage-1 scores of every validation set (about 30 min)
-python verifier_cascade.py score runs_verifier/sheila_head_near/last.pt --score head --out data_verifier/v.npz
-python verifier_cascade.py select data_verifier/v.npz --verify-ms 107.3 --max-fa-hour 1.6 --out results/c.json
-python verifier_cascade.py cache --split test --device    # the test run, once per candidate:
-python verifier_cascade.py score runs_verifier/sheila_head_near/last.pt --score head --split test --out data_verifier/vt.npz
-python verifier_cascade.py final data_verifier/vt.npz --t1 3785 --t2 1524 --stage1-threshold 18462 --verify-ms 107.3 --out results/f.json
-```
-
-Firmware and checks. `-DCASCADE` builds the stream firmware with the verifier
-(`firmware/verifier.c`); the LED follows confirmed detections only (MB[11]
-bit0; bit1 stage 1 proposed, bit2 the verifier ran; MB[32] the head score).
-`verify_verifier_rtl.py --cascade` exports both models, builds
-`build/keyword_stream_cascade_engine.bin` and compares every request on the
-SoC RTL with the oracle (`verifier_cascade.cascade_requests`). The board test
-uses the same vectors over JTAG:
-
-```powershell
-python verify_verifier_rtl.py runs_verifier/sheila_head_near/last.pt --cascade 3785 1524 --frames data_verifier/cache_validation_sheila.npz
-python jtag/make_stream_vectors.py --model runs_stream/sheila_qat_seed2/int_model.npz `
-    --cascade runs_verifier/sheila_head_near/last.pt 3785 1524 --out build/stream_board_vectors_cascade.tcl
-& $X jtag/bringup.tcl build/keyword_engine_pipe.bit build/keyword_stream_cascade_engine.bin
-& $X jtag/stream_board_test.tcl build/stream_board_vectors_cascade.tcl
-```
-
-`keyword_engine_pipe.bit` is the engine with the pipelined accumulator
-(JOURNAL 31, timing met with Vivado's default strategy). Neither it nor the
-cascade has been on a board yet.
 
 ## Run on the PYNQ board (standard Ethernet path)
 
@@ -493,7 +394,174 @@ Limitations:
 - Each 250 ms window costs 30–45 ms of JTAG transfer, against 2.7 ms of inference.
 - Vivado's Hardware Manager shares the cable. Close it while the demo runs. The relay re-selects a lost target and retries for up to 5 s.
 
-## Interface and arithmetic
+## The "yes" window-model release (`deploy/`)
+
+The first release detects **"yes"**, not "sheila": a dense 768-64-2 SNN over a
+one-second mel window every 250 ms, decided with "2 of 3" confirmation, with the
+`kdot` instruction (2.7 ms per window). It is frozen in `deploy/`
+(`manifest.json`: keyword "yes") and is what `board_server.py`, `verify.py` and
+the tests use by default. It stays until a "sheila" system passes the board test
+(IMPLEMENTATION_PLAN.md, acceptance targets). Its pipeline scripts
+(`prepare_data.py`, `train_keyword_snn.py`, `evaluate.py`, `select_deployment.py`,
+`verify.py`, `tune_stream.py`, `confusables.py`, `make_report.py`) are written
+for "yes" and ignore `KWS_KEYWORD`; the harness (`robust_eval.py`) refuses to
+score a window model unless `KWS_KEYWORD=yes`. [REPORT.md](REPORT.md) documents it.
+
+### What was measured
+
+- Six GPU training runs: current/rate encoding, seeds 0/1/2, 35 epochs each,
+  including ten epochs of quantization-aware training.
+- Official speaker-disjoint split: 84,843 training, 9,981 validation,
+  11,005 test clips; "yes" versus all other 34 words.
+- Deployed current model: 90.15% precision, 85.20% recall, 87.61% F1.
+- Worst of 40 RTL vectors: 5,981,521 cycles = 59.82 ms at 100 MHz with
+  plain RV32IM, or 267,393 cycles = 2.67 ms with the `kdot` custom instruction.
+- The best rate model took up to 715.52 ms and misses the 250 ms hop budget.
+- Full-test native C and RTL stress vectors match the integer oracle exactly.
+- Zero detections on 398 separate background-noise windows; this is not a
+  continuous-speech false-accepts-per-hour measurement.
+- Physical PYNQ-Z2, loaded over JTAG: the 40 vectors are bit-exact for the
+  RV32IM, `kdot` and augmented-trial firmware. Cycle counts equal RTL, and
+  the LED0 pulse is about 1 s.
+- Physical PYNQ-Z2 on PYNQ Linux over Ethernet (`board_server.py`): the same
+  40 vectors bit-exact for both firmware images (3 × 40 for RV32IM), cycle
+  counts equal RTL, LED0 pulse 999 ms, "2 of 3" sequences as specified, and
+  a 7 ms PC round trip per window (JTAG relay: 30–45 ms).
+- Live windows (held-out clips in noise, 250 ms hop): "2 of 3" confirmation
+  lowers other words accepted from 1.07% to 0.13%, while "yes" detection
+  goes from 74.5% to 67.3%.
+
+### Verify the bundled release without training data
+
+```powershell
+.venv/Scripts/python.exe code/snn_keyword/export_model.py code/snn_keyword/deploy/model.npz
+wsl -d Ubuntu -- bash code/snn_keyword/sim/build.sh
+wsl -d Ubuntu -- bash code/snn_keyword/sim/unit.sh
+.venv/Scripts/python.exe -m pytest code/snn_keyword/tests -q
+.venv/Scripts/python.exe code/snn_keyword/verify.py --release-only
+```
+
+The release-only check uses the 40 bundled feature vectors; the original
+full-test verification evidence remains in `results/verification.json`.
+The RTL run executes a complete 100,000,000-cycle LED pulse; allow a few
+minutes. It does not contact a PYNQ board.
+
+### Reproduce all training and experiments
+
+```powershell
+.venv/Scripts/python.exe code/snn_keyword/prepare_data.py
+.venv/Scripts/python.exe code/snn_keyword/train_keyword_snn.py
+.venv/Scripts/python.exe code/snn_keyword/evaluate.py
+wsl -d Ubuntu -- bash code/snn_keyword/sim/build.sh
+.venv/Scripts/python.exe code/snn_keyword/verify.py
+.venv/Scripts/python.exe code/snn_keyword/export_model.py code/snn_keyword/runs/current_seed2/model.npz --out code/snn_keyword/build/current
+wsl -d Ubuntu -- make -C code/snn_keyword/firmware BUILD=../build/current
+wsl -d Ubuntu -- code/snn_keyword/build/obj_dir/Vspike_soc code/snn_keyword/build/current/keyword.bin code/snn_keyword/build/vectors.bin code/snn_keyword/results/rtl_current.csv 2674
+.venv/Scripts/python.exe code/snn_keyword/select_deployment.py
+wsl -d Ubuntu -- bash code/snn_keyword/sim/build.sh
+.venv/Scripts/python.exe code/snn_keyword/verify.py
+.venv/Scripts/python.exe code/snn_keyword/robustness.py
+```
+
+Confusable endings, stream confirmation and the held-out word probe
+(JOURNAL.md, 2026-09-24/25):
+
+```powershell
+.venv/Scripts/python.exe code/snn_keyword/augment.py
+.venv/Scripts/python.exe code/snn_keyword/train_keyword_snn.py --encodings current --aug-fraction 0.3 --out code/snn_keyword/runs_aug
+.venv/Scripts/python.exe code/snn_keyword/tune_stream.py code/snn_keyword/deploy/model.npz
+.venv/Scripts/python.exe code/snn_keyword/tune_stream.py code/snn_keyword/runs_aug/current_seed2/model.npz
+powershell -ExecutionPolicy Bypass -File code/snn_keyword/make_tts_probe.ps1
+.venv/Scripts/python.exe code/snn_keyword/confusables.py release=code/snn_keyword/deploy/model.npz trial=code/snn_keyword/runs_aug/current_seed2/model.npz
+```
+
+`results/models/augmented_current_seed2.npz` is the trial model that was
+tested on the board. `results/confusables.json` scores it, the release model,
+and every configuration in the journal. The 64-time-bin experiment uses the
+experiment-only `KWS_TIME_BINS` switch. Its data directory needs the dataset
+inside it; a hard link to the archive plus a junction to the extracted
+folder avoid a second copy:
+
+```powershell
+$env:KWS_TIME_BINS = 64
+.venv/Scripts/python.exe code/snn_keyword/prepare_data.py --data code/snn_keyword/data/b64
+.venv/Scripts/python.exe code/snn_keyword/augment.py --data code/snn_keyword/data/b64
+.venv/Scripts/python.exe code/snn_keyword/train_keyword_snn.py --data code/snn_keyword/data/b64 --encodings current --hidden 56 --aug-fraction 0.3 --out code/snn_keyword/runs_b64
+.venv/Scripts/python.exe code/snn_keyword/confusables.py b64=code/snn_keyword/runs_b64/current_seed0/model.npz --data code/snn_keyword/data/b64 --out code/snn_keyword/results/confusables_64bins.json
+Remove-Item Env:KWS_TIME_BINS
+```
+
+The explicit current model and threshold above reproduce this release's
+fixed seeds. If changing training settings, choose the current run with the
+best **validation** F1 and use its `decision_threshold` from `training.json`.
+Selection must not use test accuracy. Download is about 2.43 GB; extracted
+audio, caches, CUDA packages, and Vivado output need substantially more space.
+Dataset SHA256 is checked. Raw audio and training checkpoints stay ignored;
+six exported integer models and training histories are retained in `results/`.
+
+### Live confirmation and confusable words
+
+**"2 of 3" confirmation.** A real "yes" spans several overlapping 250 ms-hop
+windows, while most false accepts fire in only one. Protocol mode 1 maps to
+firmware command 3. A window then counts as a detection only if it and one
+of the two previous stream windows (within 750 ms, by the fabric timer)
+reach the model's `stream_threshold`. Only confirmed detections light LED0.
+`detected` bit 0 is the confirmed decision and bit 1 is the window alone.
+Command 1 (single window: WAV mode and all verification) is unchanged.
+`tune_stream.py <model.npz>` picks the stream threshold on validation
+clips only. It places each clip in 2.25 s of background noise, cuts
+consecutive 250 ms-hop windows, and chooses the lowest threshold with at
+most 0.3% confirmed false accepts. `export_model.py` compiles it as
+`MODEL_STREAM_THRESHOLD`.
+
+Held-out test clips, placed the same way, over consecutive 250 ms windows:
+
+| Release model (`deploy/model.npz`) | "yes" detected | Other words accepted |
+|---|---|---|
+| Single window, threshold 2674 | 74.5% | 1.07% |
+| 2 of 3, stream threshold 1553 | 67.3% | 0.13% |
+
+**Confusable endings.** The release model also fires on "yeets", "yets",
+"pizza", "eats", "yetch" and "yeah". Speech Commands has no such words,
+and its clips are centred while the demo slides its window.
+`augment.py` edits real "yes" recordings, keeping their official splits,
+into negatives: /t/ closure plus burst before the /s/ ("yets"), /ʃ/-shifted
+endings ("yetch", "yesh"), a removed /s/ ("yeh"), and window-edge cuts.
+It also makes positives with the full word at random positions.
+`train_keyword_snn.py --aug-fraction 0.3` (default) mixes them into training.
+
+The trial model (current encoding, seed 2) was checked against synthesized
+Windows voices that were never used in training, at the real 250 ms hop:
+
+| Share of utterances detected | "yes" | yeets/yets/yetz | pizza(s) | eats/its | ch words | yeah |
+|---|---|---|---|---|---|---|
+| Release model, single window | 91% | 75% | 31% | 66% | 26% | 33% |
+| Release model, 2 of 3 | 77% | 53% | 11% | 44% | 5% | 15% |
+| Augmented model, 2 of 3 | 56% | 12% | 3% | 7% | 1% | 3% |
+
+On real held-out speakers the augmented model with 2 of 3 detects 60.1% of
+"yes" and accepts 0.50% of other words. It trades recall for rejecting
+these confusions and is not yet the release model. All figures above come
+from `results/confusables.json` (`confusables.py`).
+
+**Manual microphone test (user, board over JTAG).** Spoken made-up words
+ending in /s/ or similar sounds, such as "mes", "ras", "tes", "tos" and "ex",
+were often detected as "yes" when each window decided on its own. With "2 of
+3" confirmation (and the augmented trial model on the board) most of these
+false detections stopped. Detection is still far from perfect. This was an
+informal listening test, not a measurement; the model has never been
+trained on its speaker or microphone.
+
+**Finer time bins do not help this network.** 64 time bins (about 16 ms,
+1536-byte input, 48 or 56 hidden neurons to fit BRAM) scored below 32 bins
+on validation F1 (at most 0.819 against 0.837) and on live recall,
+including with 60 epochs. The dense layer has no time-shift invariance, so
+twice the weights per neuron add variance without new usable structure. A
+time-convolutional front layer is the next step. The firmware already
+publishes its input size (mailbox word 14), and the RTL harness and JTAG
+relay adapt to it.
+
+### Interface and arithmetic
 
 Frontend: 16 kHz, periodic Hann 400 samples, hop 160, FFT 512; 24 normalized
 HTK mel triangles from 80 to 7600 Hz; log power clipped to [-80,0] dB;

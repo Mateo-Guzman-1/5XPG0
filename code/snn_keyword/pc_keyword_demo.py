@@ -53,8 +53,9 @@ def model_abi(host, port):
         return {'abi': 2}
 
 
-def run_stream(sock, frames_iter, max_frames, raw=True):
+def run_stream(sock, frames_iter, max_frames, raw=True, keyword=None):
     """Send frame blocks in hops; raw: one JSON line per hop, else one line per detection."""
+    keyword = keyword or K.KEYWORD
     seq, detections = 1, 0
     request_frames(sock, seq, b'', MODE_RESET)
     buffered = np.zeros((0, 24), np.uint8)
@@ -68,7 +69,7 @@ def run_stream(sock, frames_iter, max_frames, raw=True):
                 print(json.dumps(result), flush=True)
             elif result['detected']:
                 detections += 1
-                print(f'\n{K.KEYWORD.upper()} detected ({detections}), frame {result["at_frame"]} of the hop, '
+                print(f'\n{keyword.upper()} detected ({detections}), frame {result["at_frame"]} of the hop, '
                       f'{result["cycles"]} cycles on the RISC-V core', flush=True)
             else:
                 print('.', end='', flush=True)   # one dot per hop: still listening
@@ -85,16 +86,20 @@ def main():
     p.add_argument('--frontend', choices=['logmel', 'logmel_w', 'logmel_agc', 'pcen'], default='logmel', help='ABI v3: the model\'s front end')
     p.add_argument('--json', action='store_true',
                    help='Live: print every board reply as JSON instead of one line per detected keyword')
+    p.add_argument('--keyword', help='name shown in the messages; default: KWS_KEYWORD ("sheila") for the streaming '
+                   'model (ABI v3), "yes" for ABI v2, which is the window-model release')
     a = p.parse_args()
     abi = model_abi(a.host, a.port)
     stream = abi['abi'] == 3
+    keyword = a.keyword or (K.KEYWORD if stream else 'yes')
     with connect(a.host, a.port) as sock:
         if a.wav:
             audio = read_wav(a.wav)
             if stream:
-                # Half a second of silence after the file lets a final "yes" reach the readout.
+                # Half a second of silence after the file lets a final keyword reach the readout.
                 fs = FrameStream(a.frontend)
-                run_stream(sock, [fs.push(np.r_[audio, np.zeros(SAMPLE_RATE // 2, np.float32)])], abi['max_frames'])
+                run_stream(sock, [fs.push(np.r_[audio, np.zeros(SAMPLE_RATE // 2, np.float32)])], abi['max_frames'],
+                           keyword=keyword)
             else:
                 print(json.dumps(request(sock, 1, features(audio))))
             return
@@ -114,10 +119,10 @@ def main():
                     except queue.Empty: break
                 chunks.put_nowait(None)
         if stream:
-            print(f'Listening for "{K.KEYWORD}"; streaming SNN, 10 ms frames in 250 ms hops, 1 s hold-off. Ctrl-C stops.')
+            print(f'Listening for "{keyword}"; streaming SNN, 10 ms frames in 250 ms hops, 1 s hold-off. Ctrl-C stops.')
         else:
             rule = 'each window' if a.single else '2 of 3 consecutive windows'
-            print(f'Listening for "{K.KEYWORD}"; 1 s windows / 250 ms hop; detection needs {rule}. Ctrl-C stops.')
+            print(f'Listening for "{keyword}"; 1 s windows / 250 ms hop; detection needs {rule}. Ctrl-C stops.')
         with sd.InputStream(channels=1, samplerate=SAMPLE_RATE, blocksize=4000,
                             dtype='float32', device=a.device, callback=callback):
             if stream:
@@ -130,7 +135,7 @@ def main():
                             fs = FrameStream(a.frontend)
                             continue
                         yield fs.push(chunk)
-                run_stream(sock, frames_iter(), abi['max_frames'], raw=a.json)
+                run_stream(sock, frames_iter(), abi['max_frames'], raw=a.json, keyword=keyword)
                 return
             buffer = np.empty(0, dtype=np.float32)
             seq = 0
@@ -151,7 +156,7 @@ def main():
                 elif result['detected'] and not previous:
                     # One spoken keyword confirms several consecutive windows; report it once.
                     detections += 1
-                    print(f'\n{K.KEYWORD.upper()} detected ({detections}), score margin {result["score1"] - result["score0"]}, '
+                    print(f'\n{keyword.upper()} detected ({detections}), score margin {result["score1"] - result["score0"]}, '
                           f'{result["cycles"]} cycles on the RISC-V core', flush=True)
                 else:
                     print('.', end='', flush=True)   # one dot per window: still listening

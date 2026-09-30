@@ -4,7 +4,7 @@ Builds build/stream headers (export_model.export_stream), the ABI v3 firmware
 (firmware/stream_main.c; --kdot uses the kdot coprocessor for layer 1), and
 sim/soc_stream.cpp against rtl/spike_soc.v. --read-wait N simulates a copy of
 spike_soc.v with READ_WAIT = N (the bus fix, report E2) without changing the
-source. Streams: 20 "yes" and 20 other test clips placed in noise as in
+source. Streams: 20 keyword and 20 other test clips placed in noise as in
 robust_eval.py, sent in 250 ms hops (25 frames). Writes results/rtl_stream*.csv
 and a JSON summary with cycles per hop.
 """
@@ -58,7 +58,7 @@ def main():
         f'build/rtl_{tag}/spike_soc.v', '../pynqz2_riscv_flow/rtl/picorv32.v', '../pynqz2_riscv_flow/rtl/poisson.v',
         '../pynqz2_riscv_flow/rtl/kdot_pcpi.v', '../pynqz2_riscv_flow/rtl/neuron_engine.v',
         '"$PWD/sim/soc_stream.cpp"'])])
-    # Vectors: yes clips first, then others, all from the live test set.
+    # Vectors: keyword clips first, then others, all from the live test set.
     cfg = SPLITS['test']
     clips, y, rng = sc_live_clips(a.data, cfg['sc'], seed=cfg['seed'])
     audio = place_clips(clips, bg_noise(a.data), rng)

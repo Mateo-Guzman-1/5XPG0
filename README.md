@@ -11,16 +11,17 @@ Kick-off slides: [`PresentationInstruction/main.pdf`](PresentationInstruction/ma
 ## The two projects
 
 ### Group 2 — single-keyword detection
-The completed implementation, trained models, simulation results, and fresh
-FPGA bitstream are in [`code/snn_keyword`](code/snn_keyword/README.md).
-See the [report](code/snn_keyword/REPORT.md) and
-[presentation](code/snn_keyword/presentation.pdf). Physical board acceptance
-is pending because no PYNQ was available during verification.
-
-Build a spiking neural network that detects **one keyword**, deploy it on the
-PYNQ-Z2 RISC-V core, and light an LED for one second when the keyword is
-spoken into the PC microphone. The PC computes a spectrogram and sends it to
-the board over Ethernet.
+Detect **one keyword, "sheila", against everything else** (all other words,
+running speech, silence, noise) with a spiking neural network on the PYNQ-Z2
+RISC-V core, and light an LED for one second when it is spoken into the PC
+microphone. The PC computes the mel features and sends them to the board over
+Ethernet. The current system, its results and how to reproduce them are in
+[`code/snn_keyword`](code/snn_keyword/README.md); every step is in its
+[journal](code/snn_keyword/JOURNAL.md). The first release, a window model for
+"yes", is frozen in `code/snn_keyword/deploy` (see the
+[report](code/snn_keyword/REPORT.md) and
+[presentation](code/snn_keyword/presentation.pdf), both about "yes"). The
+"sheila" system has not run on a board yet.
 
 ### Group 4 — benchmark ANN vs SNN on MNIST
 Build a small **ANN** and a small **SNN** for MNIST, deploy **both** on the

@@ -14,6 +14,14 @@ The "synthesized words" are offline Windows voices (David, Zira; 24 words × 4
 rates × 3 pitches; `make_tts_probe.ps1`). They were never used for training.
 With only two voices, they indicate trends, not accuracy.
 
+**Which keyword.** Entries 1-21 are about **"yes"**: the first release
+(`deploy/`), the streaming SNN of phases 0-7 and the iteration loop that
+followed. From entry 22 the keyword is **"sheila"**, detected against everything
+else (entry 22 explains the change; since 2026-09-30 it is also the default of
+`keyword_config.py`). Numbers of the two keywords are never mixed in one table
+without saying so. In result files, `yes`, `yes_class` and `yes_detected` mean
+the keyword.
+
 ---
 
 ## 2026-09-24
@@ -875,8 +883,8 @@ construction, with a causal gain control relative to a running peak
 (`logmel_agc`).
 
 **Keyword changed to "sheila"** (user request).
-- `keyword_config.py` (env `KWS_KEYWORD`, default "yes") drives data
-  selection, training, evaluation, vectors and TTS.
+- `keyword_config.py` (env `KWS_KEYWORD`, default "yes" at the time; "sheila"
+  since 2026-09-30) drives data selection, training, evaluation, vectors and TTS.
   - Models record their keyword, and the detectors refuse a mismatch.
   - "yes" reproduces exactly: the derived labels equal `features.npz`'s y.
 - Speech Commands v2 has 2,022 "sheila" clips (1,606 / 204 / 212); the
@@ -1531,42 +1539,87 @@ order; the head label stays "is the middle word the keyword". Stage 1's
 training streams keep at least 0.1-0.6 s between words and would need the
 same later.
 
+### 35. Context words in the head's training: the limit is stage 1
+
+`train_verifier.py --context-p .5` (entry 34's next step): half of the
+keyword-batch clips, keyword and other words alike, are cut to their spoken part
+and get a real neighbouring word from another speaker before and/or after (0-0.1 s
+apart). The CTC target is all the phonemes in order; the head label is "the middle
+word is the keyword". Keyword head from verifier seed 0 with near-miss negatives,
+10 epochs.
+
+**Validation** (≤ 1.6 FA/h): 87.8% live recall (94.9% complete) at 1.05 FA/h, "she-"
+words 3/183, MSWC other words 0.36%, mics / rooms / both 86.8 / 84.8 / 85.3%. That
+is the recall of the near-miss head of entry 32 (87.8% at 1.16 FA/h): isolated
+words lose nothing. It is not a new candidate; no test run was spent on it.
+
+**Sentence probe** (`tts_sentence_probe.py`, the same 1,536 utterances as entry 34).
+"Proposed" is the share of utterances where stage 1 reaches the head's `t1`
+(3785 for the near-miss head, 7080 for the context head, as selected on validation):
+
+| Position of "sheila" | Near-miss head: proposed / cascade | Context head: proposed / cascade |
+|---|---|---|
+| alone | 99% / 72% | 98% / 76% |
+| start | 92% / 63% | 79% / 60% |
+| middle | 65% / 6% | 39% / 7% |
+| end | 89% / 13% | 79% / 21% |
+| near-miss sentences, no keyword | 60% / 7% | 34% / 7% |
+
+- **The verifier improves with context.** Of the proposals, it accepts 18% in the
+  middle and 27% at the end, against 9% and 15% for the near-miss head. That is
+  still low.
+- **Stage 1 is the first limit in the middle of sentences.** The median stage-1
+  peak for "Tell Sheila that I called." is 5,213, under `t1` = 7,080; even at
+  `t1` = 3785 it proposes for 65%. In continuous speech "sheila" is shorter and its
+  last vowel merges with the next word, unlike a Speech Commands recording read
+  on its own.
+- The same probe: 7% of the near-miss sentences ("She laughed at me." above all)
+  are accepted by either head.
+
+**Next.** Stage 1 needs "sheila" in continuous speech, with the same voice on both
+sides: TTS sentences with the keyword at known times (Piper voices of the training
+speakers; the keyword's end from the concatenation), mixed into the streams of
+`train_stream.py`, then the verifier's context training again. Real recordings of the
+user's voice in sentences would settle it (open items).
+
 ## Open items
 
 Status of `IMPLEMENTATION_PLAN.md`: Phases 0-6 done; the streaming firmware and
-engine are verified on the board over JTAG (entry 18); Phase 7 evaluated for "yes",
-not promoted (entry 17). The keyword is now "sheila" (entry 22). The best system
-is the cascade of the stage-1 SNN and the verifier with a keyword head trained
-against near-miss words (entry 32): 86.8% live recall on test at 1.42 FA/h and
-0.07% other words, inside both false-accept targets; RTL bit-exact with the
-pipelined engine (entry 31); not yet on a board.
-See `MERGE_SUMMARY.md` at the repository root for all branches.
+engine are verified on the board over JTAG with the earlier "yes" model (entry 18);
+Phase 7 was evaluated for "yes" and not promoted (entry 17). The keyword is now
+"sheila" against everything else (entry 22). The best system is the cascade of the
+stage-1 SNN and the verifier with a keyword head trained against near-miss words
+(entry 32): 86.8% live recall on test at 1.42 FA/h and 0.07% other words, inside both
+false-accept targets. It is RTL bit-exact on the pipelined engine (entry 31) and has
+not been on a board. See `MERGE_SUMMARY.md` at the repository root for all branches.
 
 1. **Board test of the cascade** (`firmware -DCASCADE` with the head,
    `build/keyword_stream_cascade_engine.bin` on `build/keyword_engine_pipe.bit`,
-   entries 31-32): `verify_verifier_rtl.py
-   results/models/sheila_verifier_head_near.pt --cascade 3785 1524` builds the
-   firmware, `jtag/make_stream_vectors.py --cascade
+   entries 31-32): `verify_verifier_rtl.py results/models/sheila_verifier_head_near.pt
+   --cascade 3785 1524` builds the firmware, `jtag/make_stream_vectors.py --cascade
    results/models/sheila_verifier_head_near.pt 3785 1524` the vectors, then
-   `jtag/stream_board_test.tcl`. Needs a board and the
-   team's go-ahead. The stage-1-only candidate (entry 27) is also not yet
-   board-tested.
-2. **Suspected Speech Commands label errors** (entries 28-30). About 30
-   negative clips labelled zero, two, four, and so on decode as "...IY L AH".
-   Listening to them decides whether both cascade test runs are inside the
-   ≤ 2 FA/h target (`results/sheila_suspected_label_errors_*.json`).
-3. **Other words accepted under rooms**: 0.27% for the candidate (entry 32;
-   target 0.2% on clean audio). More varied hard negatives are needed:
-   rooms, conversational speech, TV.
-4. **v3 streaming over Ethernet.** Pedro's run (entry 18b) covers the v2
-   release. `board_server.py` serves v3 and has his fix; `net_board_test.py`
-   checks stage 1 against the oracle (the cascade's fields are not in the
-   TCP protocol yet). Not yet run on a board.
-5. ~~Engine timing margin~~: done (entry 31). The pipelined engine meets 100 MHz
-   with the default strategy (WNS +0.406 ns); use `keyword_engine_pipe.bit`
-   for the board test.
-6. Recordings of the actual user and microphone, for evaluation only.
-7. From Pedro's list:
+   `jtag/stream_board_test.tcl`. Needs a board and the team's go-ahead. The stage-1
+   firmware alone (entry 27) is the fallback and is also not yet board-tested.
+2. **"sheila" inside sentences** (entries 34-35): 6% in the middle and 13% at the end
+   of sentences (synthetic voices), against 72% alone. Stage 1 proposes for only
+   39-65% of the middle-position sentences. Train stage 1 with the keyword in
+   continuous speech (TTS sentences, same voice on both sides), then the verifier.
+3. **The "zero" clips** (entries 32-33): most remaining false accepts are Speech
+   Commands recordings labelled "zero" (also "two", "four"). Listen to them
+   (`results/sheila_suspected_label_errors_*.json`): a real near-miss or mislabelled
+   recordings. They count as false accepts in every number.
+4. **Other words accepted under rooms**: 0.27% for the candidate (entry 32; target 0.2%
+   on clean audio). More varied hard negatives are needed: rooms, conversational
+   speech, TV.
+5. **Native C on the full test set** for the "sheila" stage 1 (`verify_stream.py`).
+6. **v3 streaming over Ethernet.** Pedro's run (entry 18b) covers the v2 release.
+   `board_server.py` serves v3 and has his fix; `net_board_test.py` checks stage 1
+   against the oracle (the cascade's fields are not in the TCP protocol yet). Not yet
+   run on a board.
+7. ~~Engine timing margin~~: done (entry 31). The pipelined engine meets 100 MHz with the
+   default strategy (WNS +0.406 ns); use `keyword_engine_pipe.bit` for the board test.
+8. Recordings of the actual user and microphone, for evaluation only.
+9. From Pedro's list:
    - "release or trial model": superseded by the streaming SNN (entries 17, 27);
    - time-convolutional first layer: the streaming SNN's learnable delays
      cover this;
