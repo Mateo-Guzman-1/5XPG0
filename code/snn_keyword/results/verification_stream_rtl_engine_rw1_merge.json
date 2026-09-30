@@ -19,6 +19,6 @@
     "max": 81543,
     "mean": 40267.84905660377
   },
-  "simulation_seconds": 72.0,
+  "simulation_seconds": 79.9,
   "harness": "PASS: 40 streams, 355 hops bit-exact with the oracle; malformed requests, reset, duplicate sequence, 1 s LED pulse; worst 1029278 cycles per 25-frame hop, mean 988684; total cycles=437579098"
 }

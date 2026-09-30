@@ -1,4 +1,4 @@
-"""Verifier track, step 1: phoneme targets for the second-stage "yes" verifier.
+"""Verifier track, step 1: phoneme targets for the second-stage keyword verifier.
 
 Pronunciations come from the public CMU Pronouncing Dictionary
 (github.com/cmusphinx/cmudict, BSD licence; data_verifier/cmudict.dict):
@@ -8,11 +8,17 @@ Pronunciations come from the public CMU Pronouncing Dictionary
             utterances with any out-of-dictionary word are skipped. The
             audio is packed once into data_verifier/libri100_audio.npy
             (int16, concatenated) with an index (libri100_index.npz).
-  keywords  Every word of data/multi/manifest.csv. Out-of-dictionary words:
-            the TTS pseudo-words (yesd, yeets, pes, ...) get a small
-            rule-based letter-to-sound fallback (fallback_g2p); other OOV
-            words (MSWC names, mis-encoded apostrophes) are dropped.
+  keywords  Every word of the keyword's multi-corpus manifest
+            (keyword_config.MULTI: data/multi for "yes", data/multi_sheila,
+            or KWS_MULTI). For "yes", the TTS pseudo-words (yesd, yeets, pes,
+            ...) get a small rule-based letter-to-sound fallback
+            (fallback_g2p); for other keywords all out-of-dictionary words
+            are dropped (the rules do not cover pseudo-words such as
+            "sheiva"). Other OOV words (MSWC names, mis-encoded apostrophes)
+            are dropped.
 
+The keyword's own phonemes (KEYWORD) are its first CMUdict pronunciation:
+"yes" Y EH S, "sheila" SH IY L AH.
 data/ is read only; everything is written to data_verifier/.
 """
 import argparse
@@ -25,6 +31,8 @@ from pathlib import Path
 
 import numpy as np
 
+import keyword_config as K
+
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / 'data'
 OUT = ROOT / 'data_verifier'
@@ -34,7 +42,6 @@ PHONES = ['AA', 'AE', 'AH', 'AO', 'AW', 'AY', 'B', 'CH', 'D', 'DH', 'EH', 'ER', 
 BLANK = 0
 SYMBOLS = ['<b>'] + PHONES          # CTC classes: blank + 39 phonemes
 PID = {p: i + 1 for i, p in enumerate(PHONES)}
-KEYWORD = [PID['Y'], PID['EH'], PID['S']]
 
 
 @lru_cache(maxsize=1)
@@ -104,12 +111,21 @@ def encode(ph):
     return np.array([PID[p] for p in ph], np.int16)
 
 
+KEYWORD = [PID[p] for p in cmudict()[K.KEYWORD]]      # phoneme ids of the keyword path
+
+
+def targets_file(split):
+    """data_verifier/keyword_targets_[<multi>_]<split>.npz for keyword_config.MULTI."""
+    tag = '' if K.MULTI.name == 'multi' else f'{K.MULTI.name}_'
+    return OUT / f'keyword_targets_{tag}{split}.npz'
+
+
 def keyword_targets(split):
     """Per manifest row of `split` (sc/mswc/tts): phoneme ids or None (dropped)."""
-    rows = [r for r in csv.DictReader(open(DATA / 'multi/manifest.csv', encoding='utf-8')) if r['split'] == split]
+    rows = [r for r in csv.DictReader(open(K.MULTI / 'manifest.csv', encoding='utf-8')) if r['split'] == split]
     out = []
     for r in rows:
-        ph = word_phones(r['word'], fallback=r['corpus'] == 'tts')
+        ph = word_phones(r['word'], fallback=r['corpus'] == 'tts' and K.KEYWORD == 'yes')
         out.append((int(r['row']), r['corpus'], r['word'], None if ph is None else encode(ph)))
     return out
 
@@ -157,18 +173,22 @@ def main():
         rows = np.array([k[0] for k in kt])
         keep = np.array([k[3] is not None for k in kt])
         tg = [k[3] if k[3] is not None else np.zeros(0, np.int16) for k in kt]
-        np.savez(OUT / f'keyword_targets_{split}.npz', row=rows, keep=keep, corpus=np.array([k[1] for k in kt]),
+        np.savez(targets_file(split), row=rows, keep=keep, corpus=np.array([k[1] for k in kt]),
                  word=np.array([k[2] for k in kt]), phones=np.concatenate(tg),
                  phone_off=np.r_[0, np.cumsum([len(x) for x in tg])].astype(np.int64))
-        fb = sorted({k[2] for k in kt if k[1] == 'tts' and k[2].lower() not in cmudict()})
-        summary[split] = {'rows': len(kt), 'kept': int(keep.sum()), 'dropped_oov': int((~keep).sum()),
+        fb = sorted({k[2] for k in kt if k[1] == 'tts' and k[2].lower() not in cmudict()}) if K.KEYWORD == 'yes' else []
+        words = np.char.lower(np.array([k[2] for k in kt]))
+        summary[split] = {'multi': K.MULTI.name, 'keyword': K.KEYWORD,
+                          'keyword_phones': ' '.join(PHONES[i - 1] for i in KEYWORD),
+                          'rows': len(kt), 'kept': int(keep.sum()), 'dropped_oov': int((~keep).sum()),
+                          'keyword_clips': int(((words == K.KEYWORD) & keep).sum()),
                           'tts_fallback_words': len(fb),
                           'fallback_examples': {w: ' '.join(word_phones(w, True)) for w in fb[:12]}}
         print(split, json.dumps(summary[split]), flush=True)
     if not a.skip_libri:
         summary['libri'] = pack_libri()
         print(json.dumps(summary['libri']))
-    (OUT / 'summary.json').write_text(json.dumps(summary, indent=1))
+    (OUT / f'summary_{K.MULTI.name}.json').write_text(json.dumps(summary, indent=1))
 
 
 if __name__ == '__main__':

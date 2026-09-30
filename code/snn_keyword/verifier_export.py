@@ -15,6 +15,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
+import keyword_config as K
 from verifier_data import BLANK, KEYWORD
 from verifier_model import NEG, ONE, Verifier, integer_forward, keyword_score, quantize
 
@@ -23,6 +24,7 @@ ROOT = Path(__file__).resolve().parent
 
 def load_quantized(path):
     ck = torch.load(path, map_location='cpu', weights_only=False)
+    K.check_model_keyword(ck.get('keyword'), 'verifier')     # checkpoints before the setting are "yes"
     m = Verifier(**ck['config'])
     m.load_state_dict(ck['state_dict'])
     return quantize(m)
@@ -49,26 +51,35 @@ def range_checks(q, steps):
     wo = np.abs(q['out_w'].astype(np.int64))
     lg = ((wo.sum(1) * ONE) >> q['out_e']) + np.abs(q['out_b'].astype(np.int64))
     checks['keyword path sum'] = int(2 * lg.max() * steps)
+    if 'head_w' in q:
+        if (q['head_e'] < 0).any():
+            raise ValueError('head: negative row exponent')
+        checks['head accumulator'] = int(np.abs(q['head_w'].astype(np.int64)).sum() * ONE + 255 * ONE * q['head_w'].shape[1])
     for k, v in checks.items():
         if v >= 2 ** 30:
             raise ValueError(f'{k} can reach {v}')
     return checks
 
 
-def export(q, out, frames=150, warmup=5, boundary=10, thresholds=(NEG, NEG)):
+def export(q, out, frames=150, warmup=5, boundary=10, thresholds=(NEG, NEG), cascade_t1=None):
     out = Path(out); out.mkdir(parents=True, exist_ok=True)
     stack = int(q['stack'])
     checks = range_checks(q, frames // stack)
-    y, eh, s = KEYWORD
     cfg = ['#ifndef VERIFIER_CONFIG_H', '#define VERIFIER_CONFIG_H',
            f'#define VERIFIER_STACK {stack}', f'#define VERIFIER_IN {24 * stack}',
            f'#define VERIFIER_H1 {int(q["h1"])}', f'#define VERIFIER_H2 {int(q["h2"])}',
            f'#define VERIFIER_CLASSES {len(q["out_b"])}', f'#define VERIFIER_BLANK {BLANK}',
-           f'#define VERIFIER_Y {y}', f'#define VERIFIER_EH {eh}', f'#define VERIFIER_S {s}',
+           f'#define VERIFIER_NPH {len(KEYWORD)}',
+           f'#define VERIFIER_PHONES {{{", ".join(str(int(k)) for k in KEYWORD)}}}',
            f'#define VERIFIER_FRAMES {frames}', f'#define VERIFIER_WARMUP {warmup}',
            f'#define VERIFIER_BOUNDARY {boundary}', f'#define VERIFIER_NEG ({NEG})',
-           f'#define VERIFIER_THRESHOLD_A ({int(thresholds[0])})', f'#define VERIFIER_THRESHOLD_B ({int(thresholds[1])})',
-           '#endif', '']
+           f'#define VERIFIER_THRESHOLD_A ({int(thresholds[0])})', f'#define VERIFIER_THRESHOLD_B ({int(thresholds[1])})']
+    if cascade_t1 is not None:   # stage-1 decision score that asks the verifier (firmware CASCADE builds)
+        cfg.append(f'#define CASCADE_T1 ({int(cascade_t1)})')
+    if 'head_w' in q:            # keyword head: the cascade decides on it (VERIFIER_THRESHOLD_A is its threshold)
+        cfg += ['#define VERIFIER_HEAD 1', f'#define VERIFIER_HEAD_E {int(q["head_e"][0])}',
+                f'#define VERIFIER_HEAD_B ({int(q["head_b"][0])})']
+    cfg += ['#endif', '']
     (out / 'verifier_config.h').write_bytes('\n'.join(cfg).encode())
     lines = ['#include <stdint.h>', '#include "verifier_config.h"']
     for name in ('l1', 'l2'):
@@ -77,6 +88,8 @@ def export(q, out, frames=150, warmup=5, boundary=10, thresholds=(NEG, NEG)):
         lines += _arr('uint8_t', f'e{k}', q[f'{name}_e']) + _arr('int32_t', f'b{k}', q[f'{name}_b'])
     lines += _arr('uint8_t', 'wo', q['out_w'].astype(np.int16) + 128)
     lines += _arr('uint8_t', 'eo', q['out_e']) + _arr('int32_t', 'bo', q['out_b'])
+    if 'head_w' in q:
+        lines += _arr('uint8_t', 'wh', q['head_w'].astype(np.int16) + 128)
     lines += _arr('int16_t', 'sig', q['sig']) + _arr('int16_t', 'tanh', q['tanh'])
     (out / 'verifier_data.h').write_bytes(('\n'.join(lines) + '\n').encode())
     size = sum(q[k].size for k in ('l1_w', 'l2_w', 'out_w', 'l1_e', 'l2_e', 'out_e')) + \
@@ -86,11 +99,17 @@ def export(q, out, frames=150, warmup=5, boundary=10, thresholds=(NEG, NEG)):
 
 
 def oracle(frames, q, warmup, boundary):
-    """Python reference of verifier_run: logits, (score_a, end_a, score_b, end_b) per window."""
-    lg = integer_forward(frames, q)
+    """Python reference of verifier_run: logits, (score_a, end_a, score_b, end_b, head, end_head) per window."""
+    if 'head_w' in q:
+        lg, hd = integer_forward(frames, q, with_head=True)
+        h = hd[:, warmup:]
+        head, end_head = h.max(1), h.argmax(1) + warmup
+    else:
+        lg = integer_forward(frames, q)
+        head, end_head = np.full(len(frames), NEG, np.int64), np.full(len(frames), -1, np.int64)
     sa, ea = keyword_score(lg, warmup, 0, return_end=True)
     sb, eb = keyword_score(lg, warmup, boundary, return_end=True)
-    return lg, np.c_[sa, ea, sb, eb]
+    return lg, np.c_[sa, ea, sb, eb, head, end_head]
 
 
 def records(frames):
@@ -122,11 +141,12 @@ def main():
              'firmware/verifier.c -o build/native_verifier && ./build/native_verifier < build/verifier_in.bin '
              '> build/verifier_out.bin'])
     steps, C = lg.shape[1], lg.shape[2]
-    got = np.fromfile(ROOT / 'build/verifier_out.bin', '<i4').reshape(len(frames), steps * C + 4)
-    ok_l = (got[:, :-4].reshape(lg.shape) == lg).all()
-    ok_r = (got[:, -4:] == res).all()
+    got = np.fromfile(ROOT / 'build/verifier_out.bin', '<i4').reshape(len(frames), steps * C + 6)
+    ok_l = (got[:, :-6].reshape(lg.shape) == lg).all()
+    ok_r = (got[:, -6:] == res).all()
     print(json.dumps({'windows': len(frames), 'logits_bit_exact': bool(ok_l), 'scores_bit_exact': bool(ok_r),
-                      'score_a_median': float(np.median(res[:, 0]))}))
+                      'score_a_median': float(np.median(res[:, 0])), 'head': 'head_w' in q,
+                      'head_median': float(np.median(res[:, 4]))}))
     if not (ok_l and ok_r):
         raise SystemExit('native C verifier differs from the oracle')
 

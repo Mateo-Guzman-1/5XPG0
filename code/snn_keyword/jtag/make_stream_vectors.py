@@ -6,6 +6,12 @@ frames. For every hop the expected best score, last score, spikes (layer 1 +
 layer 2) and detection (bit0 with the firmware's 100-frame hold-off, bit1 any
 frame over the threshold, frame of the detection) come from the integer oracle.
 net_board_test.py uses the same streams and expectations over TCP.
+
+--cascade VERIFIER T1 T2: vectors for the cascade firmware (firmware -DCASCADE,
+keyword_stream_cascade_engine.bin). The stage-1 fields stay; the detection
+bits (bit0 confirmed detection, bit1 stage 1 reached T1, bit2 the verifier
+ran), the detection frame (last frame of the request) and the verifier scores
+MB[26] and MB[28] come from verifier_cascade.cascade_requests.
 """
 import argparse
 from pathlib import Path
@@ -45,6 +51,18 @@ def expected_hops(x, q, hop):
     return out
 
 
+def cascade_hops(x, q, qv, t1, t2, hop, warmup=5, boundary=10):
+    """expected_hops with the cascade firmware's detection fields and verifier scores."""
+    from verifier_cascade import HOP, cascade_requests
+    if hop != HOP:
+        raise ValueError(f'the cascade decides at the end of {HOP}-frame requests')
+    base = expected_hops(x, q, hop)
+    for h, (bits, sa, sb, hd) in zip(base, cascade_requests(x, q, qv, t1, t2, int(q.get('decision_window', 1)),
+                                                          warmup, boundary)):
+        h.update(detected=bits, at=h['frames'] - 1 if bits & 1 else 0xffffffff, score_a=sa, score_b=sb, head=hd)
+    return base
+
+
 def test_streams(q, data, streams=40):
     """Feature frames (uint8, T x 24) of verify_stream_rtl.py's streams: first yes clips, then others."""
     cfg = SPLITS['test']
@@ -54,11 +72,12 @@ def test_streams(q, data, streams=40):
     return [np.ascontiguousarray(frame_features(audio[i], str(q.get('frontend', 'logmel'))), np.uint8) for i in pick]
 
 
-def hops(x, q, hop):
+def hops(x, q, hop, cascade=None):
     out = []
-    for h in expected_hops(x, q, hop):
+    for h in expected_hops(x, q, hop) if cascade is None else cascade_hops(x, q, *cascade, hop):
         words = ' '.join(f'0x{n:08x}' for n in np.frombuffer(x[h['start']:h['start'] + h['frames']].tobytes(), '<u4'))
-        out.append(f"{{{h['frames']} {h['best']} {h['last']} {h['spikes']} {h['detected']} {h['at']} {{{words}}}}}")
+        extra = f" {h['score_a']} {h['score_b']} {h['head']}" if cascade is not None else ''
+        out.append(f"{{{h['frames']} {h['best']} {h['last']} {h['spikes']} {h['detected']} {h['at']} {{{words}}}{extra}}}")
     return out
 
 
@@ -69,19 +88,26 @@ def main():
     p.add_argument('--streams', type=int, default=40)
     p.add_argument('--hop', type=int, default=25)
     p.add_argument('--out', type=Path, default=ROOT / 'build/stream_board_vectors.tcl')
+    p.add_argument('--cascade', nargs=3, metavar=('VERIFIER', 'T1', 'T2'),
+                   help='vectors for the cascade firmware: verifier checkpoint, stage-1 and verifier thresholds')
     a = p.parse_args()
     q = dict(np.load(a.model))
-    lines = [f'set threshold {int(q["stream_threshold"])}', 'set streams {']
+    cascade = None
+    if a.cascade:
+        from verifier_export import load_quantized
+        cascade = (load_quantized(a.cascade[0]), int(a.cascade[1]), int(a.cascade[2]))
+    threshold = cascade[1] if cascade else int(q['stream_threshold'])
+    lines = [f'set threshold {threshold}', f'set cascade {int(cascade is not None)}', 'set streams {']
     n = 0
     seqs = test_streams(q, a.data, a.streams)
     for x in seqs:
-        h = hops(x, q, a.hop)
+        h = hops(x, q, a.hop, cascade)
         n += len(h)
         lines.append('{\n' + '\n'.join(h) + '\n}')
     lines.append('}')
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_bytes(('\n'.join(lines) + '\n').encode())
-    print(f'{len(seqs)} streams, {n} hops, threshold {int(q["stream_threshold"])} -> {a.out}')
+    print(f'{len(seqs)} streams, {n} hops, threshold {threshold}' + (' (cascade)' if cascade else '') + f' -> {a.out}')
 
 
 if __name__ == '__main__':

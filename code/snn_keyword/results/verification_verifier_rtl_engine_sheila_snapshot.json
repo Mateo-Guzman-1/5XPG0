@@ -1,0 +1,33 @@
+{
+  "checkpoint": "build/sheila_verifier_snapshot.pt",
+  "firmware": "build/keyword_stream_verifier_engine.bin",
+  "records": 12,
+  "bit_exact": true,
+  "cycles": {
+    "max": 10730077,
+    "mean": 10729056.153846154,
+    "min": 10728164
+  },
+  "ms_at_100MHz": 107.30077,
+  "verifier_export": {
+    "model_bytes": 53320,
+    "weights": 48640,
+    "range_checks": {
+      "l1 accumulator": 32301056,
+      "l1 r * gh": 15614976,
+      "l2 accumulator": 39744512,
+      "l2 r * gh": 13702144,
+      "keyword path sum": 2947650
+    }
+  },
+  "sections_bytes": {
+    ".text": 7372,
+    ".data": 0,
+    ".bss": 26920,
+    ".model": 120548
+  },
+  "model_region_used": "120548 of 147456",
+  "code_region_used": "34292 of 65536",
+  "simulation_seconds": 41.4,
+  "harness": "PASS: 12 records, 13 verifier calls bit-exact with the oracle; worst 10730077 cycles per verification, mean 10729056; total cycles=234934632"
+}

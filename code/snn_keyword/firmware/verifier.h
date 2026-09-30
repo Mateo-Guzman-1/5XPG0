@@ -1,6 +1,6 @@
 #ifndef VERIFIER_H
 #define VERIFIER_H
-/* Second-stage "yes" verifier: causal CTC phoneme GRU + keyword score (verifier_model.py).
+/* Second-stage keyword verifier: causal CTC phoneme GRU + keyword score (verifier_model.py).
  * Bit-exact with verifier_model.integer_forward + keyword_score. */
 #include <stdint.h>
 #include "verifier_config.h"
@@ -10,6 +10,9 @@ typedef struct {
     int32_t score_b;     /* policy (b): the same path followed by VERIFIER_BOUNDARY steps without a new phoneme */
     int32_t end_a;       /* step (20 ms) where the best (a) path ends, -1 if none */
     int32_t end_b;
+    int32_t head;        /* VERIFIER_HEAD builds: maximum of the keyword head over steps >= VERIFIER_WARMUP
+                            (verifier_model.head_score); VERIFIER_NEG otherwise */
+    int32_t end_head;    /* its step, -1 if none */
 } verifier_result_t;
 
 /* frames: n x 24 uint8, oldest first, contiguous; word aligned. n is a multiple of VERIFIER_STACK.

@@ -4,16 +4,37 @@ Every step has two sub-batches, both through augment_online.Augmenter
 (mic_ranges 'wide', waveform() then spectral(), logmel frames):
   libri     LibriSpeech train-clean-100 utterances (verifier_data.py), in
             length buckets, whole utterances with their phoneme sequence.
-  keywords  1 s clips of data/multi train (Speech Commands, MSWC, TTS) at a
-            random offset in 1.6 s, target = the word's phonemes. "yes"
-            (and yes-prefixed words: yesterday, yesd, ...) are oversampled.
+  keywords  1 s clips of the keyword's multi-corpus train split
+            (keyword_config.MULTI: Speech Commands, MSWC, TTS) at a random
+            offset in 1.6 s, target = the word's phonemes. The keyword (and
+            words that begin with it: yesterday, sheila's) is oversampled;
+            other spellings of the keyword (keyword_config.ALIASES) are left out.
+            --near-share: a pool of the keyword's near-miss words
+            (keyword_config.NEAR_MISS: she, sheep, shell, ...);
+            --kw-real-only: keyword clips from recorded speech only (the
+            synthetic ones of data/multi_sheila_full are left out).
 Waveforms are zero-padded by 12% before augmentation, because a 0.9 speed
 change stretches them and would cut off the last phonemes.
 The frame-stacking phase is random (the first frame is dropped half the time).
 
+--hard (with --init, fine-tuning a trained verifier): a third sub-batch of
+1.6 s LibriSpeech train-clean-100 windows that end 0-0.5 s after a place where
+stage 1 proposes the keyword (mine_verifier_negatives.py). Their keyword score
+(verifier_model.keyword_score_torch, float, as the cascade computes it) gets a
+hinge loss relu(score + margin_neg); the keyword clips of the keyword
+sub-batch get relu(-margin_pos - score). Both work on the decision itself
+instead of on phoneme labels, which these windows do not have.
+
+--head-weight (> 0): the verifier gets a keyword head (verifier_model.Verifier
+head=True; a new head on an --init checkpoint). Binary cross-entropy on the
+maximum of the head over steps >= 5: keyword clips 1, the other clips of the
+keyword sub-batch and the --hard windows 0.
+
 Validation (every epoch): CTC loss on LibriSpeech dev-clean utterances, and the
 float keyword score (verifier_model.keyword_score_torch) on validation keyword
-clips placed in noise: AUC of "yes" against the other words.
+clips placed in noise: AUC of the keyword against the other words and
+against the near-miss words, and the share of keyword clips above the 99th
+percentile of the other words.
 """
 import os
 os.environ.setdefault('OPENBLAS_NUM_THREADS', '4')   # OpenBLAS buffers per thread count as private memory
@@ -30,9 +51,10 @@ from torch.nn import functional as F
 
 import sys
 
+import keyword_config as K
 import memguard
 from augment_online import Augmenter
-from verifier_data import SYMBOLS, encode, text_phones
+from verifier_data import KEYWORD, SYMBOLS, encode, targets_file, text_phones
 from verifier_model import Verifier, keyword_score_torch, n_params
 
 ROOT = Path(__file__).resolve().parent
@@ -65,18 +87,25 @@ class LibriBatches:
 
 
 class KeywordBatches:
-    def __init__(self, split, rng, yes_share=.25, prefixed_share=.05):
-        t = np.load(DV / f'keyword_targets_{split}.npz')
-        self.clips = np.load(ROOT / f'data/multi/clips_{split}.npy', mmap_mode='r')
+    def __init__(self, split, rng, kw_share=.25, prefixed_share=.05, near_share=0., kw_real_only=False):
+        t = np.load(targets_file(split))
+        self.clips = np.load(K.MULTI / f'clips_{split}.npy', mmap_mode='r')
         keep = t['keep']
         self.row, self.word, self.corpus = t['row'][keep], t['word'][keep], t['corpus'][keep]
         off, ph = t['phone_off'], t['phones']      # read each npz member once
         self.tg = [ph[off[i]:off[i + 1]] for i in np.flatnonzero(keep)]
         w = np.char.lower(self.word.astype(str))
-        self.pools = {'yes': np.flatnonzero(w == 'yes'),
-                      'prefixed': np.flatnonzero(np.char.startswith(w, 'yes') & (w != 'yes')),
-                      'other': np.flatnonzero(~np.char.startswith(w, 'yes'))}
-        self.share = {'yes': yes_share, 'prefixed': prefixed_share, 'other': 1 - yes_share - prefixed_share}
+        kw = w == K.KEYWORD
+        pre = np.char.startswith(w, K.KEYWORD) & ~kw          # keyword_config.prefixed
+        alias = np.isin(w, list(K.ALIASES))
+        near = np.isin(w, list(K.NEAR_MISS[K.KEYWORD])) & ~kw & ~pre & ~alias
+        synthetic_kw = kw & (self.corpus == 'tts') if kw_real_only else np.zeros_like(kw)
+        self.pools = {'kw': np.flatnonzero(kw & ~synthetic_kw), 'prefixed': np.flatnonzero(pre),
+                      'near': np.flatnonzero(near),
+                      'other': np.flatnonzero(~kw & ~pre & ~alias & ~near)}
+        share = {k: v for k, v in (('kw', kw_share), ('prefixed', prefixed_share), ('near', near_share))
+                 if v > 0 and len(self.pools[k])}
+        self.share = dict(share, other=1 - sum(share.values()))    # an empty pool's share goes to "other"
         self.rng = rng
 
     def draw(self, n):
@@ -97,14 +126,33 @@ class KeywordBatches:
         return w, [self.tg[i] for i in ids]
 
 
+class HardWindows:
+    """1.6 s LibriSpeech windows ending 0-0.5 s after a mined stage-1 proposal (mine_verifier_negatives.py)."""
+    def __init__(self, path, rng, seconds=1.6, delay=(0., .5)):
+        h = np.load(path)
+        self.offset = h['offset']
+        self.audio = np.load(DV / 'libri100_audio.npy', mmap_mode='r')
+        self.n, self.delay, self.rng = int(seconds * SR), delay, rng
+
+    def waves(self, count, rng=None):
+        rng = rng or self.rng
+        pick = self.offset[rng.integers(0, len(self.offset), count)]
+        end = np.clip(pick + (rng.uniform(*self.delay, count) * SR).astype(np.int64), self.n, len(self.audio))
+        order = np.argsort(end)                     # memmap reads in file order
+        w = np.empty((count, self.n), np.float32)
+        for j in order:
+            w[j] = self.audio[end[j] - self.n:end[j]] / 32768
+        return w
+
+
 def pad_targets(tg, dev):
     lens = torch.tensor([len(t) for t in tg], device=dev)
     flat = torch.tensor(np.concatenate(tg).astype(np.int64), device=dev)
     return flat, lens
 
 
-def ctc(model, x, tg, dev):
-    logits = model(x)
+def ctc(model, x, tg, dev, logits=None):
+    logits = model(x) if logits is None else logits
     lp = F.log_softmax(logits.float(), -1).transpose(0, 1)
     flat, lens = pad_targets(tg, dev)
     il = torch.full((x.shape[0],), lp.shape[0], dtype=torch.long, device=dev)
@@ -149,8 +197,14 @@ def auc(pos, neg):
     return float((r[:len(pos)].sum() - len(pos) * (len(pos) + 1) / 2) / (len(pos) * len(neg)))
 
 
+def tpr_at(pos, neg, fpr=.01):
+    """Share of positives accepted by the loosest threshold (score >= t) that accepts <= fpr of neg."""
+    k = int(np.floor(fpr * len(neg)))
+    return float((pos > np.sort(neg)[::-1][k]).mean()) if k < len(neg) else 1.
+
+
 @torch.no_grad()
-def validate(model, aug, dev, libri_val, kw_val, kw_ids, noise):
+def validate(model, aug, dev, libri_val, kw_val, kw_ids, noise, hard_val=None):
     model.eval()
     losses = []
     for i in range(0, len(libri_val), 16):
@@ -165,18 +219,37 @@ def validate(model, aug, dev, libri_val, kw_val, kw_ids, noise):
     w, _ = kw_val.waves(kw_ids, rng=rng)
     n0 = rng.integers(0, len(noise) - w.shape[1], len(w))
     w = w + np.stack([noise[k:k + w.shape[1]] for k in n0]) * rng.uniform(.02, .1, (len(w), 1)).astype(np.float32)
-    scores = []
+    scores, heads = [], []
+    with_head = model.head is not None
     for i in range(0, len(w), 512):
         x = features(aug, w[i:i + 512], dev, pad=0, train=False)
-        scores.append(keyword_score_torch(model(x).double(), warmup=5).cpu().numpy())   # as the cascade
+        out = model(x, with_head=True) if with_head else (model(x), None)
+        scores.append(keyword_score_torch(out[0].double().cpu(), warmup=5).numpy())   # as the cascade
+        if with_head:
+            heads.append(out[1][:, 5:].max(1)[0].float().cpu().numpy())
     s = np.concatenate(scores)
-    word = np.char.lower(kw_val.word[kw_ids].astype(str))
-    yes = word == 'yes'
-    other = ~np.char.startswith(word, 'yes')
+    extra = {}
+    if with_head:
+        hs = np.concatenate(heads)
+        pos_, other_, near_ = (np.isin(kw_ids, kw_val.pools[k]) for k in ('kw', 'other', 'near'))
+        extra = {'head_auc': round(auc(hs[pos_], hs[other_]), 5),
+                 'head_auc_near': round(auc(hs[pos_], hs[near_]), 5) if near_.any() else None,
+                 'head_tpr_at_1pct': round(tpr_at(hs[pos_], hs[other_]), 4)}
+        if hard_val is not None:   # training-split hard windows: share above the keyword clips' 10th percentile
+            hv = []
+            for i in range(0, len(hard_val), 512):
+                x = features(aug, hard_val[i:i + 512], dev, pad=0, train=False)
+                hv.append(model(x, with_head=True)[1][:, 5:].max(1)[0].float().cpu().numpy())
+            extra['head_hard_above_p10'] = round(float((np.concatenate(hv) >= np.percentile(hs[pos_], 10)).mean()), 4)
+    pos = np.isin(kw_ids, kw_val.pools['kw'])
+    other = np.isin(kw_ids, kw_val.pools['other'])
+    near = np.isin(kw_ids, kw_val.pools['near'])
     model.train()
-    return {'val_ctc': round(float(np.mean(losses)), 4), 'kw_auc': round(auc(s[yes], s[other]), 5),
-            'kw_yes_median': float(np.median(s[yes])),
-            'kw_other_p99': float(np.percentile(s[other], 99))}
+    return {'val_ctc': round(float(np.mean(losses)), 4), 'kw_auc': round(auc(s[pos], s[other]), 5),
+            'kw_auc_near': round(auc(s[pos], s[near]), 5) if near.any() else None,
+            'kw_tpr_at_1pct': round(tpr_at(s[pos], s[other]), 4),
+            'kw_pos_median': float(np.median(s[pos])),
+            'kw_other_p99': float(np.percentile(s[other], 99)), **extra}
 
 
 def main():
@@ -188,6 +261,9 @@ def main():
     p.add_argument('--libri-seconds', type=float, default=180., help='audio per LibriSpeech sub-batch')
     p.add_argument('--kw-batch', type=int, default=128)
     p.add_argument('--kw-weight', type=float, default=1.)
+    p.add_argument('--kw-share', type=float, default=.25, help='share of keyword clips in a keyword sub-batch')
+    p.add_argument('--near-share', type=float, default=0., help='share of near-miss words (keyword_config.NEAR_MISS)')
+    p.add_argument('--kw-real-only', action='store_true', help='no synthetic keyword clips')
     p.add_argument('--lr', type=float, default=3e-3)
     p.add_argument('--seed', type=int, default=0)
     p.add_argument('--clean-steps', type=int, default=0,
@@ -197,6 +273,15 @@ def main():
     p.add_argument('--gpu-fraction', type=float, default=.28, help='cap on the GPU memory share (~2.3 GB)')
     p.add_argument('--frontend', choices=['logmel', 'logmel_w'], default='logmel',
                    help='logmel_w: -120..-20 dB (main JOURNAL entry 20); the floor of logmel erases quiet /s/')
+    p.add_argument('--max-instances', type=int, default=1, help='train_verifier.py jobs allowed at once')
+    p.add_argument('--init', type=Path, help='start from this verifier checkpoint (keeps its input normalisation)')
+    p.add_argument('--hard', type=Path, help='mined stage-1 proposals (data_verifier/hard_<keyword>.npz)')
+    p.add_argument('--hard-batch', type=int, default=64)
+    p.add_argument('--hard-weight', type=float, default=1.)
+    p.add_argument('--pos-weight', type=float, default=1.)
+    p.add_argument('--margin-neg', type=float, default=2., help='hinge: hard windows should score below -margin (logits)')
+    p.add_argument('--margin-pos', type=float, default=.5, help='hinge: keyword clips should score above -margin')
+    p.add_argument('--head-weight', type=float, default=0., help='> 0: train a keyword head (binary cross-entropy)')
     p.add_argument('--name', default='v1')
     p.add_argument('--out', type=Path, default=ROOT / 'runs_verifier')
     a = p.parse_args()
@@ -207,8 +292,8 @@ def main():
         print('data_verifier/STOP_TRAINING exists; not starting', flush=True)
         sys.exit(0)
     others = memguard.other_instances('train_verifier.py')
-    if others:
-        print('another train_verifier.py is running', others, '; not starting', flush=True)
+    if memguard.count_instances(others) >= a.max_instances:
+        print('train_verifier.py already running', others, '; not starting', flush=True)
         sys.exit(0)
     ok, free = memguard.free_ok()
     print('free at start', free, flush=True)
@@ -225,10 +310,12 @@ def main():
     torch.manual_seed(a.seed)
     rng = np.random.default_rng(a.seed)
     libri = LibriBatches(rng)
-    kw = KeywordBatches('train', rng)
-    kw_val = KeywordBatches('validation', np.random.default_rng(5))
+    kw = KeywordBatches('train', rng, a.kw_share, near_share=a.near_share, kw_real_only=a.kw_real_only)
+    kw_val = KeywordBatches('validation', np.random.default_rng(5), kw_real_only=a.kw_real_only)
     vrng = np.random.default_rng(3)
-    kw_ids = np.r_[kw_val.pools['yes'], vrng.choice(kw_val.pools['other'], 4000, replace=False)]
+    kw_ids = np.r_[kw_val.pools['kw'], vrng.choice(kw_val.pools['other'], 4000, replace=False), kw_val.pools['near']]
+    print('keyword', K.KEYWORD, [SYMBOLS[k] for k in KEYWORD], 'multi', K.MULTI.name,
+          {k: len(v) for k, v in kw.pools.items()}, 'shares', kw.share, flush=True)
     noise = np.load(ROOT / 'data/multi/noise_train.npy', mmap_mode='r')
     val_noise = np.asarray(noise[:SR * 600]).astype(np.float32) / 32768
     aug = Augmenter(dev, None, seed=a.seed, mic_ranges='wide')
@@ -237,20 +324,31 @@ def main():
     aug.noise = torch.cat([torch.tensor(np.asarray(noise[i:i + 2 ** 24]), device=dev).half() / 32768
                            for i in range(0, len(noise) // 2, 2 ** 24)])
     libri_val = dev_clean()
-    model = Verifier(a.h1, a.h2).to(dev)
+    hard = HardWindows(a.hard, rng) if a.hard else None
+    hard_val = hard.waves(512, np.random.default_rng(9)) if hard is not None else None   # fixed diagnostic sample
+    if a.init:
+        ck0 = torch.load(a.init, map_location='cpu', weights_only=False)
+        K.check_model_keyword(ck0.get('keyword'), str(a.init))
+        cfg = dict(ck0['config'], head=ck0['config'].get('head', False) or a.head_weight > 0)
+        model = Verifier(**cfg).to(dev)
+        missing = model.load_state_dict(ck0['state_dict'], strict=False).missing_keys
+        print('initialised from', a.init, 'epoch', ck0.get('epoch'), 'new:', missing, flush=True)
+    else:
+        model = Verifier(a.h1, a.h2, head=a.head_weight > 0).to(dev)
     with torch.no_grad():   # input statistics of augmented training features, per band
         xs = []
-        for _ in range(8):
+        for _ in range(0 if a.init else 8):
             wl, _ = libri.batch(a.libri_seconds)
             xs.append(model.stack_frames(features(aug, wl, dev)).reshape(-1, model.mu.numel()))
             wk, _ = kw.waves(kw.draw(a.kw_batch))
             xs.append(model.stack_frames(features(aug, wk, dev)).reshape(-1, model.mu.numel()))
-        xs = torch.cat(xs)
-        band_mu = xs.reshape(len(xs), -1, 24).mean((0, 1)).repeat(model.stack)
-        band_sd = xs.reshape(len(xs), -1, 24).std((0, 1)).clamp_min(1.).repeat(model.stack)
-        model.mu.copy_(band_mu); model.sd.copy_(band_sd)
-        print('input mu', [round(v, 1) for v in band_mu[:24].tolist()], 'sd', [round(v, 1) for v in band_sd[:24].tolist()],
-              flush=True)
+        if xs:
+            xs = torch.cat(xs)
+            band_mu = xs.reshape(len(xs), -1, 24).mean((0, 1)).repeat(model.stack)
+            band_sd = xs.reshape(len(xs), -1, 24).std((0, 1)).clamp_min(1.).repeat(model.stack)
+            model.mu.copy_(band_mu); model.sd.copy_(band_sd)
+            print('input mu', [round(v, 1) for v in band_mu[:24].tolist()],
+                  'sd', [round(v, 1) for v in band_sd[:24].tolist()], flush=True)
         del xs
     print('parameters', n_params(model), flush=True)
     opt = torch.optim.AdamW(model.parameters(), lr=a.lr, weight_decay=1e-4)
@@ -260,7 +358,7 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     history, best, t0, gstep = [], -1., time.perf_counter(), 0
     for epoch in range(a.epochs):
-        sums = {'libri': 0., 'kw': 0.}
+        sums = {'libri': 0., 'kw': 0., 'hard': 0., 'pos': 0., 'head': 0.}
         for step in range(a.steps_per_epoch):
             if step % 50 == 0:
                 memguard.check(f'epoch {epoch + 1} step {step}')
@@ -272,11 +370,38 @@ def main():
             with torch.no_grad():
                 wl, tl = libri.batch(a.libri_seconds, a.warm_seconds if warm else None)
                 xl = phase(features(aug, wl, dev, train=not warm), rng)
-                wk, tk = kw.waves(kw.draw(a.kw_batch))
+                ids = kw.draw(a.kw_batch)
+                wk, tk = kw.waves(ids)
                 xk = phase(features(aug, wk, dev, train=not warm), rng)
+                if hard is not None:
+                    xh = phase(features(aug, hard.waves(a.hard_batch), dev, train=not warm), rng)
             ll = ctc(model, xl, tl, dev)
-            lk = ctc(model, xk, tk, dev)
+            if a.head_weight > 0:
+                logits_k, head_k = model(xk, with_head=True)
+            else:
+                logits_k = model(xk)
+            lk = ctc(model, xk, tk, dev, logits_k)
             loss = ll + a.kw_weight * lk
+            if hard is not None:
+                logits_h, head_h = model(xh, with_head=True) if a.head_weight > 0 else (model(xh), None)
+            if a.head_weight > 0:
+                ys = np.isin(ids, kw.pools['kw']).astype(np.float32)
+                hs = head_k[:, 5:].max(1)[0]
+                if hard is not None:
+                    hs = torch.cat([hs, head_h[:, 5:].max(1)[0]])
+                    ys = np.r_[ys, np.zeros(len(head_h), np.float32)]
+                lhead = F.binary_cross_entropy_with_logits(hs.float(), torch.tensor(ys, device=dev))
+                loss = loss + a.head_weight * lhead
+                sums['head'] += lhead.item()
+            if hard is not None and (a.hard_weight > 0 or a.pos_weight > 0):
+                # The path DP is many tiny operations: faster on the CPU (autograd moves the gradient back).
+                sh = keyword_score_torch(logits_h.float().cpu(), warmup=5)
+                lh = F.relu(sh + a.margin_neg).mean()
+                pos = torch.tensor(np.isin(ids, kw.pools['kw']), device=dev)
+                sp = keyword_score_torch(logits_k[pos].float().cpu(), warmup=5)
+                lp = F.relu(-a.margin_pos - sp).mean() if len(sp) else torch.zeros(())
+                loss = loss + a.hard_weight * lh + a.pos_weight * lp
+                sums['hard'] += lh.item(); sums['pos'] += lp.item()
             opt.zero_grad(set_to_none=True)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.)
@@ -284,7 +409,7 @@ def main():
             sums['libri'] += ll.item(); sums['kw'] += lk.item()
         torch.cuda.empty_cache()
         r = {k: round(v / a.steps_per_epoch, 4) for k, v in sums.items()}
-        r.update(validate(model, aug, dev, libri_val, kw_val, kw_ids, val_noise))
+        r.update(validate(model, aug, dev, libri_val, kw_val, kw_ids, val_noise, hard_val))
         torch.cuda.empty_cache()
         r.update(epoch=epoch + 1, minutes=round((time.perf_counter() - t0) / 60, 1),
                  gpu_mb=round(torch.cuda.max_memory_allocated() / 2 ** 20),
@@ -292,7 +417,8 @@ def main():
         history.append(r)
         print(json.dumps(r), flush=True)
         ck = {'state_dict': copy.deepcopy(model.state_dict()), 'config': model.cfg, 'args': vars(a), 'epoch': epoch + 1,
-              'frontend': FRONTEND, 'symbols': SYMBOLS}
+              'frontend': FRONTEND, 'symbols': SYMBOLS, 'keyword': K.KEYWORD, 'keyword_phones': list(KEYWORD),
+              'multi': K.MULTI.name}
         torch.save(ck, out / 'last.pt')
         if r['kw_auc'] > best:
             best = r['kw_auc']

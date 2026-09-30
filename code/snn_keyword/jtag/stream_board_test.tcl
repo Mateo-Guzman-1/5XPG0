@@ -5,7 +5,10 @@
 # Per stream: reset (command 5), then one command 4 per hop. Checks best/last
 # scores, spikes, detection bits and detection frame against the integer oracle,
 # the frame counter, a malformed request, and the LED0 pulse length (polling
-# syscon over JTAG).
+# syscon over JTAG). Cascade vectors (make_stream_vectors.py --cascade, with
+# keyword_stream_cascade_engine.bin) also check the verifier scores MB[26], MB[28];
+# their detection bits are the cascade's (bit0 confirmed, bit1 stage 1 proposed,
+# bit2 the verifier ran).
 set root [file normalize [file join [file dirname [info script]] ..]]
 set vectors [expr {[llength $argv] > 0 ? [lindex $argv 0] : "$root/build/stream_board_vectors.tcl"}]
 set csv [expr {[llength $argv] > 1 ? [lindex $argv 1] : "$root/build/stream_board_jtag.csv"}]
@@ -32,8 +35,10 @@ proc command {opcode length} {
     }
     return [rd [mb 6]]
 }
+set cascade 0
 source $vectors
 if {[rd [mb 12]] != 0x4b575333} {error "Streaming firmware (KWS3) not running"}
+if {$cascade != ([rd [mb 31]] == 1)} {error "Vectors (cascade $cascade) do not match the firmware (MB\[31\] [rd [mb 31]])"}
 if {[rd [mb 13]] != $threshold} {error "Firmware threshold [rd [mb 13]] != model $threshold"}
 set fb [rd [mb 14]]
 if {[command 4 [expr {$fb-1}]] != 1} {error "Partial frame accepted"}
@@ -49,12 +54,16 @@ foreach stream $streams {
     set frames 0
     set hop 0
     foreach h $stream {
-        lassign $h k best last spikes detected at words
+        lassign $h k best last spikes detected at words score_a score_b head
         mwr -force 0x40010800 $words
         if {[command 4 [expr {$k*$fb}]] != 0} {error "Stream request failed"}
         incr frames $k
         set got [list [signed [rd [mb 7]]] [signed [rd [mb 8]]] [rd [mb 10]] [rd [mb 11]] [rd [mb 17]] [rd [mb 18]]]
         set want [list $best $last $spikes $detected $at $frames]
+        if {$cascade} {
+            lappend got [signed [rd [mb 26]]] [signed [rd [mb 28]]] [signed [rd [mb 32]]]
+            lappend want $score_a $score_b $head
+        }
         if {$got ne $want} {error "Mismatch record $record hop $hop: got $got expected $want"}
         set cycles [rd [mb 9]]
         puts $out "$record,$hop,$k,$best,$last,$spikes,[rd [mb 16]],$cycles,$detected"

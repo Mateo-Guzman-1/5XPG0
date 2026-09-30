@@ -1,7 +1,7 @@
 """Verifier track: cycles of the phoneme verifier on the PicoRV32 SoC RTL (Verilator), bit-exact.
 
-Builds the stage-1 headers (export_model.export_stream, the W=20 model of the
-main worktree, read only), the verifier headers (verifier_export.export), the
+Builds the stage-1 headers (export_model.export_stream, the keyword's stage-1
+model of the main worktree, read only: "yes" W=20, "sheila" the QAT candidate), the verifier headers (verifier_export.export), the
 firmware with -DUSE_VERIFIER (kdot + neuron engine, and pure RV32IM with
 --rv32im), and sim/soc_verifier.cpp against rtl/spike_soc.v. Records are
 validation windows: each record is streamed through stage 1 in 250 ms
@@ -11,6 +11,14 @@ Cycles of the verifier do not depend on the weights' values (no data-dependent
 branches except LUT clamping), so a randomly initialised model measures the
 same cycles as a trained one.
 Writes results/rtl_verifier_<tag>.csv and results/verification_verifier_rtl_<tag>.json.
+
+--cascade T1 T2: the cascade firmware (firmware -DCASCADE, sim/soc_cascade.cpp).
+Records are validation live clips (keyword and other words) and 30 s pieces
+of the validation negatives stream around stage-1 proposals (--frames: the
+verifier_cascade.py cache); every request is compared with
+verifier_cascade.cascade_requests (detection bits, verifier scores), and a
+detection must light the LED. Writes results/rtl_cascade_<tag>.csv and
+results/verification_cascade_rtl_<tag>.json.
 """
 import argparse
 import json
@@ -20,13 +28,15 @@ from pathlib import Path
 
 import numpy as np
 
+import keyword_config as K
 from export_model import export_stream
 from verifier_export import export, load_quantized, oracle, records
 from verify import command
 
 ROOT = Path(__file__).resolve().parent
 RTL = ROOT.parent / 'pynqz2_riscv_flow' / 'rtl'
-STAGE1_W20 = Path(r'C:\Users\matut\FULL_AI\5XPG0\code\snn_keyword\runs_stream\s2_nokd_qat\int_last_w20.npz')
+STAGE1_W20 = Path(r'C:\Users\matut\FULL_AI\5XPG0\code\snn_keyword\runs_stream') / \
+    {'yes': 's2_nokd_qat/int_last_w20.npz', 'sheila': 'sheila_qat_seed2/int_model.npz'}[K.KEYWORD]
 
 
 def section_sizes(mapfile):
@@ -48,7 +58,12 @@ def main():
     p.add_argument('--tag', default='')
     p.add_argument('--warmup', type=int, default=5)
     p.add_argument('--boundary', type=int, default=10)
+    p.add_argument('--cascade', type=int, nargs=2, metavar=('T1', 'T2'),
+                   help='cascade firmware: stage-1 threshold T1 and verifier threshold T2 (needs --frames)')
+    p.add_argument('--neg-records', type=int, default=8, help='--cascade: 30 s pieces of the negatives stream')
     a = p.parse_args()
+    if a.cascade:
+        return cascade_main(a)
     tag = ('rv32im' if a.rv32im else 'engine') + (f'_{a.tag}' if a.tag else '')
     q = load_quantized(a.checkpoint)
     info = export(q, ROOT / 'build/verifier', warmup=a.warmup, boundary=a.boundary)
@@ -73,7 +88,7 @@ def main():
     lg, res = oracle(wins, q, a.warmup, a.boundary)
     flat = lg.reshape(len(wins), -1)
     hashes = (flat.astype(np.int64) * np.arange(1, flat.shape[1] + 1)).sum(1) & 0xffffffff
-    exp = np.c_[res, hashes.astype(np.uint32).view(np.int32)].astype('<i4')
+    exp = np.c_[res[:, :4], hashes.astype(np.uint32).view(np.int32)].astype('<i4')
     (ROOT / 'build/verifier_rtl_in.bin').write_bytes(records(seqs))
     exp.tofile(ROOT / 'build/verifier_rtl_expected.bin')
     t0 = time.perf_counter()
@@ -92,6 +107,74 @@ def main():
                'simulation_seconds': round(time.perf_counter() - t0, 1), 'harness': r.stdout.strip()}
     (ROOT / f'results/verification_verifier_rtl_{tag}.json').write_text(json.dumps(summary, indent=2))
     print(json.dumps({k: v for k, v in summary.items() if k != 'harness'}, indent=2))
+
+
+def cascade_main(a):
+    from verifier_cascade import cascade_requests
+    from verifier_model import NEG
+    t1, t2 = a.cascade
+    tag = 'engine' + (f'_{a.tag}' if a.tag else '')
+    qv = load_quantized(a.checkpoint)
+    q1 = dict(np.load(a.stage1))
+    window = int(q1.get('decision_window', 1))
+    info = export(qv, ROOT / 'build/verifier', warmup=a.warmup, boundary=a.boundary, thresholds=(t2, NEG), cascade_t1=t1)
+    export_stream(a.stage1, ROOT / 'build/stream')
+    command(['make', '-C', 'firmware', 'cascade'])
+    fw = 'build/keyword_stream_cascade_engine'
+    command(['bash', '-lc', ' '.join([
+        'verilator --cc --exe --build -j 8 -Wno-fatal --top-module spike_soc', '--Mdir build/obj_cascade',
+        "-CFLAGS '-O3'", '../pynqz2_riscv_flow/rtl/spike_soc.v', '../pynqz2_riscv_flow/rtl/picorv32.v',
+        '../pynqz2_riscv_flow/rtl/poisson.v', '../pynqz2_riscv_flow/rtl/kdot_pcpi.v',
+        '../pynqz2_riscv_flow/rtl/neuron_engine.v', '"$PWD/sim/soc_cascade.cpp"'])])
+    if not a.frames:
+        raise SystemExit('--cascade needs --frames (the verifier_cascade.py cache)')
+    c = np.load(a.frames)
+    rng = np.random.default_rng(0)
+    off, y = c['live_off'], c['live_y']
+    pick = np.r_[rng.choice(np.flatnonzero(y == 1), a.records // 2, replace=False),
+                 rng.choice(np.flatnonzero(y == 0), a.records - a.records // 2, replace=False)]
+    seqs = [c['live_frames'][off[i]:off[i + 1]] for i in pick]
+    kinds = ['keyword' if y[i] else 'other word' for i in pick]
+    # Negatives: 30 s pieces that start 10 s before a stage-1 proposal (d >= t1) of the cached stream.
+    noff, nraw, nfr = c['neg_off'], c['neg_raw'], c['neg_frames']
+    from model import decision_scores
+    starts = []
+    for i in range(len(noff) - 1):
+        d = decision_scores(nraw[noff[i]:noff[i + 1]].astype(np.int64), window)
+        hits = np.flatnonzero(d >= t1)
+        if len(hits):
+            starts.append((i, max(0, int(hits[len(hits) // 2]) - 1000)))
+    for i, st in [starts[j] for j in rng.choice(len(starts), min(a.neg_records, len(starts)), replace=False)]:
+        seqs.append(nfr[noff[i] + st:min(noff[i + 1], noff[i] + st + 3000)])
+        kinds.append('negatives stream')
+    exp, per = [], []
+    for sq in seqs:
+        r = cascade_requests(sq, q1, qv, t1, t2, window, a.warmup, a.boundary)
+        per.append(r)
+        exp += [w for req in r for w in req]      # detected, score_a, score_b, head per request
+    (ROOT / 'build/cascade_rtl_in.bin').write_bytes(records(seqs))
+    np.array(exp, '<i4').tofile(ROOT / 'build/cascade_rtl_expected.bin')
+    t0 = time.perf_counter()
+    r = command([f'./build/obj_cascade/Vspike_soc', fw + '.bin', 'build/cascade_rtl_in.bin',
+                 'build/cascade_rtl_expected.bin', f'results/rtl_cascade_{tag}.csv', 25], capture_output=True, text=True)
+    print(r.stdout.strip())
+    rows = np.genfromtxt(ROOT / f'results/rtl_cascade_{tag}.csv', delimiter=',', names=True, dtype=None, encoding=None)
+    cyc = rows['cycles'].astype(np.int64)
+    ran = (rows['detected'].astype(np.int64) & 4) > 0
+    sizes = section_sizes(ROOT / (fw + '.map'))
+    summary = {'checkpoint': a.checkpoint.as_posix(), 'stage1': a.stage1.as_posix(), 'firmware': fw + '.bin',
+               't1': t1, 't2': t2, 'window': window, 'decision': 'head' if 'head_w' in qv else 'path',
+               'records': {k: kinds.count(k) for k in dict.fromkeys(kinds)}, 'requests': len(rows),
+               'bit_exact': 'PASS' in r.stdout, 'verifier_runs': int(ran.sum()),
+               'detections': int(((rows['detected'].astype(np.int64) & 1) > 0).sum()),
+               'detections_by_kind': {k: sum(any(req[0] & 1 for req in p) for p, kk in zip(per, kinds) if kk == k)
+                                      for k in dict.fromkeys(kinds)},
+               'cycles_request_max': int(cyc.max()), 'cycles_with_verifier_max': int(cyc[ran].max()) if ran.any() else None,
+               'ms_at_100MHz_max': float(cyc.max()) / 1e5, 'verifier_export': info,
+               'sections_bytes': sizes, 'model_region_used': f"{sizes['.model']} of {144 * 1024}",
+               'simulation_seconds': round(time.perf_counter() - t0, 1), 'harness': r.stdout.strip()}
+    (ROOT / f'results/verification_cascade_rtl_{tag}.json').write_text(json.dumps(summary, indent=2))
+    print(json.dumps({k: v for k, v in summary.items() if k not in ('harness', 'verifier_export')}, indent=2))
 
 
 if __name__ == '__main__':
