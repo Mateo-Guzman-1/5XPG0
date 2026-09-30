@@ -14,6 +14,14 @@ The "synthesized words" are offline Windows voices (David, Zira; 24 words × 4
 rates × 3 pitches; `make_tts_probe.ps1`). They were never used for training.
 With only two voices, they indicate trends, not accuracy.
 
+**Which keyword.** Entries 1-21 are about **"yes"**: the first release
+(`deploy/`), the streaming SNN of phases 0-7 and the iteration loop that
+followed. From entry 22 the keyword is **"sheila"**, detected against everything
+else (entry 22 explains the change; since 2026-09-30 it is also the default of
+`keyword_config.py`). Numbers of the two keywords are never mixed in one table
+without saying so. In result files, `yes`, `yes_class` and `yes_detected` mean
+the keyword.
+
 ---
 
 ## 2026-09-24
@@ -825,8 +833,8 @@ construction, with a causal gain control relative to a running peak
 (`logmel_agc`).
 
 **Keyword changed to "sheila"** (user request).
-- `keyword_config.py` (env `KWS_KEYWORD`, default "yes") drives data
-  selection, training, evaluation, vectors and TTS.
+- `keyword_config.py` (env `KWS_KEYWORD`, default "yes" at the time; "sheila"
+  since 2026-09-30) drives data selection, training, evaluation, vectors and TTS.
   - Models record their keyword, and the detectors refuse a mismatch.
   - "yes" reproduces exactly: the derived labels equal `features.npz`'s y.
 - Speech Commands v2 has 2,022 "sheila" clips (1,606 / 204 / 212); the
@@ -1080,18 +1088,23 @@ The bitstream is `build/keyword_engine_pipe.bit`. It has not been on a board.
 ## Open items
 
 Status of `IMPLEMENTATION_PLAN.md`: Phases 0-6 done; the streaming firmware and
-engine are verified on the board (entry 18); Phase 7 evaluated, candidate not
-promoted (entry 17). The iteration loop from entry 19 is running; the keyword
-is now "sheila" (entry 22).
+engine are verified on the board over JTAG with the earlier "yes" model (entry 18);
+Phase 7 was evaluated for "yes" and not promoted (entry 17). The keyword is now
+"sheila" against everything else (entry 22); its stage-1 candidate
+`runs_stream/sheila_qat_seed2/int_model.npz` (`results/models/sheila_stream_int8.npz`)
+is RTL bit-exact and has had its one test run (entry 27).
 
-1. Rebuild `keyword_engine.bit` with the `ps_if.v` ABI fix (`0x00020003`).
-2. The SD card now boots PYNQ Linux: test the standard Ethernet path
-   (`board_server.py`), loading the overlay through PYNQ.
-3. Recall of the streaming SNN (57.8% live on test against 67.3% for the
-   release): longer training, a larger or 64-neuron variant, and a looser
-   false-accept budget are the next levers (entries 14, 17).
-4. Microphone robustness (drop 17-20 points for every model): apply the
-   training microphones in the time domain, or add real device recordings
-   from public corpora; PCEN alone did not help on validation.
-5. Leave-one-source-out for the new route: train without MSWC, test on it.
-6. Recordings of the actual user and microphone, for evaluation only.
+1. **Board test of the "sheila" candidate**, with the engine bitstream (built with
+   the `ps_if.v` ABI fix `0x00020003`, entry 19) and `keyword_stream_engine.bin`:
+   over JTAG (`jtag/stream_board_test.tcl`) or the Ethernet path
+   (`net_board_test.py`). Needs a board and the team's go-ahead.
+2. **Native C on the full test set** for the "sheila" model (`verify_stream.py`).
+3. **"sheila" recall.** Test: 63.7% live, 70.7% on complete recordings, at 1.58 FA/h;
+   the target is 85% (IMPLEMENTATION_PLAN.md). Speech Commands has only 1,606
+   training positives. Compare changes over several seeds (SD 3.6 points, entry
+   26). A second stage, a phoneme verifier with a keyword head, is developed on
+   branch `explore-verifier` (entries 28-35).
+4. **Engine timing margin.** The rebuilt bitstream met 100 MHz only with
+   Performance_ExplorePostRoutePhysOpt (WNS +0.348 ns, entry 19); the accumulator
+   read-modify-write is pipelined on branch `engine-timing` (entry 31).
+5. Recordings of the actual user and microphone, for evaluation only.

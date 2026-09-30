@@ -71,7 +71,7 @@ class ClipSampler:
                 torch.tensor(np.concatenate(sil), device=self.device))
 
     def yes_batch(self, n):
-        """n "yes" clips, corpora in the batch mix's proportions (unshifted waveforms, numpy)."""
+        """n keyword clips, corpora in the batch mix's proportions (unshifted waveforms, numpy)."""
         yes_cls = CLASSES.index(K.KEYWORD)
         # A corpus supplies positives only with >= 100 keyword clips: MSWC has 8 "sheila" clips,
         # which would otherwise be 18% of all positives, endlessly repeated.

@@ -3,9 +3,9 @@
 Exports the integer model to C headers (export_model.export_stream), builds
 sim/native_stream.c with firmware/stream_infer.c (gcc in WSL on Windows, as
 verify.py), and runs both on the same frame sequences:
-  - every clean live test clip of robust_eval.py (Speech Commands test "yes"
+  - every clean live test clip of robust_eval.py (Speech Commands test keyword
     and 3000 other words in noise, 2.25 s each);
-  - the one-hour test stream (Speech Commands words, LibriSpeech, "yes").
+  - the one-hour test stream (Speech Commands words, LibriSpeech, keyword).
 Scores and layer-1 / layer-2 spike counts must match on every frame.
 Writes results/verification_stream.json, with synaptic events per frame
 (the event-driven work of the kernel) for the activity measurements.

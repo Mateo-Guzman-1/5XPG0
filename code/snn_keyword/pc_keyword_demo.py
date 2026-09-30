@@ -12,6 +12,7 @@ import queue
 import socket
 from pathlib import Path
 import numpy as np
+import keyword_config as K
 from features import SAMPLE_RATE, features, frame_power, logmel_agc_frames, logmel_frames, pcen_frames, read_wav
 from protocol import MODE_RESET, MODE_SINGLE, MODE_STREAM, info, request, request_frames
 
@@ -74,14 +75,17 @@ def main():
     p.add_argument('--single', action='store_true',
                    help='ABI v2 live: decide on each window alone instead of requiring 2 of 3 consecutive windows')
     p.add_argument('--frontend', choices=['logmel', 'logmel_w', 'logmel_agc', 'pcen'], default='logmel', help='ABI v3: the model\'s front end')
+    p.add_argument('--keyword', help='name shown in the messages; default: KWS_KEYWORD ("sheila") for the streaming '
+                   'model (ABI v3), "yes" for ABI v2, which is the window-model release')
     a = p.parse_args()
     abi = model_abi(a.host, a.port)
     stream = abi['abi'] == 3
+    keyword = a.keyword or (K.KEYWORD if stream else 'yes')
     with connect(a.host, a.port) as sock:
         if a.wav:
             audio = read_wav(a.wav)
             if stream:
-                # Half a second of silence after the file lets a final "yes" reach the readout.
+                # Half a second of silence after the file lets a final keyword reach the readout.
                 fs = FrameStream(a.frontend)
                 run_stream(sock, [fs.push(np.r_[audio, np.zeros(SAMPLE_RATE // 2, np.float32)])], abi['max_frames'])
             else:
@@ -103,10 +107,10 @@ def main():
                     except queue.Empty: break
                 chunks.put_nowait(None)
         if stream:
-            print('Listening for "yes"; streaming SNN, 10 ms frames in 250 ms hops, 1 s hold-off. Ctrl-C stops.')
+            print(f'Listening for "{keyword}"; streaming SNN, 10 ms frames in 250 ms hops, 1 s hold-off. Ctrl-C stops.')
         else:
             rule = 'each window' if a.single else '2 of 3 consecutive windows'
-            print(f'Listening for "yes"; 1 s windows / 250 ms hop; detection needs {rule}. Ctrl-C stops.')
+            print(f'Listening for "{keyword}"; 1 s windows / 250 ms hop; detection needs {rule}. Ctrl-C stops.')
         with sd.InputStream(channels=1, samplerate=SAMPLE_RATE, blocksize=4000,
                             dtype='float32', device=a.device, callback=callback):
             if stream:

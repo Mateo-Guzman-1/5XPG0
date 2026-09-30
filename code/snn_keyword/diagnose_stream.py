@@ -4,7 +4,7 @@
    stream false accepts <= 2/h), and which constraint binds.
 2. False accepts on the validation stream at that threshold and at looser
    ones: source kind and word (Speech Commands label or LibriSpeech).
-3. Missed "yes" clips in the live set against signal-to-noise ratio, speech
+3. Missed keyword clips in the live set against signal-to-noise ratio, speech
    level, and whether the /s/ is cut off (robust_eval.edge_clipped).
 4. Decision rules on the same per-frame scores (no retraining): the raw score,
    a moving average over w frames, and a sustained score (minimum over the

@@ -71,7 +71,8 @@ def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('host')
     p.add_argument('--port', type=int, default=5556)
-    p.add_argument('--model', type=Path, help='default: deploy/model.npz (v2) or the selected streaming model (v3)')
+    p.add_argument('--model', type=Path, help='default: deploy/model.npz (v2, the "yes" release) or '
+                   'results/models/sheila_stream_int8.npz (v3)')
     p.add_argument('--data', type=Path, default=ROOT / 'data')
     p.add_argument('--streams', type=int, default=40)
     p.add_argument('--hop', type=int, default=25)
@@ -80,7 +81,7 @@ def main():
     with socket.create_connection((a.host, a.port), timeout=30) as sock:
         info = protocol.info(sock, 1)
     print('INFO', info, flush=True)
-    default = ROOT / ('deploy/model.npz' if info['abi'] == 2 else 'runs_stream/s2_nokd_qat/int_last.npz')
+    default = ROOT / ('deploy/model.npz' if info['abi'] == 2 else 'results/models/sheila_stream_int8.npz')
     q = dict(np.load(a.model or default))
     threshold = int(q['decision_threshold'] if info['abi'] == 2 else q['stream_threshold'])
     if info['threshold'] != threshold:
