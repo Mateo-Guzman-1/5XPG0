@@ -1,0 +1,2874 @@
+{
+ "scores": "data_verifier\\vscores_sheila_logmel_cap4096.npz",
+ "verify_ms": 107.3,
+ "keyword": "sheila",
+ "rule": "live other words <= 0.2%, <= 2 FA/h on the negatives stream (policy b: + prefixed utterances)",
+ "runs": [
+  {
+   "window": 1,
+   "policy": "a",
+   "stage1_frame": {
+    "t1": 18462,
+    "t2": null,
+    "live_recall": 0.6667,
+    "live_recall_complete": 0.7595,
+    "live_fa": 0.0003,
+    "live_mic": {
+     "recall": 0.6176,
+     "other_accepted": 0.0003,
+     "recall_complete": 0.7025
+    },
+    "live_room": {
+     "recall": 0.6029,
+     "other_accepted": 0.001,
+     "recall_complete": 0.6646
+    },
+    "live_mic+room": {
+     "recall": 0.5931,
+     "other_accepted": 0.002,
+     "recall_complete": 0.6582
+    },
+    "fa_per_hour": 1.436,
+    "neg_hours": 18.11,
+    "stream_recall": 0.5809,
+    "stream_fa": 1,
+    "latency_median_s": 0.072,
+    "latency_p90_s": 0.15,
+    "mswc_recall": 0.5,
+    "mswc_other_fa": 0.0055,
+    "mswc_prefixed_accepted": "0/0",
+    "mswc_groups_accepted": {
+     "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "13/183",
+     "/\u0283\u025b/ (shell, shelf, shelter, ...)": "3/118",
+     "/t\u0283i\u02d0/ (cheap, cheese, chief)": "0/179",
+     "-ila/-ela names (leila, delilah, stella, ...)": "1/32",
+     "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+     "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "1/95",
+     "random other words": "2/3000"
+    },
+    "prefixed_clips_accepted": "0/0",
+    "prefixed_libri_with_detection": "0/0"
+   },
+   "stage1_hop": {
+    "t1": 18462,
+    "t2": null,
+    "live_recall": 0.6667,
+    "live_recall_complete": 0.7595,
+    "live_fa": 0.0003,
+    "live_mic": {
+     "recall": 0.6176,
+     "other_accepted": 0.0003,
+     "recall_complete": 0.7025
+    },
+    "live_room": {
+     "recall": 0.6029,
+     "other_accepted": 0.001,
+     "recall_complete": 0.6646
+    },
+    "live_mic+room": {
+     "recall": 0.5931,
+     "other_accepted": 0.002,
+     "recall_complete": 0.6582
+    },
+    "fa_per_hour": 1.436,
+    "neg_hours": 18.11,
+    "stream_recall": 0.5809,
+    "stream_fa": 1,
+    "latency_median_s": 0.198,
+    "latency_p90_s": 0.331,
+    "mswc_recall": 0.5,
+    "mswc_other_fa": 0.0055,
+    "mswc_prefixed_accepted": "0/0",
+    "mswc_groups_accepted": {
+     "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "13/183",
+     "/\u0283\u025b/ (shell, shelf, shelter, ...)": "3/118",
+     "/t\u0283i\u02d0/ (cheap, cheese, chief)": "0/179",
+     "-ila/-ela names (leila, delilah, stella, ...)": "1/32",
+     "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+     "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "1/95",
+     "random other words": "2/3000"
+    },
+    "prefixed_clips_accepted": "0/0",
+    "prefixed_libri_with_detection": "0/0"
+   },
+   "cascade": {
+    "t1": 16201,
+    "t2": 227329,
+    "live_recall": 0.3922,
+    "live_recall_complete": 0.4177,
+    "live_fa": 0.0,
+    "live_mic": {
+     "recall": 0.4118,
+     "other_accepted": 0.001,
+     "recall_complete": 0.4304
+    },
+    "live_room": {
+     "recall": 0.4216,
+     "other_accepted": 0.001,
+     "recall_complete": 0.4684
+    },
+    "live_mic+room": {
+     "recall": 0.4167,
+     "other_accepted": 0.0017,
+     "recall_complete": 0.462
+    },
+    "fa_per_hour": 1.049,
+    "neg_hours": 18.11,
+    "stream_recall": 0.3382,
+    "stream_fa": 1,
+    "latency_median_s": 0.215,
+    "latency_p90_s": 0.355,
+    "mswc_recall": 0.0,
+    "mswc_other_fa": 0.0077,
+    "mswc_prefixed_accepted": "0/0",
+    "mswc_groups_accepted": {
+     "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "16/183",
+     "/\u0283\u025b/ (shell, shelf, shelter, ...)": "4/118",
+     "/t\u0283i\u02d0/ (cheap, cheese, chief)": "5/179",
+     "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+     "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+     "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "1/95",
+     "random other words": "2/3000"
+    },
+    "prefixed_clips_accepted": "0/0",
+    "prefixed_libri_with_detection": "0/0",
+    "verifier_calls_per_hour": 17.1,
+    "paired_vs_stage1_frame": {
+     "only_cascade": 7,
+     "only_stage1": 63,
+     "p_exact": 0.0
+    }
+   },
+   "grid": [
+    {
+     "t1": 16201,
+     "t2": 227329,
+     "live_recall": 0.3922,
+     "live_recall_complete": 0.4177,
+     "live_fa": 0.0,
+     "live_mic": {
+      "recall": 0.4118,
+      "other_accepted": 0.001,
+      "recall_complete": 0.4304
+     },
+     "live_room": {
+      "recall": 0.4216,
+      "other_accepted": 0.001,
+      "recall_complete": 0.4684
+     },
+     "live_mic+room": {
+      "recall": 0.4167,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.462
+     },
+     "fa_per_hour": 1.049,
+     "neg_hours": 18.11,
+     "stream_recall": 0.3382,
+     "stream_fa": 1,
+     "latency_median_s": 0.215,
+     "latency_p90_s": 0.355,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0077,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "16/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "4/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "5/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "1/95",
+      "random other words": "2/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 17.1,
+     "paired_vs_stage1_frame": {
+      "only_cascade": 7,
+      "only_stage1": 63,
+      "p_exact": 0.0
+     }
+    },
+    {
+     "t1": 15070,
+     "t2": 228733,
+     "live_recall": 0.3676,
+     "live_recall_complete": 0.3861,
+     "live_fa": 0.0,
+     "live_mic": {
+      "recall": 0.3873,
+      "other_accepted": 0.0007,
+      "recall_complete": 0.3987
+     },
+     "live_room": {
+      "recall": 0.3922,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.4177
+     },
+     "live_mic+room": {
+      "recall": 0.4216,
+      "other_accepted": 0.0037,
+      "recall_complete": 0.4557
+     },
+     "fa_per_hour": 1.657,
+     "neg_hours": 18.11,
+     "stream_recall": 0.3382,
+     "stream_fa": 1,
+     "latency_median_s": 0.196,
+     "latency_p90_s": 0.288,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0118,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "23/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "4/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "11/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "2/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 32.4
+    },
+    {
+     "t1": 13655,
+     "t2": 230586,
+     "live_recall": 0.3431,
+     "live_recall_complete": 0.3544,
+     "live_fa": 0.0007,
+     "live_mic": {
+      "recall": 0.3578,
+      "other_accepted": 0.0007,
+      "recall_complete": 0.3608
+     },
+     "live_room": {
+      "recall": 0.3824,
+      "other_accepted": 0.0023,
+      "recall_complete": 0.3987
+     },
+     "live_mic+room": {
+      "recall": 0.3873,
+      "other_accepted": 0.0037,
+      "recall_complete": 0.3924
+     },
+     "fa_per_hour": 1.878,
+     "neg_hours": 18.11,
+     "stream_recall": 0.3162,
+     "stream_fa": 0,
+     "latency_median_s": 0.191,
+     "latency_p90_s": 0.28,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0127,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "23/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "15/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "4/95",
+      "random other words": "2/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 54.4
+    },
+    {
+     "t1": 13172,
+     "t2": 231794,
+     "live_recall": 0.3186,
+     "live_recall_complete": 0.3228,
+     "live_fa": 0.001,
+     "live_mic": {
+      "recall": 0.3235,
+      "other_accepted": 0.0007,
+      "recall_complete": 0.3228
+     },
+     "live_room": {
+      "recall": 0.3676,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.3797
+     },
+     "live_mic+room": {
+      "recall": 0.3578,
+      "other_accepted": 0.0033,
+      "recall_complete": 0.3481
+     },
+     "fa_per_hour": 1.988,
+     "neg_hours": 18.11,
+     "stream_recall": 0.3088,
+     "stream_fa": 0,
+     "latency_median_s": 0.189,
+     "latency_p90_s": 0.28,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.011,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "19/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "14/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "1/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "1/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 64.8
+    },
+    {
+     "t1": 13172,
+     "t2": 232653,
+     "live_recall": 0.3088,
+     "live_recall_complete": 0.3101,
+     "live_fa": 0.0007,
+     "live_mic": {
+      "recall": 0.2941,
+      "other_accepted": 0.0003,
+      "recall_complete": 0.2975
+     },
+     "live_room": {
+      "recall": 0.348,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.3544
+     },
+     "live_mic+room": {
+      "recall": 0.348,
+      "other_accepted": 0.002,
+      "recall_complete": 0.3418
+     },
+     "fa_per_hour": 1.712,
+     "neg_hours": 18.11,
+     "stream_recall": 0.2794,
+     "stream_fa": 0,
+     "latency_median_s": 0.186,
+     "latency_p90_s": 0.25,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0083,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "14/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "9/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "1/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "1/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 64.8
+    },
+    {
+     "t1": 12726,
+     "t2": 232989,
+     "live_recall": 0.3137,
+     "live_recall_complete": 0.3165,
+     "live_fa": 0.0007,
+     "live_mic": {
+      "recall": 0.299,
+      "other_accepted": 0.0007,
+      "recall_complete": 0.3038
+     },
+     "live_room": {
+      "recall": 0.348,
+      "other_accepted": 0.001,
+      "recall_complete": 0.3608
+     },
+     "live_mic+room": {
+      "recall": 0.348,
+      "other_accepted": 0.002,
+      "recall_complete": 0.3418
+     },
+     "fa_per_hour": 1.933,
+     "neg_hours": 18.11,
+     "stream_recall": 0.2574,
+     "stream_fa": 0,
+     "latency_median_s": 0.176,
+     "latency_p90_s": 0.24,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0094,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "18/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "1/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "11/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "1/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 74.6
+    },
+    {
+     "t1": 12507,
+     "t2": 233409,
+     "live_recall": 0.3039,
+     "live_recall_complete": 0.3101,
+     "live_fa": 0.0007,
+     "live_mic": {
+      "recall": 0.2892,
+      "other_accepted": 0.0007,
+      "recall_complete": 0.2975
+     },
+     "live_room": {
+      "recall": 0.3186,
+      "other_accepted": 0.001,
+      "recall_complete": 0.3418
+     },
+     "live_mic+room": {
+      "recall": 0.3431,
+      "other_accepted": 0.002,
+      "recall_complete": 0.3354
+     },
+     "fa_per_hour": 1.601,
+     "neg_hours": 18.11,
+     "stream_recall": 0.25,
+     "stream_fa": 0,
+     "latency_median_s": 0.176,
+     "latency_p90_s": 0.241,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0077,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "15/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "1/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "9/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 81.2
+    },
+    {
+     "t1": 12507,
+     "t2": 234360,
+     "live_recall": 0.2892,
+     "live_recall_complete": 0.3038,
+     "live_fa": 0.0003,
+     "live_mic": {
+      "recall": 0.2598,
+      "other_accepted": 0.0007,
+      "recall_complete": 0.2658
+     },
+     "live_room": {
+      "recall": 0.3039,
+      "other_accepted": 0.001,
+      "recall_complete": 0.3228
+     },
+     "live_mic+room": {
+      "recall": 0.3088,
+      "other_accepted": 0.001,
+      "recall_complete": 0.2911
+     },
+     "fa_per_hour": 1.325,
+     "neg_hours": 18.11,
+     "stream_recall": 0.2279,
+     "stream_fa": 0,
+     "latency_median_s": 0.172,
+     "latency_p90_s": 0.236,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0061,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "12/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "1/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "7/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "2/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 81.2
+    },
+    {
+     "t1": 11260,
+     "t2": 234575,
+     "live_recall": 0.2892,
+     "live_recall_complete": 0.2975,
+     "live_fa": 0.0007,
+     "live_mic": {
+      "recall": 0.2794,
+      "other_accepted": 0.0007,
+      "recall_complete": 0.2911
+     },
+     "live_room": {
+      "recall": 0.3186,
+      "other_accepted": 0.002,
+      "recall_complete": 0.3354
+     },
+     "live_mic+room": {
+      "recall": 0.3137,
+      "other_accepted": 0.0023,
+      "recall_complete": 0.2975
+     },
+     "fa_per_hour": 1.933,
+     "neg_hours": 18.11,
+     "stream_recall": 0.25,
+     "stream_fa": 0,
+     "latency_median_s": 0.17,
+     "latency_p90_s": 0.237,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0085,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "15/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "9/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "5/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 125.9
+    },
+    {
+     "t1": 11260,
+     "t2": 234954,
+     "live_recall": 0.2892,
+     "live_recall_complete": 0.2975,
+     "live_fa": 0.0007,
+     "live_mic": {
+      "recall": 0.2647,
+      "other_accepted": 0.0007,
+      "recall_complete": 0.2722
+     },
+     "live_room": {
+      "recall": 0.3137,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.3291
+     },
+     "live_mic+room": {
+      "recall": 0.3088,
+      "other_accepted": 0.0023,
+      "recall_complete": 0.2975
+     },
+     "fa_per_hour": 1.878,
+     "neg_hours": 18.11,
+     "stream_recall": 0.2426,
+     "stream_fa": 0,
+     "latency_median_s": 0.167,
+     "latency_p90_s": 0.238,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0083,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "14/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "9/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "5/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 125.9
+    },
+    {
+     "t1": 10673,
+     "t2": 235651,
+     "live_recall": 0.2843,
+     "live_recall_complete": 0.2911,
+     "live_fa": 0.0013,
+     "live_mic": {
+      "recall": 0.2647,
+      "other_accepted": 0.0007,
+      "recall_complete": 0.2658
+     },
+     "live_room": {
+      "recall": 0.2843,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.2848
+     },
+     "live_mic+room": {
+      "recall": 0.2941,
+      "other_accepted": 0.003,
+      "recall_complete": 0.2785
+     },
+     "fa_per_hour": 1.988,
+     "neg_hours": 18.11,
+     "stream_recall": 0.25,
+     "stream_fa": 0,
+     "latency_median_s": 0.166,
+     "latency_p90_s": 0.237,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0088,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "12/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "9/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "1/95",
+      "random other words": "8/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 153.9
+    },
+    {
+     "t1": 10673,
+     "t2": 236232,
+     "live_recall": 0.2745,
+     "live_recall_complete": 0.2848,
+     "live_fa": 0.0013,
+     "live_mic": {
+      "recall": 0.25,
+      "other_accepted": 0.0,
+      "recall_complete": 0.2468
+     },
+     "live_room": {
+      "recall": 0.2745,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.2722
+     },
+     "live_mic+room": {
+      "recall": 0.2794,
+      "other_accepted": 0.003,
+      "recall_complete": 0.2785
+     },
+     "fa_per_hour": 1.822,
+     "neg_hours": 18.11,
+     "stream_recall": 0.2132,
+     "stream_fa": 0,
+     "latency_median_s": 0.167,
+     "latency_p90_s": 0.236,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0077,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "9/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "8/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "1/95",
+      "random other words": "8/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 153.9
+    },
+    {
+     "t1": 10349,
+     "t2": 236804,
+     "live_recall": 0.2696,
+     "live_recall_complete": 0.2785,
+     "live_fa": 0.002,
+     "live_mic": {
+      "recall": 0.2451,
+      "other_accepted": 0.0,
+      "recall_complete": 0.2405
+     },
+     "live_room": {
+      "recall": 0.2647,
+      "other_accepted": 0.002,
+      "recall_complete": 0.2658
+     },
+     "live_mic+room": {
+      "recall": 0.25,
+      "other_accepted": 0.0037,
+      "recall_complete": 0.2532
+     },
+     "fa_per_hour": 1.878,
+     "neg_hours": 18.11,
+     "stream_recall": 0.2132,
+     "stream_fa": 0,
+     "latency_median_s": 0.172,
+     "latency_p90_s": 0.236,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0069,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "7/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "8/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "1/95",
+      "random other words": "7/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 172.3
+    },
+    {
+     "t1": 10349,
+     "t2": 237052,
+     "live_recall": 0.2549,
+     "live_recall_complete": 0.2658,
+     "live_fa": 0.002,
+     "live_mic": {
+      "recall": 0.2353,
+      "other_accepted": 0.0,
+      "recall_complete": 0.2278
+     },
+     "live_room": {
+      "recall": 0.2549,
+      "other_accepted": 0.002,
+      "recall_complete": 0.2595
+     },
+     "live_mic+room": {
+      "recall": 0.2451,
+      "other_accepted": 0.0033,
+      "recall_complete": 0.2532
+     },
+     "fa_per_hour": 1.822,
+     "neg_hours": 18.11,
+     "stream_recall": 0.2132,
+     "stream_fa": 0,
+     "latency_median_s": 0.172,
+     "latency_p90_s": 0.236,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0063,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "7/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "7/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "7/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 172.3
+    },
+    {
+     "t1": 10349,
+     "t2": 237331,
+     "live_recall": 0.2451,
+     "live_recall_complete": 0.2532,
+     "live_fa": 0.002,
+     "live_mic": {
+      "recall": 0.2255,
+      "other_accepted": 0.0,
+      "recall_complete": 0.2278
+     },
+     "live_room": {
+      "recall": 0.2549,
+      "other_accepted": 0.002,
+      "recall_complete": 0.2595
+     },
+     "live_mic+room": {
+      "recall": 0.2402,
+      "other_accepted": 0.0027,
+      "recall_complete": 0.2468
+     },
+     "fa_per_hour": 1.712,
+     "neg_hours": 18.11,
+     "stream_recall": 0.2059,
+     "stream_fa": 0,
+     "latency_median_s": 0.17,
+     "latency_p90_s": 0.237,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0058,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "6/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "6/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "7/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 172.3
+    },
+    {
+     "t1": 10349,
+     "t2": 237676,
+     "live_recall": 0.2402,
+     "live_recall_complete": 0.2468,
+     "live_fa": 0.002,
+     "live_mic": {
+      "recall": 0.2206,
+      "other_accepted": 0.0,
+      "recall_complete": 0.2278
+     },
+     "live_room": {
+      "recall": 0.25,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.2532
+     },
+     "live_mic+room": {
+      "recall": 0.2353,
+      "other_accepted": 0.0023,
+      "recall_complete": 0.2405
+     },
+     "fa_per_hour": 1.491,
+     "neg_hours": 18.11,
+     "stream_recall": 0.1985,
+     "stream_fa": 0,
+     "latency_median_s": 0.167,
+     "latency_p90_s": 0.233,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0052,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "6/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "6/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "5/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 172.3
+    },
+    {
+     "t1": 10349,
+     "t2": 237953,
+     "live_recall": 0.2353,
+     "live_recall_complete": 0.2405,
+     "live_fa": 0.002,
+     "live_mic": {
+      "recall": 0.2206,
+      "other_accepted": 0.0,
+      "recall_complete": 0.2278
+     },
+     "live_room": {
+      "recall": 0.2451,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.2468
+     },
+     "live_mic+room": {
+      "recall": 0.2353,
+      "other_accepted": 0.0023,
+      "recall_complete": 0.2405
+     },
+     "fa_per_hour": 1.436,
+     "neg_hours": 18.11,
+     "stream_recall": 0.1912,
+     "stream_fa": 0,
+     "latency_median_s": 0.17,
+     "latency_p90_s": 0.233,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0047,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "5/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "5/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "5/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 172.3
+    },
+    {
+     "t1": 10349,
+     "t2": 238124,
+     "live_recall": 0.2353,
+     "live_recall_complete": 0.2405,
+     "live_fa": 0.002,
+     "live_mic": {
+      "recall": 0.2206,
+      "other_accepted": 0.0,
+      "recall_complete": 0.2278
+     },
+     "live_room": {
+      "recall": 0.2353,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.2342
+     },
+     "live_mic+room": {
+      "recall": 0.2255,
+      "other_accepted": 0.002,
+      "recall_complete": 0.2278
+     },
+     "fa_per_hour": 1.436,
+     "neg_hours": 18.11,
+     "stream_recall": 0.1912,
+     "stream_fa": 0,
+     "latency_median_s": 0.17,
+     "latency_p90_s": 0.233,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0047,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "5/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "5/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "5/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 172.3
+    },
+    {
+     "t1": 10349,
+     "t2": 238175,
+     "live_recall": 0.2353,
+     "live_recall_complete": 0.2405,
+     "live_fa": 0.002,
+     "live_mic": {
+      "recall": 0.2206,
+      "other_accepted": 0.0,
+      "recall_complete": 0.2278
+     },
+     "live_room": {
+      "recall": 0.2353,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.2342
+     },
+     "live_mic+room": {
+      "recall": 0.2108,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.2089
+     },
+     "fa_per_hour": 1.436,
+     "neg_hours": 18.11,
+     "stream_recall": 0.1912,
+     "stream_fa": 0,
+     "latency_median_s": 0.17,
+     "latency_p90_s": 0.233,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0044,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "5/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "5/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "4/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 172.3
+    },
+    {
+     "t1": 10046,
+     "t2": 238420,
+     "live_recall": 0.2353,
+     "live_recall_complete": 0.2342,
+     "live_fa": 0.002,
+     "live_mic": {
+      "recall": 0.2206,
+      "other_accepted": 0.0003,
+      "recall_complete": 0.2278
+     },
+     "live_room": {
+      "recall": 0.2255,
+      "other_accepted": 0.002,
+      "recall_complete": 0.2278
+     },
+     "live_mic+room": {
+      "recall": 0.2108,
+      "other_accepted": 0.002,
+      "recall_complete": 0.1962
+     },
+     "fa_per_hour": 1.878,
+     "neg_hours": 18.11,
+     "stream_recall": 0.1912,
+     "stream_fa": 0,
+     "latency_median_s": 0.17,
+     "latency_p90_s": 0.233,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0041,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "6/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "3/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "4/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 191.6
+    },
+    {
+     "t1": 10046,
+     "t2": 238635,
+     "live_recall": 0.2304,
+     "live_recall_complete": 0.2278,
+     "live_fa": 0.002,
+     "live_mic": {
+      "recall": 0.2108,
+      "other_accepted": 0.0003,
+      "recall_complete": 0.2215
+     },
+     "live_room": {
+      "recall": 0.2157,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.2152
+     },
+     "live_mic+room": {
+      "recall": 0.2108,
+      "other_accepted": 0.002,
+      "recall_complete": 0.1962
+     },
+     "fa_per_hour": 1.712,
+     "neg_hours": 18.11,
+     "stream_recall": 0.1838,
+     "stream_fa": 0,
+     "latency_median_s": 0.167,
+     "latency_p90_s": 0.234,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0041,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "6/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "3/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "4/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 191.6
+    },
+    {
+     "t1": 10046,
+     "t2": 238840,
+     "live_recall": 0.2255,
+     "live_recall_complete": 0.2215,
+     "live_fa": 0.002,
+     "live_mic": {
+      "recall": 0.2059,
+      "other_accepted": 0.0003,
+      "recall_complete": 0.2152
+     },
+     "live_room": {
+      "recall": 0.2157,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.2152
+     },
+     "live_mic+room": {
+      "recall": 0.2059,
+      "other_accepted": 0.002,
+      "recall_complete": 0.1962
+     },
+     "fa_per_hour": 1.657,
+     "neg_hours": 18.11,
+     "stream_recall": 0.1838,
+     "stream_fa": 0,
+     "latency_median_s": 0.167,
+     "latency_p90_s": 0.234,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0039,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "5/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "3/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "4/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 191.6
+    },
+    {
+     "t1": 10046,
+     "t2": 239061,
+     "live_recall": 0.2206,
+     "live_recall_complete": 0.2152,
+     "live_fa": 0.0017,
+     "live_mic": {
+      "recall": 0.2059,
+      "other_accepted": 0.0003,
+      "recall_complete": 0.2152
+     },
+     "live_room": {
+      "recall": 0.2108,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.2089
+     },
+     "live_mic+room": {
+      "recall": 0.2059,
+      "other_accepted": 0.002,
+      "recall_complete": 0.1962
+     },
+     "fa_per_hour": 1.546,
+     "neg_hours": 18.11,
+     "stream_recall": 0.1838,
+     "stream_fa": 0,
+     "latency_median_s": 0.167,
+     "latency_p90_s": 0.234,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0036,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "4/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "3/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "4/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 191.6
+    },
+    {
+     "t1": 10046,
+     "t2": 239293,
+     "live_recall": 0.2206,
+     "live_recall_complete": 0.2152,
+     "live_fa": 0.0013,
+     "live_mic": {
+      "recall": 0.2059,
+      "other_accepted": 0.0003,
+      "recall_complete": 0.2152
+     },
+     "live_room": {
+      "recall": 0.2059,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.2025
+     },
+     "live_mic+room": {
+      "recall": 0.201,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.1899
+     },
+     "fa_per_hour": 1.546,
+     "neg_hours": 18.11,
+     "stream_recall": 0.1838,
+     "stream_fa": 0,
+     "latency_median_s": 0.167,
+     "latency_p90_s": 0.234,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.003,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "3/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "3/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 191.6
+    },
+    {
+     "t1": 9596,
+     "t2": 239661,
+     "live_recall": 0.2108,
+     "live_recall_complete": 0.2089,
+     "live_fa": 0.001,
+     "live_mic": {
+      "recall": 0.2059,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.2152
+     },
+     "live_room": {
+      "recall": 0.201,
+      "other_accepted": 0.002,
+      "recall_complete": 0.2025
+     },
+     "live_mic+room": {
+      "recall": 0.1961,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.1835
+     },
+     "fa_per_hour": 1.988,
+     "neg_hours": 18.11,
+     "stream_recall": 0.1838,
+     "stream_fa": 1,
+     "latency_median_s": 0.167,
+     "latency_p90_s": 0.234,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0033,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "3/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "3/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "4/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 227.8
+    },
+    {
+     "t1": 9596,
+     "t2": 240001,
+     "live_recall": 0.201,
+     "live_recall_complete": 0.1962,
+     "live_fa": 0.001,
+     "live_mic": {
+      "recall": 0.2059,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.2152
+     },
+     "live_room": {
+      "recall": 0.1912,
+      "other_accepted": 0.002,
+      "recall_complete": 0.1899
+     },
+     "live_mic+room": {
+      "recall": 0.1863,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.1772
+     },
+     "fa_per_hour": 1.822,
+     "neg_hours": 18.11,
+     "stream_recall": 0.1838,
+     "stream_fa": 1,
+     "latency_median_s": 0.167,
+     "latency_p90_s": 0.234,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.003,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "3/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "3/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 227.8
+    },
+    {
+     "t1": 9596,
+     "t2": 240185,
+     "live_recall": 0.201,
+     "live_recall_complete": 0.1962,
+     "live_fa": 0.0007,
+     "live_mic": {
+      "recall": 0.1961,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.2025
+     },
+     "live_room": {
+      "recall": 0.1912,
+      "other_accepted": 0.002,
+      "recall_complete": 0.1899
+     },
+     "live_mic+room": {
+      "recall": 0.1814,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.1709
+     },
+     "fa_per_hour": 1.822,
+     "neg_hours": 18.11,
+     "stream_recall": 0.1691,
+     "stream_fa": 1,
+     "latency_median_s": 0.172,
+     "latency_p90_s": 0.235,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.003,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "3/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "3/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 227.8
+    },
+    {
+     "t1": 9596,
+     "t2": 240475,
+     "live_recall": 0.201,
+     "live_recall_complete": 0.1962,
+     "live_fa": 0.0007,
+     "live_mic": {
+      "recall": 0.1912,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.1962
+     },
+     "live_room": {
+      "recall": 0.1814,
+      "other_accepted": 0.002,
+      "recall_complete": 0.1835
+     },
+     "live_mic+room": {
+      "recall": 0.1814,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.1709
+     },
+     "fa_per_hour": 1.712,
+     "neg_hours": 18.11,
+     "stream_recall": 0.1691,
+     "stream_fa": 1,
+     "latency_median_s": 0.172,
+     "latency_p90_s": 0.235,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.003,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "3/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "3/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "0/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 227.8
+    },
+    {
+     "t1": 9203,
+     "t2": 240760,
+     "live_recall": 0.201,
+     "live_recall_complete": 0.1962,
+     "live_fa": 0.0007,
+     "live_mic": {
+      "recall": 0.1961,
+      "other_accepted": 0.001,
+      "recall_complete": 0.2025
+     },
+     "live_room": {
+      "recall": 0.1863,
+      "other_accepted": 0.002,
+      "recall_complete": 0.1835
+     },
+     "live_mic+room": {
+      "recall": 0.1765,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.1646
+     },
+     "fa_per_hour": 1.878,
+     "neg_hours": 18.11,
+     "stream_recall": 0.1691,
+     "stream_fa": 2,
+     "latency_median_s": 0.172,
+     "latency_p90_s": 0.235,
+     "mswc_recall": 0.0,
+     "mswc_other_fa": 0.0036,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "2/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "4/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "1/95",
+      "random other words": "4/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 268.4
+    }
+   ]
+  },
+  {
+   "window": 1,
+   "policy": "b",
+   "stage1_frame": {
+    "t1": 18462,
+    "t2": null,
+    "live_recall": 0.6667,
+    "live_recall_complete": 0.7595,
+    "live_fa": 0.0003,
+    "live_mic": {
+     "recall": 0.6176,
+     "other_accepted": 0.0003,
+     "recall_complete": 0.7025
+    },
+    "live_room": {
+     "recall": 0.6029,
+     "other_accepted": 0.001,
+     "recall_complete": 0.6646
+    },
+    "live_mic+room": {
+     "recall": 0.5931,
+     "other_accepted": 0.002,
+     "recall_complete": 0.6582
+    },
+    "fa_per_hour": 1.436,
+    "neg_hours": 18.11,
+    "stream_recall": 0.5809,
+    "stream_fa": 1,
+    "latency_median_s": 0.072,
+    "latency_p90_s": 0.15,
+    "mswc_recall": 0.5,
+    "mswc_other_fa": 0.0055,
+    "mswc_prefixed_accepted": "0/0",
+    "mswc_groups_accepted": {
+     "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "13/183",
+     "/\u0283\u025b/ (shell, shelf, shelter, ...)": "3/118",
+     "/t\u0283i\u02d0/ (cheap, cheese, chief)": "0/179",
+     "-ila/-ela names (leila, delilah, stella, ...)": "1/32",
+     "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+     "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "1/95",
+     "random other words": "2/3000"
+    },
+    "prefixed_clips_accepted": "0/0",
+    "prefixed_libri_with_detection": "0/0"
+   },
+   "stage1_hop": {
+    "t1": 18462,
+    "t2": null,
+    "live_recall": 0.6667,
+    "live_recall_complete": 0.7595,
+    "live_fa": 0.0003,
+    "live_mic": {
+     "recall": 0.6176,
+     "other_accepted": 0.0003,
+     "recall_complete": 0.7025
+    },
+    "live_room": {
+     "recall": 0.6029,
+     "other_accepted": 0.001,
+     "recall_complete": 0.6646
+    },
+    "live_mic+room": {
+     "recall": 0.5931,
+     "other_accepted": 0.002,
+     "recall_complete": 0.6582
+    },
+    "fa_per_hour": 1.436,
+    "neg_hours": 18.11,
+    "stream_recall": 0.5809,
+    "stream_fa": 1,
+    "latency_median_s": 0.198,
+    "latency_p90_s": 0.331,
+    "mswc_recall": 0.5,
+    "mswc_other_fa": 0.0055,
+    "mswc_prefixed_accepted": "0/0",
+    "mswc_groups_accepted": {
+     "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "13/183",
+     "/\u0283\u025b/ (shell, shelf, shelter, ...)": "3/118",
+     "/t\u0283i\u02d0/ (cheap, cheese, chief)": "0/179",
+     "-ila/-ela names (leila, delilah, stella, ...)": "1/32",
+     "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+     "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "1/95",
+     "random other words": "2/3000"
+    },
+    "prefixed_clips_accepted": "0/0",
+    "prefixed_libri_with_detection": "0/0"
+   },
+   "cascade": {
+    "t1": 17320,
+    "t2": 222897,
+    "live_recall": 0.5931,
+    "live_recall_complete": 0.6646,
+    "live_fa": 0.0,
+    "live_mic": {
+     "recall": 0.5784,
+     "other_accepted": 0.0003,
+     "recall_complete": 0.6519
+    },
+    "live_room": {
+     "recall": 0.6029,
+     "other_accepted": 0.0023,
+     "recall_complete": 0.6709
+    },
+    "live_mic+room": {
+     "recall": 0.5686,
+     "other_accepted": 0.0037,
+     "recall_complete": 0.6139
+    },
+    "fa_per_hour": 1.601,
+    "neg_hours": 18.11,
+    "stream_recall": 0.5515,
+    "stream_fa": 1,
+    "latency_median_s": 0.384,
+    "latency_p90_s": 0.484,
+    "mswc_recall": 0.5,
+    "mswc_other_fa": 0.0094,
+    "mswc_prefixed_accepted": "0/0",
+    "mswc_groups_accepted": {
+     "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "20/183",
+     "/\u0283\u025b/ (shell, shelf, shelter, ...)": "4/118",
+     "/t\u0283i\u02d0/ (cheap, cheese, chief)": "4/179",
+     "-ila/-ela names (leila, delilah, stella, ...)": "1/32",
+     "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+     "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "1/95",
+     "random other words": "4/3000"
+    },
+    "prefixed_clips_accepted": "0/0",
+    "prefixed_libri_with_detection": "0/0",
+    "verifier_calls_per_hour": 7.7,
+    "paired_vs_stage1_frame": {
+     "only_cascade": 9,
+     "only_stage1": 24,
+     "p_exact": 0.0135
+    }
+   },
+   "grid": [
+    {
+     "t1": 17320,
+     "t2": 222897,
+     "live_recall": 0.5931,
+     "live_recall_complete": 0.6646,
+     "live_fa": 0.0,
+     "live_mic": {
+      "recall": 0.5784,
+      "other_accepted": 0.0003,
+      "recall_complete": 0.6519
+     },
+     "live_room": {
+      "recall": 0.6029,
+      "other_accepted": 0.0023,
+      "recall_complete": 0.6709
+     },
+     "live_mic+room": {
+      "recall": 0.5686,
+      "other_accepted": 0.0037,
+      "recall_complete": 0.6139
+     },
+     "fa_per_hour": 1.601,
+     "neg_hours": 18.11,
+     "stream_recall": 0.5515,
+     "stream_fa": 1,
+     "latency_median_s": 0.384,
+     "latency_p90_s": 0.484,
+     "mswc_recall": 0.5,
+     "mswc_other_fa": 0.0094,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "20/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "4/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "4/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "1/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "1/95",
+      "random other words": "4/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 7.7,
+     "paired_vs_stage1_frame": {
+      "only_cascade": 9,
+      "only_stage1": 24,
+      "p_exact": 0.0135
+     }
+    },
+    {
+     "t1": 16485,
+     "t2": 226743,
+     "live_recall": 0.4902,
+     "live_recall_complete": 0.5443,
+     "live_fa": 0.0003,
+     "live_mic": {
+      "recall": 0.5147,
+      "other_accepted": 0.001,
+      "recall_complete": 0.5633
+     },
+     "live_room": {
+      "recall": 0.5245,
+      "other_accepted": 0.0023,
+      "recall_complete": 0.5633
+     },
+     "live_mic+room": {
+      "recall": 0.4902,
+      "other_accepted": 0.0037,
+      "recall_complete": 0.538
+     },
+     "fa_per_hour": 1.601,
+     "neg_hours": 18.11,
+     "stream_recall": 0.5221,
+     "stream_fa": 1,
+     "latency_median_s": 0.384,
+     "latency_p90_s": 0.461,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0107,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "22/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "5/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "6/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "1/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 14.2
+    },
+    {
+     "t1": 15991,
+     "t2": 227306,
+     "live_recall": 0.5,
+     "live_recall_complete": 0.557,
+     "live_fa": 0.0007,
+     "live_mic": {
+      "recall": 0.5245,
+      "other_accepted": 0.0023,
+      "recall_complete": 0.5759
+     },
+     "live_room": {
+      "recall": 0.5294,
+      "other_accepted": 0.003,
+      "recall_complete": 0.5759
+     },
+     "live_mic+room": {
+      "recall": 0.4853,
+      "other_accepted": 0.0037,
+      "recall_complete": 0.5253
+     },
+     "fa_per_hour": 1.878,
+     "neg_hours": 18.11,
+     "stream_recall": 0.5368,
+     "stream_fa": 2,
+     "latency_median_s": 0.382,
+     "latency_p90_s": 0.46,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0129,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "25/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "7/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "7/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "3/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 18.8
+    },
+    {
+     "t1": 15991,
+     "t2": 227648,
+     "live_recall": 0.4951,
+     "live_recall_complete": 0.5506,
+     "live_fa": 0.0007,
+     "live_mic": {
+      "recall": 0.5,
+      "other_accepted": 0.0023,
+      "recall_complete": 0.5443
+     },
+     "live_room": {
+      "recall": 0.5098,
+      "other_accepted": 0.003,
+      "recall_complete": 0.557
+     },
+     "live_mic+room": {
+      "recall": 0.4853,
+      "other_accepted": 0.0033,
+      "recall_complete": 0.5253
+     },
+     "fa_per_hour": 1.878,
+     "neg_hours": 18.11,
+     "stream_recall": 0.5368,
+     "stream_fa": 2,
+     "latency_median_s": 0.382,
+     "latency_p90_s": 0.46,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0127,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "24/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "7/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "7/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "3/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 18.8
+    },
+    {
+     "t1": 15991,
+     "t2": 228164,
+     "live_recall": 0.4755,
+     "live_recall_complete": 0.5253,
+     "live_fa": 0.0007,
+     "live_mic": {
+      "recall": 0.4804,
+      "other_accepted": 0.0023,
+      "recall_complete": 0.5253
+     },
+     "live_room": {
+      "recall": 0.4755,
+      "other_accepted": 0.003,
+      "recall_complete": 0.5127
+     },
+     "live_mic+room": {
+      "recall": 0.4657,
+      "other_accepted": 0.0033,
+      "recall_complete": 0.5
+     },
+     "fa_per_hour": 1.878,
+     "neg_hours": 18.11,
+     "stream_recall": 0.5294,
+     "stream_fa": 2,
+     "latency_median_s": 0.383,
+     "latency_p90_s": 0.461,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0118,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "21/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "7/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "7/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "3/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 18.8
+    },
+    {
+     "t1": 15991,
+     "t2": 228565,
+     "live_recall": 0.4755,
+     "live_recall_complete": 0.5253,
+     "live_fa": 0.0003,
+     "live_mic": {
+      "recall": 0.4706,
+      "other_accepted": 0.002,
+      "recall_complete": 0.5127
+     },
+     "live_room": {
+      "recall": 0.4608,
+      "other_accepted": 0.003,
+      "recall_complete": 0.5
+     },
+     "live_mic+room": {
+      "recall": 0.4657,
+      "other_accepted": 0.0033,
+      "recall_complete": 0.5
+     },
+     "fa_per_hour": 1.822,
+     "neg_hours": 18.11,
+     "stream_recall": 0.4926,
+     "stream_fa": 2,
+     "latency_median_s": 0.373,
+     "latency_p90_s": 0.454,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0118,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "21/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "7/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "7/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "3/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 18.8
+    },
+    {
+     "t1": 15991,
+     "t2": 229270,
+     "live_recall": 0.4608,
+     "live_recall_complete": 0.5127,
+     "live_fa": 0.0003,
+     "live_mic": {
+      "recall": 0.451,
+      "other_accepted": 0.002,
+      "recall_complete": 0.4937
+     },
+     "live_room": {
+      "recall": 0.451,
+      "other_accepted": 0.003,
+      "recall_complete": 0.4873
+     },
+     "live_mic+room": {
+      "recall": 0.451,
+      "other_accepted": 0.003,
+      "recall_complete": 0.4937
+     },
+     "fa_per_hour": 1.491,
+     "neg_hours": 18.11,
+     "stream_recall": 0.4853,
+     "stream_fa": 2,
+     "latency_median_s": 0.369,
+     "latency_p90_s": 0.452,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.011,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "20/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "6/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "7/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "2/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 18.8
+    },
+    {
+     "t1": 15991,
+     "t2": 229738,
+     "live_recall": 0.4608,
+     "live_recall_complete": 0.5127,
+     "live_fa": 0.0003,
+     "live_mic": {
+      "recall": 0.4363,
+      "other_accepted": 0.002,
+      "recall_complete": 0.481
+     },
+     "live_room": {
+      "recall": 0.4314,
+      "other_accepted": 0.0027,
+      "recall_complete": 0.4684
+     },
+     "live_mic+room": {
+      "recall": 0.4363,
+      "other_accepted": 0.0027,
+      "recall_complete": 0.481
+     },
+     "fa_per_hour": 1.491,
+     "neg_hours": 18.11,
+     "stream_recall": 0.4706,
+     "stream_fa": 2,
+     "latency_median_s": 0.364,
+     "latency_p90_s": 0.45,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0105,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "19/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "5/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "7/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "2/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 18.8
+    },
+    {
+     "t1": 15991,
+     "t2": 230284,
+     "live_recall": 0.4608,
+     "live_recall_complete": 0.5127,
+     "live_fa": 0.0,
+     "live_mic": {
+      "recall": 0.4265,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.4684
+     },
+     "live_room": {
+      "recall": 0.4314,
+      "other_accepted": 0.0027,
+      "recall_complete": 0.4684
+     },
+     "live_mic+room": {
+      "recall": 0.4118,
+      "other_accepted": 0.002,
+      "recall_complete": 0.4494
+     },
+     "fa_per_hour": 1.325,
+     "neg_hours": 18.11,
+     "stream_recall": 0.4632,
+     "stream_fa": 2,
+     "latency_median_s": 0.364,
+     "latency_p90_s": 0.447,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0099,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "18/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "4/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "7/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "2/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 18.8
+    },
+    {
+     "t1": 15991,
+     "t2": 231053,
+     "live_recall": 0.4559,
+     "live_recall_complete": 0.5063,
+     "live_fa": 0.0,
+     "live_mic": {
+      "recall": 0.4167,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.4557
+     },
+     "live_room": {
+      "recall": 0.4118,
+      "other_accepted": 0.0027,
+      "recall_complete": 0.443
+     },
+     "live_mic+room": {
+      "recall": 0.402,
+      "other_accepted": 0.002,
+      "recall_complete": 0.4367
+     },
+     "fa_per_hour": 1.16,
+     "neg_hours": 18.11,
+     "stream_recall": 0.4632,
+     "stream_fa": 2,
+     "latency_median_s": 0.364,
+     "latency_p90_s": 0.447,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0096,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "18/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "4/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "6/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "2/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 18.8
+    },
+    {
+     "t1": 14999,
+     "t2": 231476,
+     "live_recall": 0.4608,
+     "live_recall_complete": 0.5127,
+     "live_fa": 0.0,
+     "live_mic": {
+      "recall": 0.4461,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.4873
+     },
+     "live_room": {
+      "recall": 0.4118,
+      "other_accepted": 0.0037,
+      "recall_complete": 0.4494
+     },
+     "live_mic+room": {
+      "recall": 0.4314,
+      "other_accepted": 0.004,
+      "recall_complete": 0.4684
+     },
+     "fa_per_hour": 1.933,
+     "neg_hours": 18.11,
+     "stream_recall": 0.4706,
+     "stream_fa": 2,
+     "latency_median_s": 0.361,
+     "latency_p90_s": 0.447,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0143,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "24/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "5/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "13/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "3/95",
+      "random other words": "5/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 32.7
+    },
+    {
+     "t1": 14855,
+     "t2": 231776,
+     "live_recall": 0.4559,
+     "live_recall_complete": 0.5,
+     "live_fa": 0.0,
+     "live_mic": {
+      "recall": 0.4461,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.4873
+     },
+     "live_room": {
+      "recall": 0.4118,
+      "other_accepted": 0.003,
+      "recall_complete": 0.4494
+     },
+     "live_mic+room": {
+      "recall": 0.4216,
+      "other_accepted": 0.0047,
+      "recall_complete": 0.4557
+     },
+     "fa_per_hour": 1.822,
+     "neg_hours": 18.11,
+     "stream_recall": 0.4706,
+     "stream_fa": 2,
+     "latency_median_s": 0.361,
+     "latency_p90_s": 0.447,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0138,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "22/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "4/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "14/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "3/95",
+      "random other words": "5/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 35.1
+    },
+    {
+     "t1": 14855,
+     "t2": 232014,
+     "live_recall": 0.451,
+     "live_recall_complete": 0.4937,
+     "live_fa": 0.0,
+     "live_mic": {
+      "recall": 0.4363,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.4747
+     },
+     "live_room": {
+      "recall": 0.4118,
+      "other_accepted": 0.0027,
+      "recall_complete": 0.4494
+     },
+     "live_mic+room": {
+      "recall": 0.4167,
+      "other_accepted": 0.0047,
+      "recall_complete": 0.4494
+     },
+     "fa_per_hour": 1.712,
+     "neg_hours": 18.11,
+     "stream_recall": 0.4706,
+     "stream_fa": 2,
+     "latency_median_s": 0.361,
+     "latency_p90_s": 0.447,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0135,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "21/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "4/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "14/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "3/95",
+      "random other words": "5/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 35.1
+    },
+    {
+     "t1": 14632,
+     "t2": 232391,
+     "live_recall": 0.4461,
+     "live_recall_complete": 0.4937,
+     "live_fa": 0.0,
+     "live_mic": {
+      "recall": 0.4412,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.481
+     },
+     "live_room": {
+      "recall": 0.4118,
+      "other_accepted": 0.0027,
+      "recall_complete": 0.4494
+     },
+     "live_mic+room": {
+      "recall": 0.4167,
+      "other_accepted": 0.0047,
+      "recall_complete": 0.4494
+     },
+     "fa_per_hour": 1.933,
+     "neg_hours": 18.11,
+     "stream_recall": 0.4853,
+     "stream_fa": 2,
+     "latency_median_s": 0.356,
+     "latency_p90_s": 0.445,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.014,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "22/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "4/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "14/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "1/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "3/95",
+      "random other words": "5/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 38.3
+    },
+    {
+     "t1": 14632,
+     "t2": 232603,
+     "live_recall": 0.4314,
+     "live_recall_complete": 0.4747,
+     "live_fa": 0.0,
+     "live_mic": {
+      "recall": 0.4412,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.481
+     },
+     "live_room": {
+      "recall": 0.4069,
+      "other_accepted": 0.0027,
+      "recall_complete": 0.443
+     },
+     "live_mic+room": {
+      "recall": 0.4167,
+      "other_accepted": 0.0047,
+      "recall_complete": 0.4494
+     },
+     "fa_per_hour": 1.878,
+     "neg_hours": 18.11,
+     "stream_recall": 0.4853,
+     "stream_fa": 2,
+     "latency_median_s": 0.356,
+     "latency_p90_s": 0.445,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0129,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "20/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "4/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "12/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "1/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "3/95",
+      "random other words": "5/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 38.3
+    },
+    {
+     "t1": 14632,
+     "t2": 232713,
+     "live_recall": 0.4265,
+     "live_recall_complete": 0.4684,
+     "live_fa": 0.0,
+     "live_mic": {
+      "recall": 0.4412,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.481
+     },
+     "live_room": {
+      "recall": 0.402,
+      "other_accepted": 0.0027,
+      "recall_complete": 0.4367
+     },
+     "live_mic+room": {
+      "recall": 0.4118,
+      "other_accepted": 0.0047,
+      "recall_complete": 0.443
+     },
+     "fa_per_hour": 1.878,
+     "neg_hours": 18.11,
+     "stream_recall": 0.4853,
+     "stream_fa": 2,
+     "latency_median_s": 0.356,
+     "latency_p90_s": 0.445,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0127,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "20/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "4/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "12/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "1/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "2/95",
+      "random other words": "5/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 38.3
+    },
+    {
+     "t1": 14632,
+     "t2": 232959,
+     "live_recall": 0.4167,
+     "live_recall_complete": 0.462,
+     "live_fa": 0.0,
+     "live_mic": {
+      "recall": 0.4314,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.4747
+     },
+     "live_room": {
+      "recall": 0.3971,
+      "other_accepted": 0.0027,
+      "recall_complete": 0.4304
+     },
+     "live_mic+room": {
+      "recall": 0.4069,
+      "other_accepted": 0.0047,
+      "recall_complete": 0.4367
+     },
+     "fa_per_hour": 1.767,
+     "neg_hours": 18.11,
+     "stream_recall": 0.4779,
+     "stream_fa": 2,
+     "latency_median_s": 0.354,
+     "latency_p90_s": 0.446,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0124,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "19/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "4/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "12/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "1/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "2/95",
+      "random other words": "5/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 38.3
+    },
+    {
+     "t1": 14632,
+     "t2": 233427,
+     "live_recall": 0.4069,
+     "live_recall_complete": 0.4557,
+     "live_fa": 0.0,
+     "live_mic": {
+      "recall": 0.4265,
+      "other_accepted": 0.001,
+      "recall_complete": 0.4747
+     },
+     "live_room": {
+      "recall": 0.3922,
+      "other_accepted": 0.002,
+      "recall_complete": 0.4241
+     },
+     "live_mic+room": {
+      "recall": 0.402,
+      "other_accepted": 0.0047,
+      "recall_complete": 0.4304
+     },
+     "fa_per_hour": 1.546,
+     "neg_hours": 18.11,
+     "stream_recall": 0.4559,
+     "stream_fa": 2,
+     "latency_median_s": 0.356,
+     "latency_p90_s": 0.448,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0118,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "18/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "4/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "11/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "1/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "2/95",
+      "random other words": "5/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 38.3
+    },
+    {
+     "t1": 13817,
+     "t2": 233645,
+     "live_recall": 0.4167,
+     "live_recall_complete": 0.462,
+     "live_fa": 0.0007,
+     "live_mic": {
+      "recall": 0.4265,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.481
+     },
+     "live_room": {
+      "recall": 0.402,
+      "other_accepted": 0.0033,
+      "recall_complete": 0.4367
+     },
+     "live_mic+room": {
+      "recall": 0.4167,
+      "other_accepted": 0.0057,
+      "recall_complete": 0.4557
+     },
+     "fa_per_hour": 1.878,
+     "neg_hours": 18.11,
+     "stream_recall": 0.4632,
+     "stream_fa": 2,
+     "latency_median_s": 0.357,
+     "latency_p90_s": 0.448,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0157,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "24/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "8/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "12/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "1/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "4/95",
+      "random other words": "6/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 51.3
+    },
+    {
+     "t1": 13817,
+     "t2": 234253,
+     "live_recall": 0.4069,
+     "live_recall_complete": 0.4557,
+     "live_fa": 0.0003,
+     "live_mic": {
+      "recall": 0.4167,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.4684
+     },
+     "live_room": {
+      "recall": 0.3971,
+      "other_accepted": 0.0033,
+      "recall_complete": 0.4367
+     },
+     "live_mic+room": {
+      "recall": 0.4069,
+      "other_accepted": 0.0053,
+      "recall_complete": 0.4494
+     },
+     "fa_per_hour": 1.822,
+     "neg_hours": 18.11,
+     "stream_recall": 0.4485,
+     "stream_fa": 2,
+     "latency_median_s": 0.354,
+     "latency_p90_s": 0.446,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0149,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "22/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "8/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "12/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "1/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "3/95",
+      "random other words": "6/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 51.3
+    },
+    {
+     "t1": 13817,
+     "t2": 234468,
+     "live_recall": 0.4069,
+     "live_recall_complete": 0.4557,
+     "live_fa": 0.0003,
+     "live_mic": {
+      "recall": 0.4118,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.462
+     },
+     "live_room": {
+      "recall": 0.3922,
+      "other_accepted": 0.0033,
+      "recall_complete": 0.4304
+     },
+     "live_mic+room": {
+      "recall": 0.402,
+      "other_accepted": 0.005,
+      "recall_complete": 0.4494
+     },
+     "fa_per_hour": 1.712,
+     "neg_hours": 18.11,
+     "stream_recall": 0.4412,
+     "stream_fa": 2,
+     "latency_median_s": 0.356,
+     "latency_p90_s": 0.446,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0143,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "20/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "8/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "12/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "1/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "3/95",
+      "random other words": "6/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 51.3
+    },
+    {
+     "t1": 13817,
+     "t2": 234719,
+     "live_recall": 0.3922,
+     "live_recall_complete": 0.4367,
+     "live_fa": 0.0003,
+     "live_mic": {
+      "recall": 0.4069,
+      "other_accepted": 0.0013,
+      "recall_complete": 0.4557
+     },
+     "live_room": {
+      "recall": 0.3922,
+      "other_accepted": 0.0033,
+      "recall_complete": 0.4304
+     },
+     "live_mic+room": {
+      "recall": 0.3971,
+      "other_accepted": 0.005,
+      "recall_complete": 0.443
+     },
+     "fa_per_hour": 1.712,
+     "neg_hours": 18.11,
+     "stream_recall": 0.4265,
+     "stream_fa": 2,
+     "latency_median_s": 0.354,
+     "latency_p90_s": 0.443,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0138,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "20/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "8/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "11/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "1/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "3/95",
+      "random other words": "5/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 51.3
+    },
+    {
+     "t1": 13817,
+     "t2": 235635,
+     "live_recall": 0.3873,
+     "live_recall_complete": 0.4304,
+     "live_fa": 0.0003,
+     "live_mic": {
+      "recall": 0.3824,
+      "other_accepted": 0.001,
+      "recall_complete": 0.4367
+     },
+     "live_room": {
+      "recall": 0.3725,
+      "other_accepted": 0.003,
+      "recall_complete": 0.4114
+     },
+     "live_mic+room": {
+      "recall": 0.3922,
+      "other_accepted": 0.0043,
+      "recall_complete": 0.4367
+     },
+     "fa_per_hour": 1.546,
+     "neg_hours": 18.11,
+     "stream_recall": 0.3971,
+     "stream_fa": 2,
+     "latency_median_s": 0.351,
+     "latency_p90_s": 0.44,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.011,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "14/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "6/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "9/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "1/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "3/95",
+      "random other words": "5/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 51.3
+    },
+    {
+     "t1": 13817,
+     "t2": 235920,
+     "live_recall": 0.3824,
+     "live_recall_complete": 0.4241,
+     "live_fa": 0.0003,
+     "live_mic": {
+      "recall": 0.3725,
+      "other_accepted": 0.001,
+      "recall_complete": 0.4241
+     },
+     "live_room": {
+      "recall": 0.3725,
+      "other_accepted": 0.003,
+      "recall_complete": 0.4114
+     },
+     "live_mic+room": {
+      "recall": 0.3873,
+      "other_accepted": 0.0037,
+      "recall_complete": 0.4304
+     },
+     "fa_per_hour": 1.546,
+     "neg_hours": 18.11,
+     "stream_recall": 0.3971,
+     "stream_fa": 2,
+     "latency_median_s": 0.351,
+     "latency_p90_s": 0.44,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0105,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "13/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "6/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "9/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "1/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "3/95",
+      "random other words": "4/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 51.3
+    },
+    {
+     "t1": 12311,
+     "t2": 236678,
+     "live_recall": 0.3775,
+     "live_recall_complete": 0.4114,
+     "live_fa": 0.001,
+     "live_mic": {
+      "recall": 0.3529,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.4114
+     },
+     "live_room": {
+      "recall": 0.3676,
+      "other_accepted": 0.0033,
+      "recall_complete": 0.4051
+     },
+     "live_mic+room": {
+      "recall": 0.3775,
+      "other_accepted": 0.0053,
+      "recall_complete": 0.4177
+     },
+     "fa_per_hour": 1.988,
+     "neg_hours": 18.11,
+     "stream_recall": 0.3897,
+     "stream_fa": 3,
+     "latency_median_s": 0.354,
+     "latency_p90_s": 0.44,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0121,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "16/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "7/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "11/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "1/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "1/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "4/95",
+      "random other words": "4/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 88.5
+    },
+    {
+     "t1": 11733,
+     "t2": 237205,
+     "live_recall": 0.3725,
+     "live_recall_complete": 0.4114,
+     "live_fa": 0.0013,
+     "live_mic": {
+      "recall": 0.3431,
+      "other_accepted": 0.002,
+      "recall_complete": 0.3987
+     },
+     "live_room": {
+      "recall": 0.348,
+      "other_accepted": 0.004,
+      "recall_complete": 0.3861
+     },
+     "live_mic+room": {
+      "recall": 0.3676,
+      "other_accepted": 0.0053,
+      "recall_complete": 0.4051
+     },
+     "fa_per_hour": 1.657,
+     "neg_hours": 18.11,
+     "stream_recall": 0.3824,
+     "stream_fa": 3,
+     "latency_median_s": 0.353,
+     "latency_p90_s": 0.437,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0118,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "16/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "8/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "9/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "1/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "1/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "4/95",
+      "random other words": "4/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 107.6
+    },
+    {
+     "t1": 11733,
+     "t2": 237611,
+     "live_recall": 0.3627,
+     "live_recall_complete": 0.4051,
+     "live_fa": 0.0013,
+     "live_mic": {
+      "recall": 0.3333,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.3861
+     },
+     "live_room": {
+      "recall": 0.3382,
+      "other_accepted": 0.004,
+      "recall_complete": 0.3734
+     },
+     "live_mic+room": {
+      "recall": 0.348,
+      "other_accepted": 0.0043,
+      "recall_complete": 0.3797
+     },
+     "fa_per_hour": 1.546,
+     "neg_hours": 18.11,
+     "stream_recall": 0.3676,
+     "stream_fa": 3,
+     "latency_median_s": 0.353,
+     "latency_p90_s": 0.438,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.011,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "15/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "8/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "8/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "1/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "1/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "4/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 107.6
+    },
+    {
+     "t1": 11733,
+     "t2": 238180,
+     "live_recall": 0.3529,
+     "live_recall_complete": 0.3924,
+     "live_fa": 0.0013,
+     "live_mic": {
+      "recall": 0.3284,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.3797
+     },
+     "live_room": {
+      "recall": 0.3284,
+      "other_accepted": 0.0037,
+      "recall_complete": 0.3608
+     },
+     "live_mic+room": {
+      "recall": 0.3382,
+      "other_accepted": 0.004,
+      "recall_complete": 0.3671
+     },
+     "fa_per_hour": 1.325,
+     "neg_hours": 18.11,
+     "stream_recall": 0.3529,
+     "stream_fa": 3,
+     "latency_median_s": 0.353,
+     "latency_p90_s": 0.432,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0102,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "13/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "7/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "8/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "1/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "1/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "4/95",
+      "random other words": "3/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 107.6
+    },
+    {
+     "t1": 11733,
+     "t2": 238501,
+     "live_recall": 0.3431,
+     "live_recall_complete": 0.3797,
+     "live_fa": 0.0013,
+     "live_mic": {
+      "recall": 0.3235,
+      "other_accepted": 0.0017,
+      "recall_complete": 0.3734
+     },
+     "live_room": {
+      "recall": 0.3284,
+      "other_accepted": 0.0033,
+      "recall_complete": 0.3608
+     },
+     "live_mic+room": {
+      "recall": 0.3382,
+      "other_accepted": 0.0037,
+      "recall_complete": 0.3671
+     },
+     "fa_per_hour": 1.16,
+     "neg_hours": 18.11,
+     "stream_recall": 0.3529,
+     "stream_fa": 3,
+     "latency_median_s": 0.353,
+     "latency_p90_s": 0.432,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0088,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "11/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "6/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "8/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "1/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "4/95",
+      "random other words": "2/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 107.6
+    },
+    {
+     "t1": 11733,
+     "t2": 239259,
+     "live_recall": 0.3235,
+     "live_recall_complete": 0.3671,
+     "live_fa": 0.0013,
+     "live_mic": {
+      "recall": 0.3186,
+      "other_accepted": 0.001,
+      "recall_complete": 0.3671
+     },
+     "live_room": {
+      "recall": 0.3137,
+      "other_accepted": 0.003,
+      "recall_complete": 0.3418
+     },
+     "live_mic+room": {
+      "recall": 0.3284,
+      "other_accepted": 0.0037,
+      "recall_complete": 0.3544
+     },
+     "fa_per_hour": 0.828,
+     "neg_hours": 18.11,
+     "stream_recall": 0.3456,
+     "stream_fa": 1,
+     "latency_median_s": 0.352,
+     "latency_p90_s": 0.428,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0077,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "11/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "5/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "5/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "1/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "4/95",
+      "random other words": "2/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 107.6
+    },
+    {
+     "t1": 11733,
+     "t2": 239425,
+     "live_recall": 0.3137,
+     "live_recall_complete": 0.3544,
+     "live_fa": 0.0013,
+     "live_mic": {
+      "recall": 0.3186,
+      "other_accepted": 0.001,
+      "recall_complete": 0.3671
+     },
+     "live_room": {
+      "recall": 0.3088,
+      "other_accepted": 0.003,
+      "recall_complete": 0.3418
+     },
+     "live_mic+room": {
+      "recall": 0.3235,
+      "other_accepted": 0.0037,
+      "recall_complete": 0.3481
+     },
+     "fa_per_hour": 0.718,
+     "neg_hours": 18.11,
+     "stream_recall": 0.3456,
+     "stream_fa": 1,
+     "latency_median_s": 0.352,
+     "latency_p90_s": 0.428,
+     "mswc_recall": 1.0,
+     "mswc_other_fa": 0.0077,
+     "mswc_prefixed_accepted": "0/0",
+     "mswc_groups_accepted": {
+      "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "11/183",
+      "/\u0283\u025b/ (shell, shelf, shelter, ...)": "5/118",
+      "/t\u0283i\u02d0/ (cheap, cheese, chief)": "5/179",
+      "-ila/-ela names (leila, delilah, stella, ...)": "1/32",
+      "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+      "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "4/95",
+      "random other words": "2/3000"
+     },
+     "prefixed_clips_accepted": "0/0",
+     "prefixed_libri_with_detection": "0/0",
+     "verifier_calls_per_hour": 107.6
+    }
+   ]
+  }
+ ]
+}

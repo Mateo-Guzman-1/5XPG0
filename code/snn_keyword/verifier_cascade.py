@@ -217,8 +217,8 @@ def score(a):
         def flush():
             x = np.concatenate(pend)
             lg = model(x)
-            va.append(keyword_score_torch(lg, a.warmup, 0).numpy().astype(np.int64))
-            vb.append(keyword_score_torch(lg, a.warmup, a.boundary).numpy().astype(np.int64))
+            va.append(keyword_score_torch(lg, a.warmup, 0, cap=a.cap).numpy().astype(np.int64))
+            vb.append(keyword_score_torch(lg, a.warmup, a.boundary, cap=a.cap).numpy().astype(np.int64))
             pend.clear()
             memguard.check(f'score {g}')
 
@@ -236,7 +236,7 @@ def score(a):
         out[f'{g}_voff'] = np.array(off, np.int64)
         print(g, len(items), 'items', off[-1], 'windows', round(time.perf_counter() - t0), 's', flush=True)
     out.update(checkpoint=np.array(str(a.checkpoint)), warmup=np.array(a.warmup), boundary=np.array(a.boundary),
-               window=np.array(a.window))
+               window=np.array(a.window), cap=np.array(a.cap))
     np.savez(a.out, **out)
 
 
@@ -542,6 +542,7 @@ def main():
     s.add_argument('--window', type=int, default=150, help='frames (10 ms) given to the verifier')
     s.add_argument('--warmup', type=int, default=5, help='20 ms steps before a keyword may start')
     s.add_argument('--boundary', type=int, default=10, help='policy b: 20 ms steps without a new phoneme after S')
+    s.add_argument('--cap', type=int, default=0, help='capped-margin score (verifier_model.step_costs), Q10 units')
     s.add_argument('--batch', type=int, default=2048)
     s.add_argument('--threads', type=int, default=4)
     s.add_argument('--out', type=Path, required=True)

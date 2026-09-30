@@ -27,6 +27,14 @@ exp or log is needed. The segment must start at step >= warmup. States:
 2i = phoneme i, 2i+1 = blank after phoneme i (i < N-1).
 Policy (b) (reject-prefix) appends `boundary` steps after the last phoneme in
 which no new phoneme may start: each costs max(c_t(blank), c_t(pN)).
+
+Capped margin (cap > 0): c_t(k) = min(cap, logit_t(k) - max_{j != k} logit_t(j)).
+A step whose label is the best class then adds up to `cap` instead of 0, so a
+confidently decoded keyword scores above one that only just wins; cap = 0 is
+the score above exactly (the best path costs 0 again). Tested for "sheila"
+(JOURNAL entry 28): every cap > 0 loses recall in the cascade (72% at 0.5
+logit against 83% at 0), because clean read speech ("she laughed") earns
+larger margins than keywords in noise. The firmware implements cap = 0 only.
 """
 import numpy as np
 import torch
@@ -213,15 +221,31 @@ class IntegerTorch:
 
 # --------------------------------------------------------------------------- keyword score
 
-def keyword_score(logits, warmup=0, boundary=0, keyword=KEYWORD, return_end=False):
+def step_costs(lg, cap=0):
+    """c_t(k) = logit - max over the other classes, at most cap (cap = 0: logit - max)."""
+    top = lg.max(-1, keepdims=True)
+    if cap <= 0:
+        return lg - top
+    top2 = np.sort(lg, -1)[..., -2:-1]
+    return np.minimum(lg - np.where(lg == top, top2, top), cap)
+
+
+def step_costs_torch(lg, cap=0):
+    top = lg.max(-1, keepdim=True)[0]
+    if cap <= 0:
+        return lg - top
+    top2 = lg.topk(2, -1)[0][..., 1:2]
+    return torch.clamp(lg - torch.where(lg == top, top2, top), max=cap)
+
+
+def keyword_score(logits, warmup=0, boundary=0, keyword=KEYWORD, return_end=False, cap=0):
     """Best p1+ b* ... pN+ [boundary] path score per window (int64, <= 0; NEG if none fits).
 
     logits: (B, T, C) integer (or float) array. Works on numpy int64 exactly as
     firmware/verifier.c does in int32. boundary > 0: that many steps after the
     last phoneme, each costing max(c(blank), c(pN)) (policy b).
     """
-    lg = np.asarray(logits)
-    c = lg - lg.max(-1, keepdims=True)
+    c = step_costs(np.asarray(logits), cap)
     b_, t_, _ = c.shape
     n = len(keyword)
     cph, cb = [c[..., k] for k in keyword], c[..., BLANK]
@@ -252,9 +276,9 @@ def keyword_score(logits, warmup=0, boundary=0, keyword=KEYWORD, return_end=Fals
     return (best, end) if return_end else best
 
 
-def keyword_score_torch(logits, warmup=0, boundary=0, keyword=KEYWORD):
+def keyword_score_torch(logits, warmup=0, boundary=0, keyword=KEYWORD, cap=0):
     """keyword_score on a torch tensor (float64 of integers, or float for training diagnostics)."""
-    c = logits - logits.max(-1, keepdim=True)[0]
+    c = step_costs_torch(logits, cap)
     b_, t_, _ = c.shape
     n = len(keyword)
     cph, cb = [c[..., k] for k in keyword], c[..., BLANK]
