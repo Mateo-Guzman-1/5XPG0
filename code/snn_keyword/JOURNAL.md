@@ -1104,7 +1104,7 @@ is RTL bit-exact and has had its one test run (entry 27).
    training positives. Compare changes over several seeds (SD 3.6 points, entry
    26). A second stage, a phoneme verifier with a keyword head, is developed on
    branch `explore-verifier` (entries 28-35).
-4. **Engine timing margin.** The rebuilt bitstream met 100 MHz only with
-   Performance_ExplorePostRoutePhysOpt (WNS +0.348 ns, entry 19); the accumulator
-   read-modify-write is pipelined on branch `engine-timing` (entry 31).
+4. ~~Engine timing margin~~: done on this branch (entry 31). The pipelined accumulator
+   meets 100 MHz with the default Vivado strategy (WNS +0.406 ns,
+   `build/keyword_engine_pipe.bit`); the "sheila" board test should use it.
 5. Recordings of the actual user and microphone, for evaluation only.
