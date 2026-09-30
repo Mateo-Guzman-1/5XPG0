@@ -1,0 +1,8 @@
+{
+  "model": "runs_sheila_r2_aug30_e60\\current_seed0\\model.npz",
+  "decision_threshold": 2358,
+  "stream_threshold": 2114,
+  "max_fa": 0.003,
+  "validation_confirmed_recall": 0.5098039215686274,
+  "validation_confirmed_fa": 0.0026666666666666666
+}

@@ -1,0 +1,8 @@
+{
+  "model": "runs_sheila_r2_aug50\\current_seed2\\model.npz",
+  "decision_threshold": 2019,
+  "stream_threshold": 775,
+  "max_fa": 0.003,
+  "validation_confirmed_recall": 0.6176470588235294,
+  "validation_confirmed_fa": 0.003
+}
