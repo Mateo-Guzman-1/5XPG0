@@ -7,6 +7,11 @@ keep, change or delete. It also describes the local branch `merge-all`, which
 combines all of them. Numbers come from the files named in each row. JOURNAL
 means `code/snn_keyword/JOURNAL.md`.
 
+**The task** is one keyword, **"sheila", against everything else**: the other 34
+Speech Commands words, running speech, synthesized near-miss words, silence and
+noise. The output is binary. The earlier keyword "yes" appears here as history
+(the first release, journal entries 1-21).
+
 ## In short
 
 - **Best system: a two-stage detector for "sheila" on the PicoRV32.** A
@@ -28,6 +33,12 @@ means `code/snn_keyword/JOURNAL.md`.
   pipelined neuron engine that now meets 100 MHz with the default Vivado
   strategy. The system has **not yet run on a board** (the engine and the
   stage-1 firmware have, over JTAG, with the earlier "yes" model).
+- **Limit: the word said on its own.** All recall numbers above are for
+  "sheila" as an isolated recording. With synthetic voices that neither stage
+  has heard, the system detects it alone in 72%, at the start of a sentence in
+  63%, in the middle in 6% and at the end in 13% (JOURNAL 34-35). Both stages
+  were trained on words separated by pauses; stage 1 is the first limit in the
+  middle of sentences. This is the main open problem for a real user.
 - **Clip accuracy did not predict live behaviour.** The clip classifiers (the
   "yes" release, Damien's "sheila v2") score 98% on isolated clips but fire
   52-366 times per hour on ordinary speech. At an equal false-alarm rate
@@ -42,21 +53,26 @@ means `code/snn_keyword/JOURNAL.md`.
   stream holds too few false alarms to set a ≤ 2/h threshold; recall-only
   robustness sweeps mislead; one training seed varies by ±3.6 points. All three
   are handled now (see "Method").
-- **The merge (`merge-all`) combines 7 branches.** It builds, the 15 Python
+- **The merge (`merge-all`) combines 8 branches.** It builds, the 16 Python
   tests pass, the RTL unit tests pass, the release firmware rebuilds
-  byte-identical, and the streaming RTL check is bit-exact. Two things are for
-  the team to decide: the duplicate board scripts and the two pipelines' file
-  layout.
+  byte-identical, and the streaming and cascade RTL checks are bit-exact. Two
+  things are for the team to decide: the duplicate board scripts and the two
+  pipelines' file layout.
+- **Everything points to "sheila".** The default keyword of the code, the READMEs,
+  the plans and the journal's open items state the task as "sheila against
+  everything else". "yes" remains only where it is the subject: the frozen
+  release, its report and scripts, and the journal's first 21 entries (see
+  "Keyword and documentation review").
 
 ## Branches
 
 | Branch | Who | Commits after `714db5c` | What it holds | In `merge-all` |
 |---|---|---|---|---|
-| `Rework` | Mateo | 8 | JTAG bring-up, `kdot`, "2 of 3", the full streaming-SNN plan (phases 0-7), neuron engine, iteration loop, keyword → "sheila" | base |
+| `Rework` | Mateo | 10 | JTAG bring-up, `kdot`, "2 of 3", the full streaming-SNN plan (phases 0-7), neuron engine, iteration loop, keyword → "sheila" (default since the documentation review) | base |
 | `Mateo_AI` (upstream) | Mateo | 4 | the first 4 commits of `Rework` | contained |
 | `explore-yes-boundary` | Mateo (worktree) | +1 on `Rework` | later decision point, "reject yesterday" policy | merged |
-| `explore-verifier` | Mateo (worktree, agent) | +39 on `Rework` | verifier on the PicoRV32 (CTC GRU + keyword head, int8, C, RTL), the cascade firmware, JOURNAL 28-30, 32 | merged (three times) |
-| `engine-timing` | Mateo (worktree, agent) | +2 on `Rework` | pipelined neuron-engine accumulator, JOURNAL 31 | merged |
+| `explore-verifier` | Mateo (worktree, agent) | +37 on `Rework` | verifier on the PicoRV32 (CTC GRU + keyword head, int8, C, RTL), the cascade firmware, sentence probe, JOURNAL 28-30, 32-35 | merged (five times) |
+| `engine-timing` | Mateo (worktree, agent) | +4 on `Rework` | pipelined neuron-engine accumulator, JOURNAL 31 | merged (twice) |
 | `Pedro` (upstream) | Pedro | 3 (on `Mateo_AI`) | Ethernet path on PYNQ Linux, `board_server.py` double-request fix, E0-E8 research plan | merged |
 | `Alex-parallel` (upstream) | Alex | 2 (on `Mateo_AI`) | one-click demo scripts, 64-neuron parallel LIF layer (sketch) | merged, sketch relocated |
 | `damien-dicking-around` (upstream) | Damien | 4 (from `c2009be`, before `714db5c`) | independent clip pipeline (8×16 features, ZeroMQ), front-end sweeps, "sheila v2" on his board | merged, 3 files renamed |
@@ -161,6 +177,8 @@ Validation data, full rule.
 | Near-miss words in verifier training | "she-" words 26/183 → 4/183 accepted, but −3.4 points of recall | ⚠️ trade-off | JOURNAL 29 |
 | **Keyword head** on the verifier, trained on stage-1 false proposals mined from training speech | Validation 89.2% / 87.8% (2 seeds) at ≤ 1.6 FA/h. **Test, once:** 91.0% (96.6% complete), mics/rooms 87.7-90.6%, 0.20% other words, **2.11 FA/h** (just over). Firmware `-DCASCADE`, RTL bit-exact, 117 ms worst request. | ⚠️ over the FA target | JOURNAL 30, `results/final_sheila_head_cascade_test.json` |
 | **Keyword head with near-miss negatives** (the candidate) | Validation 87.8% at 1.16 FA/h, "she-" words 1/183. **Test, once:** **86.8% (92.0% complete) at 1.42 FA/h, 0.07% other words**; mics/rooms 84.9-86.3%; "she-" words 6/183. RTL bit-exact on the pipelined engine. | ✅ both FA targets met | JOURNAL 32, `results/final_sheila_head_near_cascade_test.json` |
+| **The keyword inside sentences** (probe: Piper voices that no model has heard, 1,536 utterances; not a test split) | Detected alone 72%, sentence start 63%, **middle 6%, end 13%**; near-miss sentences accepted 7%. The verifier rejects context (accepts 9% of proposals in the middle); stage 1 proposes for only 39-65% of middle-position sentences. | ⚠️ main open problem | JOURNAL 34, `results/tts_sentence_probe_head_near.json` |
+| Context words around the keyword in the head's training | Validation unchanged (87.8% at 1.05 FA/h); the verifier accepts 18% (middle) and 27% (end) of proposals, up from 9% and 15%; the end position 13% → 21%. Stage 1 is the limit. Not a new candidate. | ⚠️ | JOURNAL 35, `results/tts_sentence_probe_head_ctx.json` |
 | Speech Commands "zero" (and other digits) accepted as "sheila" | The remaining false accepts are mostly "zero" clips that the verifier decodes as "...IY L AH". "zero" has the shape of "sheila" (sibilant, front vowel, liquid, vowel): a real confusion or mislabelled recordings; listening decides. Mining such words for the head: no measurable gain. | ⚠️ | JOURNAL 32-33, `results/sheila_suspected_label_errors_*.json` |
 
 ### H. Damien's front-end findings
@@ -177,6 +195,40 @@ From `research/SHEILA_V2_REPORT.md` and `FRONTEND_SWEEP_REPORT.md`, clip accurac
   function for both paths, and the demo test checks live framing against
   offline features.
 
+## Keyword and documentation review (2026-09-30)
+
+Requested: all merges and documentation must point to the keyword "sheila" against
+everything else. What was found and done on `Rework` (and merged into
+`explore-verifier`, `engine-timing` and `merge-all`):
+
+| Where | Before | Now |
+|---|---|---|
+| `keyword_config.py` | default keyword "yes" | default **"sheila"**; `KWS_KEYWORD=yes` for the earlier keyword. The window models (`deploy/model.npz`, `runs/`) record no keyword and are refused by `robust_eval.WindowDetector` unless `KWS_KEYWORD=yes` (a test covers both) |
+| `code/snn_keyword/README.md` | title "yes keyword detection", "yes" results first, Ethernet path "not run" | starts with the task, the results table (stage 1, and stage 1 + verifier on this branch) and limits; the "sheila" recipe comes first; the "yes" release is one labelled section at the end |
+| Root `README.md` | "one keyword", board acceptance pending | "sheila against everything else", status |
+| `JOURNAL.md` | no note which keyword | header note: entries 1-21 "yes", from 22 "sheila"; entry 22 notes the new default; open items rewritten |
+| `IMPLEMENTATION_PLAN.md` | targets for "yes" | banner and a table of acceptance targets for "sheila" with the current values |
+| `OPTIMIZATION_REPORT.md`, `EXPERIMENT_PLAN.md`, `HANDOFF_ALT_METHODS.md`, `REPORT.md` (and `make_report.py`, which generates it), `research/pedro/` | written for "yes" | a banner each: written for "yes", the project is now "sheila" |
+| `deploy/` | undocumented | `deploy/README.md`: the frozen "yes" window release; nothing in it detects "sheila" |
+| `pc_keyword_demo.py` | printed "yes" | names the model's keyword (`--keyword`; ABI v2 is the "yes" release) |
+| Default model paths (`make_stream_vectors.py`, `net_board_test.py`) | the "yes" streaming model | `results/models/sheila_stream_int8.npz` |
+| Docstrings and messages of the streaming tools | "yes" | "keyword" |
+
+**"yes" stays on purpose** where it is the subject:
+- `deploy/` and the window-model pipeline (`prepare_data.py`, `train_keyword_snn.py`,
+  `evaluate.py`, `select_deployment.py`, `verify.py`, `tune_stream.py`,
+  `confusables.py`, `robustness.py`, `package_release.py`);
+- `REPORT.md`, `presentation.pdf` and `make_report.py`, the report of the first
+  release (bannered, not rewritten);
+- JOURNAL entries 1-21 and the "yes" streaming model
+  `results/models/yes_stream_int8_w20.npz`;
+- internal names: `yes`, `YES`, `yes_class` and `yes_detected` in code, saved models
+  and result files mean the keyword (renaming them would break saved models; the
+  README says so).
+
+**Not done:** a report and presentation for "sheila" (item 7 below). `data/multi_sheila`
+is a link to the corpus built under "yes"; the README explains it.
+
 ## Still to do (in priority order)
 
 1. **Board test of the cascade** with `build/keyword_engine_pipe.bit`
@@ -186,20 +238,26 @@ From `research/SHEILA_V2_REPORT.md` and `FRONTEND_SWEEP_REPORT.md`, clip accurac
    results/models/sheila_verifier_head_near.pt 3785 1524` and
    `jtag/stream_board_test.tcl` check it. Neither the pipelined bitstream nor
    the ABI-fix bitstream has been loaded on a board yet.
-2. **Decide the release.** Replace `deploy/` ("yes" window model) with the
-   "sheila" cascade after item 1, and write "sheila" acceptance targets (the
-   IMPLEMENTATION_PLAN targets were written for "yes").
-3. **Listen to the "zero" clips** that the cascade accepts (about 30 short
+2. **"sheila" inside sentences** (JOURNAL 34-35). Train stage 1 with the keyword in
+   continuous speech (TTS sentences, same voice on both sides), then the
+   verifier; check with the sentence probe and, above all, with recordings of the
+   real user.
+3. **Decide the release.** Replace `deploy/` ("yes" window model) with the
+   "sheila" cascade after item 1. Acceptance targets for "sheila" are in
+   IMPLEMENTATION_PLAN.md.
+4. **Listen to the "zero" clips** that the cascade accepts (about 30 short
    clips, `results/sheila_suspected_label_errors_*.json`). "zero" is either a
    real near-miss of "sheila" (same sound shape) or some recordings are
    mislabelled. They count as false alarms in every number above.
-4. **Other words under rooms:** 0.27% accepted by the candidate (target 0.2%
+5. **Other words under rooms:** 0.27% accepted by the candidate (target 0.2%
    on clean audio). Mine hard negatives in reverberant and conversational
    speech, not only read speech.
-5. **One deployment script** for v2 and v3, the engine bitstream and both
+6. **One deployment script** for v2 and v3, the engine bitstream and both
    boards (merge Alex's and Pedro's). The Ethernet protocol does not carry
    the cascade's fields yet.
-6. Recordings of the actual user and microphone (evaluation).
+7. **A report and presentation for "sheila"** (`REPORT.md`/`presentation.pdf` are
+   about the "yes" release), and recordings of the actual user and microphone
+   for evaluation.
 
 ## Keep / change / delete
 
@@ -266,11 +324,14 @@ branch:
 | Follow-up | `df165ad` | Tests fixed for Pedro's views (his branch did not update them; they failed there too). The two candidate models added to `results/models/`. This summary. |
 | `explore-verifier` again | `3d03ecb` | Journal merged automatically (entries 28-30), open items rewritten. The verifier with keyword head added as `results/models/sheila_verifier_head.pt`. |
 | `engine-timing` | `ddc95d0` | Journal: entry 31 after 30 (conflict at the same place, both kept). Open item "timing margin" closed. |
-| `explore-verifier` a third time | (this commit) | Entry 32 and the built-in keyword phonemes (the verifier runtime no longer needs `data_verifier/cmudict.dict`). The candidate verifier as `results/models/sheila_verifier_head_near.pt`. |
+| `explore-verifier` a third time | `65bb65d` | Entry 32 and the built-in keyword phonemes (the verifier runtime no longer needs `data_verifier/cmudict.dict`). The candidate verifier as `results/models/sheila_verifier_head_near.pt`. |
+| `explore-verifier` (sentence probe) | `52c3ce5` | none: entries 33-34, `tts_sentence_probe.py`, `--context-p`, hard training words. |
+| `explore-verifier` (documentation review) | `95d6154` | Four files. `README.md`: the two-stage README of `explore-verifier` taken, then Pedro's Ethernet section and facts, Damien's note and Alex's demo text re-applied by hand (both sides had restructured the same regions). `pc_keyword_demo.py`: Pedro's `--json` and our `--keyword`, one keyword label. `train_stream.py`: `--pos-delay` from the yes-boundary branch with the keyword wording. `JOURNAL.md`: one merged open-items list. |
+| `engine-timing` (its Rework merge) | `6b1cb28` | `JOURNAL.md` open items only; the list of `merge-all` already covered it. |
 
 **Verified on `merge-all`:**
 - all Python byte-compiles;
-- `pytest tests/test_pipeline.py`: 15/15 (after the fix above);
+- `pytest tests/test_pipeline.py`: 16/16 (after the fix above, with the test of the default keyword and the window-model guard);
 - `make -C firmware all stream` with `-Werror`;
 - `keyword.bin` and `keyword_kdot.bin` byte-identical to `deploy/`;
 - `sim/unit.sh` (AXI, LED): pass;

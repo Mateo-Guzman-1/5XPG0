@@ -2,6 +2,10 @@
 > Pedro's personal session brief: machine paths, his board (10.43.0.1) and his git rules.
 > At the root it would have instructed every Claude session in the repository. To use it
 > on his PC, copy it back to the root there (untracked) or point the session at this file.
+>
+> **Keyword.** It was written for "yes". The project's keyword is now **"sheila"**
+> (`../../README.md`); read "yes" below as the earlier keyword and the window model as the
+> first release.
 
 # 5XPG0 — Group 2 keyword spotter (brief for Claude Code sessions)
 

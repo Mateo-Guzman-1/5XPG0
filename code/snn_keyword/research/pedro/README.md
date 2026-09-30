@@ -1,5 +1,11 @@
 # Research programme — how to run a session
 
+> **Keyword.** Written for the keyword **"yes"** and the dense window model of the first
+> release. The project's keyword is now **"sheila"**, detected against everything else by a
+> streaming SNN (`../../README.md`, `../../JOURNAL.md` entries 22 onwards). The experiments
+> below compare encodings and sizes of the window model; for "sheila" they would have to be
+> repeated with `KWS_KEYWORD=sheila` (the default) and the streaming model.
+
 This folder holds the Group 2 research study: how input encoding and network size trade
 off against detection quality and latency on the PicoRV32 RISC-V core.
 
