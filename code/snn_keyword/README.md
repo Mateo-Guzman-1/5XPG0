@@ -344,6 +344,69 @@ $X = "C:/AMDDesignTools/2025.2/Vivado/bin/xsdb.bat"
 & $X code/snn_keyword/jtag/stream_board_test.tcl
 ```
 
+## Keyword "sheila": stage 1 proposes, a verifier confirms (JOURNAL 22-32)
+
+With `KWS_KEYWORD=sheila` every script works on "sheila" (Speech Commands v2).
+The streaming SNN above is stage 1. A small verifier (two GRU layers of 64,
+49k parameters, int8) runs on the same PicoRV32, only when stage 1's decision
+score reaches `t1` in the current or the previous 250 ms request. It scores
+the last 1.5 s of frames and confirms when its keyword head reaches `t2`.
+- The verifier is trained with CTC on phonemes (LibriSpeech and the keyword
+  clips).
+- Its keyword head, a linear readout of the last GRU layer with the maximum
+  over time, is trained against:
+  - stage 1's false proposals, mined from LibriSpeech *training* speech;
+  - near-miss words ("she", "sheep", "shield", ...).
+- Test split, one run per candidate, thresholds from validation (≤ 1.6 FA/h
+  there), 18.97 h of negatives:
+
+| | Stage 1 alone | Stage 1 + verifier |
+|---|---|---|
+| Live "sheila" detected (complete recordings) | 63.7% (70.7%) | **86.8% (92.0%)** |
+| Held-out mics / real rooms / both | 66.5 / 60.9 / 58.0% | 86.3 / 85.9 / 84.9% |
+| Other words accepted | 0.00% | 0.07% |
+| False accepts per hour | 1.58 | 1.42 |
+| Median latency after the word | 0.04 s | 0.18 s |
+| Worst compute per 250 ms request | 10.3 ms | 117 ms |
+
+```powershell
+$env:KWS_KEYWORD = "sheila"
+# Stage 1: as above with KWS_KEYWORD=sheila (JOURNAL 23-27); candidate runs_stream/sheila_qat_seed2/int_model.npz
+python verifier_data.py                                   # phoneme targets; LibriSpeech train-clean-100 packed
+python train_verifier.py --frontend logmel --clean-steps 4000 --epochs 40 --name sheila_logmel
+python mine_verifier_negatives.py                         # stage 1's proposals on the training speech
+$env:KWS_MULTI = "data/multi_sheila_full"                 # near-miss words (MSWC) for the head
+python train_verifier.py --init runs_verifier/sheila_logmel/last.pt --hard data_verifier/hard_sheila.npz `
+    --head-weight 1 --hard-weight 0 --pos-weight 0 --near-share .15 --kw-real-only --epochs 10 --lr 1e-3 --name sheila_head_near
+Remove-Item Env:KWS_MULTI
+python verifier_cascade.py cache                          # stage-1 scores of every validation set (about 30 min)
+python verifier_cascade.py score runs_verifier/sheila_head_near/last.pt --score head --out data_verifier/v.npz
+python verifier_cascade.py select data_verifier/v.npz --verify-ms 107.3 --max-fa-hour 1.6 --out results/c.json
+python verifier_cascade.py cache --split test --device    # the test run, once per candidate:
+python verifier_cascade.py score runs_verifier/sheila_head_near/last.pt --score head --split test --out data_verifier/vt.npz
+python verifier_cascade.py final data_verifier/vt.npz --t1 3785 --t2 1524 --stage1-threshold 18462 --verify-ms 107.3 --out results/f.json
+```
+
+Firmware and checks. `-DCASCADE` builds the stream firmware with the verifier
+(`firmware/verifier.c`); the LED follows confirmed detections only (MB[11]
+bit0; bit1 stage 1 proposed, bit2 the verifier ran; MB[32] the head score).
+`verify_verifier_rtl.py --cascade` exports both models, builds
+`build/keyword_stream_cascade_engine.bin` and compares every request on the
+SoC RTL with the oracle (`verifier_cascade.cascade_requests`). The board test
+uses the same vectors over JTAG:
+
+```powershell
+python verify_verifier_rtl.py runs_verifier/sheila_head_near/last.pt --cascade 3785 1524 --frames data_verifier/cache_validation_sheila.npz
+python jtag/make_stream_vectors.py --model runs_stream/sheila_qat_seed2/int_model.npz `
+    --cascade runs_verifier/sheila_head_near/last.pt 3785 1524 --out build/stream_board_vectors_cascade.tcl
+& $X jtag/bringup.tcl build/keyword_engine_pipe.bit build/keyword_stream_cascade_engine.bin
+& $X jtag/stream_board_test.tcl build/stream_board_vectors_cascade.tcl
+```
+
+`keyword_engine_pipe.bit` is the engine with the pipelined accumulator
+(JOURNAL 31, timing met with Vivado's default strategy). Neither it nor the
+cascade has been on a board yet.
+
 ## Run on the PYNQ board (standard Ethernet path)
 
 This is the intended deployment, tested on a PYNQ-Z2 with PYNQ Linux 3.0.1

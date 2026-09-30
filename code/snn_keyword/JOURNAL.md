@@ -1433,6 +1433,11 @@ within every 250 ms request.
 - Candidates tested so far, one test run each: the path cascade (entry 29),
   head seed 0 (entry 30) and this one. Each was chosen on validation before
   its test; the test results were not used to choose between them.
+- **Seed check** (validation only, after the test): a second near-miss head
+  (seed 1) also reaches 87.8% live recall (94.9% complete), with "she-"
+  words 3/183 and MSWC other words 0.33%, at 1.55 FA/h. Recall and near-miss
+  rejection repeat; the false-accept rate at the chosen threshold varies
+  between seeds (1.16 and 1.55 FA/h), inside the validation budget both times.
 
 ## Open items
 
