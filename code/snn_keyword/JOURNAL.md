@@ -1206,6 +1206,106 @@ test-other plus every non-"sheila" Speech Commands test word.
   budget, for example ≤ 1.6 FA/h. This rule is introduced after seeing one
   test result and is recorded as such.
 
+### 30. A keyword head on the verifier: 91% live recall on test
+
+The first cascade missed the false-accept target on test (entry 29). The
+remaining false accepts were "she ..." phrases that the phoneme verifier
+passes. All results below are on validation with the stricter budget
+(≤ 1.6 FA/h, entry 29) unless marked as test.
+
+**Hard negatives from stage 1** (`mine_verifier_negatives.py`). The
+stage-1 float model runs over the verifier's own training speech
+(LibriSpeech train-clean-100, 17,698 utterances, 17 min on the GPU).
+The 8000 highest proposal peaks are exactly the confusions seen on
+validation: "she had three", "she held up", "sure ned land", "cheer up",
+"down to the shore".
+
+**Three ways to use them, and policy (b):**
+
+| Verifier | Live recall | Complete recordings | FA/h |
+|---|---|---|---|
+| phoneme path, seed 0 (entry 28) | 76.5% | 86.1% | 1.49 |
+| policy (b): no new phoneme within 200 ms after AH | 76.5% | 84.2% | 1.55 |
+| path + hinge fine-tuning on the mined windows (10 epochs) | 77.0% | 86.7% | 1.49 |
+| **keyword head**, seed 0 | **89.2%** | **95.6%** | 1.55 |
+| keyword head, seed 1 | 87.8% | 94.9% | 1.38 |
+
+- **Policy (b)** does not help. A CTC model is "peaky": blank wins most
+  frames, so a phrase that goes on after "she l..." rarely breaks the
+  boundary. It costs 0.15 s of latency.
+- **Hinge fine-tuning** (`train_verifier.py --init --hard`): the mined
+  windows' path score is pushed below −2 logits, and keyword clips above
+  −0.5. There was no gain. The path score only asks whether the best
+  phoneme path runs through SH IY L AH, so it leaves little room to rank
+  "she laughed" below "sheila". The GPU version of the path DP made this
+  run CPU-bound (14 min per epoch). The DP now handles all states as one
+  tensor: 2.5× faster on the GPU, 9× on the CPU, with identical values
+  and gradients.
+- **Keyword head** (`--head-weight 1`): a linear readout of GRU 2 per step,
+  whose maximum over steps is the decision. It is trained with binary
+  cross-entropy: keyword clips against the other words of the keyword
+  sub-batch and the mined windows. The CTC losses stay, starting from
+  verifier seed 0, 10 epochs, 20 min.
+  - On clips: AUC 0.996 against other words and 0.985 against near-miss
+    words (path score: 0.93).
+  - The cascade can then lower the stage-1 threshold from 15226 to 7080,
+    and the verifier rejects what stage 1 lets through.
+  - Two seeds: 89.2% and 87.8%.
+
+**Firmware.** `verifier.c` computes the head per step: 64 MACs through
+kdot, and a running maximum. The cascade build decides on the head when the
+verifier has one (MB[32]); MB[26..29] stay the path scores.
+- Native C is bit-exact: logits, path scores, head.
+- SoC RTL (`verify_verifier_rtl.py --cascade 7080 1588`): 934 requests
+  bit-exact, 75 verifier runs; 10/12 keyword clips detected, 0/12 other
+  words. Worst request 117 ms at 100 MHz; 121 KB of the 144 KB model region.
+- The board vectors (`jtag/make_stream_vectors.py --cascade`) include the head.
+
+**Test split, once** (`results/final_sheila_head_cascade_test.json`).
+Head seed 0, t1 = 7080, t2 = 1588, chosen on validation. Negatives are
+18.97 h.
+
+| | Stage 1 alone | Path cascade (entry 29) | **Head cascade** |
+|---|---|---|---|
+| Live recall | 63.7% | 84.0% | **91.0%** |
+| Complete recordings | 70.7% | 90.2% | **96.6%** |
+| Held-out mics | 66.5% | 82.6% | 88.7% |
+| Real rooms | 60.9% | 83.0% | 90.6% |
+| Mics + rooms | 58.0% | 82.6% | 87.7% |
+| Live other words accepted | 0.00% | 0.10% | 0.20% |
+| **FA/h** | 1.58 | 2.37 | **2.11** |
+| 1 h stream: recall, false accepts | 69.3%, 1 | 84.3%, 0 | 91.4%, 2 |
+| Latency after the word (median, p90) | 0.04 s, 0.11 s | 0.25 s, 0.38 s | 0.18 s, 0.33 s |
+| Verifier calls per hour of negatives | | 56 | 663 (107 ms each, 2% of the time) |
+
+- **Recall:** +27.3 points over stage 1 alone (58 clips only by the
+  cascade, 0 only by stage 1). The gain holds under held-out mics and
+  rooms (+22 to +30 points).
+- **False accepts: the target is missed narrowly**, 2.11 against ≤ 2.
+  Validation said 1.55: the stricter budget absorbed less than this
+  model's validation-to-test increase (+36%).
+- **What the 40 test false accepts are:** 24 LibriSpeech phrases (1.27
+  FA/h) and 16 Speech Commands clips labelled zero (7), two (5), four (2),
+  seven or left. The verifier's phoneme decoding of all 16 ends in IY L AH:
+  8 × SH IY L AH, 4 × IY L AH, 2 × S IY L AH, EH L AH, IY L AH N. None
+  decodes as its label. They are probably mislabelled or cut-off "sheila"
+  recordings (`results/final_sheila_head_cascade_test_sc_false_accepts.json`),
+  unconfirmed until someone listens to them.
+- **Other words accepted:** exactly at the 0.2% limit on clean audio, and
+  0.27-0.50% under rooms and mics. Stage 1 alone was at 0.00-0.40%.
+
+**Critique.**
+- The FA budget was missed on both test runs, each time by less than the
+  Speech Commands clips that are probably mislabelled. Listening to them
+  settles it (about 30 files). If they are "sheila", both candidates are
+  inside the target. If not, the next candidate needs a larger validation
+  margin.
+- The head was trained on one kind of hard negative (LibriSpeech read
+  speech). Conversational speech, TV and music were not mined and are not
+  in the negatives.
+- The mined windows come from the float stage-1 model and the training
+  split only; validation and test speech were never mined.
+
 ## Open items
 
 Status of `IMPLEMENTATION_PLAN.md`: Phases 0-6 done; the streaming firmware and

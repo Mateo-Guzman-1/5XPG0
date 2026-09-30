@@ -14,5 +14,17 @@
   "four/fce96bac_nohash_0.wav",
   "zero/81dc4a94_nohash_0.wav",
   "zero/563aa4e6_nohash_2.wav"
- ]
+ ],
+ "files_head_cascade_new": [
+  "two/0487ba9b_nohash_0.wav",
+  "two/9d4bab4f_nohash_0.wav",
+  "zero/81dc4a94_nohash_1.wav",
+  "zero/0d53e045_nohash_0.wav",
+  "left/e1469561_nohash_2.wav",
+  "zero/d962e5ac_nohash_0.wav",
+  "two/9e2ce5e3_nohash_0.wav",
+  "zero/d103dd6e_nohash_0.wav",
+  "zero/0cb74144_nohash_1.wav"
+ ],
+ "note_head_cascade": "Speech Commands test clips (not labelled sheila) accepted by the keyword-head cascade (t1 7080, t2 1588) and not in files; decoded phonemes in results/final_sheila_head_cascade_test_sc_false_accepts.json"
 }
