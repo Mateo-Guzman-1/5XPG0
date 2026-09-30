@@ -161,7 +161,7 @@ Validation data, full rule.
 | Near-miss words in verifier training | "she-" words 26/183 → 4/183 accepted, but −3.4 points of recall | ⚠️ trade-off | JOURNAL 29 |
 | **Keyword head** on the verifier, trained on stage-1 false proposals mined from training speech | Validation 89.2% / 87.8% (2 seeds) at ≤ 1.6 FA/h. **Test, once:** 91.0% (96.6% complete), mics/rooms 87.7-90.6%, 0.20% other words, **2.11 FA/h** (just over). Firmware `-DCASCADE`, RTL bit-exact, 117 ms worst request. | ⚠️ over the FA target | JOURNAL 30, `results/final_sheila_head_cascade_test.json` |
 | **Keyword head with near-miss negatives** (the candidate) | Validation 87.8% at 1.16 FA/h, "she-" words 1/183. **Test, once:** **86.8% (92.0% complete) at 1.42 FA/h, 0.07% other words**; mics/rooms 84.9-86.3%; "she-" words 6/183. RTL bit-exact on the pipelined engine. | ✅ both FA targets met | JOURNAL 32, `results/final_sheila_head_near_cascade_test.json` |
-| Suspected Speech Commands label errors | About 30 negative clips labelled with digits decode as "...IY L AH"; both cascade test runs are inside the FA target without them | ⚠️ listen to them | `results/sheila_suspected_label_errors_*.json` |
+| Speech Commands "zero" (and other digits) accepted as "sheila" | The remaining false accepts are mostly "zero" clips that the verifier decodes as "...IY L AH". "zero" has the shape of "sheila" (sibilant, front vowel, liquid, vowel): a real confusion or mislabelled recordings; listening decides. Mining such words for the head: no measurable gain. | ⚠️ | JOURNAL 32-33, `results/sheila_suspected_label_errors_*.json` |
 
 ### H. Damien's front-end findings
 
@@ -189,10 +189,10 @@ From `research/SHEILA_V2_REPORT.md` and `FRONTEND_SWEEP_REPORT.md`, clip accurac
 2. **Decide the release.** Replace `deploy/` ("yes" window model) with the
    "sheila" cascade after item 1, and write "sheila" acceptance targets (the
    IMPLEMENTATION_PLAN targets were written for "yes").
-3. **Listen to the suspected label errors** (about 30 short clips,
-   `results/sheila_suspected_label_errors_*.json`): Speech Commands digits
-   that the verifier hears as "...IY L AH". They count as false alarms in
-   every number above.
+3. **Listen to the "zero" clips** that the cascade accepts (about 30 short
+   clips, `results/sheila_suspected_label_errors_*.json`). "zero" is either a
+   real near-miss of "sheila" (same sound shape) or some recordings are
+   mislabelled. They count as false alarms in every number above.
 4. **Other words under rooms:** 0.27% accepted by the candidate (target 0.2%
    on clean audio). Mine hard negatives in reverberant and conversational
    speech, not only read speech.
