@@ -1355,6 +1355,39 @@ Head seed 0, t1 = 7080, t2 = 1588, chosen on validation. Negatives are
   in the negatives.
 - The mined windows come from the float stage-1 model and the training
   split only; validation and test speech were never mined.
+### 31. Neuron engine: the accumulator pipelined, timing met with the default strategy
+
+Branch `engine-timing`. Entry 19 found the engine's critical path:
+`acc[idx] += w` in one clock, i.e. a 128-way 18-bit read multiplexer, the
+adder and the write decode, 11 logic levels. The rebuilt bitstream met
+100 MHz only with Performance_ExplorePostRoutePhysOpt.
+
+**Change** (`rtl/neuron_engine.v`): two stages after the synapse register.
+- Stage A reads `acc[post]`. If stage B writes the same neuron in this
+  clock, stage A takes B's sum instead (forwarding), so back-to-back events
+  to one neuron stay exact.
+- Stage B adds the weight and writes.
+- A frame waits for both stages before the recurrence. This costs one
+  engine clock per frame.
+
+**Checks:**
+- Streaming RTL check (`verify_stream_rtl.py --engine`, "sheila"
+  candidate): 40 streams, 355 hops bit-exact. Worst hop 1,029,278 cycles
+  (unchanged); mean 988,705 (was 988,684).
+- Vivado 2025.2, default strategy (`vivado/build.tcl`):
+
+  | | WNS | Hold (WHS) | LUTs | BRAM36 | DSP |
+  |---|---|---|---|---|---|
+  | before, default strategy | −0.023 ns | | | | |
+  | before, ExplorePostRoutePhysOpt | +0.348 ns | | 12,894 | 88 | |
+  | **pipelined, default strategy** | **+0.406 ns** | +0.040 ns | 14,627 (27%) | 88 | 12 |
+
+  All constraints are met, with 0 failing endpoints
+  (`results/engine_pipe_timing_summary.rpt`, `_utilization.rpt`).
+- The worst path is now in the Poisson encoder (a DSP multiply,
+  3 logic levels), not in the engine.
+
+The bitstream is `build/keyword_engine_pipe.bit`. It has not been on a board.
 
 ## Open items
 
@@ -1366,7 +1399,8 @@ is the cascade of the stage-1 SNN and the verifier with a keyword head (entry
 See `MERGE_SUMMARY.md` at the repository root for all branches.
 
 1. **Board test of the cascade** (`firmware -DCASCADE` with the head,
-   `build/keyword_stream_cascade_engine.bin` on `build/keyword_engine_abi3.bit`):
+   `build/keyword_stream_cascade_engine.bin` on `build/keyword_engine_pipe.bit`,
+   entry 31):
    `jtag/make_stream_vectors.py --cascade runs_verifier/sheila_head/last.pt
    7080 1588`, then `jtag/stream_board_test.tcl`. Needs a board and the
    team's go-ahead. The stage-1-only candidate (entry 27) is also not yet
@@ -1382,9 +1416,9 @@ See `MERGE_SUMMARY.md` at the repository root for all branches.
    release. `board_server.py` serves v3 and has his fix; `net_board_test.py`
    checks stage 1 against the oracle (the cascade's fields are not in the
    TCP protocol yet). Not yet run on a board.
-5. **Engine timing margin.** The rebuilt ABI bitstream met timing only with
-   Performance_ExplorePostRoutePhysOpt (WNS +0.348 ns, entry 19). Pipeline
-   the `acc[idx] += w` read-modify-write with forwarding.
+5. ~~Engine timing margin~~: done (entry 31). The pipelined engine meets 100 MHz
+   with the default strategy (WNS +0.406 ns); use `keyword_engine_pipe.bit`
+   for the board test.
 6. Recordings of the actual user and microphone, for evaluation only.
 7. From Pedro's list:
    - "release or trial model": superseded by the streaming SNN (entries 17, 27);
