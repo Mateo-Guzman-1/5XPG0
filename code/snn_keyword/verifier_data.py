@@ -111,7 +111,11 @@ def encode(ph):
     return np.array([PID[p] for p in ph], np.int16)
 
 
-KEYWORD = [PID[p] for p in cmudict()[K.KEYWORD]]      # phoneme ids of the keyword path
+# The keywords of this project, as CMUdict has them (stress removed), so that the verifier's
+# runtime (export, cascade oracle, RTL checks) needs no dictionary file; other keywords are
+# looked up in data_verifier/cmudict.dict.
+KEYWORD_PHONES = {'yes': ['Y', 'EH', 'S'], 'sheila': ['SH', 'IY', 'L', 'AH']}
+KEYWORD = [PID[p] for p in (KEYWORD_PHONES.get(K.KEYWORD) or cmudict()[K.KEYWORD])]   # phoneme ids of the keyword path
 
 
 def targets_file(split):
