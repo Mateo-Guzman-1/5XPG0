@@ -2,7 +2,8 @@
 // usage: Vspike_soc firmware.bin streams.bin expected.bin results.csv hop
 //   streams.bin:  records of uint32 n_frames + n_frames x 24 uint8 (state is reset per record)
 //   expected.bin: per request int32 detected (bit0 detection, bit1 stage 1 reached CASCADE_T1,
-//                 bit2 the verifier ran), score_a, score_b (VERIFIER_NEG when it did not run)
+//                 bit2 the verifier ran), score_a, score_b, head (VERIFIER_NEG when it did not run
+//                 or has no keyword head)
 // Checks every request against the oracle (verify_verifier_rtl.py --cascade), the frame of a
 // detection (MB[17] = last frame of the request) and that a detection lights the LED.
 #include "Vspike_soc.h"
@@ -67,7 +68,7 @@ int main(int argc, char **argv) {
             return s.read(mb(6));
         };
         std::ofstream out(argv[4]);
-        out << "record,request,frames,detected,score_a,score_b,cycles\n";
+        out << "record,request,frames,detected,score_a,score_b,head,cycles\n";
         size_t pos = 0, e = 0;
         unsigned record = 0, detections = 0, runs = 0, requests = 0;
         uint64_t worst = 0, worst_run = 0;
@@ -86,10 +87,11 @@ int main(int argc, char **argv) {
                 }
                 pos += k * FB;
                 if (command(4, k * FB) != 0) throw std::runtime_error("Stream request failed");
-                if (e + 3 > expected.size()) throw std::runtime_error("Expected-value file too short");
-                const int32_t got[3] = {int32_t(s.read(mb(11)) & 7u), int32_t(s.read(mb(26))), int32_t(s.read(mb(28)))};
+                if (e + 4 > expected.size()) throw std::runtime_error("Expected-value file too short");
+                const int32_t got[4] = {int32_t(s.read(mb(11)) & 7u), int32_t(s.read(mb(26))), int32_t(s.read(mb(28))),
+                                        int32_t(s.read(mb(32)))};
                 const uint32_t cyc = s.read(mb(9));
-                for (unsigned w = 0; w < 3; ++w)
+                for (unsigned w = 0; w < 4; ++w)
                     if (got[w] != expected[e + w]) {
                         std::cerr << "record " << record << " request " << request << " word " << w << ": " << got[w]
                                   << " expected " << expected[e + w] << '\n';
@@ -103,8 +105,8 @@ int main(int argc, char **argv) {
                 if (got[0] & 4) { ++runs; worst_run = std::max<uint64_t>(worst_run, cyc); }
                 worst = std::max<uint64_t>(worst, cyc);
                 out << record << ',' << request << ',' << k << ',' << got[0] << ',' << got[1] << ',' << got[2] << ','
-                    << cyc << '\n';
-                e += 3;
+                    << got[3] << ',' << cyc << '\n';
+                e += 4;
             }
             ++record;
         }

@@ -54,15 +54,15 @@ foreach stream $streams {
     set frames 0
     set hop 0
     foreach h $stream {
-        lassign $h k best last spikes detected at words score_a score_b
+        lassign $h k best last spikes detected at words score_a score_b head
         mwr -force 0x40010800 $words
         if {[command 4 [expr {$k*$fb}]] != 0} {error "Stream request failed"}
         incr frames $k
         set got [list [signed [rd [mb 7]]] [signed [rd [mb 8]]] [rd [mb 10]] [rd [mb 11]] [rd [mb 17]] [rd [mb 18]]]
         set want [list $best $last $spikes $detected $at $frames]
         if {$cascade} {
-            lappend got [signed [rd [mb 26]]] [signed [rd [mb 28]]]
-            lappend want $score_a $score_b
+            lappend got [signed [rd [mb 26]]] [signed [rd [mb 28]]] [signed [rd [mb 32]]]
+            lappend want $score_a $score_b $head
         }
         if {$got ne $want} {error "Mismatch record $record hop $hop: got $got expected $want"}
         set cycles [rd [mb 9]]

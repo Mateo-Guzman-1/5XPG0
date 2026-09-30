@@ -57,9 +57,9 @@ def cascade_hops(x, q, qv, t1, t2, hop, warmup=5, boundary=10):
     if hop != HOP:
         raise ValueError(f'the cascade decides at the end of {HOP}-frame requests')
     base = expected_hops(x, q, hop)
-    for h, (bits, sa, sb) in zip(base, cascade_requests(x, q, qv, t1, t2, int(q.get('decision_window', 1)),
-                                                      warmup, boundary)):
-        h.update(detected=bits, at=h['frames'] - 1 if bits & 1 else 0xffffffff, score_a=sa, score_b=sb)
+    for h, (bits, sa, sb, hd) in zip(base, cascade_requests(x, q, qv, t1, t2, int(q.get('decision_window', 1)),
+                                                          warmup, boundary)):
+        h.update(detected=bits, at=h['frames'] - 1 if bits & 1 else 0xffffffff, score_a=sa, score_b=sb, head=hd)
     return base
 
 
@@ -76,7 +76,7 @@ def hops(x, q, hop, cascade=None):
     out = []
     for h in expected_hops(x, q, hop) if cascade is None else cascade_hops(x, q, *cascade, hop):
         words = ' '.join(f'0x{n:08x}' for n in np.frombuffer(x[h['start']:h['start'] + h['frames']].tobytes(), '<u4'))
-        extra = f" {h['score_a']} {h['score_b']}" if cascade is not None else ''
+        extra = f" {h['score_a']} {h['score_b']} {h['head']}" if cascade is not None else ''
         out.append(f"{{{h['frames']} {h['best']} {h['last']} {h['spikes']} {h['detected']} {h['at']} {{{words}}}{extra}}}")
     return out
 

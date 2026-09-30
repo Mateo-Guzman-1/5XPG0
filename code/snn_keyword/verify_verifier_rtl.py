@@ -88,7 +88,7 @@ def main():
     lg, res = oracle(wins, q, a.warmup, a.boundary)
     flat = lg.reshape(len(wins), -1)
     hashes = (flat.astype(np.int64) * np.arange(1, flat.shape[1] + 1)).sum(1) & 0xffffffff
-    exp = np.c_[res, hashes.astype(np.uint32).view(np.int32)].astype('<i4')
+    exp = np.c_[res[:, :4], hashes.astype(np.uint32).view(np.int32)].astype('<i4')
     (ROOT / 'build/verifier_rtl_in.bin').write_bytes(records(seqs))
     exp.tofile(ROOT / 'build/verifier_rtl_expected.bin')
     t0 = time.perf_counter()
@@ -151,7 +151,7 @@ def cascade_main(a):
     for sq in seqs:
         r = cascade_requests(sq, q1, qv, t1, t2, window, a.warmup, a.boundary)
         per.append(r)
-        exp += [w for req in r for w in req]
+        exp += [w for req in r for w in req]      # detected, score_a, score_b, head per request
     (ROOT / 'build/cascade_rtl_in.bin').write_bytes(records(seqs))
     np.array(exp, '<i4').tofile(ROOT / 'build/cascade_rtl_expected.bin')
     t0 = time.perf_counter()
@@ -163,11 +163,11 @@ def cascade_main(a):
     ran = (rows['detected'].astype(np.int64) & 4) > 0
     sizes = section_sizes(ROOT / (fw + '.map'))
     summary = {'checkpoint': a.checkpoint.as_posix(), 'stage1': a.stage1.as_posix(), 'firmware': fw + '.bin',
-               't1': t1, 't2': t2, 'window': window,
+               't1': t1, 't2': t2, 'window': window, 'decision': 'head' if 'head_w' in qv else 'path',
                'records': {k: kinds.count(k) for k in dict.fromkeys(kinds)}, 'requests': len(rows),
                'bit_exact': 'PASS' in r.stdout, 'verifier_runs': int(ran.sum()),
                'detections': int(((rows['detected'].astype(np.int64) & 1) > 0).sum()),
-               'detections_by_kind': {k: sum(any(b & 1 for b, _, _ in p) for p, kk in zip(per, kinds) if kk == k)
+               'detections_by_kind': {k: sum(any(req[0] & 1 for req in p) for p, kk in zip(per, kinds) if kk == k)
                                       for k in dict.fromkeys(kinds)},
                'cycles_request_max': int(cyc.max()), 'cycles_with_verifier_max': int(cyc[ran].max()) if ran.any() else None,
                'ms_at_100MHz_max': float(cyc.max()) / 1e5, 'verifier_export': info,

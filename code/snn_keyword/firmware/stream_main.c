@@ -35,6 +35,9 @@
  * MB[26..29] its scores (VERIFIER_NEG, -1 when it did not run); MB[17] the
  * last frame of the request on a detection; MB[9] cycles of stage 1 and the
  * verifier; MB[13] = CASCADE_T1, MB[25] = VERIFIER_THRESHOLD_A, MB[31] = 1.
+ * With a keyword head (VERIFIER_HEAD) the decision is the head score, MB[32]
+ * (MB[33] its step); MB[26..29] stay the phoneme path scores. Command 6 also
+ * writes MB[32..33].
  */
 #include <stdint.h>
 #include "stream_infer.h"
@@ -158,20 +161,27 @@ void main(void)
 #ifdef CASCADE
             {
                 const uint32_t reach = hop_best >= (int64_t)CASCADE_T1;
-                int32_t v[4] = {VERIFIER_NEG, -1, VERIFIER_NEG, -1};
+                int32_t v[6] = {VERIFIER_NEG, -1, VERIFIER_NEG, -1, VERIFIER_NEG, -1};
                 if (reach) detected |= 2;
                 if (reach || prev_reach) {
                     verifier_result_t r;
                     verifier_run(vhist + vpos * STREAM_BANDS, VERIFIER_FRAMES, &r, 0);
                     v[0] = r.score_a; v[1] = r.end_a; v[2] = r.score_b; v[3] = r.end_b;
+                    v[4] = r.head; v[5] = r.end_head;
                     detected |= 4;
-                    if (r.score_a >= VERIFIER_THRESHOLD_A && (!have_event || frames - last_event >= HOLDOFF)) {
+#ifdef VERIFIER_HEAD
+                    const int32_t decision = r.head;
+#else
+                    const int32_t decision = r.score_a;
+#endif
+                    if (decision >= VERIFIER_THRESHOLD_A && (!have_event || frames - last_event >= HOLDOFF)) {
                         have_event = 1; last_event = frames;
                         detected |= 1; at = k - 1;
                     }
                 }
                 prev_reach = reach;
                 for (unsigned i = 0; i < 4; ++i) MB[26 + i] = (uint32_t)v[i];
+                MB[32] = (uint32_t)v[4]; MB[33] = (uint32_t)v[5];
             }
 #endif
             uint32_t elapsed = TIMER - start;
@@ -204,6 +214,7 @@ void main(void)
                 hash += (uint32_t)vlogits[i] * (i + 1);
             MB[6] = 0; MB[26] = (uint32_t)r.score_a; MB[27] = (uint32_t)r.end_a;
             MB[28] = (uint32_t)r.score_b; MB[29] = (uint32_t)r.end_b; MB[30] = hash;
+            MB[32] = (uint32_t)r.head; MB[33] = (uint32_t)r.end_head;
 #endif
         } else if (opcode == 2) {
             MB[6] = 0;

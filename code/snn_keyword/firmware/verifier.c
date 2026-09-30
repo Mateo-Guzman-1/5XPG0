@@ -95,8 +95,8 @@ void verifier_run(const uint8_t *frames, unsigned n, verifier_result_t *res, int
     const unsigned steps = n / VERIFIER_STACK;
     for (unsigned i = 0; i < VERIFIER_IN + VERIFIER_H1 + VERIFIER_H2; ++i) act[i] = 0;
     for (unsigned s = 0; s < NS; ++s) D[s] = VERIFIER_NEG;
-    res->score_a = res->score_b = VERIFIER_NEG;
-    res->end_a = res->end_b = -1;
+    res->score_a = res->score_b = res->head = VERIFIER_NEG;
+    res->end_a = res->end_b = res->end_head = -1;
     for (unsigned t = 0; t < steps; ++t) {
         const uint8_t *f = frames + t * VERIFIER_IN;
         for (unsigned i = 0; i < VERIFIER_IN; ++i) act[i] = (int16_t)(f[i] << 2);
@@ -111,6 +111,12 @@ void verifier_run(const uint8_t *frames, unsigned n, verifier_result_t *res, int
             if (lg[c] > top) top = lg[c];
             if (logits) logits[t * VERIFIER_CLASSES + c] = lg[c];
         }
+#ifdef VERIFIER_HEAD
+        {   /* keyword head (verifier_model.head_score): w . h2 per step, maximum over steps >= warmup */
+            const int32_t hv = ((dot(h2, verifier_wh, VERIFIER_H2) - 128 * s2) >> VERIFIER_HEAD_E) + VERIFIER_HEAD_B;
+            if (t >= VERIFIER_WARMUP && hv > res->head) { res->head = hv; res->end_head = (int32_t)t; }
+        }
+#endif
         /* Keyword path (verifier_model.keyword_score); costs c(k) = logit(k) - max <= 0. */
         const int32_t cb = lg[VERIFIER_BLANK] - top, cp = max2(cb, lg[phones[VERIFIER_NPH - 1]] - top);
         for (unsigned s = 0; s < NS; ++s) P[s] = D[s];
