@@ -1,4 +1,5 @@
 """Additional held-out background-noise probes; never used to tune the model."""
+import argparse
 import json
 from pathlib import Path
 import numpy as np
@@ -9,7 +10,11 @@ ROOT=Path(__file__).resolve().parent
 
 
 def main():
-    q=dict(np.load(ROOT/'deploy/model.npz'))
+    p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--model',type=Path,default=ROOT/'deploy/model.npz')
+    p.add_argument('--out',type=Path,default=ROOT/'results/background_noise.json')
+    a=p.parse_args()
+    q=dict(np.load(a.model))
     rows=[]
     for path in sorted((ROOT/'data/speech_commands_v0.02/_background_noise_').glob('*.wav')):
         audio=read_wav(path)
@@ -20,7 +25,7 @@ def main():
     result={'purpose':'out-of-training background probes, nonoverlapping 1 s clips; not continuous-speech FAR',
             'recordings':rows,'windows':sum(r['windows'] for r in rows),
             'false_detections':sum(r['false_detections'] for r in rows)}
-    (ROOT/'results/background_noise.json').write_text(json.dumps(result,indent=2))
+    a.out.write_text(json.dumps(result,indent=2))
     print(json.dumps(result,indent=2))
 
 

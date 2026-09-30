@@ -8,6 +8,16 @@ import numpy as np
 from features import SAMPLE_RATE, features, read_wav
 from protocol import MODE_SINGLE, MODE_STREAM, request
 
+ROOT = Path(__file__).resolve().parent
+
+
+def deployed_keyword():
+    """The board only returns scores; the word's name comes from deploy/manifest.json."""
+    try:
+        return json.loads((ROOT / 'deploy/manifest.json').read_text())['keyword']
+    except (OSError, ValueError, KeyError):
+        return 'keyword'
+
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
@@ -19,7 +29,10 @@ def main():
                    help='Live: decide on each window alone instead of requiring 2 of 3 consecutive windows')
     p.add_argument('--json', action='store_true',
                    help='Live: print every board reply as JSON instead of one line per detected keyword')
+    p.add_argument('--keyword', default=deployed_keyword(),
+                   help='Name of the keyword on the board, for messages (default: deploy/manifest.json)')
     a = p.parse_args()
+    word = a.keyword.capitalize()
     with socket.create_connection((a.host, a.port), timeout=10) as sock:
         if a.wav:
             print(json.dumps(request(sock, 1, features(read_wav(a.wav)))))
@@ -43,7 +56,7 @@ def main():
         seq = 0
         mode = MODE_SINGLE if a.single else MODE_STREAM
         rule = 'each window' if a.single else '2 of 3 consecutive windows'
-        print(f'Listening for "yes"; 1 s windows / 250 ms hop; detection needs {rule}. Ctrl-C stops.')
+        print(f'Listening for "{word}"; 1 s windows / 250 ms hop; detection needs {rule}. Ctrl-C stops.')
         detections, previous = 0, False
         with sd.InputStream(channels=1, samplerate=SAMPLE_RATE, blocksize=4000,
                             dtype='float32', device=a.device, callback=callback):
@@ -60,9 +73,9 @@ def main():
                 if a.json:
                     print(json.dumps(result), flush=True)
                 elif result['detected'] and not previous:
-                    # One spoken "yes" confirms several consecutive windows; report it once.
+                    # One spoken keyword confirms several consecutive windows; report it once.
                     detections += 1
-                    print(f'\nYES detected ({detections}), score margin {result["score1"] - result["score0"]}, '
+                    print(f'\n{word.upper()} detected ({detections}), score margin {result["score1"] - result["score0"]}, '
                           f'{result["cycles"]} cycles on the RISC-V core', flush=True)
                 else:
                     print('.', end='', flush=True)   # one dot per window: still listening

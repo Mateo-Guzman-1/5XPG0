@@ -13,6 +13,23 @@ session and ends with a short, detailed report containing measured data. Togethe
 reports form the evidence for the conclusion of the main report. How to start a session:
 see [README.md](README.md). Progress: [STATUS.md](STATUS.md).
 
+> **Keyword change (2026-09-30).** The keyword is now **"Sheila"** (Speech Commands word
+> `sheila`), no longer "yes" (`JOURNAL.md` entry 9). Read "yes" in this plan as "the keyword".
+> - E0's baseline is the Sheila release: `deploy/model.npz`, numbers in [STATUS.md](STATUS.md),
+>   evidence in `code/snn_keyword/results/sheila/`. PyTorch, the dataset, a measured CPU
+>   training time, `research/tools/build_firmware.py` and `code/snn_keyword/check_board.py`
+>   already exist (see STATUS.md for what E0 still has to do).
+> - The near-miss words in A3, A6, E1 and E5 were chosen for "yes". The session that runs
+>   each experiment first re-chooses them for Sheila. The first TTS probe
+>   (`make_tts_probe.ps1 -Keyword sheila`, 2 voices; `results/sheila/confusables.json`)
+>   shows the opposite of the "yes" problem: the release model keys on the **"shee-"
+>   onset**. With "2 of 3" it accepts sheena 71%, shayla 68%, shield 64%, cheetah 60%,
+>   sheep 55%, she 54%, sheet 48%, shelter 45% ("Sheila" itself 68%), but not words that
+>   share only the ending (leila 3%, delilah 0%). So E1 should record mainly "she-" words,
+>   and E5's most relevant hard negatives are *ending* variants (Sheila with its "-la"
+>   removed or replaced, "Sheena", "sheet"); onset swaps ("Leila") come second.
+> - `augment.py` edits "yes" recordings only; Sheila hard negatives are built in E5.
+
 ---
 
 ## Part A — Primer: the ideas behind the plan

@@ -6,7 +6,7 @@ from pathlib import Path
 import shutil
 import numpy as np
 import torch
-from model import SpikeMLP, integer_forward, metrics
+from model import SpikeMLP, integer_forward, metrics, keyword_of
 from train_keyword_snn import evaluate
 from export_model import export
 
@@ -16,17 +16,24 @@ ROOT = Path(__file__).resolve().parent
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--runs', type=Path, default=ROOT / 'runs')
+    p.add_argument('--results', type=Path, default=ROOT / 'results',
+                   help='folder for evaluation.json, training histories and verification vectors')
+    p.add_argument('--expect', type=int, default=6, help='number of runs that must exist (6 = the preregistered "yes" runs)')
     a = p.parse_args()
     torch.set_num_threads(8)
     folders = sorted(a.runs.glob('*_seed*'))
     training = {f: json.loads((f / 'training.json').read_text()) for f in folders}
-    if len(training) != 6:
-        raise ValueError('Expected the six preregistered runs; finish training first')
+    if len(training) != a.expect:
+        raise ValueError(f'Expected {a.expect} runs in {a.runs}; finish training first')
     winner = max(folders, key=lambda f: (training[f]['validation']['f1'], training[f]['encoding'] == 'current'))
-    deploy, results = ROOT / 'deploy', ROOT / 'results'
-    deploy.mkdir(exist_ok=True); results.mkdir(exist_ok=True)
-    shutil.copyfile(winner / 'model.npz', deploy / 'model.npz')
+    deploy, results = ROOT / 'deploy', a.results
+    deploy.mkdir(exist_ok=True); results.mkdir(parents=True, exist_ok=True)
     data = np.load(ROOT / 'data/features.npz')
+    keyword = keyword_of(data)
+    for folder in folders:
+        if keyword_of(np.load(folder / 'model.npz')) != keyword:
+            raise ValueError(f'{folder} was not trained for "{keyword}", the keyword of data/features.npz')
+    shutil.copyfile(winner / 'model.npz', deploy / 'model.npz')
     mask = data['split'] == 2
     x, y, names = data['x'][mask], data['y'][mask], data['names'][mask]
     reports = []
@@ -62,7 +69,7 @@ def main():
             vectors.tofile(ROOT / 'build/vectors.bin')
             x.tofile(ROOT / 'build/test_features.bin')
             np.c_[scores, spikes].astype('<i4').tofile(ROOT / 'build/test_expected.bin')
-    summary = {'selected_run': winner.name, 'selection_rule': 'maximum integer validation F1; no test tuning',
+    summary = {'keyword': keyword, 'selected_run': winner.name, 'selection_rule': 'maximum integer validation F1; no test tuning',
                'model_sha256': hashlib.sha256((deploy / 'model.npz').read_bytes()).hexdigest(),
                'test_samples': len(y), 'runs': reports}
     (results / 'evaluation.json').write_text(json.dumps(summary, indent=2))

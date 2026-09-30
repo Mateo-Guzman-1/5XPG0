@@ -16,6 +16,7 @@ the complete word ending in a plain /s/:
   label 1  shift  complete word at a random position in the window
 
 Variants inherit their source clip's official speaker-disjoint split.
+Only for data prepared with --keyword yes; other keywords need their own variants.
 """
 import argparse
 from concurrent.futures import ThreadPoolExecutor
@@ -23,6 +24,7 @@ import json
 from pathlib import Path
 import numpy as np
 from features import SAMPLE_RATE, features, read_wav
+from model import keyword_of
 
 ROOT = Path(__file__).resolve().parent
 KINDS = ('ts', 'ch', 'sh', 'cut', 'tail', 'head', 'shift')
@@ -118,6 +120,8 @@ def fit(audio):
 
 def build(data, workers):
     cache = np.load(data / 'features.npz')
+    if keyword_of(cache) != 'yes':
+        raise SystemExit(f'augment.py edits the final /s/ of "yes" clips; the data is prepared for "{keyword_of(cache)}"')
     names, split = cache['names'], cache['split']
     raw = data / 'speech_commands_v0.02'
     jobs = [(i, n) for i, n in enumerate(names) if n.startswith('yes/')]

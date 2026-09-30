@@ -8,11 +8,18 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from features import features, mel_bank, N_INPUT
-from model import integer_forward, trunc_div, metrics, choose_threshold
+from model import integer_forward, trunc_div, metrics, choose_threshold, keyword_of
 from protocol import request, recv_exact, HEADER, RESPONSE, MAGIC, MODE_STREAM
 from board_server import handle
 from board_server import SimulatedBoard
 from board_server import Board
+
+
+def release_evidence():
+    """Folder with the deployed model's verification vectors (deploy/manifest.json "evidence")."""
+    import json
+    manifest=json.loads((ROOT/'deploy/manifest.json').read_text())
+    return ROOT/manifest.get('evidence','results')
 
 
 def test_frontend_contract():
@@ -132,7 +139,7 @@ def test_exported_model_silence():
 def test_real_model_over_tcp_and_wav_frontend():
     path=ROOT/'deploy/model.npz'
     if not path.exists(): pytest.skip('Run training/export first')
-    vectors=np.load(ROOT/'results/verification_vectors.npz')
+    vectors=np.load(release_evidence()/'verification_vectors.npz')
     backend=SimulatedBoard(path)
     with socket.create_server(('127.0.0.1',0)) as server:
         def serve():
@@ -146,7 +153,7 @@ def test_real_model_over_tcp_and_wav_frontend():
                 assert r['spikes']==int(vectors['spikes'][i])
         thread.join(timeout=3)
         assert not thread.is_alive()
-    sources=ROOT/'results/vector_sources.json'
+    sources=release_evidence()/'vector_sources.json'
     if sources.exists():
         import json
         from features import read_wav
@@ -155,10 +162,21 @@ def test_real_model_over_tcp_and_wav_frontend():
             assert np.array_equal(features(read_wav(wav)),vectors['x'][0])
 
 
+def test_deploy_matches_manifest():
+    import hashlib,json
+    manifest=json.loads((ROOT/'deploy/manifest.json').read_text())
+    for name,info in manifest['files'].items():
+        data=(ROOT/'deploy'/name).read_bytes()
+        assert (len(data),hashlib.sha256(data).hexdigest())==(info['bytes'],info['sha256']),name
+    assert keyword_of(np.load(ROOT/'deploy/model.npz'))==manifest['keyword']
+
+
 def test_board_mailbox_layout_and_sequence_wrap():
     import struct
     board=Board.__new__(Board)
     board.ram=bytearray(0x40000);board.reg=bytearray(4096)
+    # Board.__init__ makes these 32-bit views over the mapped memory.
+    board.ram32=memoryview(board.ram).cast('I');board.reg32=memoryview(board.reg).cast('I')
     struct.pack_into('<I',board.ram,0x10400,0xffffffff)
     struct.pack_into('<I',board.ram,0x10404,0xffffffff)
     original_write=board.write
@@ -179,6 +197,7 @@ def test_board_timeout_stops_core(monkeypatch):
     import board_server
     board=Board.__new__(Board)
     board.ram=bytearray(0x40000);board.reg=bytearray(4096)
+    board.ram32=memoryview(board.ram).cast('I');board.reg32=memoryview(board.reg).cast('I')
     clock=iter([0,6])
     monkeypatch.setattr(board_server.time,'monotonic',lambda:next(clock))
     with pytest.raises(RuntimeError,match='timed out'): board.infer(bytes(768))

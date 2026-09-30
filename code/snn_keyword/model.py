@@ -77,6 +77,11 @@ def quantize(model):
     return q
 
 
+def keyword_of(npz):
+    """Keyword stored in a features cache or model file; files made before it was stored are "yes"."""
+    return str(npz['keyword']) if 'keyword' in npz else 'yes'
+
+
 def trunc_div(x, d):
     return np.where(x < 0, -((-x) // d), x // d)
 

@@ -1,16 +1,24 @@
 # Held-out confusable-word probe: synthesize words with the offline Windows
-# voices (David, Zira) at 4 rates x 3 pitches into build/tts_probe/*.wav.
+# voices (David, Zira) at 4 rates x 3 pitches into build/tts_probe/*.wav
+# ("yes") or build/tts_probe_<keyword>/*.wav (other keywords).
 # These clips are never used for training; confusables.py scores them.
 # Voices differ between Windows installs, so regenerated clips (and the probe
 # numbers) can differ from the recorded results on another machine.
-param([string]$Out = (Join-Path $PSScriptRoot 'build\tts_probe'))
+param([ValidateSet('sheila', 'yes')][string]$Keyword = 'sheila', [string]$Out = '')
+if (-not $Out) { $Out = Join-Path $PSScriptRoot $(if ($Keyword -eq 'yes') { 'build\tts_probe' } else { "build\tts_probe_$Keyword" }) }
 New-Item -ItemType Directory -Force $Out | Out-Null
 Add-Type -AssemblyName System.Speech
 $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer
 $format = New-Object System.Speech.AudioFormat.SpeechAudioFormatInfo(16000,
     [System.Speech.AudioFormat.AudioBitsPerSample]::Sixteen, [System.Speech.AudioFormat.AudioChannel]::Mono)
-$words = @('yes','yes!','yeets','yeet','yets','yetz','pizza','pizzas','yech','yetch','peach','each',
-           'eats','jets','gets','bets','lets','yeah','sets','its','cheese','yesterday','less','guess')
+# Keyword, then near-miss words; the Sheila list is a first probe (groups in confusables.py).
+$lists = @{
+    yes = @('yes','yes!','yeets','yeet','yets','yetz','pizza','pizzas','yech','yetch','peach','each',
+            'eats','jets','gets','bets','lets','yeah','sets','its','cheese','yesterday','less','guess')
+    sheila = @('sheila','sheila!','she','sheet','sheep','shield','sheena','leila','delilah','keela',
+               'feeler','healer','dealer','shayla','shelter','cheetah','tequila','yes','no','hello','seven','marvin')
+}
+$words = $lists[$Keyword]
 $count = 0
 foreach ($voice in @('Microsoft David Desktop','Microsoft Zira Desktop')) {
     $synth.SelectVoice($voice)

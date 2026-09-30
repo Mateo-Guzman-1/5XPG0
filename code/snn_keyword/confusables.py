@@ -3,11 +3,12 @@
 For each model (integer inference, identical to the board):
   clips      official test clips at the decision threshold (precision/recall/F1)
   live       test clips placed in 2.25 s of background noise, consecutive 250 ms-hop
-             windows as the demo sends them: "yes" detected / other word accepted,
+             windows as the demo sends them: keyword detected / other word accepted,
              for a single window and for "2 of 3" confirmation at stream_threshold
-  augmented  false accepts on augment.py test-split variants (shift = recall)
+  augmented  false accepts on augment.py test-split variants (shift = recall; "yes" only)
   tts        per word, share of synthesized utterances (make_tts_probe.ps1, never
              trained on) detected over 250 ms-hop windows, averaged over 4 hop phases
+The keyword is the one the data was prepared for (prepare_data.py --keyword).
 Writes one JSON file; run with KWS_TIME_BINS=64 --data data/b64 for 64-bin models.
 """
 import argparse
@@ -18,14 +19,20 @@ import os
 from pathlib import Path
 import numpy as np
 from features import N_TIME, SAMPLE_RATE, features, read_wav
-from model import integer_forward, metrics
+from model import integer_forward, keyword_of, metrics
 from tune_stream import HOP, live_windows
 
 ROOT = Path(__file__).resolve().parent
-TTS_GROUPS = {'yes': ['yes'], 'yeets/yets/yetz': ['yeets', 'yets', 'yetz'], 'pizza(s)': ['pizza', 'pizzas'],
-              'eats/its': ['eats', 'its'], 'other -ts': ['jets', 'gets', 'bets', 'lets', 'sets'],
-              'ch words': ['yech', 'yetch', 'each', 'peach'], 'yeah': ['yeah'], 'yeet': ['yeet'],
-              'guess/less': ['guess', 'less'], 'cheese/yesterday': ['cheese', 'yesterday']}
+# Word groups of the TTS probe per keyword (make_tts_probe.ps1 -Keyword).
+TTS_GROUPS = {
+    'yes': {'yes': ['yes'], 'yeets/yets/yetz': ['yeets', 'yets', 'yetz'], 'pizza(s)': ['pizza', 'pizzas'],
+            'eats/its': ['eats', 'its'], 'other -ts': ['jets', 'gets', 'bets', 'lets', 'sets'],
+            'ch words': ['yech', 'yetch', 'each', 'peach'], 'yeah': ['yeah'], 'yeet': ['yeet'],
+            'guess/less': ['guess', 'less'], 'cheese/yesterday': ['cheese', 'yesterday']},
+    'sheila': {'sheila': ['sheila'], 'she- words': ['she', 'sheet', 'sheep', 'shield', 'sheena'],
+               '-eila words': ['leila', 'delilah', 'keela'], '-eeler words': ['feeler', 'healer', 'dealer'],
+               'similar': ['shayla', 'shelter', 'cheetah', 'tequila'],
+               'other words': ['yes', 'no', 'hello', 'seven', 'marvin']}}
 
 
 def tts_sequences(data, probe):
@@ -57,7 +64,7 @@ def decide(margin, bounds, single, stream):
     return np.array(one), np.array(two)
 
 
-def evaluate(q, clips, live, aug, tts):
+def evaluate(q, clips, live, aug, tts, keyword):
     th = int(q['decision_threshold']); sth = int(q.get('stream_threshold', th))
     margin = lambda x: (lambda s: s[:, 1] - s[:, 0])(integer_forward(x, q)[0])
     out = {'decision_threshold': th, 'stream_threshold': sth, 'hidden': int(len(q['w1']))}
@@ -66,18 +73,21 @@ def evaluate(q, clips, live, aug, tts):
     x, clip, y = live
     bounds = np.r_[0, np.cumsum(np.bincount(clip))]
     one, two = decide(margin(x), bounds, th, sth)
-    out['live'] = {'single_window': {'yes_detected': round(float(one[y == 1].mean()), 4),
+    detected = f'{keyword}_detected'
+    out['live'] = {'single_window': {detected: round(float(one[y == 1].mean()), 4),
                                      'other_accepted': round(float(one[y == 0].mean()), 4)},
-                   'two_of_three': {'yes_detected': round(float(two[y == 1].mean()), 4),
+                   'two_of_three': {detected: round(float(two[y == 1].mean()), 4),
                                     'other_accepted': round(float(two[y == 0].mean()), 4)}}
-    ax, ak = aug
-    hit = margin(ax) >= th
-    out['augmented_test_detected'] = {k: round(float(hit[ak == k].mean()), 4) for k in dict.fromkeys(ak)}
+    if aug:
+        ax, ak = aug
+        hit = margin(ax) >= th
+        out['augmented_test_detected'] = {k: round(float(hit[ak == k].mean()), 4) for k in dict.fromkeys(ak)}
     if tts:
         words, tx, tb = tts
         one, two = decide(margin(tx), tb, th, sth)
         words = np.array(words)
-        out['tts'] = {mode: {g: round(float(r[np.isin(words, ws)].mean()), 4) for g, ws in TTS_GROUPS.items()}
+        groups = {g: ws for g, ws in TTS_GROUPS.get(keyword, {keyword: [keyword]}).items() if np.isin(words, ws).any()}
+        out['tts'] = {mode: {g: round(float(r[np.isin(words, ws)].mean()), 4) for g, ws in groups.items()}
                       for mode, r in (('single_window', one), ('two_of_three', two))}
     return out
 
@@ -86,20 +96,28 @@ def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('models', nargs='+', help='name=path/to/model.npz')
     p.add_argument('--data', type=Path, default=ROOT / 'data')
-    p.add_argument('--probe', type=Path, default=ROOT / 'build/tts_probe')
+    p.add_argument('--probe', type=Path, help='TTS clips; default build/tts_probe ("yes") or build/tts_probe_<keyword>')
     p.add_argument('--out', type=Path, default=ROOT / 'results/confusables.json')
     a = p.parse_args()
     d = np.load(a.data / 'features.npz')
+    keyword = keyword_of(d)
     clips = (d['x'][d['split'] == 2], d['y'][d['split'] == 2])
-    aug = np.load(a.data / 'augment.npz')
-    aug = (aug['x'][aug['split'] == 2], aug['kind'][aug['split'] == 2])
+    aug = None
+    if keyword == 'yes' and (a.data / 'augment.npz').exists():   # augment.py edits "yes" clips only
+        aug = np.load(a.data / 'augment.npz')
+        aug = (aug['x'][aug['split'] == 2], aug['kind'][aug['split'] == 2])
     live = live_windows(a.data, 3000, seed=1, split=2)
-    tts = tts_sequences(a.data, a.probe)
-    report = {'time_bins': N_TIME, 'live_test': {'yes_clips': int((live[2] == 1).sum()), 'other_clips': int((live[2] == 0).sum())},
+    probe = a.probe or ROOT / ('build/tts_probe' if keyword == 'yes' else f'build/tts_probe_{keyword}')
+    tts = tts_sequences(a.data, probe)
+    report = {'keyword': keyword, 'time_bins': N_TIME,
+              'live_test': {f'{keyword}_clips': int((live[2] == 1).sum()), 'other_clips': int((live[2] == 0).sum())},
               'tts_utterances': (len(tts[0]) // 4) if tts else 0, 'models': {}}
     for spec in a.models:
         name, path = spec.split('=', 1)
-        report['models'][name] = evaluate(dict(np.load(path)), clips, live, aug, tts)
+        q = dict(np.load(path))
+        if keyword_of(q) != keyword:
+            raise SystemExit(f'{path} detects "{keyword_of(q)}" but the data is prepared for "{keyword}"')
+        report['models'][name] = evaluate(q, clips, live, aug, tts, keyword)
         report['models'][name]['file'] = Path(path).as_posix()
         print(name, json.dumps(report['models'][name]['live']), flush=True)
     a.out.write_text(json.dumps(report, indent=2))

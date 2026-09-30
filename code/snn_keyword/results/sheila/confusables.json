@@ -1,0 +1,128 @@
+{
+  "keyword": "sheila",
+  "time_bins": 32,
+  "live_test": {
+    "sheila_clips": 212,
+    "other_clips": 3000
+  },
+  "tts_utterances": 528,
+  "models": {
+    "release_seed1": {
+      "decision_threshold": 3002,
+      "stream_threshold": 1080,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8564,
+        "recall": 0.816,
+        "f1": 0.8357
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7406,
+          "other_accepted": 0.0107
+        },
+        "two_of_three": {
+          "sheila_detected": 0.6887,
+          "other_accepted": 0.004
+        }
+      },
+      "tts": {
+        "single_window": {
+          "sheila": 0.7969,
+          "she- words": 0.7104,
+          "-eila words": 0.1042,
+          "-eeler words": 0.2222,
+          "similar": 0.6224,
+          "other words": 0.0021
+        },
+        "two_of_three": {
+          "sheila": 0.6771,
+          "she- words": 0.5833,
+          "-eila words": 0.1042,
+          "-eeler words": 0.1181,
+          "similar": 0.5,
+          "other words": 0.0
+        }
+      },
+      "file": "deploy/model.npz"
+    },
+    "seed0": {
+      "decision_threshold": 2915,
+      "stream_threshold": 1310,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8,
+        "recall": 0.8302,
+        "f1": 0.8148
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7547,
+          "other_accepted": 0.0123
+        },
+        "two_of_three": {
+          "sheila_detected": 0.7075,
+          "other_accepted": 0.0043
+        }
+      },
+      "tts": {
+        "single_window": {
+          "sheila": 0.7865,
+          "she- words": 0.7292,
+          "-eila words": 0.1875,
+          "-eeler words": 0.3056,
+          "similar": 0.737,
+          "other words": 0.05
+        },
+        "two_of_three": {
+          "sheila": 0.7135,
+          "she- words": 0.5979,
+          "-eila words": 0.1458,
+          "-eeler words": 0.2431,
+          "similar": 0.5521,
+          "other words": 0.0042
+        }
+      },
+      "file": "results/sheila/models/current_seed0.npz"
+    },
+    "seed2": {
+      "decision_threshold": 3084,
+      "stream_threshold": 534,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8923,
+        "recall": 0.8208,
+        "f1": 0.855
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7358,
+          "other_accepted": 0.0093
+        },
+        "two_of_three": {
+          "sheila_detected": 0.6792,
+          "other_accepted": 0.005
+        }
+      },
+      "tts": {
+        "single_window": {
+          "sheila": 0.7917,
+          "she- words": 0.6937,
+          "-eila words": 0.1389,
+          "-eeler words": 0.2639,
+          "similar": 0.6927,
+          "other words": 0.0063
+        },
+        "two_of_three": {
+          "sheila": 0.6979,
+          "she- words": 0.6229,
+          "-eila words": 0.125,
+          "-eeler words": 0.1806,
+          "similar": 0.5391,
+          "other words": 0.0
+        }
+      },
+      "file": "results/sheila/models/current_seed2.npz"
+    }
+  }
+}

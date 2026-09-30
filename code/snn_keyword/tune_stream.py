@@ -17,7 +17,7 @@ import json
 from pathlib import Path
 import numpy as np
 from features import SAMPLE_RATE, features, read_wav
-from model import integer_forward
+from model import integer_forward, keyword_of
 
 ROOT = Path(__file__).resolve().parent
 HOP = SAMPLE_RATE // 4
@@ -26,11 +26,12 @@ HOP = SAMPLE_RATE // 4
 def live_windows(data, negatives, seed=2, split=1):
     """Consecutive 250 ms-hop windows of clips in noise; split 1 = validation, 2 = test."""
     from features import N_TIME
-    cache = ROOT / 'build' / f'live_split{split}_{negatives}_{seed}_{N_TIME}bins.npz'
+    d = np.load(data / 'features.npz')
+    # The positive clips and labels depend on the keyword the data was prepared for.
+    cache = ROOT / 'build' / f'live_{keyword_of(d)}_split{split}_{negatives}_{seed}_{N_TIME}bins.npz'
     if cache.exists():
         z = np.load(cache)
         return z['x'], z['clip'], z['y']
-    d = np.load(data / 'features.npz')
     raw = data / 'speech_commands_v0.02'
     names, y = d['names'][d['split'] == split], d['y'][d['split'] == split]
     noise = np.concatenate([read_wav(p) for p in sorted(glob.glob(str(raw / '_background_noise_' / '*.wav')))])
@@ -68,6 +69,9 @@ def main():
     p.add_argument('--negatives', type=int, default=3000)
     a = p.parse_args()
     q = dict(np.load(a.model))
+    data_keyword = keyword_of(np.load(a.data / 'features.npz'))
+    if keyword_of(q) != data_keyword:
+        raise SystemExit(f'Model detects "{keyword_of(q)}" but the data is prepared for "{data_keyword}"')
     x, clip, y = live_windows(a.data, a.negatives)
     scores, _ = integer_forward(x, q)
     best = confirmed_margin((scores[:, 1] - scores[:, 0]).astype(np.int64), clip, len(y))

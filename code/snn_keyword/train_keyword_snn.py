@@ -10,7 +10,7 @@ import numpy as np
 os.environ.setdefault('CUBLAS_WORKSPACE_CONFIG', ':4096:8')
 import torch
 from torch import nn
-from model import SpikeMLP, integer_forward, quantize, metrics, choose_threshold
+from model import SpikeMLP, integer_forward, quantize, metrics, choose_threshold, keyword_of
 
 ROOT = Path(__file__).resolve().parent
 
@@ -29,6 +29,7 @@ def run(args, seed, encoding):
     device = torch.device(args.device)
     cache = np.load(args.data / 'features.npz')
     x = cache['x']; y = cache['y']; split = cache['split']
+    keyword = keyword_of(cache)   # positive class chosen by prepare_data.py --keyword
     xt = torch.tensor(x[split == 0], device=device, dtype=torch.float32) / 255
     yt = torch.tensor(y[split == 0], device=device, dtype=torch.long)
     xv_np, yv = x[split == 1], y[split == 1]
@@ -36,6 +37,8 @@ def run(args, seed, encoding):
     if args.aug_fraction > 0:
         # Edited "yes" clips from augment.py (confusable endings, window-edge cuts,
         # shifted positives); they inherit the official speaker-disjoint splits.
+        if keyword != 'yes':
+            raise SystemExit(f'augment.npz holds edited "yes" clips; use --aug-fraction 0 for "{keyword}"')
         aug = np.load(args.data / 'augment.npz')
         use = np.isin(aug['kind'], args.aug_kinds)
         tr, va = use & (aug['split'] == 0), use & (aug['split'] == 1)
@@ -88,11 +91,12 @@ def run(args, seed, encoding):
     qlogits, _ = integer_forward(xv_np, q)
     margin = qlogits[:, 1] - qlogits[:, 0]
     q['decision_threshold'] = int(choose_threshold(yv, margin))
+    q['keyword'] = np.array(keyword)
     out = args.out / f'{encoding}_seed{seed}'
     out.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(out / 'model.npz', **q)
     torch.save({'state_dict': best_state, 'hidden': args.hidden, 'steps': args.steps, 'encoding': encoding}, out / 'checkpoint.pt')
-    summary = {'seed': seed, 'encoding': encoding, 'hidden': args.hidden, 'steps': args.steps,
+    summary = {'keyword': keyword, 'seed': seed, 'encoding': encoding, 'hidden': args.hidden, 'steps': args.steps,
                'aug_fraction': args.aug_fraction, 'aug_kinds': args.aug_kinds, 'augmented_train': len(yt) - n_orig,
                'epochs': args.epochs, 'samples_per_epoch': args.samples_per_epoch,
                'training_seconds': time.perf_counter() - start, 'device': str(device),

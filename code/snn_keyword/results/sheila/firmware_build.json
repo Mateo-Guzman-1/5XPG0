@@ -1,0 +1,21 @@
+{
+  "model": "code/snn_keyword/deploy/model.npz",
+  "out": "code/snn_keyword/build/sheila",
+  "compiler": "riscv32-xilinx-elf-gcc.exe (GCC) 13.4.0",
+  "images": {
+    "keyword": {
+      "bin_bytes": 197120,
+      "sha256": "7008b23056c13851182311c4ca1174daa21ab87290fe61652bf398cb5ff5ac3f",
+      "text_bytes": 1168,
+      "model_bytes": 98816,
+      "model_limit_bytes": 147456
+    },
+    "keyword_kdot": {
+      "bin_bytes": 197120,
+      "sha256": "18c11d82bc8fe61a952199ed2c3a6d485ff70f5e7bef23216f9f85239f11f0da",
+      "text_bytes": 1148,
+      "model_bytes": 98816,
+      "model_limit_bytes": 147456
+    }
+  }
+}

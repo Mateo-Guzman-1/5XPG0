@@ -1,10 +1,84 @@
-# Group 2: "yes" keyword detection on PicoRV32
+# Group 2: keyword detection on PicoRV32 ("Sheila"; originally "yes")
 
 The completed local pipeline trains a spiking keyword detector on the full
 Speech Commands v0.02 dataset, exports an integer model, executes its C
 inference kernel on the PicoRV32 RTL, and builds the PYNQ-Z2 bitstream.
 The PC computes one-second mel spectrograms every 250 ms; the RISC-V core
 classifies them and a hardware countdown lights LED0 for exactly one second.
+The keyword is **"Sheila"** since 2026-09-30 (next section); the rest of this
+README documents the original **"yes"** release.
+
+## Current keyword: "Sheila" (since 2026-09-30)
+
+The keyword changed from "yes" to "Sheila" ([JOURNAL.md](JOURNAL.md) entry 9).
+Firmware C code, RTL, bitstreams, board server and protocol are unchanged; only
+the weights and the two thresholds in `deploy/` are new. The evidence for the
+Sheila release is in [`results/sheila/`](results/sheila/); the files directly
+in `results/` belong to the "yes" release.
+
+**Data.** "sheila" is one of the 35 words of Speech Commands v0.02: 2,022
+clips with the official speaker-disjoint split, 1,606 / 204 / 212 positives in
+train / validation / test (84,843 / 9,981 / 11,005 clips in total; the other
+34 words are the negatives). That is about half the positives of "yes".
+
+**Model.** Same recipe as the "yes" release: 768–64–2 LIF, current encoding,
+12 steps, int16 Q10 weights, 35 epochs with the last 10 quantization-aware,
+seeds 0/1/2. Trained on the CPU (Ryzen 5 7600X, PyTorch 2.11.0+cpu), about
+10 s per run. Seed 1 has the best validation F1 and is deployed (decision
+threshold 3002, stream threshold 1080; no test data used for any choice).
+
+| Deployed Sheila model (seed 1) | Value |
+|---|---|
+| Validation F1 | 0.9054 |
+| Test precision / recall / F1 | 85.64% / 81.60% / 0.8357 |
+| Test F1, 3 seeds (mean ± sample sd) | 0.835 ± 0.020 ("yes": 0.867 ± 0.022) |
+| Negative-clip false-positive rate | 0.269% |
+| Live windows, "Sheila" detected: single / 2 of 3 | 74.1% / 68.9% |
+| Live windows, other words accepted: single / 2 of 3 | 1.07% / 0.40% |
+| Background-noise windows with a detection | 2 of 398 |
+| Board max cycles, RV32IM / `kdot` (40 vectors ×3, bit-exact) | 5,980,921 (59.81 ms) / 266,793 (2.67 ms) |
+| Model bytes | 98,824 of 147,456 |
+
+Synthesized words (2 Windows voices, 250 ms hop, 2 of 3): words that start
+like "Sheila" are often accepted (sheena 71%, shayla 68%, shield 64%, sheep
+55%, she 54%; "Sheila" itself 68%), words that only share its ending are not
+(leila 3%, delilah 0%), and unrelated words never were (yes, no, hello, seven,
+marvin: 0%). The network keys on the "shee-" onset; research experiments E1
+and E5 ([research/PLAN.md](research/PLAN.md)) address this.
+
+Reproduce from the repository root (`evaluate.py` overwrites
+`deploy/model.npz`; then update the hashes in `deploy/manifest.json`, which
+the tests check). PyTorch for this CPU-only PC:
+`.venv/Scripts/python.exe -m pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cpu`.
+
+```powershell
+.venv/Scripts/python.exe code/snn_keyword/prepare_data.py --keyword sheila
+.venv/Scripts/python.exe code/snn_keyword/train_keyword_snn.py --encodings current --out code/snn_keyword/runs_sheila
+foreach ($s in 0,1,2) { .venv/Scripts/python.exe code/snn_keyword/tune_stream.py code/snn_keyword/runs_sheila/current_seed$s/model.npz }
+.venv/Scripts/python.exe code/snn_keyword/evaluate.py --runs code/snn_keyword/runs_sheila --results code/snn_keyword/results/sheila --expect 3
+.venv/Scripts/python.exe code/snn_keyword/robustness.py --out code/snn_keyword/results/sheila/background_noise.json
+powershell -ExecutionPolicy Bypass -File code/snn_keyword/make_tts_probe.ps1 -Keyword sheila
+.venv/Scripts/python.exe code/snn_keyword/confusables.py release_seed1=code/snn_keyword/deploy/model.npz seed0=code/snn_keyword/results/sheila/models/current_seed0.npz seed2=code/snn_keyword/results/sheila/models/current_seed2.npz --out code/snn_keyword/results/sheila/confusables.json
+.venv/Scripts/python.exe code/snn_keyword/research/tools/build_firmware.py code/snn_keyword/deploy/model.npz --out code/snn_keyword/build/sheila
+Copy-Item code/snn_keyword/build/sheila/keyword*.bin code/snn_keyword/deploy/
+code/snn_keyword/run_board.ps1                                   # -Variant base for RV32IM
+.venv/Scripts/python.exe code/snn_keyword/check_board.py 10.43.0.1   # vectors, cycles, "2 of 3"
+.venv/Scripts/python.exe code/snn_keyword/pc_keyword_demo.py 10.43.0.1
+```
+
+**Changing the keyword.** `prepare_data.py --keyword <word>` accepts any of
+the 35 dataset words; with the features already cached it only relabels them
+(seconds). Features, model files, `training.json` and result files store their
+keyword, and `tune_stream.py`, `confusables.py` and `evaluate.py` refuse a
+model trained for another word. `augment.py` edits "yes" recordings only.
+`pc_keyword_demo.py` prints the keyword named in `deploy/manifest.json`.
+
+**Tools for a PC without make or WSL.** `research/tools/build_firmware.py`
+compiles `keyword.bin` and `keyword_kdot.bin` with the Vitis 2026.1 RISC-V gcc
+and the `firmware/Makefile` flags; it rebuilds the "yes" release byte for byte
+(`--compare deploy`). `check_board.py` compares the running board with the
+integer oracle: verification vectors (scores, spikes, decision, cycles), the
+"2 of 3" patterns, and optionally WAV clips streamed like the live demo (`--wavs`).
 
 See [REPORT.md](REPORT.md), [presentation.pdf](presentation.pdf),
 [JOURNAL.md](JOURNAL.md) (dated log of every change, its motivation and its
@@ -15,7 +89,7 @@ standard PYNQ Linux/Ethernet path, which also runs the live microphone demo
 (see [Run on the PYNQ board](#run-on-the-pynq-board-standard-ethernet-path)
 and [Live confirmation](#live-confirmation-and-confusable-words)).
 
-## What was measured
+## What was measured (original "yes" release)
 
 - Six GPU training runs: current/rate encoding, seeds 0/1/2, 35 epochs each,
   including ten epochs of quantization-aware training.
@@ -72,10 +146,10 @@ full-test verification evidence remains in `results/verification.json`.
 The RTL run executes a complete 100,000,000-cycle LED pulse; allow a few
 minutes. It does not contact a PYNQ board.
 
-## Reproduce all training and experiments
+## Reproduce all training and experiments (original "yes" release)
 
 ```powershell
-.venv/Scripts/python.exe code/snn_keyword/prepare_data.py
+.venv/Scripts/python.exe code/snn_keyword/prepare_data.py --keyword yes
 .venv/Scripts/python.exe code/snn_keyword/train_keyword_snn.py
 .venv/Scripts/python.exe code/snn_keyword/evaluate.py
 wsl -d Ubuntu -- bash code/snn_keyword/sim/build.sh
@@ -97,7 +171,7 @@ Confusable endings, stream confirmation and the held-out word probe
 .venv/Scripts/python.exe code/snn_keyword/train_keyword_snn.py --encodings current --aug-fraction 0.3 --out code/snn_keyword/runs_aug
 .venv/Scripts/python.exe code/snn_keyword/tune_stream.py code/snn_keyword/deploy/model.npz
 .venv/Scripts/python.exe code/snn_keyword/tune_stream.py code/snn_keyword/runs_aug/current_seed2/model.npz
-powershell -ExecutionPolicy Bypass -File code/snn_keyword/make_tts_probe.ps1
+powershell -ExecutionPolicy Bypass -File code/snn_keyword/make_tts_probe.ps1 -Keyword yes
 .venv/Scripts/python.exe code/snn_keyword/confusables.py release=code/snn_keyword/deploy/model.npz trial=code/snn_keyword/runs_aug/current_seed2/model.npz
 ```
 
@@ -110,7 +184,7 @@ folder avoid a second copy:
 
 ```powershell
 $env:KWS_TIME_BINS = 64
-.venv/Scripts/python.exe code/snn_keyword/prepare_data.py --data code/snn_keyword/data/b64
+.venv/Scripts/python.exe code/snn_keyword/prepare_data.py --keyword yes --data code/snn_keyword/data/b64
 .venv/Scripts/python.exe code/snn_keyword/augment.py --data code/snn_keyword/data/b64
 .venv/Scripts/python.exe code/snn_keyword/train_keyword_snn.py --data code/snn_keyword/data/b64 --encodings current --hidden 56 --aug-fraction 0.3 --out code/snn_keyword/runs_b64
 .venv/Scripts/python.exe code/snn_keyword/confusables.py b64=code/snn_keyword/runs_b64/current_seed0/model.npz --data code/snn_keyword/data/b64 --out code/snn_keyword/results/confusables_64bins.json
@@ -205,11 +279,12 @@ on the main thread. Responses contain scores, detection, and hidden spikes.
 Simulation reports zero cycles; only RTL/board execution measures cycles.
 Live microphone mode uses "2 of 3" confirmation (below); `--single`
 restores per-window decisions. WAV mode always classifies a single window.
-Live mode prints one dot per window and one `YES detected` line per spoken
-keyword (consecutive confirmed windows count once); `--json` prints every
+Live mode prints one dot per window and one `SHEILA detected` line per spoken
+keyword (consecutive confirmed windows count once; the name comes from
+`deploy/manifest.json`, `--keyword` overrides it); `--json` prints every
 reply instead.
 
-## Live confirmation and confusable words
+## Live confirmation and confusable words (original "yes" release)
 
 **"2 of 3" confirmation.** A real "yes" spans several overlapping 250 ms-hop
 windows, while most false accepts fire in only one. Protocol mode 1 maps to

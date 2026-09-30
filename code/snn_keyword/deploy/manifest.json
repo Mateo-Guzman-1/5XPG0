@@ -3,15 +3,17 @@
     "keyword.bit": "0x00020000",
     "keyword_kdot.bit": "0x00020001"
   },
-  "keyword": "yes",
+  "keyword": "sheila",
+  "evidence": "results/sheila",
+  "previous_release": "keyword \"yes\" until 2026-09-30 (git commit 05ad009); its evidence stays in results/",
   "board_tested": {
-    "method": "JTAG (jtag/bringup.tcl, jtag/board_test.tcl); PYNQ Linux 3.0.1 over Ethernet (run_board.ps1, board_server.py)",
-    "date": "2026-09-24 (JTAG), 2026-09-27 (Ethernet)",
-    "result": "40/40 verification vectors bit-exact, LED0 pulse about 1 s; over Ethernet also \"2 of 3\" stream confirmation and the live microphone demo"
+    "method": "PYNQ Linux 3.0.1 over Ethernet (run_board.ps1, board_server.py, check_board.py)",
+    "date": "2026-09-30",
+    "result": "40 verification vectors x3 bit-exact for keyword.bin (max 5,980,921 cycles) and keyword_kdot.bin (max 266,793 cycles); \"2 of 3\" stream patterns as specified; synthesized clips streamed at the 250 ms hop, every window bit-exact (results/sheila/board_base.json, board_kdot.json)"
   },
   "files": {
     "keyword.bin": {
-      "sha256": "e9997e6ebb07b96085895259707b449f76fe90be98f78c986c9fb1afb81303a2",
+      "sha256": "7008b23056c13851182311c4ca1174daa21ab87290fe61652bf398cb5ff5ac3f",
       "bytes": 197120
     },
     "keyword.bit": {
@@ -19,11 +21,11 @@
       "bytes": 1292867
     },
     "model.npz": {
-      "sha256": "6ffcdf843d15798cc48ac96916f9e43bab9ba3b01a3a3fbac0394cfd5ac7909e",
-      "bytes": 63184
+      "sha256": "7bf2b99d117cc5103f30638fd0c2cb4dab58f9dec66456a6784898826c32c5b7",
+      "bytes": 59734
     },
     "keyword_kdot.bin": {
-      "sha256": "bd84a8cb76ecaac7a3a48ccdfb4585fdb3cfbdb7a96c644772bff9d00c96a52c",
+      "sha256": "18c11d82bc8fe61a952199ed2c3a6d485ff70f5e7bef23216f9f85239f11f0da",
       "bytes": 197120
     },
     "keyword_kdot.bit": {

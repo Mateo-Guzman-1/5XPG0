@@ -251,6 +251,74 @@ With only two voices, they indicate trends, not accuracy.
 - **Unaffected earlier results.** `confusables.json`, `tune_stream.py` and
   the manual microphone test (over JTAG) did not use `board_server.py`.
 
+## 2026-09-30
+
+### 9. Keyword changed from "yes" to "Sheila"
+
+- **Motivation.** User decision: the demo and the research programme (E0–E8)
+  continue with the keyword **"Sheila"**.
+- **Data.** "sheila" is one of the 35 Speech Commands v0.02 words: 2,022
+  clips, official speaker-disjoint split, 1,606 / 204 / 212 positives in
+  train / validation / test. Archive (SHA256 checked), frontend and features
+  are the same as for "yes"; only the labels change.
+- **Changes.**
+  - `prepare_data.py --keyword` (default `sheila`) labels the data and stores
+    the keyword in `features.npz` and `manifest.json`; an existing cache of the
+    same clips is only relabelled. The keyword travels into `model.npz`,
+    `training.json` and the result files. `tune_stream.py`, `confusables.py` and
+    `evaluate.py` refuse a model trained for another word. The live-window cache
+    name now contains the keyword; otherwise windows labelled for "yes" would
+    be reused silently.
+  - `confusables.py`: TTS groups per keyword, result keys `<keyword>_detected`
+    ("yes" keeps `yes_detected`), augmented section only for "yes".
+    `augment.py` refuses other keywords, and `train_keyword_snn.py` refuses
+    `--aug-fraction` above 0 for them.
+  - `evaluate.py --results --expect`, `robustness.py --model --out`,
+    `make_tts_probe.ps1 -Keyword`. `pc_keyword_demo.py` prints the keyword
+    named in `deploy/manifest.json`.
+  - New `research/tools/build_firmware.py` (this PC has no make or WSL); it
+    rebuilds the "yes" release byte for byte. New `check_board.py`: the running
+    board against the integer oracle over Ethernet (vectors, cycles, "2 of 3"
+    patterns, streamed WAV clips). Before the switch it passed on the "yes"
+    release: 120/120 bit-exact, max 267,393 cycles.
+  - `deploy/`: new `model.npz`, `keyword.bin`, `keyword_kdot.bin`. The manifest
+    names the keyword and the evidence folder `results/sheila/`. Bitstreams,
+    firmware C code, RTL, board server and protocol are unchanged.
+  - Tests: the deployed model is paired with its own verification vectors
+    (manifest `evidence`); a new test checks the manifest hashes and keyword.
+    Two board unit tests had failed since entry 8 because their fake `Board`
+    lacked the new 32-bit views; fixed.
+- **Training.** Release recipe (current encoding, 64 hidden, 12 steps, 35
+  epochs, last 10 QAT), seeds 0/1/2, on the CPU (Ryzen 5 7600X, PyTorch
+  2.11.0+cpu): 9.8–10.4 s per run; the GPU runs for "yes" took 18 s. Integer
+  validation F1 0.8955 / 0.9054 / 0.8900, so seed 1 is deployed: thresholds
+  3002 (window) and 1080 (stream, validation-tuned at 0.3% confirmed false
+  accepts, validation confirmed recall 68.1%).
+- **Outcome** (`results/sheila/`):
+  - Test, seed 1: precision 85.64%, recall 81.60%, F1 0.8357, FPR 0.269%
+    (TP 173, FP 29, FN 39, TN 10,764); quantized and float checkpoints never
+    disagree. Three seeds: F1 0.835 ± 0.020, below "yes" (0.867 ± 0.022) with
+    half the positives. Seed 2 had the best test F1 (0.855); only validation
+    decides.
+  - Live windows (test clips in noise, 250 ms hop): "Sheila" detected 74.1%
+    single, 68.9% with 2 of 3; other words accepted 1.07% and 0.40% ("yes":
+    74.5 / 67.3% and 1.07 / 0.13%).
+  - Background noise: 2 detections in 398 windows (doing_the_dishes,
+    dude_miaowing; "yes": 0).
+  - Synthesized words, 2 of 3: "Sheila" 68%. Words that start like it are often
+    accepted: sheena 71%, shayla 68%, shield 64%, cheetah 60%, sheep 55%, she
+    54%, sheet 48%, shelter 45%. Words sharing only the ending are not: keela
+    28%, tequila 27%, feeler 19%, healer 14%, dealer 3%, leila 3%, delilah 0%.
+    Unrelated words (yes, no, hello, seven, marvin): 0%. The dense network keys
+    on the "shee-" onset, the mirror image of the "yes" ending problem.
+  - Board over Ethernet (`check_board.py`): 40 vectors ×3 bit-exact for both
+    images; max 5,980,921 cycles (RV32IM, 59.81 ms) and 266,793 (`kdot`,
+    2.67 ms); "2 of 3" patterns as specified; round trip 3.9 ms with `kdot`.
+    12 synthesized clips streamed at the real hop, every window bit-exact:
+    4 of 5 "Sheila" confirmed (the fast, high-pitched one had its two positive
+    windows 750 ms apart); she, sheet and shield fired one window each but were
+    not confirmed; leila, hello, yes and seven had no positive window.
+
 ## Open items
 
 1. ~~Reflash the SD card and test the standard Ethernet path~~: done on a
@@ -262,3 +330,6 @@ With only two voices, they indicate trends, not accuracy.
    latency budget allows it.
 4. Recordings of the actual user and microphone for training and evaluation.
 5. Optional speedups: lower `READ_WAIT`, add a LIF unit.
+6. Sheila (entry 9): words starting with "shee-" are often accepted; research
+   experiments E1 (near-miss recordings) and E5 (hard negatives) address it.
+   Items 2 and 3 above were written for "yes"; the time-convolutional layer is E4.
