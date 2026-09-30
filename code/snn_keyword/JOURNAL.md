@@ -1140,6 +1140,72 @@ cascade on the PicoRV32 itself: the LED follows confirmed detections only.
   (MSWC "she", "sheep", "shell", ...: `data/multi_sheila_full`) are the
   next experiment.
 
+### 29. The cascade candidate, and its one-time test run
+
+**Three more verifier variants, validation only** (stage 1 unchanged, same rule):
+
+| Verifier | Live recall | Complete recordings | FA/h | MSWC "she-" words accepted | MSWC other words |
+|---|---|---|---|---|---|
+| seed 0 (entry 28) | 82.8% | 90.5% | 1.99 | 26/183 | 1.02% |
+| seed 1 | 82.4% | 89.9% | 1.99 | 22/183 | 0.94% |
+| near-miss words 15% (`data/multi_sheila_full`, real keyword clips only) | 79.4% | 88.6% | 1.99 | **4/183** | **0.30%** |
+| capped-margin score, cap 0.5 logit (seed 0) | 72.1% | 81.0% | 1.99 | 13/183 | 0.63% |
+
+- **Seeds:** both select the same t1 and t2, and recall differs by
+  0.5 points. The verifier adds little seed variance.
+- **Near-miss training** almost stops isolated "she", "sheep" and "shield"
+  from being accepted: 4/183, where stage 1 alone accepts 13/183. It costs
+  3.4 points of live recall (8 clips found only by seed 0, 1 only by it;
+  p = 0.04). The rule ranks by live recall, so seed 0 stays the candidate.
+  The near-miss verifier is the option if isolated near-miss words matter
+  more than recall.
+- **Capped margin** (`verifier_model.step_costs`): a step whose label wins
+  adds up to `cap` instead of 0. Every cap loses recall: 72%, 65%, 58% and
+  39% for 0.5, 1, 2 and 4 logits. Clean read speech ("she laughed") earns
+  larger margins than keywords in noise. The score that saturates at 0 is
+  the better one here.
+
+**Candidate:** stage 1 `sheila_qat_seed2` (W = 1) with verifier
+`runs_verifier/sheila_logmel/last.pt`, t1 = 13744, t2 = −11, policy (a).
+
+**Test split, once** (`verifier_cascade.py final`,
+`results/final_sheila_cascade_test.json`). Thresholds come from
+validation; the negatives are 18.97 h of LibriSpeech test-clean and
+test-other plus every non-"sheila" Speech Commands test word.
+
+| | Stage 1 alone | Cascade |
+|---|---|---|
+| Live recall | 63.7% | **84.0%** |
+| Complete recordings | 70.7% | **90.2%** |
+| Held-out mics | 66.5% | 82.6% |
+| Real rooms | 60.9% | 83.0% |
+| Mics + rooms | 58.0% | 82.6% |
+| Live other words accepted | 0.00% | 0.10% |
+| **FA/h on the negatives** | 1.58 | **2.37** |
+| 1 h stream: recall, false accepts | 69.3%, 1 | 84.3%, 0 |
+| Latency after the word (median, p90) | 0.04 s, 0.11 s | 0.25 s, 0.38 s |
+| MSWC other words | 0.83% | 1.13% |
+
+- The stage-1 column equals entry 27's `final_eval.py` report, so the
+  cache pipeline and the old evaluation agree.
+- **Recall:** +20.3 points (44 clips only by the cascade, 1 only by stage
+  1). The gain holds under held-out mics and rooms (+16 to +25 points).
+- **False accepts: the target is missed.** 2.37 FA/h against ≤ 2.
+  Validation chose the threshold at the edge of the budget (1.99). Stage 1
+  alone went from 1.44 to 1.58 between validation and test (+10%); the
+  cascade went from 1.99 to 2.37 (+19%).
+- **What the 45 test false accepts are:**
+  - 33 are LibriSpeech "she"/"sh-" phrases.
+  - 12 are Speech Commands clips labelled nine, two, zero, seven, six or
+    four. The verifier decodes every one as SH IY L AH, and two speakers
+    have two clips each. Validation had the same pattern (entry 28).
+  - If these clips are mislabelled "sheila" recordings, the real rate is
+    33 / 18.97 h = 1.74 FA/h. This is unconfirmed: nobody has listened to
+    them yet (`results/sheila_suspected_label_errors_{validation,test}.json`).
+- For the next candidates, validation needs a safety margin on the FA
+  budget, for example ≤ 1.6 FA/h. This rule is introduced after seeing one
+  test result and is recorded as such.
+
 ## Open items
 
 Status of `IMPLEMENTATION_PLAN.md`: Phases 0-6 done; the streaming firmware and

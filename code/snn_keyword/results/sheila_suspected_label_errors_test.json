@@ -1,0 +1,18 @@
+{
+ "note": "Speech Commands test clips (not labelled sheila) that are cascade false accepts at t1=13744, t2=-11; the verifier greedy decoding of each is SH IY L AH. Suspected label errors, unconfirmed (nobody has listened).",
+ "root": "data/speech_commands_v0.02",
+ "files": [
+  "nine/a4e8a997_nohash_0.wav",
+  "two/9a69672b_nohash_3.wav",
+  "zero/5828dfa2_nohash_0.wav",
+  "zero/893705bb_nohash_7.wav",
+  "seven/8fe67225_nohash_0.wav",
+  "six/24ad3ebe_nohash_0.wav",
+  "four/fce96bac_nohash_1.wav",
+  "zero/893705bb_nohash_1.wav",
+  "two/82b99576_nohash_0.wav",
+  "four/fce96bac_nohash_0.wav",
+  "zero/81dc4a94_nohash_0.wav",
+  "zero/563aa4e6_nohash_2.wav"
+ ]
+}

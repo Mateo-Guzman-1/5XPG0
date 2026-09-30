@@ -450,7 +450,8 @@ def final(a):
     """All metrics at the thresholds chosen on validation: stage 1 alone and the cascade."""
     c = dict(np.load(cache_file(a.split)))
     v = dict(np.load(a.scores))
-    assert str(v['checkpoint']) == str(a.checkpoint_name) if a.checkpoint_name else True
+    if a.checkpoint_name and Path(str(v['checkpoint'])) != Path(a.checkpoint_name):
+        raise SystemExit(f"scores are of {v['checkpoint']}, not {a.checkpoint_name}")
     cas = Cascade(c, v, a.window, a.verify_ms)
     rows = {'stage1_frame': metrics(cas, 'frame', a.stage1_threshold, None, a.policy),
             'stage1_hop': metrics(cas, 'hop', a.stage1_threshold, None, a.policy),
