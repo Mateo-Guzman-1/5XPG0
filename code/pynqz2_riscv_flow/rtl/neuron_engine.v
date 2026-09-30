@@ -176,11 +176,18 @@ module neuron_engine #(
     // ------------------------------------------------------------------
     reg signed [17:0] acc [0:N2-1];
     reg signed [17:0] acc_q;
-    // Synaptic event stage: the synapse word is registered once after the BRAM,
-    // then added (a single-clock read-modify-write, so back-to-back events to one
-    // neuron stay exact).
-    reg        ev_v;
+    // Synaptic events, three stages after the BRAM: ev registers the synapse word;
+    // stage A reads acc[post], or the sum that stage B writes to the same neuron in
+    // this clock (forwarding, so back-to-back events to one neuron stay exact);
+    // stage B adds the weight and writes. The read multiplexer and the adder with
+    // the write decode are in different clocks (one clock was 11 logic levels,
+    // JOURNAL entry 19).
+    reg        ev_v, evb_v;
     reg [15:0] ev_syn;
+    reg [6:0]  evb_j;
+    reg signed [17:0] evb_acc;
+    reg signed [7:0]  evb_w;
+    wire signed [17:0] evb_sum = evb_acc + evb_w;
 
     // ------------------------------------------------------------------
     // Update pipeline
@@ -239,7 +246,7 @@ module neuron_engine #(
         st_we <= 1'b0;
         if (!resetn) begin
             state <= S_RESET; busy <= 1'b1; j <= 8'd0;
-            i_v <= 1'b0; p1_v <= 1'b0; p2_v <= 1'b0; p3_v <= 1'b0; wb_fire <= 1'b0; ev_v <= 1'b0;
+            i_v <= 1'b0; p1_v <= 1'b0; p2_v <= 1'b0; p3_v <= 1'b0; wb_fire <= 1'b0; ev_v <= 1'b0; evb_v <= 1'b0;
         end else begin
             if (busy) cycles <= cycles + 32'd1;
 
@@ -266,10 +273,13 @@ module neuron_engine #(
                 for (c = 0; c < 4; c = c + 1) acc_o[c] <= acc_o[c] + $signed(wot_q[8*c +: 8]);
             i_v <= 1'b0;
             ev_v <= (state == S_DSYN) && v; ev_syn <= syn_q;
+            evb_v <= ev_v;
             if (ev_v) begin
-                acc[ev_syn[7:0]] <= acc[ev_syn[7:0]] + $signed(ev_syn[15:8]);
+                evb_j <= ev_syn[6:0]; evb_w <= ev_syn[15:8];
+                evb_acc <= (evb_v && evb_j == ev_syn[6:0]) ? evb_sum : acc[ev_syn[6:0]];
                 events <= events + 32'd1;
             end
+            if (evb_v) acc[evb_j] <= evb_sum;
 
             case (state)
             S_RESET: begin
@@ -295,7 +305,7 @@ module neuron_engine #(
             // ---- delayed synapses, one event per clock ----
             S_DSLOT: begin
                 if (tau == 6'd32) begin
-                    if (!ev_v) begin state <= S_REC; row <= 11'd0; v <= 1'b0; end
+                    if (!ev_v && !evb_v) begin state <= S_REC; row <= 11'd0; v <= 1'b0; end
                 end else if (n >= ring_cnt[slot]) begin
                     tau <= tau + 6'd1; n <= 8'd0;
                 end else begin
