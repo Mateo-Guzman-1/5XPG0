@@ -70,7 +70,8 @@ code/snn_keyword/run_board.ps1                                   # -Variant base
 the 35 dataset words; with the features already cached it only relabels them
 (seconds). Features, model files, `training.json` and result files store their
 keyword, and `tune_stream.py`, `confusables.py` and `evaluate.py` refuse a
-model trained for another word. `augment.py` edits "yes" recordings only.
+model trained for another word. `augment.py` has hard-negative variants for
+"yes" and for "sheila" (JOURNAL.md entry 10).
 `pc_keyword_demo.py` prints the keyword named in `deploy/manifest.json`.
 
 **Tools for a PC without make or WSL.** `research/tools/build_firmware.py`

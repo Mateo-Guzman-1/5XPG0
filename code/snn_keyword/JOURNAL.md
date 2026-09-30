@@ -319,6 +319,58 @@ With only two voices, they indicate trends, not accuracy.
     windows 750 ms apart); she, sheet and shield fired one window each but were
     not confirmed; leila, hello, yes and seven had no positive window.
 
+## 2026-10-01
+
+### 10. Sheila near-misses: hard negatives from real recordings
+
+- **Motivation.** User's live microphone test of the entry-9 release: a plain
+  "sh" or "shi" was detected as "Sheila". Speech Commands has no other word
+  with /ʃ/, so "sh" (+ "ee") alone separated the keyword from all 34 negatives.
+- **Change.** `augment.py` gains Sheila variants cut from real "sheila" clips,
+  keeping the official split. `sheila_marks` finds the /ʃ/ per clip as ≥ 50 ms
+  of frication (energy mostly ≥ 2 kHz) directly followed by ≥ 150 ms of voicing
+  (1,537 of 2,022 clips). Negatives: `sh` (the /ʃ/ alone, sometimes stretched),
+  `shee` ("-la" cut off), `sheet` ("shee" + closure + burst), `swap` (/ʃ/ + another
+  word without its unvoiced onset, ×2), `ending` ("shee" + the start of another
+  word), `onset` (another word's unvoiced onset + "eila"), `head` ("eila"),
+  `noise` (white to brown, −60 to −10 dBFS); positive: `shift` (whole word at a
+  random position). Half of the variants get colored background noise at 5–30 dB
+  SNR. Tools: `train_keyword_snn.py` accepts `augment.npz` of the same keyword;
+  `confusables.py --split validation` and variant rates at the stream threshold;
+  `evaluate.py --deploy` stages a candidate outside `deploy/`; the TTS probe adds
+  a pure "shh" (IPA phoneme; the voices read "shh" as letter names), shush, shy,
+  show, shoe and shelly.
+- **Round 1** (sh, shee, sheet, swap, head, shift; commit 8506d0e,
+  `results/sheila_hardneg/round1/`). Test: "sh" windows passing the live
+  threshold fell from 48% to 0%, but pure-noise windows then passed 18.7%
+  (validation) and the pink-noise recording triggered 5 of 60 windows. Not used.
+- **Round 2** (+ ending, onset, noise, background noise). Configurations, 3 seeds
+  each: 64 hidden at fraction 0.3 and 0.5, 95 hidden at 0.3, 60 epochs at 0.3.
+  Chosen by validation F1 including the variants: **95 hidden, fraction 0.3,
+  seed 2** (0.7440; mean over seeds 0.730 against 0.725 with 64 hidden, within
+  the seed spread; also the best live validation recall, 63.7%).
+- **Outcome** (test data, `results/sheila_hardneg/`; entry-9 model → candidate):
+  - Per window at the live threshold: "sh" 55.8% → 1.2%, "shee" 55.2% → 7.6%,
+    "sheet" 52.9% → 8.1%, /ʃ/ + other word 25.3% → 6.4%, "shee" + other word
+    64.5% → 33.1%, other onset + "eila" 34.0% → 35.2%, noise 0% → 0%.
+  - Synthesized words, 2 of 3: sh sounds 42% → 6%, she- words 58% → 31%, other
+    sh- words 49% → 27%, "Sheila" 68% → 63%, unrelated words 0%.
+  - Live windows, 2 of 3: "Sheila" 68.9% → 60.9%, other words 0.40% → 0.33%.
+    Background noise: 2 → 0 of 398 windows.
+  - Clips: precision 0.856 → 0.812, recall 0.816 → 0.755, F1 0.836 → 0.782
+    (95 hidden, 3 seeds: 0.781 ± 0.003).
+  - Board (candidate firmware copied to the board, `deploy/` unchanged): 40
+    vectors ×3 bit-exact for both images; max 8,877,865 cycles (88.78 ms, RV32IM)
+    and 395,945 (3.96 ms, `kdot`); "2 of 3" patterns as specified; model 146,680
+    of 147,456 bytes. Streamed synthesized clips: 3 of 4 "Sheila" confirmed;
+    shh (2 voices), she, sheet, sheep, shy, leila, hello and yes gave no positive
+    window; show one window, not confirmed; shield and sheena confirmed.
+- **Limits.** Words as close as shield, sheena or shayla, and the "shee" + other
+  word splices, still pass about a third of the time: a dense layer cannot follow
+  the order of sounds (E3/E4). The price is about 8 points of live Sheila recall.
+- **Status.** Candidate loaded on the board for the user's live test; `deploy/`
+  still holds the entry-9 model.
+
 ## Open items
 
 1. ~~Reflash the SD card and test the standard Ethernet path~~: done on a
@@ -330,6 +382,7 @@ With only two voices, they indicate trends, not accuracy.
    latency budget allows it.
 4. Recordings of the actual user and microphone for training and evaluation.
 5. Optional speedups: lower `READ_WAIT`, add a LIF unit.
-6. Sheila (entry 9): words starting with "shee-" are often accepted; research
-   experiments E1 (near-miss recordings) and E5 (hard negatives) address it.
+6. Sheila (entry 9): words starting with "shee-" are often accepted. Entry 10
+   removes most of it with hard negatives (candidate awaiting the user's live
+   test); E1 (near-miss recordings) and E5 (hard negatives) study it properly.
    Items 2 and 3 above were written for "yes"; the time-convolutional layer is E4.

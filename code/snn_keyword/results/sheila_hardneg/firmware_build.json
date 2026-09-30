@@ -1,0 +1,21 @@
+{
+  "model": "code/snn_keyword/build/sheila_hardneg/model.npz",
+  "out": "code/snn_keyword/build/sheila_hardneg",
+  "compiler": "riscv32-xilinx-elf-gcc.exe (GCC) 13.4.0",
+  "images": {
+    "keyword": {
+      "bin_bytes": 244984,
+      "sha256": "da5f59588f446a6d6635a889904463d736ccf194aeeadb6125ce7b355029c237",
+      "text_bytes": 1164,
+      "model_bytes": 146680,
+      "model_limit_bytes": 147456
+    },
+    "keyword_kdot": {
+      "bin_bytes": 244984,
+      "sha256": "59f43df53ab40d31c76eacfe3d187edff7ed4be5149ff251f4136107118a5dde",
+      "text_bytes": 1148,
+      "model_bytes": 146680,
+      "model_limit_bytes": 147456
+    }
+  }
+}

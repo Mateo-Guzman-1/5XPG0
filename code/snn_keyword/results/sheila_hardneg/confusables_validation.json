@@ -1,0 +1,642 @@
+{
+  "keyword": "sheila",
+  "split": "validation",
+  "time_bins": 32,
+  "live_validation": {
+    "sheila_clips": 204,
+    "other_clips": 3000
+  },
+  "tts_utterances": 0,
+  "models": {
+    "now_seed1": {
+      "decision_threshold": 3002,
+      "stream_threshold": 1080,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.9465,
+        "recall": 0.8676,
+        "f1": 0.9054
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7255,
+          "other_accepted": 0.007
+        },
+        "two_of_three": {
+          "sheila_detected": 0.6814,
+          "other_accepted": 0.003
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.3871,
+          "shee": 0.3871,
+          "sheet": 0.4323,
+          "swap": 0.1968,
+          "ending": 0.5097,
+          "onset": 0.2483,
+          "head": 0.0774,
+          "noise": 0.0,
+          "shift": 0.7419
+        },
+        "stream_threshold": {
+          "sh": 0.5419,
+          "shee": 0.5484,
+          "sheet": 0.6,
+          "swap": 0.2839,
+          "ending": 0.6194,
+          "onset": 0.3826,
+          "head": 0.2129,
+          "noise": 0.0,
+          "shift": 0.8323
+        }
+      },
+      "file": "deploy/model.npz"
+    },
+    "r1_aug30_seed2": {
+      "decision_threshold": 2364,
+      "stream_threshold": 1175,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8564,
+        "recall": 0.848,
+        "f1": 0.8522
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7598,
+          "other_accepted": 0.0123
+        },
+        "two_of_three": {
+          "sheila_detected": 0.6667,
+          "other_accepted": 0.003
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0129,
+          "shee": 0.0903,
+          "sheet": 0.1032,
+          "swap": 0.0452,
+          "ending": 0.3355,
+          "onset": 0.4966,
+          "head": 0.0065,
+          "noise": 0.0065,
+          "shift": 0.8129
+        },
+        "stream_threshold": {
+          "sh": 0.0774,
+          "shee": 0.1871,
+          "sheet": 0.1677,
+          "swap": 0.0774,
+          "ending": 0.4839,
+          "onset": 0.6577,
+          "head": 0.0581,
+          "noise": 0.1871,
+          "shift": 0.871
+        }
+      },
+      "file": "results/sheila_hardneg/round1/models/aug30_seed2.npz"
+    },
+    "r2_aug30_seed0": {
+      "decision_threshold": 2104,
+      "stream_threshold": 1484,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8214,
+        "recall": 0.7892,
+        "f1": 0.805
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7108,
+          "other_accepted": 0.0157
+        },
+        "two_of_three": {
+          "sheila_detected": 0.5539,
+          "other_accepted": 0.003
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0194,
+          "shee": 0.0129,
+          "sheet": 0.0194,
+          "swap": 0.0581,
+          "ending": 0.2258,
+          "onset": 0.2148,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.729
+        },
+        "stream_threshold": {
+          "sh": 0.0194,
+          "shee": 0.0516,
+          "sheet": 0.0516,
+          "swap": 0.0774,
+          "ending": 0.2968,
+          "onset": 0.2752,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.7677
+        }
+      },
+      "file": "runs_sheila_r2_aug30/current_seed0/model.npz"
+    },
+    "r2_aug30_seed1": {
+      "decision_threshold": 1852,
+      "stream_threshold": 1626,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.815,
+        "recall": 0.799,
+        "f1": 0.8069
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7255,
+          "other_accepted": 0.0293
+        },
+        "two_of_three": {
+          "sheila_detected": 0.5637,
+          "other_accepted": 0.003
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0129,
+          "shee": 0.0129,
+          "sheet": 0.0065,
+          "swap": 0.0613,
+          "ending": 0.3161,
+          "onset": 0.2148,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.7419
+        },
+        "stream_threshold": {
+          "sh": 0.0194,
+          "shee": 0.0194,
+          "sheet": 0.0258,
+          "swap": 0.071,
+          "ending": 0.3226,
+          "onset": 0.2416,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.7742
+        }
+      },
+      "file": "runs_sheila_r2_aug30/current_seed1/model.npz"
+    },
+    "r2_aug30_seed2": {
+      "decision_threshold": 2456,
+      "stream_threshold": 993,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8689,
+        "recall": 0.7794,
+        "f1": 0.8217
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.652,
+          "other_accepted": 0.004
+        },
+        "two_of_three": {
+          "sheila_detected": 0.5686,
+          "other_accepted": 0.003
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0,
+          "shee": 0.0065,
+          "sheet": 0.0,
+          "swap": 0.0419,
+          "ending": 0.1871,
+          "onset": 0.1544,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.6774
+        },
+        "stream_threshold": {
+          "sh": 0.0065,
+          "shee": 0.0258,
+          "sheet": 0.0194,
+          "swap": 0.0935,
+          "ending": 0.3484,
+          "onset": 0.3356,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.8
+        }
+      },
+      "file": "runs_sheila_r2_aug30/current_seed2/model.npz"
+    },
+    "r2_aug50_seed0": {
+      "decision_threshold": 2374,
+      "stream_threshold": 1324,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8105,
+        "recall": 0.7549,
+        "f1": 0.7817
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.6814,
+          "other_accepted": 0.0177
+        },
+        "two_of_three": {
+          "sheila_detected": 0.549,
+          "other_accepted": 0.003
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0,
+          "shee": 0.0,
+          "sheet": 0.0,
+          "swap": 0.0452,
+          "ending": 0.1484,
+          "onset": 0.1611,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.6452
+        },
+        "stream_threshold": {
+          "sh": 0.0,
+          "shee": 0.0258,
+          "sheet": 0.0258,
+          "swap": 0.0871,
+          "ending": 0.2774,
+          "onset": 0.3087,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.7548
+        }
+      },
+      "file": "runs_sheila_r2_aug50/current_seed0/model.npz"
+    },
+    "r2_aug50_seed1": {
+      "decision_threshold": 1420,
+      "stream_threshold": 827,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.7864,
+        "recall": 0.7941,
+        "f1": 0.7902
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7647,
+          "other_accepted": 0.0247
+        },
+        "two_of_three": {
+          "sheila_detected": 0.598,
+          "other_accepted": 0.0027
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0065,
+          "shee": 0.0129,
+          "sheet": 0.0065,
+          "swap": 0.0548,
+          "ending": 0.2387,
+          "onset": 0.2416,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.7484
+        },
+        "stream_threshold": {
+          "sh": 0.0129,
+          "shee": 0.0452,
+          "sheet": 0.0194,
+          "swap": 0.0935,
+          "ending": 0.2968,
+          "onset": 0.2953,
+          "head": 0.0065,
+          "noise": 0.0,
+          "shift": 0.8129
+        }
+      },
+      "file": "runs_sheila_r2_aug50/current_seed1/model.npz"
+    },
+    "r2_aug50_seed2": {
+      "decision_threshold": 2019,
+      "stream_threshold": 775,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.7744,
+        "recall": 0.7402,
+        "f1": 0.7569
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.6961,
+          "other_accepted": 0.0213
+        },
+        "two_of_three": {
+          "sheila_detected": 0.6176,
+          "other_accepted": 0.003
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0,
+          "shee": 0.0129,
+          "sheet": 0.0065,
+          "swap": 0.0452,
+          "ending": 0.2194,
+          "onset": 0.1745,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.6968
+        },
+        "stream_threshold": {
+          "sh": 0.0129,
+          "shee": 0.0258,
+          "sheet": 0.0258,
+          "swap": 0.0839,
+          "ending": 0.3548,
+          "onset": 0.3624,
+          "head": 0.0065,
+          "noise": 0.0,
+          "shift": 0.8129
+        }
+      },
+      "file": "runs_sheila_r2_aug50/current_seed2/model.npz"
+    },
+    "r2_aug30_h95_seed0": {
+      "decision_threshold": 2473,
+      "stream_threshold": 1572,
+      "hidden": 95,
+      "clips": {
+        "precision": 0.8274,
+        "recall": 0.799,
+        "f1": 0.813
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7059,
+          "other_accepted": 0.014
+        },
+        "two_of_three": {
+          "sheila_detected": 0.5588,
+          "other_accepted": 0.003
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0129,
+          "shee": 0.0129,
+          "sheet": 0.0065,
+          "swap": 0.0452,
+          "ending": 0.2387,
+          "onset": 0.1544,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.6516
+        },
+        "stream_threshold": {
+          "sh": 0.0129,
+          "shee": 0.0194,
+          "sheet": 0.0129,
+          "swap": 0.071,
+          "ending": 0.3161,
+          "onset": 0.2819,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.7871
+        }
+      },
+      "file": "runs_sheila_r2_aug30_h95/current_seed0/model.npz"
+    },
+    "r2_aug30_h95_seed1": {
+      "decision_threshold": 2375,
+      "stream_threshold": 1117,
+      "hidden": 95,
+      "clips": {
+        "precision": 0.8533,
+        "recall": 0.7696,
+        "f1": 0.8093
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7108,
+          "other_accepted": 0.013
+        },
+        "two_of_three": {
+          "sheila_detected": 0.6324,
+          "other_accepted": 0.003
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0065,
+          "shee": 0.0323,
+          "sheet": 0.0129,
+          "swap": 0.0581,
+          "ending": 0.2387,
+          "onset": 0.1879,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.7548
+        },
+        "stream_threshold": {
+          "sh": 0.0258,
+          "shee": 0.0968,
+          "sheet": 0.0581,
+          "swap": 0.0871,
+          "ending": 0.4452,
+          "onset": 0.3154,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.8516
+        }
+      },
+      "file": "runs_sheila_r2_aug30_h95/current_seed1/model.npz"
+    },
+    "r2_aug30_h95_seed2": {
+      "decision_threshold": 1594,
+      "stream_threshold": 403,
+      "hidden": 95,
+      "clips": {
+        "precision": 0.8564,
+        "recall": 0.8186,
+        "f1": 0.8371
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7549,
+          "other_accepted": 0.0153
+        },
+        "two_of_three": {
+          "sheila_detected": 0.6373,
+          "other_accepted": 0.003
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0065,
+          "shee": 0.0194,
+          "sheet": 0.0129,
+          "swap": 0.0484,
+          "ending": 0.2194,
+          "onset": 0.1946,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.7226
+        },
+        "stream_threshold": {
+          "sh": 0.0194,
+          "shee": 0.0581,
+          "sheet": 0.0387,
+          "swap": 0.0806,
+          "ending": 0.329,
+          "onset": 0.3289,
+          "head": 0.0065,
+          "noise": 0.0,
+          "shift": 0.8194
+        }
+      },
+      "file": "runs_sheila_r2_aug30_h95/current_seed2/model.npz"
+    },
+    "r2_aug30_e60_seed0": {
+      "decision_threshold": 2358,
+      "stream_threshold": 2114,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8204,
+        "recall": 0.8284,
+        "f1": 0.8244
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7402,
+          "other_accepted": 0.0273
+        },
+        "two_of_three": {
+          "sheila_detected": 0.5098,
+          "other_accepted": 0.0027
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0129,
+          "shee": 0.0452,
+          "sheet": 0.0065,
+          "swap": 0.0516,
+          "ending": 0.2323,
+          "onset": 0.2349,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.7226
+        },
+        "stream_threshold": {
+          "sh": 0.0129,
+          "shee": 0.0581,
+          "sheet": 0.0129,
+          "swap": 0.0581,
+          "ending": 0.2452,
+          "onset": 0.2483,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.729
+        }
+      },
+      "file": "runs_sheila_r2_aug30_e60/current_seed0/model.npz"
+    },
+    "r2_aug30_e60_seed1": {
+      "decision_threshold": 1944,
+      "stream_threshold": 1285,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.7805,
+        "recall": 0.7843,
+        "f1": 0.7824
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7353,
+          "other_accepted": 0.0223
+        },
+        "two_of_three": {
+          "sheila_detected": 0.5833,
+          "other_accepted": 0.003
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0065,
+          "shee": 0.0323,
+          "sheet": 0.0194,
+          "swap": 0.0516,
+          "ending": 0.2839,
+          "onset": 0.2215,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.7484
+        },
+        "stream_threshold": {
+          "sh": 0.0065,
+          "shee": 0.0516,
+          "sheet": 0.0516,
+          "swap": 0.0774,
+          "ending": 0.3613,
+          "onset": 0.2953,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.8
+        }
+      },
+      "file": "runs_sheila_r2_aug30_e60/current_seed1/model.npz"
+    },
+    "r2_aug30_e60_seed2": {
+      "decision_threshold": 2426,
+      "stream_threshold": 598,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8895,
+        "recall": 0.7892,
+        "f1": 0.8364
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.6716,
+          "other_accepted": 0.0123
+        },
+        "two_of_three": {
+          "sheila_detected": 0.5931,
+          "other_accepted": 0.003
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0065,
+          "shee": 0.0065,
+          "sheet": 0.0,
+          "swap": 0.0323,
+          "ending": 0.2194,
+          "onset": 0.2013,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.671
+        },
+        "stream_threshold": {
+          "sh": 0.0065,
+          "shee": 0.0645,
+          "sheet": 0.0516,
+          "swap": 0.1065,
+          "ending": 0.3548,
+          "onset": 0.349,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.8129
+        }
+      },
+      "file": "runs_sheila_r2_aug30_e60/current_seed2/model.npz"
+    }
+  }
+}

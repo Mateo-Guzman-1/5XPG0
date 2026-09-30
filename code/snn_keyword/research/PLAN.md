@@ -28,7 +28,9 @@ see [README.md](README.md). Progress: [STATUS.md](STATUS.md).
 >   share only the ending (leila 3%, delilah 0%). So E1 should record mainly "she-" words,
 >   and E5's most relevant hard negatives are *ending* variants (Sheila with its "-la"
 >   removed or replaced, "Sheena", "sheet"); onset swaps ("Leila") come second.
-> - `augment.py` edits "yes" recordings only; Sheila hard negatives are built in E5.
+> - Sheila hard negatives already exist (`augment.py`, JOURNAL entry 10): built early at the
+>   user's request because a plain "sh" triggered the demo. E5 still studies them
+>   systematically (dense vs time-aware, with and without).
 
 ---
 

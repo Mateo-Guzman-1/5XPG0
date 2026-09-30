@@ -76,8 +76,16 @@ For reference, the previous "yes" release: test F1 0.8761 (seeds 0.867 ± 0.022)
 - The Sheila TTS probe is in `build/tts_probe_sheila/` (`make_tts_probe.ps1 -Keyword sheila`).
 
 ## Open issues / decisions
-- E1 and E5 must use Sheila near-miss words (PLAN.md note): mainly "she-" words.
-- The live microphone test of the Sheila release by the user is still to be done.
+- **Hard-negative candidate (JOURNAL entry 10, 2026-10-01)**, awaiting the user's live test
+  and deploy decision: 95 hidden, trained with Sheila hard negatives
+  (`augment.py`, fraction 0.3), staged in `build/sheila_hardneg/`, evidence in
+  `results/sheila_hardneg/`. Test: "sh" windows passing the live threshold 55.8% → 1.2%,
+  synthesized sh/she-/sh- words 42/58/49% → 6/31/27%, background noise 2 → 0 of 398, but
+  live 2 of 3 Sheila 68.9% → 60.9% and clip F1 0.836 → 0.782. Board: bit-exact, max
+  8,877,865 / 395,945 cycles, model 146,680 of 147,456 bytes.
+- E1 and E5 must use Sheila near-miss words (PLAN.md note): mainly "she-" words; still
+  accepted by the candidate: shield, sheena, shayla, "shee" + other word.
+- The user found by live test that the entry-9 release fires on a plain "sh".
 - Test F1 is below validation F1 (0.836 vs 0.905 for seed 1). Part of it is selection on
   validation, part sampling: with 212 test positives, one standard error of recall alone
   is about 2.7 percentage points.

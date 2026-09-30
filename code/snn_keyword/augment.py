@@ -21,13 +21,19 @@ windows that cut "yes" off before its /s/:
 as the keyword and fired on "sh", "she", "sheep" or "shield". The /ʃ/ and the
 vowel onset are found per clip (sheila_marks; about 75% of the clips):
 
-  label 0  sh     only the /ʃ/, sometimes repeated into a long "shhh"   "sh"
-  label 0  shee   /ʃ/ + start of the vowel, "-la" removed with a fade   "shee"
-  label 0  sheet  "shee" + stop closure + release burst                 "sheet"
-  label 0  swap   /ʃ/ + another dataset word without its unvoiced onset "sh|op"
-                  (two per clip, source word from the same split)
-  label 0  head   window starts after the /ʃ/                           "|eila"
-  label 1  shift  complete word at a random position in the window
+  label 0  sh      only the /ʃ/, sometimes repeated into a long "shhh"   "sh"
+  label 0  shee    /ʃ/ + start of the vowel, "-la" removed with a fade   "shee"
+  label 0  sheet   "shee" + stop closure + release burst                 "sheet"
+  label 0  swap    /ʃ/ + another word without its unvoiced onset (x2)    "sh|op"
+  label 0  ending  "shee" + the first 150-350 ms of another word         "shee|no"
+  label 0  onset   another word's unvoiced onset + "eila"                "k|eila"
+  label 0  head    window starts after the /ʃ/                           "|eila"
+  label 0  noise   white to brown noise alone, sometimes fluctuating     (fan, hiss)
+  label 1  shift   complete word at a random position in the window
+Other words come from the same split and never start with /l/ for "ending"
+("shee|l..." would be too close to the keyword). Half of the Sheila variants
+(not "noise") get white-to-brown background noise at 5-30 dB SNR, so noise
+alone says nothing about the label.
 
 Variants inherit their source clips' official speaker-disjoint split.
 --examples N writes N WAV files per kind to build/aug_examples_<keyword>/ to listen to.
@@ -43,7 +49,7 @@ from model import keyword_of
 
 ROOT = Path(__file__).resolve().parent
 KINDS = {'yes': ('ts', 'ch', 'sh', 'cut', 'tail', 'head', 'shift'),
-         'sheila': ('sh', 'shee', 'sheet', 'swap', 'swap', 'head', 'shift')}
+         'sheila': ('sh', 'shee', 'sheet', 'swap', 'swap', 'ending', 'onset', 'head', 'noise', 'shift')}
 LABEL = {k: int(k == 'shift') for kinds in KINDS.values() for k in kinds}
 HOP = 160
 
@@ -188,14 +194,43 @@ def sheila_marks(a):
     return None if best is None else tuple(k * HOP for k in best[:3])
 
 
-def rhyme(a):
+def voice_start(rel, low):
+    """First frame of the first voiced run of >= 80 ms that comes within 10 dB of the loudest frame."""
+    loud_runs = [r for r in runs((low > .5) & (rel > -25), gap=4) if r[1] - r[0] >= 8 and rel[r[0]:r[1]].max() > -10]
+    return loud_runs[0][0] if loud_runs else None
+
+
+def rhyme(a, rng=None):
     """Samples of a word from its first loud voiced run to its end: the word without an unvoiced onset."""
     rel, _, low = frame_levels(a)
-    loud_runs = [r for r in runs((low > .5) & (rel > -25), gap=4) if r[1] - r[0] >= 8 and rel[r[0]:r[1]].max() > -10]
-    if not loud_runs:
+    r0 = voice_start(rel, low)
+    r1 = None if r0 is None else word_end(rel > -30, r0, 80)
+    return None if r0 is None or r1 - r0 < 10 else (r0 * HOP, r1 * HOP)
+
+
+def onset(a, rng=None):
+    """Samples of a word's unvoiced onset: 40-200 ms of mostly unvoiced sound before its voicing ("k" of "cat")."""
+    rel, _, low = frame_levels(a)
+    r0, w0 = voice_start(rel, low), int(np.argmax(rel > -30))
+    if r0 is None or not 4 <= r0 - w0 <= 20 or low[w0:r0].mean() > .35:
         return None
-    r0 = loud_runs[0][0]
-    return r0 * HOP, word_end(rel > -30, r0, 80) * HOP
+    return max(0, w0 - 3) * HOP, r0 * HOP
+
+
+def word_head(a, rng):
+    """Samples of the first 150-350 ms of a word: its onset and the start of its vowel."""
+    w0, n = int(np.argmax(frame_levels(a)[0] > -30)), int(rng.uniform(15, 35))
+    return (w0 * HOP, (w0 + n) * HOP) if (w0 + n) * HOP <= len(a) else None
+
+
+SOURCES = {'swap': rhyme, 'ending': word_head, 'onset': onset}   # parts of other words, per Sheila kind
+
+
+def colored_noise(n, rng):
+    """Unit-RMS noise with a 1/f^alpha power spectrum, alpha from 0 (white) over 1 (pink) to 2 (brown)."""
+    spec = np.fft.rfft(rng.normal(size=n)) / np.maximum(np.fft.rfftfreq(n, 1 / SAMPLE_RATE), 20) ** (rng.uniform(0, 2) / 2)
+    x = np.fft.irfft(spec, n)
+    return (x / (np.sqrt(np.mean(x ** 2)) + 1e-12)).astype(np.float32)
 
 
 def fade_out(seg, n):
@@ -212,14 +247,27 @@ def crossfade(a, b, n):
 
 
 def sheila_variant(a, marks, kind, rng, other=None):
-    """One edited 1 s window from a "sheila" clip; `other` is the rhyme of another word for "swap"."""
+    """One edited 1 s window from a "sheila" clip; `other` is the part of another word (SOURCES)."""
     f0, v0, w1 = marks
     pad, ms = int(.03 * SAMPLE_RATE), SAMPLE_RATE // 1000
     fric = a[max(0, f0 - pad):v0]
+    vowel_peak = float(np.abs(a[v0:w1]).max()) + 1e-6
+    if kind == 'noise':
+        wobble = 1 + rng.uniform(0, .8) * np.sin(2 * np.pi * (rng.uniform(.5, 4) * np.arange(SAMPLE_RATE) / SAMPLE_RATE
+                                                              + rng.uniform()))
+        return (colored_noise(SAMPLE_RATE, rng) * wobble * 10 ** rng.uniform(-3, -.5)).astype(np.float32)   # -60..-10 dBFS
+    window = None
     if kind == 'head':
-        return place(a[v0 - 10 * ms:w1 + pad], 0)
-    if kind == 'shift':
+        seg = a[v0 - 10 * ms:w1 + pad]
+        window = place(seg, 0)
+    elif kind == 'shift':
         seg = a[max(0, f0 - pad):w1 + pad]
+    elif kind == 'ending':   # "shee" + the start of another word at this clip's vowel level
+        shee = a[max(0, f0 - pad):v0 + int(rng.uniform(.25, .45) * (w1 - v0))]
+        seg = fade_out(crossfade(shee, other * vowel_peak / (float(np.abs(other).max()) + 1e-6), 8 * ms), 20 * ms)
+    elif kind == 'onset':    # another word's unvoiced onset at up to this clip's /ʃ/ level, then "eila"
+        start = other * rng.uniform(.5, 1) * float(np.abs(fric).max()) / (float(np.abs(other).max()) + 1e-6)
+        seg = crossfade(start, a[v0 - 10 * ms:w1 + pad], 8 * ms)
     elif kind == 'sh':
         seg = fric
         for _ in range(int(rng.integers(0, 3))):   # the noise-like /ʃ/ repeats into a longer "shhh"
@@ -235,9 +283,13 @@ def sheila_variant(a, marks, kind, rng, other=None):
             burst = (rng.normal(0, 1, n) * np.exp(-np.linspace(0, 5, n)) * peak * rng.uniform(.6, 1.2)).astype(np.float32)
             seg = np.concatenate([seg, closure, burst])
     else:   # swap: the other word's rhyme at the level of this clip's vowel
-        level = (float(np.abs(a[v0:w1]).max()) + 1e-6) / (float(np.abs(other).max()) + 1e-6)
-        seg = crossfade(fric, other * level, 8 * ms)
-    return place(seg, int(rng.integers(0, max(1, SAMPLE_RATE - len(seg)))))
+        seg = crossfade(fric, other * vowel_peak / (float(np.abs(other).max()) + 1e-6), 8 * ms)
+    if window is None:
+        window = place(seg, int(rng.integers(0, max(1, SAMPLE_RATE - len(seg)))))
+    if rng.random() < .5:   # background noise at 5-30 dB SNR for half of the variants
+        rms = float(np.sqrt(np.mean(seg ** 2))) + 1e-9
+        window = window + colored_noise(SAMPLE_RATE, rng) * rms * 10 ** (-rng.uniform(5, 30) / 20)
+    return window
 
 
 def write_wav(path, audio):
@@ -270,14 +322,16 @@ def build(data, workers, examples=0):
             made = []
             for k in (KINDS[keyword] if marks else ()):
                 other, source = None, name
-                for _ in range(20 if k == 'swap' else 0):   # another word from the same split
+                for _ in range(20 if k in SOURCES else 0):   # part of another word from the same split
                     j = int(rng.choice(others[split[i]]))
+                    if k == 'ending' and names[j].startswith(('left/', 'learn/')):
+                        continue
                     b = read_wav(raw / names[j])
-                    span = rhyme(b)
-                    if span and span[1] - span[0] >= .1 * SAMPLE_RATE:
+                    span = SOURCES[k](b, rng)
+                    if span:
                         other, source = b[span[0]:span[1]], f'{name}+{names[j]}'
                         break
-                if k != 'swap' or other is not None:
+                if k not in SOURCES or other is not None:
                     made.append((sheila_variant(audio, marks, k, rng, other), k, source))
         return [(features(fit(v)), split[i], k, source, fit(v) if i in listen else None) for v, k, source in made]
 

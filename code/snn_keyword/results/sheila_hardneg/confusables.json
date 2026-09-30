@@ -1,0 +1,950 @@
+{
+  "keyword": "sheila",
+  "split": "test",
+  "time_bins": 32,
+  "live_test": {
+    "sheila_clips": 212,
+    "other_clips": 3000
+  },
+  "tts_utterances": 672,
+  "models": {
+    "now_seed1": {
+      "decision_threshold": 3002,
+      "stream_threshold": 1080,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8564,
+        "recall": 0.816,
+        "f1": 0.8357
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7406,
+          "other_accepted": 0.0107
+        },
+        "two_of_three": {
+          "sheila_detected": 0.6887,
+          "other_accepted": 0.004
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.3721,
+          "shee": 0.3663,
+          "sheet": 0.3779,
+          "swap": 0.1715,
+          "ending": 0.5058,
+          "onset": 0.2346,
+          "head": 0.0988,
+          "noise": 0.0,
+          "shift": 0.7674
+        },
+        "stream_threshold": {
+          "sh": 0.5581,
+          "shee": 0.5523,
+          "sheet": 0.5291,
+          "swap": 0.2529,
+          "ending": 0.6453,
+          "onset": 0.3395,
+          "head": 0.2384,
+          "noise": 0.0,
+          "shift": 0.8605
+        }
+      },
+      "tts": {
+        "single_window": {
+          "sheila": 0.7969,
+          "sh sound": 0.5938,
+          "she- words": 0.7104,
+          "other sh- words": 0.6267,
+          "-eila words": 0.1042,
+          "-eeler words": 0.2222,
+          "similar": 0.5729,
+          "other words": 0.0021
+        },
+        "two_of_three": {
+          "sheila": 0.6771,
+          "sh sound": 0.4219,
+          "she- words": 0.5792,
+          "other sh- words": 0.4931,
+          "-eila words": 0.1042,
+          "-eeler words": 0.1181,
+          "similar": 0.4271,
+          "other words": 0.0
+        }
+      },
+      "file": "deploy/model.npz"
+    },
+    "r1_aug30_seed2": {
+      "decision_threshold": 2364,
+      "stream_threshold": 1175,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.7717,
+        "recall": 0.7972,
+        "f1": 0.7842
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7736,
+          "other_accepted": 0.0147
+        },
+        "two_of_three": {
+          "sheila_detected": 0.6509,
+          "other_accepted": 0.0057
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.064,
+          "shee": 0.0988,
+          "sheet": 0.064,
+          "swap": 0.0494,
+          "ending": 0.4012,
+          "onset": 0.4568,
+          "head": 0.0058,
+          "noise": 0.0058,
+          "shift": 0.7733
+        },
+        "stream_threshold": {
+          "sh": 0.1221,
+          "shee": 0.2093,
+          "sheet": 0.1221,
+          "swap": 0.093,
+          "ending": 0.5233,
+          "onset": 0.5247,
+          "head": 0.0407,
+          "noise": 0.1105,
+          "shift": 0.8721
+        }
+      },
+      "tts": {
+        "single_window": {
+          "sheila": 0.7969,
+          "sh sound": 0.1823,
+          "she- words": 0.45,
+          "other sh- words": 0.375,
+          "-eila words": 0.2257,
+          "-eeler words": 0.309,
+          "similar": 0.6823,
+          "other words": 0.0167
+        },
+        "two_of_three": {
+          "sheila": 0.6562,
+          "sh sound": 0.0469,
+          "she- words": 0.2854,
+          "other sh- words": 0.2118,
+          "-eila words": 0.1528,
+          "-eeler words": 0.1215,
+          "similar": 0.4271,
+          "other words": 0.0
+        }
+      },
+      "file": "results/sheila_hardneg/round1/models/aug30_seed2.npz"
+    },
+    "r2_aug30_seed0": {
+      "decision_threshold": 2104,
+      "stream_threshold": 1484,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.7958,
+        "recall": 0.717,
+        "f1": 0.7543
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7123,
+          "other_accepted": 0.0223
+        },
+        "two_of_three": {
+          "sheila_detected": 0.5425,
+          "other_accepted": 0.003
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0116,
+          "shee": 0.0174,
+          "sheet": 0.0174,
+          "swap": 0.0436,
+          "ending": 0.2616,
+          "onset": 0.2346,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.6686
+        },
+        "stream_threshold": {
+          "sh": 0.0174,
+          "shee": 0.0523,
+          "sheet": 0.0291,
+          "swap": 0.061,
+          "ending": 0.3488,
+          "onset": 0.3086,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.7093
+        }
+      },
+      "tts": {
+        "single_window": {
+          "sheila": 0.7917,
+          "sh sound": 0.2188,
+          "she- words": 0.5479,
+          "other sh- words": 0.4497,
+          "-eila words": 0.2396,
+          "-eeler words": 0.2708,
+          "similar": 0.5781,
+          "other words": 0.0708
+        },
+        "two_of_three": {
+          "sheila": 0.625,
+          "sh sound": 0.1302,
+          "she- words": 0.2792,
+          "other sh- words": 0.3212,
+          "-eila words": 0.0972,
+          "-eeler words": 0.1285,
+          "similar": 0.3125,
+          "other words": 0.0021
+        }
+      },
+      "file": "runs_sheila_r2_aug30/current_seed0/model.npz"
+    },
+    "r2_aug30_seed1": {
+      "decision_threshold": 1852,
+      "stream_threshold": 1626,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.7583,
+        "recall": 0.7547,
+        "f1": 0.7565
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7358,
+          "other_accepted": 0.0283
+        },
+        "two_of_three": {
+          "sheila_detected": 0.5189,
+          "other_accepted": 0.003
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0,
+          "shee": 0.0291,
+          "sheet": 0.0291,
+          "swap": 0.0494,
+          "ending": 0.25,
+          "onset": 0.1728,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.6919
+        },
+        "stream_threshold": {
+          "sh": 0.0,
+          "shee": 0.0407,
+          "sheet": 0.0349,
+          "swap": 0.0669,
+          "ending": 0.2907,
+          "onset": 0.1852,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.7267
+        }
+      },
+      "tts": {
+        "single_window": {
+          "sheila": 0.776,
+          "sh sound": 0.1875,
+          "she- words": 0.5354,
+          "other sh- words": 0.4514,
+          "-eila words": 0.2049,
+          "-eeler words": 0.2292,
+          "similar": 0.5521,
+          "other words": 0.0417
+        },
+        "two_of_three": {
+          "sheila": 0.599,
+          "sh sound": 0.0521,
+          "she- words": 0.325,
+          "other sh- words": 0.25,
+          "-eila words": 0.1181,
+          "-eeler words": 0.0938,
+          "similar": 0.2708,
+          "other words": 0.0021
+        }
+      },
+      "file": "runs_sheila_r2_aug30/current_seed1/model.npz"
+    },
+    "r2_aug30_seed2": {
+      "decision_threshold": 2456,
+      "stream_threshold": 993,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8862,
+        "recall": 0.6981,
+        "f1": 0.781
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.6981,
+          "other_accepted": 0.0063
+        },
+        "two_of_three": {
+          "sheila_detected": 0.5708,
+          "other_accepted": 0.003
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0058,
+          "shee": 0.0058,
+          "sheet": 0.0116,
+          "swap": 0.0349,
+          "ending": 0.1977,
+          "onset": 0.1358,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.5756
+        },
+        "stream_threshold": {
+          "sh": 0.0116,
+          "shee": 0.0523,
+          "sheet": 0.0291,
+          "swap": 0.0785,
+          "ending": 0.3488,
+          "onset": 0.3272,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.7674
+        }
+      },
+      "tts": {
+        "single_window": {
+          "sheila": 0.7448,
+          "sh sound": 0.2135,
+          "she- words": 0.4104,
+          "other sh- words": 0.4201,
+          "-eila words": 0.1354,
+          "-eeler words": 0.1667,
+          "similar": 0.5208,
+          "other words": 0.0333
+        },
+        "two_of_three": {
+          "sheila": 0.6667,
+          "sh sound": 0.1094,
+          "she- words": 0.3417,
+          "other sh- words": 0.3351,
+          "-eila words": 0.0972,
+          "-eeler words": 0.1319,
+          "similar": 0.3646,
+          "other words": 0.0021
+        }
+      },
+      "file": "runs_sheila_r2_aug30/current_seed2/model.npz"
+    },
+    "r2_aug50_seed0": {
+      "decision_threshold": 2374,
+      "stream_threshold": 1324,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.7725,
+        "recall": 0.6887,
+        "f1": 0.7282
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7075,
+          "other_accepted": 0.0203
+        },
+        "two_of_three": {
+          "sheila_detected": 0.5708,
+          "other_accepted": 0.003
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0058,
+          "shee": 0.0058,
+          "sheet": 0.0116,
+          "swap": 0.032,
+          "ending": 0.1919,
+          "onset": 0.1481,
+          "head": 0.0116,
+          "noise": 0.0,
+          "shift": 0.564
+        },
+        "stream_threshold": {
+          "sh": 0.0058,
+          "shee": 0.0291,
+          "sheet": 0.0291,
+          "swap": 0.061,
+          "ending": 0.3081,
+          "onset": 0.3148,
+          "head": 0.0174,
+          "noise": 0.0,
+          "shift": 0.75
+        }
+      },
+      "tts": {
+        "single_window": {
+          "sheila": 0.7552,
+          "sh sound": 0.1667,
+          "she- words": 0.4437,
+          "other sh- words": 0.4115,
+          "-eila words": 0.2604,
+          "-eeler words": 0.3299,
+          "similar": 0.5677,
+          "other words": 0.0229
+        },
+        "two_of_three": {
+          "sheila": 0.625,
+          "sh sound": 0.0833,
+          "she- words": 0.3,
+          "other sh- words": 0.2587,
+          "-eila words": 0.1458,
+          "-eeler words": 0.1979,
+          "similar": 0.4167,
+          "other words": 0.0083
+        }
+      },
+      "file": "runs_sheila_r2_aug50/current_seed0/model.npz"
+    },
+    "r2_aug50_seed1": {
+      "decision_threshold": 1420,
+      "stream_threshold": 827,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.7202,
+        "recall": 0.7406,
+        "f1": 0.7302
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7123,
+          "other_accepted": 0.024
+        },
+        "two_of_three": {
+          "sheila_detected": 0.6085,
+          "other_accepted": 0.004
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0,
+          "shee": 0.0174,
+          "sheet": 0.0407,
+          "swap": 0.0523,
+          "ending": 0.3081,
+          "onset": 0.1975,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.6453
+        },
+        "stream_threshold": {
+          "sh": 0.0,
+          "shee": 0.0349,
+          "sheet": 0.0523,
+          "swap": 0.064,
+          "ending": 0.3488,
+          "onset": 0.321,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.7384
+        }
+      },
+      "tts": {
+        "single_window": {
+          "sheila": 0.7656,
+          "sh sound": 0.224,
+          "she- words": 0.4479,
+          "other sh- words": 0.4583,
+          "-eila words": 0.1771,
+          "-eeler words": 0.1806,
+          "similar": 0.6146,
+          "other words": 0.0396
+        },
+        "two_of_three": {
+          "sheila": 0.625,
+          "sh sound": 0.1146,
+          "she- words": 0.2979,
+          "other sh- words": 0.276,
+          "-eila words": 0.0868,
+          "-eeler words": 0.0938,
+          "similar": 0.3646,
+          "other words": 0.0
+        }
+      },
+      "file": "runs_sheila_r2_aug50/current_seed1/model.npz"
+    },
+    "r2_aug50_seed2": {
+      "decision_threshold": 2019,
+      "stream_threshold": 775,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.7959,
+        "recall": 0.7358,
+        "f1": 0.7647
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.717,
+          "other_accepted": 0.0183
+        },
+        "two_of_three": {
+          "sheila_detected": 0.6274,
+          "other_accepted": 0.004
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0,
+          "shee": 0.0116,
+          "sheet": 0.0116,
+          "swap": 0.0436,
+          "ending": 0.2384,
+          "onset": 0.179,
+          "head": 0.0058,
+          "noise": 0.0,
+          "shift": 0.6279
+        },
+        "stream_threshold": {
+          "sh": 0.0058,
+          "shee": 0.0523,
+          "sheet": 0.064,
+          "swap": 0.0872,
+          "ending": 0.407,
+          "onset": 0.3704,
+          "head": 0.0116,
+          "noise": 0.0,
+          "shift": 0.7965
+        }
+      },
+      "tts": {
+        "single_window": {
+          "sheila": 0.8021,
+          "sh sound": 0.2604,
+          "she- words": 0.5437,
+          "other sh- words": 0.4983,
+          "-eila words": 0.184,
+          "-eeler words": 0.2674,
+          "similar": 0.599,
+          "other words": 0.0521
+        },
+        "two_of_three": {
+          "sheila": 0.651,
+          "sh sound": 0.1146,
+          "she- words": 0.3625,
+          "other sh- words": 0.3663,
+          "-eila words": 0.1424,
+          "-eeler words": 0.1458,
+          "similar": 0.3646,
+          "other words": 0.0083
+        }
+      },
+      "file": "runs_sheila_r2_aug50/current_seed2/model.npz"
+    },
+    "r2_aug30_h95_seed0": {
+      "decision_threshold": 2473,
+      "stream_threshold": 1572,
+      "hidden": 95,
+      "clips": {
+        "precision": 0.8621,
+        "recall": 0.7075,
+        "f1": 0.7772
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7075,
+          "other_accepted": 0.012
+        },
+        "two_of_three": {
+          "sheila_detected": 0.5755,
+          "other_accepted": 0.0013
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0,
+          "shee": 0.0116,
+          "sheet": 0.0116,
+          "swap": 0.0349,
+          "ending": 0.2151,
+          "onset": 0.1543,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.6105
+        },
+        "stream_threshold": {
+          "sh": 0.0058,
+          "shee": 0.0349,
+          "sheet": 0.0233,
+          "swap": 0.0698,
+          "ending": 0.3081,
+          "onset": 0.2469,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.7151
+        }
+      },
+      "tts": {
+        "single_window": {
+          "sheila": 0.7448,
+          "sh sound": 0.1927,
+          "she- words": 0.4917,
+          "other sh- words": 0.4566,
+          "-eila words": 0.1597,
+          "-eeler words": 0.1632,
+          "similar": 0.5938,
+          "other words": 0.0688
+        },
+        "two_of_three": {
+          "sheila": 0.625,
+          "sh sound": 0.1094,
+          "she- words": 0.3146,
+          "other sh- words": 0.3628,
+          "-eila words": 0.0903,
+          "-eeler words": 0.0972,
+          "similar": 0.3958,
+          "other words": 0.0083
+        }
+      },
+      "file": "runs_sheila_r2_aug30_h95/current_seed0/model.npz"
+    },
+    "r2_aug30_h95_seed1": {
+      "decision_threshold": 2375,
+      "stream_threshold": 1117,
+      "hidden": 95,
+      "clips": {
+        "precision": 0.809,
+        "recall": 0.7594,
+        "f1": 0.7835
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.717,
+          "other_accepted": 0.0123
+        },
+        "two_of_three": {
+          "sheila_detected": 0.6321,
+          "other_accepted": 0.0033
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0,
+          "shee": 0.0174,
+          "sheet": 0.0233,
+          "swap": 0.0378,
+          "ending": 0.2674,
+          "onset": 0.179,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.6512
+        },
+        "stream_threshold": {
+          "sh": 0.0116,
+          "shee": 0.093,
+          "sheet": 0.0756,
+          "swap": 0.0843,
+          "ending": 0.3953,
+          "onset": 0.3395,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.8081
+        }
+      },
+      "tts": {
+        "single_window": {
+          "sheila": 0.7448,
+          "sh sound": 0.1927,
+          "she- words": 0.4396,
+          "other sh- words": 0.4201,
+          "-eila words": 0.1424,
+          "-eeler words": 0.1632,
+          "similar": 0.5156,
+          "other words": 0.0208
+        },
+        "two_of_three": {
+          "sheila": 0.651,
+          "sh sound": 0.0781,
+          "she- words": 0.3292,
+          "other sh- words": 0.2969,
+          "-eila words": 0.1146,
+          "-eeler words": 0.1389,
+          "similar": 0.3646,
+          "other words": 0.0
+        }
+      },
+      "file": "runs_sheila_r2_aug30_h95/current_seed1/model.npz"
+    },
+    "r2_aug30_h95_seed2": {
+      "decision_threshold": 1594,
+      "stream_threshold": 403,
+      "hidden": 95,
+      "clips": {
+        "precision": 0.8122,
+        "recall": 0.7547,
+        "f1": 0.7824
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7358,
+          "other_accepted": 0.0147
+        },
+        "two_of_three": {
+          "sheila_detected": 0.6085,
+          "other_accepted": 0.0033
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0058,
+          "shee": 0.0058,
+          "sheet": 0.0291,
+          "swap": 0.0262,
+          "ending": 0.1977,
+          "onset": 0.2099,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.6279
+        },
+        "stream_threshold": {
+          "sh": 0.0116,
+          "shee": 0.0756,
+          "sheet": 0.0814,
+          "swap": 0.064,
+          "ending": 0.3314,
+          "onset": 0.3519,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.814
+        }
+      },
+      "tts": {
+        "single_window": {
+          "sheila": 0.8073,
+          "sh sound": 0.2135,
+          "she- words": 0.5375,
+          "other sh- words": 0.4149,
+          "-eila words": 0.1667,
+          "-eeler words": 0.2118,
+          "similar": 0.5729,
+          "other words": 0.0229
+        },
+        "two_of_three": {
+          "sheila": 0.6302,
+          "sh sound": 0.0625,
+          "she- words": 0.3146,
+          "other sh- words": 0.2743,
+          "-eila words": 0.125,
+          "-eeler words": 0.1181,
+          "similar": 0.3594,
+          "other words": 0.0
+        }
+      },
+      "file": "runs_sheila_r2_aug30_h95/current_seed2/model.npz"
+    },
+    "r2_aug30_e60_seed0": {
+      "decision_threshold": 2358,
+      "stream_threshold": 2114,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.7766,
+        "recall": 0.7217,
+        "f1": 0.7482
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7406,
+          "other_accepted": 0.0253
+        },
+        "two_of_three": {
+          "sheila_detected": 0.5047,
+          "other_accepted": 0.0013
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0058,
+          "shee": 0.0407,
+          "sheet": 0.0233,
+          "swap": 0.0581,
+          "ending": 0.2384,
+          "onset": 0.2531,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.6337
+        },
+        "stream_threshold": {
+          "sh": 0.0058,
+          "shee": 0.0523,
+          "sheet": 0.0349,
+          "swap": 0.061,
+          "ending": 0.2442,
+          "onset": 0.2654,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.6628
+        }
+      },
+      "tts": {
+        "single_window": {
+          "sheila": 0.7604,
+          "sh sound": 0.3542,
+          "she- words": 0.5437,
+          "other sh- words": 0.4913,
+          "-eila words": 0.2188,
+          "-eeler words": 0.309,
+          "similar": 0.599,
+          "other words": 0.0646
+        },
+        "two_of_three": {
+          "sheila": 0.5885,
+          "sh sound": 0.0938,
+          "she- words": 0.3333,
+          "other sh- words": 0.3177,
+          "-eila words": 0.1146,
+          "-eeler words": 0.1111,
+          "similar": 0.3125,
+          "other words": 0.0042
+        }
+      },
+      "file": "runs_sheila_r2_aug30_e60/current_seed0/model.npz"
+    },
+    "r2_aug30_e60_seed1": {
+      "decision_threshold": 1944,
+      "stream_threshold": 1285,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.7674,
+        "recall": 0.7783,
+        "f1": 0.7728
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7594,
+          "other_accepted": 0.021
+        },
+        "two_of_three": {
+          "sheila_detected": 0.6085,
+          "other_accepted": 0.0027
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0,
+          "shee": 0.0349,
+          "sheet": 0.0349,
+          "swap": 0.0756,
+          "ending": 0.25,
+          "onset": 0.2037,
+          "head": 0.0058,
+          "noise": 0.0,
+          "shift": 0.6802
+        },
+        "stream_threshold": {
+          "sh": 0.0058,
+          "shee": 0.0407,
+          "sheet": 0.0756,
+          "swap": 0.093,
+          "ending": 0.3198,
+          "onset": 0.2469,
+          "head": 0.0058,
+          "noise": 0.0,
+          "shift": 0.7558
+        }
+      },
+      "tts": {
+        "single_window": {
+          "sheila": 0.7552,
+          "sh sound": 0.1823,
+          "she- words": 0.5458,
+          "other sh- words": 0.4618,
+          "-eila words": 0.2396,
+          "-eeler words": 0.3403,
+          "similar": 0.5312,
+          "other words": 0.0625
+        },
+        "two_of_three": {
+          "sheila": 0.6354,
+          "sh sound": 0.0677,
+          "she- words": 0.2938,
+          "other sh- words": 0.2847,
+          "-eila words": 0.1389,
+          "-eeler words": 0.191,
+          "similar": 0.3021,
+          "other words": 0.0063
+        }
+      },
+      "file": "runs_sheila_r2_aug30_e60/current_seed1/model.npz"
+    },
+    "r2_aug30_e60_seed2": {
+      "decision_threshold": 2426,
+      "stream_threshold": 598,
+      "hidden": 64,
+      "clips": {
+        "precision": 0.8511,
+        "recall": 0.7547,
+        "f1": 0.8
+      },
+      "live": {
+        "single_window": {
+          "sheila_detected": 0.7358,
+          "other_accepted": 0.0097
+        },
+        "two_of_three": {
+          "sheila_detected": 0.6368,
+          "other_accepted": 0.005
+        }
+      },
+      "augmented_detected": {
+        "decision_threshold": {
+          "sh": 0.0058,
+          "shee": 0.0058,
+          "sheet": 0.0116,
+          "swap": 0.0407,
+          "ending": 0.2093,
+          "onset": 0.1605,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.6744
+        },
+        "stream_threshold": {
+          "sh": 0.0174,
+          "shee": 0.0756,
+          "sheet": 0.0523,
+          "swap": 0.0814,
+          "ending": 0.3605,
+          "onset": 0.3086,
+          "head": 0.0,
+          "noise": 0.0,
+          "shift": 0.8314
+        }
+      },
+      "tts": {
+        "single_window": {
+          "sheila": 0.7812,
+          "sh sound": 0.2396,
+          "she- words": 0.5396,
+          "other sh- words": 0.434,
+          "-eila words": 0.1701,
+          "-eeler words": 0.1944,
+          "similar": 0.5,
+          "other words": 0.0063
+        },
+        "two_of_three": {
+          "sheila": 0.6823,
+          "sh sound": 0.1354,
+          "she- words": 0.3833,
+          "other sh- words": 0.3507,
+          "-eila words": 0.1215,
+          "-eeler words": 0.1562,
+          "similar": 0.3646,
+          "other words": 0.0042
+        }
+      },
+      "file": "runs_sheila_r2_aug30_e60/current_seed2/model.npz"
+    }
+  }
+}
