@@ -25,6 +25,11 @@ hinge loss relu(score + margin_neg); the keyword clips of the keyword
 sub-batch get relu(-margin_pos - score). Both work on the decision itself
 instead of on phoneme labels, which these windows do not have.
 
+--head-weight (> 0): the verifier gets a keyword head (verifier_model.Verifier
+head=True; a new head on an --init checkpoint). Binary cross-entropy on the
+maximum of the head over steps >= 5: keyword clips 1, the other clips of the
+keyword sub-batch and the --hard windows 0.
+
 Validation (every epoch): CTC loss on LibriSpeech dev-clean utterances, and the
 float keyword score (verifier_model.keyword_score_torch) on validation keyword
 clips placed in noise: AUC of the keyword against the other words and
@@ -199,7 +204,7 @@ def tpr_at(pos, neg, fpr=.01):
 
 
 @torch.no_grad()
-def validate(model, aug, dev, libri_val, kw_val, kw_ids, noise):
+def validate(model, aug, dev, libri_val, kw_val, kw_ids, noise, hard_val=None):
     model.eval()
     losses = []
     for i in range(0, len(libri_val), 16):
@@ -214,11 +219,28 @@ def validate(model, aug, dev, libri_val, kw_val, kw_ids, noise):
     w, _ = kw_val.waves(kw_ids, rng=rng)
     n0 = rng.integers(0, len(noise) - w.shape[1], len(w))
     w = w + np.stack([noise[k:k + w.shape[1]] for k in n0]) * rng.uniform(.02, .1, (len(w), 1)).astype(np.float32)
-    scores = []
+    scores, heads = [], []
+    with_head = model.head is not None
     for i in range(0, len(w), 512):
         x = features(aug, w[i:i + 512], dev, pad=0, train=False)
-        scores.append(keyword_score_torch(model(x).double(), warmup=5).cpu().numpy())   # as the cascade
+        out = model(x, with_head=True) if with_head else (model(x), None)
+        scores.append(keyword_score_torch(out[0].double().cpu(), warmup=5).numpy())   # as the cascade
+        if with_head:
+            heads.append(out[1][:, 5:].max(1)[0].float().cpu().numpy())
     s = np.concatenate(scores)
+    extra = {}
+    if with_head:
+        hs = np.concatenate(heads)
+        pos_, other_, near_ = (np.isin(kw_ids, kw_val.pools[k]) for k in ('kw', 'other', 'near'))
+        extra = {'head_auc': round(auc(hs[pos_], hs[other_]), 5),
+                 'head_auc_near': round(auc(hs[pos_], hs[near_]), 5) if near_.any() else None,
+                 'head_tpr_at_1pct': round(tpr_at(hs[pos_], hs[other_]), 4)}
+        if hard_val is not None:   # training-split hard windows: share above the keyword clips' 10th percentile
+            hv = []
+            for i in range(0, len(hard_val), 512):
+                x = features(aug, hard_val[i:i + 512], dev, pad=0, train=False)
+                hv.append(model(x, with_head=True)[1][:, 5:].max(1)[0].float().cpu().numpy())
+            extra['head_hard_above_p10'] = round(float((np.concatenate(hv) >= np.percentile(hs[pos_], 10)).mean()), 4)
     pos = np.isin(kw_ids, kw_val.pools['kw'])
     other = np.isin(kw_ids, kw_val.pools['other'])
     near = np.isin(kw_ids, kw_val.pools['near'])
@@ -227,7 +249,7 @@ def validate(model, aug, dev, libri_val, kw_val, kw_ids, noise):
             'kw_auc_near': round(auc(s[pos], s[near]), 5) if near.any() else None,
             'kw_tpr_at_1pct': round(tpr_at(s[pos], s[other]), 4),
             'kw_pos_median': float(np.median(s[pos])),
-            'kw_other_p99': float(np.percentile(s[other], 99))}
+            'kw_other_p99': float(np.percentile(s[other], 99)), **extra}
 
 
 def main():
@@ -259,6 +281,7 @@ def main():
     p.add_argument('--pos-weight', type=float, default=1.)
     p.add_argument('--margin-neg', type=float, default=2., help='hinge: hard windows should score below -margin (logits)')
     p.add_argument('--margin-pos', type=float, default=.5, help='hinge: keyword clips should score above -margin')
+    p.add_argument('--head-weight', type=float, default=0., help='> 0: train a keyword head (binary cross-entropy)')
     p.add_argument('--name', default='v1')
     p.add_argument('--out', type=Path, default=ROOT / 'runs_verifier')
     a = p.parse_args()
@@ -302,14 +325,16 @@ def main():
                            for i in range(0, len(noise) // 2, 2 ** 24)])
     libri_val = dev_clean()
     hard = HardWindows(a.hard, rng) if a.hard else None
+    hard_val = hard.waves(512, np.random.default_rng(9)) if hard is not None else None   # fixed diagnostic sample
     if a.init:
         ck0 = torch.load(a.init, map_location='cpu', weights_only=False)
         K.check_model_keyword(ck0.get('keyword'), str(a.init))
-        model = Verifier(**ck0['config']).to(dev)
-        model.load_state_dict(ck0['state_dict'])
-        print('initialised from', a.init, 'epoch', ck0.get('epoch'), flush=True)
+        cfg = dict(ck0['config'], head=ck0['config'].get('head', False) or a.head_weight > 0)
+        model = Verifier(**cfg).to(dev)
+        missing = model.load_state_dict(ck0['state_dict'], strict=False).missing_keys
+        print('initialised from', a.init, 'epoch', ck0.get('epoch'), 'new:', missing, flush=True)
     else:
-        model = Verifier(a.h1, a.h2).to(dev)
+        model = Verifier(a.h1, a.h2, head=a.head_weight > 0).to(dev)
     with torch.no_grad():   # input statistics of augmented training features, per band
         xs = []
         for _ in range(0 if a.init else 8):
@@ -333,7 +358,7 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     history, best, t0, gstep = [], -1., time.perf_counter(), 0
     for epoch in range(a.epochs):
-        sums = {'libri': 0., 'kw': 0., 'hard': 0., 'pos': 0.}
+        sums = {'libri': 0., 'kw': 0., 'hard': 0., 'pos': 0., 'head': 0.}
         for step in range(a.steps_per_epoch):
             if step % 50 == 0:
                 memguard.check(f'epoch {epoch + 1} step {step}')
@@ -351,12 +376,26 @@ def main():
                 if hard is not None:
                     xh = phase(features(aug, hard.waves(a.hard_batch), dev, train=not warm), rng)
             ll = ctc(model, xl, tl, dev)
-            logits_k = model(xk)
+            if a.head_weight > 0:
+                logits_k, head_k = model(xk, with_head=True)
+            else:
+                logits_k = model(xk)
             lk = ctc(model, xk, tk, dev, logits_k)
             loss = ll + a.kw_weight * lk
             if hard is not None:
+                logits_h, head_h = model(xh, with_head=True) if a.head_weight > 0 else (model(xh), None)
+            if a.head_weight > 0:
+                ys = np.isin(ids, kw.pools['kw']).astype(np.float32)
+                hs = head_k[:, 5:].max(1)[0]
+                if hard is not None:
+                    hs = torch.cat([hs, head_h[:, 5:].max(1)[0]])
+                    ys = np.r_[ys, np.zeros(len(head_h), np.float32)]
+                lhead = F.binary_cross_entropy_with_logits(hs.float(), torch.tensor(ys, device=dev))
+                loss = loss + a.head_weight * lhead
+                sums['head'] += lhead.item()
+            if hard is not None and (a.hard_weight > 0 or a.pos_weight > 0):
                 # The path DP is many tiny operations: faster on the CPU (autograd moves the gradient back).
-                sh = keyword_score_torch(model(xh).float().cpu(), warmup=5)
+                sh = keyword_score_torch(logits_h.float().cpu(), warmup=5)
                 lh = F.relu(sh + a.margin_neg).mean()
                 pos = torch.tensor(np.isin(ids, kw.pools['kw']), device=dev)
                 sp = keyword_score_torch(logits_k[pos].float().cpu(), warmup=5)
@@ -370,7 +409,7 @@ def main():
             sums['libri'] += ll.item(); sums['kw'] += lk.item()
         torch.cuda.empty_cache()
         r = {k: round(v / a.steps_per_epoch, 4) for k, v in sums.items()}
-        r.update(validate(model, aug, dev, libri_val, kw_val, kw_ids, val_noise))
+        r.update(validate(model, aug, dev, libri_val, kw_val, kw_ids, val_noise, hard_val))
         torch.cuda.empty_cache()
         r.update(epoch=epoch + 1, minutes=round((time.perf_counter() - t0) / 60, 1),
                  gpu_mb=round(torch.cuda.max_memory_allocated() / 2 ** 20),

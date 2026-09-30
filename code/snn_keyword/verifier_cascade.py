@@ -216,9 +216,14 @@ def score(a):
 
         def flush():
             x = np.concatenate(pend)
-            lg = model(x)
-            va.append(keyword_score_torch(lg, a.warmup, 0, cap=a.cap).numpy().astype(np.int64))
-            vb.append(keyword_score_torch(lg, a.warmup, a.boundary, cap=a.cap).numpy().astype(np.int64))
+            if a.score == 'head':      # keyword head: maximum over steps >= warmup (both policies)
+                _, hd = model(x, with_head=True)
+                hs = hd[:, a.warmup:].max(1)[0].numpy().astype(np.int64)
+                va.append(hs); vb.append(hs)
+            else:
+                lg = model(x)
+                va.append(keyword_score_torch(lg, a.warmup, 0, cap=a.cap).numpy().astype(np.int64))
+                vb.append(keyword_score_torch(lg, a.warmup, a.boundary, cap=a.cap).numpy().astype(np.int64))
             pend.clear()
             memguard.check(f'score {g}')
 
@@ -236,7 +241,7 @@ def score(a):
         out[f'{g}_voff'] = np.array(off, np.int64)
         print(g, len(items), 'items', off[-1], 'windows', round(time.perf_counter() - t0), 's', flush=True)
     out.update(checkpoint=np.array(str(a.checkpoint)), warmup=np.array(a.warmup), boundary=np.array(a.boundary),
-               window=np.array(a.window), cap=np.array(a.cap))
+               window=np.array(a.window), cap=np.array(a.cap), score=np.array(a.score))
     np.savez(a.out, **out)
 
 
@@ -545,6 +550,8 @@ def main():
     s.add_argument('--warmup', type=int, default=5, help='20 ms steps before a keyword may start')
     s.add_argument('--boundary', type=int, default=10, help='policy b: 20 ms steps without a new phoneme after S')
     s.add_argument('--cap', type=int, default=0, help='capped-margin score (verifier_model.step_costs), Q10 units')
+    s.add_argument('--score', choices=['path', 'head'], default='path',
+                   help='path: keyword phoneme path (keyword_score); head: the keyword head (verifier_model.head_score)')
     s.add_argument('--batch', type=int, default=2048)
     s.add_argument('--threads', type=int, default=4)
     s.add_argument('--out', type=Path, required=True)

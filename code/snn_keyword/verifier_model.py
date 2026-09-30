@@ -19,6 +19,12 @@ Integer model (quantize / integer_forward; firmware/verifier.c is bit-exact):
   n   = tanh(gx_n + (r * gh_n) >> 10);  h' = n + (z * (h - n)) >> 10;
   logits Q10.
 
+Keyword head (optional, cfg head=True): a linear readout of GRU 2 per step,
+head_t = w . h2_t + b (Q10 in the integer model, one int8 row with its own
+power-of-two scale). Its score is the maximum over steps >= warmup
+(head_score): a direct keyword/not-keyword decision, trained on the keyword
+against stage-1 false proposals, next to the CTC phoneme outputs.
+
 Keyword score (keyword_score): with c_t(k) = logit_t(k) - max_j logit_t(j) <= 0,
 the best-scoring path p1+ b* p2+ b* ... pN+ (b = blank; CTC: a blank is
 required between two equal phonemes) over any segment of the window, where
@@ -51,13 +57,14 @@ NEG = -(1 << 30)
 
 
 class Verifier(nn.Module):
-    def __init__(self, h1=64, h2=64, stack=2, classes=len(SYMBOLS)):
+    def __init__(self, h1=64, h2=64, stack=2, classes=len(SYMBOLS), head=False):
         super().__init__()
-        self.cfg = dict(h1=h1, h2=h2, stack=stack, classes=classes)
+        self.cfg = dict(h1=h1, h2=h2, stack=stack, classes=classes, head=head)
         self.stack = stack
         self.gru1 = nn.GRU(N_MELS * stack, h1, batch_first=True)
         self.gru2 = nn.GRU(h1, h2, batch_first=True)
         self.out = nn.Linear(h2, classes)
+        self.head = nn.Linear(h2, 1) if head else None
         # Per-input normalisation (x - mu) / sd, folded into layer 1 by quantize(). Without it
         # CTC training stays on the "same label sequence for every input" plateau (JOURNAL).
         self.register_buffer('mu', torch.zeros(N_MELS * stack))
@@ -68,10 +75,12 @@ class Verifier(nn.Module):
         t = t // self.stack * self.stack
         return x[:, :t].reshape(b, t // self.stack, m * self.stack)
 
-    def forward(self, x):
-        """x: (B, T, 24) uint8-valued frames -> logits (B, T // stack, classes)."""
+    def forward(self, x, with_head=False):
+        """x: (B, T, 24) uint8-valued frames -> logits (B, T // stack, classes) [, head (B, T // stack)]."""
         h, _ = self.gru1((self.stack_frames(x) - self.mu) / self.sd)
         h, _ = self.gru2(h)
+        if with_head:
+            return self.out(h), self.head(h).squeeze(-1)
         return self.out(h)
 
 
@@ -127,6 +136,11 @@ def quantize(model):
     q['out_w'] = quantize_rows(wo, e)
     q['out_e'] = e
     q['out_b'] = np.rint(model.out.bias.detach().cpu().double().numpy() * ONE).astype(np.int32)
+    if model.head is not None:
+        wh = model.head.weight.detach().cpu().double().numpy()
+        e = row_exponent(wh)
+        q['head_w'], q['head_e'] = quantize_rows(wh, e), e
+        q['head_b'] = np.rint(model.head.bias.detach().cpu().double().numpy() * ONE).astype(np.int32)
     q['sig'], q['tanh'] = tables()
     return q
 
@@ -151,8 +165,9 @@ def gru_step_int(a, h, w, e, b, sig, tanh):
     return n + ((z * (h - n)) >> Q)
 
 
-def integer_forward(frames, q):
-    """frames (B, T, 24) uint8 -> logits (B, T // stack, classes) int64 (Q10). Zero initial state."""
+def integer_forward(frames, q, with_head=False):
+    """frames (B, T, 24) uint8 -> logits (B, T // stack, classes) int64 (Q10) [, head (B, T // stack)].
+    Zero initial state."""
     frames = np.asarray(frames)
     b, t, m = frames.shape
     st = int(q['stack'])
@@ -162,11 +177,19 @@ def integer_forward(frames, q):
     h2 = np.zeros((b, int(q['h2'])), np.int64)
     wo = q['out_w'].astype(np.int64)
     out = np.empty((b, t // st, len(q['out_b'])), np.int64)
+    head = np.empty((b, t // st), np.int64)
     for k in range(t // st):
         h1 = gru_step_int(x[:, k], h1, q['l1_w'], q['l1_e'], q['l1_b'], q['sig'], q['tanh'])
         h2 = gru_step_int(h1, h2, q['l2_w'], q['l2_e'], q['l2_b'], q['sig'], q['tanh'])
         out[:, k] = ((h2 @ wo.T) >> q['out_e']) + q['out_b']
-    return out
+        if with_head:
+            head[:, k] = ((h2 @ q['head_w'][0].astype(np.int64)) >> q['head_e'][0]) + q['head_b'][0]
+    return (out, head) if with_head else out
+
+
+def head_score(head, warmup=0):
+    """Keyword head decision: the maximum of the per-step head over steps >= warmup."""
+    return head[:, warmup:].max(1)
 
 
 class IntegerTorch:
@@ -182,6 +205,9 @@ class IntegerTorch:
             self.L[name] = (d(w), d(2.0 ** -e), d(q[f'{name}_b']), w.shape[1] - (self.h1 if name == 'l1' else self.h2))
         self.wo, self.so, self.bo = d(q['out_w']), d(2.0 ** -q['out_e']), d(q['out_b'])
         self.sig, self.tanh = d(q['sig']), d(q['tanh'])
+        self.has_head = 'head_w' in q
+        if self.has_head:
+            self.wh, self.sh, self.bh = d(q['head_w'][0]), float(2.0 ** -q['head_e'][0]), float(q['head_b'][0])
 
     @staticmethod
     def _shift(acc, scale):   # arithmetic >> e == floor(acc * 2^-e)
@@ -204,19 +230,21 @@ class IntegerTorch:
         return n + torch.floor(z * (h - n) / ONE)
 
     @torch.no_grad()
-    def __call__(self, frames):
+    def __call__(self, frames, with_head=False):
         x = torch.as_tensor(np.asarray(frames), device=self.device).double()
         b, t, m = x.shape
         t = t // self.st * self.st
         x = x[:, :t].reshape(b, t // self.st, m * self.st) * (1 << (Q - 8))
         h1 = torch.zeros(b, self.h1, dtype=torch.float64, device=self.device)
         h2 = torch.zeros(b, self.h2, dtype=torch.float64, device=self.device)
-        out = []
+        out, head = [], []
         for k in range(t // self.st):
             h1 = self._step(x[:, k], h1, 'l1')
             h2 = self._step(h1, h2, 'l2')
             out.append(self._shift(h2 @ self.wo.T, self.so) + self.bo)
-        return torch.stack(out, 1)
+            if with_head:
+                head.append(torch.floor(h2 @ self.wh * self.sh) + self.bh)
+        return (torch.stack(out, 1), torch.stack(head, 1)) if with_head else torch.stack(out, 1)
 
 
 # --------------------------------------------------------------------------- keyword score
