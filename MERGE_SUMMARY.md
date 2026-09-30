@@ -74,7 +74,7 @@ noise. The output is binary. The earlier keyword "yes" appears here as history
 | `explore-verifier` | Mateo (worktree, agent) | +37 on `Rework` | verifier on the PicoRV32 (CTC GRU + keyword head, int8, C, RTL), the cascade firmware, sentence probe, JOURNAL 28-30, 32-35 | merged (five times) |
 | `engine-timing` | Mateo (worktree, agent) | +4 on `Rework` | pipelined neuron-engine accumulator, JOURNAL 31 | merged (twice) |
 | `Pedro` (upstream) | Pedro | 3 (on `Mateo_AI`) | Ethernet path on PYNQ Linux, `board_server.py` double-request fix, E0-E8 research plan | merged |
-| `Alex-parallel` (upstream) | Alex | 2 (on `Mateo_AI`) | one-click demo scripts, 64-neuron parallel LIF layer (sketch) | merged, sketch relocated |
+| `Alex-parallel` (upstream) | Alex | 3 (on `Mateo_AI`) | one-click demo scripts, 64-neuron parallel LIF layer (sketch), its on-board smoke test | merged, sketch relocated |
 | `damien-dicking-around` (upstream) | Damien | 4 (from `c2009be`, before `714db5c`) | independent clip pipeline (8×16 features, ZeroMQ), front-end sweeps, "sheila v2" on his board | merged, 3 files renamed |
 | `main`, `Group2`, `Khalid`, `Alex's` | — | 0 | course material only | — |
 
