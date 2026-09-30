@@ -525,6 +525,8 @@ def sources(a):
 
 
 def main():
+    import sys
+    sys.stdout.reconfigure(encoding='utf-8')     # the MSWC group names are in IPA
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest='cmd', required=True)
     c = sub.add_parser('cache')
