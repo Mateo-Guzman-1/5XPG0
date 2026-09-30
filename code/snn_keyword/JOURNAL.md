@@ -1504,21 +1504,26 @@ user's voice in sentences would settle it (open items).
 Status of `IMPLEMENTATION_PLAN.md`: Phases 0-6 done; the streaming firmware and
 engine are verified on the board over JTAG with the earlier "yes" model (entry 18);
 Phase 7 was evaluated for "yes" and not promoted (entry 17). The keyword is now
-"sheila" against everything else (entry 22); its stage-1 candidate
-`runs_stream/sheila_qat_seed2/int_model.npz` (`results/models/sheila_stream_int8.npz`)
-is RTL bit-exact and has had its one test run (entry 27).
+"sheila" against everything else (entry 22). The best system is the cascade of the
+stage-1 SNN and the verifier with a keyword head trained against near-miss words
+(entry 32): 86.8% live recall on test at 1.42 FA/h and 0.07% other words. It is
+RTL bit-exact and has not been on a board.
 
-1. **Board test of the "sheila" candidate**, with the engine bitstream (built with
-   the `ps_if.v` ABI fix `0x00020003`, entry 19) and `keyword_stream_engine.bin`:
-   over JTAG (`jtag/stream_board_test.tcl`) or the Ethernet path
-   (`net_board_test.py`). Needs a board and the team's go-ahead.
-2. **Native C on the full test set** for the "sheila" model (`verify_stream.py`).
-3. **"sheila" recall.** Test: 63.7% live, 70.7% on complete recordings, at 1.58 FA/h;
-   the target is 85% (IMPLEMENTATION_PLAN.md). Speech Commands has only 1,606
-   training positives. Compare changes over several seeds (SD 3.6 points, entry
-   26). A second stage, a phoneme verifier with a keyword head, is developed on
-   branch `explore-verifier` (entries 28-35).
-4. **Engine timing margin.** The rebuilt bitstream met 100 MHz only with
-   Performance_ExplorePostRoutePhysOpt (WNS +0.348 ns, entry 19); the accumulator
-   read-modify-write is pipelined on branch `engine-timing` (entry 31).
-5. Recordings of the actual user and microphone, for evaluation only.
+1. **Board test of the cascade** (`firmware -DCASCADE` with the head): `verify_verifier_rtl.py
+   runs_verifier/sheila_head_near/last.pt --cascade 3785 1524` builds the firmware,
+   `jtag/make_stream_vectors.py --cascade runs_verifier/sheila_head_near/last.pt 3785 1524`
+   the vectors, then `jtag/stream_board_test.tcl`. Needs a board and the team's
+   go-ahead. The stage-1 firmware alone (entry 27) is the fallback.
+2. **"sheila" inside sentences** (entries 34-35): 6% in the middle and 13% at the end
+   of sentences (synthetic voices), against 72% alone. Stage 1 proposes for only
+   39-65% of the middle-position sentences. Train stage 1 with the keyword in
+   continuous speech (TTS sentences, same voice on both sides), then the verifier.
+3. **The "zero" clips** (entries 32-33): most remaining false accepts are Speech
+   Commands recordings labelled "zero" (also "two", "four"). Listen to them
+   (`results/sheila_suspected_label_errors_*.json`): a real near-miss or
+   mislabelled recordings.
+4. **Other words under rooms:** 0.27% for the candidate (target 0.2% on clean audio).
+5. **Native C on the full test set** for the "sheila" stage 1 (`verify_stream.py`).
+6. **Engine timing margin:** branch `engine-timing` (entry 31) pipelines the
+   accumulator; the default Vivado strategy then meets 100 MHz.
+7. Recordings of the actual user and microphone, for evaluation only.
