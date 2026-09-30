@@ -1,11 +1,13 @@
-"""Ending- and position-aware augmentation made from real "yes" recordings.
+"""Hard negatives and position variants made from real keyword recordings.
 
-The original model fired on words that share the "ye"/"ee" vowel but end in
-/ts/ or /tʃ/ ("yeets", "pizza", "yetch"), on "yeah", and on live windows that
-cut "yes" off before its /s/. Speech Commands has none of these, and its
-clips are centred, while the live demo slides a 1 s window every 250 ms.
-Every variant edits a real "yes" clip, so the model must learn that "yes" is
-the complete word ending in a plain /s/:
+Speech Commands has no near-miss words for its keywords, and its clips are
+centred, while the live demo slides a 1 s window every 250 ms. Every variant
+edits a real recording of the keyword the data is prepared for
+(prepare_data.py --keyword), so the model must learn the complete word.
+
+"yes": the original model fired on words that share the "ye"/"ee" vowel but
+end in /ts/ or /tʃ/ ("yeets", "pizza", "yetch"), on "yeah", and on live
+windows that cut "yes" off before its /s/:
 
   label 0  ts     stop closure + release burst + short, abrupt /s/    "yets"
   label 0  ch     closure + burst + frication moved to the /ʃ/ band    "yetch"
@@ -15,20 +17,34 @@ the complete word ending in a plain /s/:
   label 0  head   window starts after the /j/ onset                   "|es"
   label 1  shift  complete word at a random position in the window
 
-Variants inherit their source clip's official speaker-disjoint split.
-Only for data prepared with --keyword yes; other keywords need their own variants.
+"sheila": no other dataset word contains /ʃ/, so the model learned "sh" (+ "ee")
+as the keyword and fired on "sh", "she", "sheep" or "shield". The /ʃ/ and the
+vowel onset are found per clip (sheila_marks; about 75% of the clips):
+
+  label 0  sh     only the /ʃ/, sometimes repeated into a long "shhh"   "sh"
+  label 0  shee   /ʃ/ + start of the vowel, "-la" removed with a fade   "shee"
+  label 0  sheet  "shee" + stop closure + release burst                 "sheet"
+  label 0  swap   /ʃ/ + another dataset word without its unvoiced onset "sh|op"
+                  (two per clip, source word from the same split)
+  label 0  head   window starts after the /ʃ/                           "|eila"
+  label 1  shift  complete word at a random position in the window
+
+Variants inherit their source clips' official speaker-disjoint split.
+--examples N writes N WAV files per kind to build/aug_examples_<keyword>/ to listen to.
 """
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 import json
 from pathlib import Path
+import wave
 import numpy as np
 from features import SAMPLE_RATE, features, read_wav
 from model import keyword_of
 
 ROOT = Path(__file__).resolve().parent
-KINDS = ('ts', 'ch', 'sh', 'cut', 'tail', 'head', 'shift')
-LABEL = {k: int(k == 'shift') for k in KINDS}
+KINDS = {'yes': ('ts', 'ch', 'sh', 'cut', 'tail', 'head', 'shift'),
+         'sheila': ('sh', 'shee', 'sheet', 'swap', 'swap', 'head', 'shift')}
+LABEL = {k: int(k == 'shift') for kinds in KINDS.values() for k in kinds}
 HOP = 160
 
 
@@ -118,23 +134,152 @@ def fit(audio):
     return audio[max(0, len(audio) - SAMPLE_RATE):]
 
 
-def build(data, workers):
+def frame_levels(a):
+    """Per 10 ms frame: energy in dB below the loudest frame, share of energy >= 2 kHz and < 1 kHz."""
+    n = len(a) // HOP
+    spec = np.abs(np.fft.rfft(a[:n * HOP].reshape(n, HOP) * np.hanning(HOP), axis=1)) ** 2
+    freqs = np.fft.rfftfreq(HOP, 1 / SAMPLE_RATE)
+    total = spec.sum(1) + 1e-12
+    rel = 10 * np.log10(total)
+    return rel - rel.max(), spec[:, freqs >= 2000].sum(1) / total, spec[:, freqs < 1000].sum(1) / total
+
+
+def runs(mask, gap):
+    """[start, end) frame runs of True, bridging up to `gap` missing frames."""
+    out = []
+    for i in np.flatnonzero(mask):
+        if out and i - out[-1][1] <= gap:
+            out[-1][1] = i + 1
+        else:
+            out.append([i, i + 1])
+    return out
+
+
+def word_end(loud, start, limit):
+    """End of the last loud frame after `start`, stopping at more than 5 quiet frames or `limit` frames."""
+    end, quiet = start, 0
+    for i in range(start, min(len(loud), start + limit)):
+        if loud[i]:
+            end, quiet = i + 1, 0
+        else:
+            quiet += 1
+            if quiet > 5:
+                break
+    return end
+
+
+def sheila_marks(a):
+    """Samples where the /ʃ/ starts, where the vowel starts and where the word ends, or None.
+
+    The /ʃ/ is >= 50 ms of frication (energy mostly >= 2 kHz, little < 1 kHz) directly
+    followed by >= 150 ms of voicing; of several candidates, the loudest voicing wins.
+    """
+    rel, high, low = frame_levels(a)
+    voiced = runs((low > .5) & (rel > -25), gap=4)
+    best = None
+    for f0, f1 in runs((high > .6) & (low < .2) & (rel > -40), gap=2):
+        follow = [r for r in voiced if f1 - 1 <= r[0] <= f1 + 4]
+        if f1 - f0 < 5 or not follow or follow[0][1] - follow[0][0] < 15:
+            continue
+        v0 = follow[0][0]
+        w1 = word_end(rel > -30, v0, 70)
+        if best is None or rel[v0:w1].max() > best[3]:
+            best = (f0, v0, w1, rel[v0:w1].max())
+    return None if best is None else tuple(k * HOP for k in best[:3])
+
+
+def rhyme(a):
+    """Samples of a word from its first loud voiced run to its end: the word without an unvoiced onset."""
+    rel, _, low = frame_levels(a)
+    loud_runs = [r for r in runs((low > .5) & (rel > -25), gap=4) if r[1] - r[0] >= 8 and rel[r[0]:r[1]].max() > -10]
+    if not loud_runs:
+        return None
+    r0 = loud_runs[0][0]
+    return r0 * HOP, word_end(rel > -30, r0, 80) * HOP
+
+
+def fade_out(seg, n):
+    seg = seg.copy()
+    n = min(n, len(seg))
+    seg[len(seg) - n:] *= np.linspace(1, 0, n, dtype=np.float32)
+    return seg
+
+
+def crossfade(a, b, n):
+    n = min(n, len(a), len(b))
+    ramp = np.linspace(0, 1, n, dtype=np.float32)
+    return np.concatenate([a[:len(a) - n], a[len(a) - n:] * (1 - ramp) + b[:n] * ramp, b[n:]])
+
+
+def sheila_variant(a, marks, kind, rng, other=None):
+    """One edited 1 s window from a "sheila" clip; `other` is the rhyme of another word for "swap"."""
+    f0, v0, w1 = marks
+    pad, ms = int(.03 * SAMPLE_RATE), SAMPLE_RATE // 1000
+    fric = a[max(0, f0 - pad):v0]
+    if kind == 'head':
+        return place(a[v0 - 10 * ms:w1 + pad], 0)
+    if kind == 'shift':
+        seg = a[max(0, f0 - pad):w1 + pad]
+    elif kind == 'sh':
+        seg = fric
+        for _ in range(int(rng.integers(0, 3))):   # the noise-like /ʃ/ repeats into a longer "shhh"
+            seg = crossfade(seg, a[f0:v0], 10 * ms)
+        seg = fade_out(np.concatenate([seg, a[v0:v0 + int(rng.uniform(0, 30)) * ms]]), 15 * ms)
+    elif kind in ('shee', 'sheet'):
+        cut = v0 + int(rng.uniform(.2, .45) * (w1 - v0))
+        seg = fade_out(a[max(0, f0 - pad):cut], int(rng.uniform(20, 40)) * ms)
+        if kind == 'sheet':
+            peak = float(np.abs(fric).max()) + 1e-6
+            closure = rng.normal(0, peak * .01, int(rng.uniform(30, 120)) * ms).astype(np.float32)
+            n = int(rng.uniform(4, 12)) * ms
+            burst = (rng.normal(0, 1, n) * np.exp(-np.linspace(0, 5, n)) * peak * rng.uniform(.6, 1.2)).astype(np.float32)
+            seg = np.concatenate([seg, closure, burst])
+    else:   # swap: the other word's rhyme at the level of this clip's vowel
+        level = (float(np.abs(a[v0:w1]).max()) + 1e-6) / (float(np.abs(other).max()) + 1e-6)
+        seg = crossfade(fric, other * level, 8 * ms)
+    return place(seg, int(rng.integers(0, max(1, SAMPLE_RATE - len(seg)))))
+
+
+def write_wav(path, audio):
+    with wave.open(str(path), 'wb') as f:
+        f.setnchannels(1); f.setsampwidth(2); f.setframerate(SAMPLE_RATE)
+        f.writeframes((np.clip(audio, -1, 1) * 32767).astype('<i2').tobytes())
+
+
+def build(data, workers, examples=0):
     cache = np.load(data / 'features.npz')
-    if keyword_of(cache) != 'yes':
-        raise SystemExit(f'augment.py edits the final /s/ of "yes" clips; the data is prepared for "{keyword_of(cache)}"')
+    keyword = keyword_of(cache)
+    if keyword not in KINDS:
+        raise SystemExit(f'No augmentation is defined for "{keyword}"; see the docstring for "yes" and "sheila"')
     names, split = cache['names'], cache['split']
     raw = data / 'speech_commands_v0.02'
-    jobs = [(i, n) for i, n in enumerate(names) if n.startswith('yes/')]
+    jobs = [(i, n) for i, n in enumerate(names) if n.startswith(keyword + '/')]
+    others = [np.flatnonzero((split == s) & ~np.char.startswith(names, keyword + '/')) for s in range(3)]
+    listen = {i for i, _ in [j for j in jobs if split[j[0]] == 0][:4 * examples]}   # audio kept to write examples
 
     def make(job):
         i, name = job
         # Per-clip seed keeps the dataset reproducible regardless of thread order.
         rng = np.random.default_rng(i)
         audio = read_wav(raw / name)
-        span = s_region(audio)
-        if span is None:
-            return []
-        return [(features(fit(variant(audio, span, k, rng))), split[i], k, name) for k in KINDS]
+        if keyword == 'yes':
+            span = s_region(audio)
+            made = [] if span is None else [(variant(audio, span, k, rng), k, name) for k in KINDS[keyword]]
+        else:
+            marks = sheila_marks(audio)
+            made = []
+            for k in (KINDS[keyword] if marks else ()):
+                other, source = None, name
+                for _ in range(20 if k == 'swap' else 0):   # another word from the same split
+                    j = int(rng.choice(others[split[i]]))
+                    b = read_wav(raw / names[j])
+                    span = rhyme(b)
+                    if span and span[1] - span[0] >= .1 * SAMPLE_RATE:
+                        other, source = b[span[0]:span[1]], f'{name}+{names[j]}'
+                        break
+                if k != 'swap' or other is not None:
+                    made.append((sheila_variant(audio, marks, k, rng, other), k, source))
+        return [(features(fit(v)), split[i], k, source, fit(v) if i in listen else None) for v, k, source in made]
 
     with ThreadPoolExecutor(max_workers=workers) as pool:
         rows = [r for rs in pool.map(make, jobs) for r in rs]
@@ -142,17 +287,28 @@ def build(data, workers):
     kinds = np.array([r[2] for r in rows])
     np.savez_compressed(data / 'augment.npz', x=x, y=np.array([LABEL[k] for k in kinds], np.int64),
                         split=np.array([r[1] for r in rows], np.uint8), kind=kinds,
-                        source=np.array([r[3] for r in rows]))
-    summary = {'source_yes_clips': len(jobs), 'clips_with_s': len(rows) // len(KINDS), 'kinds': list(KINDS),
-               'per_split': {s: int((np.array([r[1] for r in rows]) == i).sum())
-                             for i, s in enumerate(['train', 'validation', 'test'])}}
+                        source=np.array([r[3] for r in rows]), keyword=np.array(keyword))
+    if examples:
+        out = ROOT / 'build' / f'aug_examples_{keyword}'
+        out.mkdir(parents=True, exist_ok=True)
+        count = {}
+        for _, _, k, _, audio in rows:
+            if audio is not None and count.get(k, 0) < examples:
+                count[k] = count.get(k, 0) + 1
+                write_wav(out / f'{k}_{count[k]:02d}.wav', audio)
+    splits = np.array([r[1] for r in rows])
+    summary = {'keyword': keyword, f'source_{keyword}_clips': len(jobs),
+               'clips_used': len({r[3].split('+')[0] for r in rows}), 'kinds': sorted(set(KINDS[keyword])),
+               'per_split': {s: int((splits == i).sum()) for i, s in enumerate(['train', 'validation', 'test'])},
+               'per_kind': {k: int((kinds == k).sum()) for k in sorted(set(KINDS[keyword]))}}
     print(json.dumps(summary, indent=2), flush=True)
     return summary
 
 
 if __name__ == '__main__':
-    p = argparse.ArgumentParser(description=__doc__)
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--data', type=Path, default=ROOT / 'data')
     p.add_argument('--workers', type=int, default=12)
+    p.add_argument('--examples', type=int, default=0, help='WAV files per kind to write for listening')
     a = p.parse_args()
-    build(a.data, a.workers)
+    build(a.data, a.workers, a.examples)

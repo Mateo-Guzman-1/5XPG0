@@ -15,8 +15,9 @@ $format = New-Object System.Speech.AudioFormat.SpeechAudioFormatInfo(16000,
 $lists = @{
     yes = @('yes','yes!','yeets','yeet','yets','yetz','pizza','pizzas','yech','yetch','peach','each',
             'eats','jets','gets','bets','lets','yeah','sets','its','cheese','yesterday','less','guess')
-    sheila = @('sheila','sheila!','she','sheet','sheep','shield','sheena','leila','delilah','keela',
-               'feeler','healer','dealer','shayla','shelter','cheetah','tequila','yes','no','hello','seven','marvin')
+    sheila = @('sheila','sheila!','shh','shush','she','sheet','sheep','shield','sheena','shy','show','shoe','shelly',
+               'shayla','shelter','leila','delilah','keela','feeler','healer','dealer','cheetah','tequila',
+               'yes','no','hello','seven','marvin')
 }
 $words = $lists[$Keyword]
 $count = 0
@@ -24,8 +25,10 @@ foreach ($voice in @('Microsoft David Desktop','Microsoft Zira Desktop')) {
     $synth.SelectVoice($voice)
     foreach ($word in $words) { foreach ($rate in @('x-slow','slow','medium','fast')) { foreach ($pitch in @('low','medium','high')) {
         $name = ($word -replace '[^a-z]','') + '_' + $voice.Split(' ')[1] + "_$rate" + "_$pitch" + $(if ($word -match '!') {'_x'} else {''})
+        # The voices read "shh" as letter names; its IPA phoneme gives the plain /ʃ/ hiss.
+        $text = if ($word -eq 'shh') { "<phoneme alphabet='ipa' ph='$([char]0x283)'>sh</phoneme>" } else { $word }
         $synth.SetOutputToWaveFile((Join-Path $Out "$name.wav"), $format)
-        $synth.SpeakSsml("<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'><prosody rate='$rate' pitch='$pitch'>$word</prosody></speak>")
+        $synth.SpeakSsml("<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'><prosody rate='$rate' pitch='$pitch'>$text</prosody></speak>")
         $count++
     }}}
 }

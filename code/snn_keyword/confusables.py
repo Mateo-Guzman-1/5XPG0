@@ -5,10 +5,12 @@ For each model (integer inference, identical to the board):
   live       test clips placed in 2.25 s of background noise, consecutive 250 ms-hop
              windows as the demo sends them: keyword detected / other word accepted,
              for a single window and for "2 of 3" confirmation at stream_threshold
-  augmented  false accepts on augment.py test-split variants (shift = recall; "yes" only)
+  augmented  detections on augment.py test-split variants (hard negatives; shift = recall)
   tts        per word, share of synthesized utterances (make_tts_probe.ps1, never
              trained on) detected over 250 ms-hop windows, averaged over 4 hop phases
 The keyword is the one the data was prepared for (prepare_data.py --keyword).
+--split validation scores validation clips, windows and variants instead, for choosing
+between models; the TTS probe is then skipped so that it stays held out.
 Writes one JSON file; run with KWS_TIME_BINS=64 --data data/b64 for 64-bin models.
 """
 import argparse
@@ -29,10 +31,11 @@ TTS_GROUPS = {
             'eats/its': ['eats', 'its'], 'other -ts': ['jets', 'gets', 'bets', 'lets', 'sets'],
             'ch words': ['yech', 'yetch', 'each', 'peach'], 'yeah': ['yeah'], 'yeet': ['yeet'],
             'guess/less': ['guess', 'less'], 'cheese/yesterday': ['cheese', 'yesterday']},
-    'sheila': {'sheila': ['sheila'], 'she- words': ['she', 'sheet', 'sheep', 'shield', 'sheena'],
+    'sheila': {'sheila': ['sheila'], 'sh sound': ['shh', 'shush'],
+               'she- words': ['she', 'sheet', 'sheep', 'shield', 'sheena'],
+               'other sh- words': ['shy', 'show', 'shoe', 'shelly', 'shayla', 'shelter'],
                '-eila words': ['leila', 'delilah', 'keela'], '-eeler words': ['feeler', 'healer', 'dealer'],
-               'similar': ['shayla', 'shelter', 'cheetah', 'tequila'],
-               'other words': ['yes', 'no', 'hello', 'seven', 'marvin']}}
+               'similar': ['cheetah', 'tequila'], 'other words': ['yes', 'no', 'hello', 'seven', 'marvin']}}
 
 
 def tts_sequences(data, probe):
@@ -79,9 +82,11 @@ def evaluate(q, clips, live, aug, tts, keyword):
                    'two_of_three': {detected: round(float(two[y == 1].mean()), 4),
                                     'other_accepted': round(float(two[y == 0].mean()), 4)}}
     if aug:
+        # One window per variant; at the stream threshold it is the share a live stream would pass per window.
         ax, ak = aug
-        hit = margin(ax) >= th
-        out['augmented_test_detected'] = {k: round(float(hit[ak == k].mean()), 4) for k in dict.fromkeys(ak)}
+        ma = margin(ax)
+        out['augmented_detected'] = {name: {k: round(float((ma[ak == k] >= t).mean()), 4) for k in dict.fromkeys(ak)}
+                                     for name, t in (('decision_threshold', th), ('stream_threshold', sth))}
     if tts:
         words, tx, tb = tts
         one, two = decide(margin(tx), tb, th, sth)
@@ -98,19 +103,23 @@ def main():
     p.add_argument('--data', type=Path, default=ROOT / 'data')
     p.add_argument('--probe', type=Path, help='TTS clips; default build/tts_probe ("yes") or build/tts_probe_<keyword>')
     p.add_argument('--out', type=Path, default=ROOT / 'results/confusables.json')
+    p.add_argument('--split', choices=['test', 'validation'], default='test',
+                   help='validation: for choosing models (the live windows of tune_stream.py, no TTS probe)')
     a = p.parse_args()
+    s = 2 if a.split == 'test' else 1
     d = np.load(a.data / 'features.npz')
     keyword = keyword_of(d)
-    clips = (d['x'][d['split'] == 2], d['y'][d['split'] == 2])
+    clips = (d['x'][d['split'] == s], d['y'][d['split'] == s])
     aug = None
-    if keyword == 'yes' and (a.data / 'augment.npz').exists():   # augment.py edits "yes" clips only
-        aug = np.load(a.data / 'augment.npz')
-        aug = (aug['x'][aug['split'] == 2], aug['kind'][aug['split'] == 2])
-    live = live_windows(a.data, 3000, seed=1, split=2)
+    if (a.data / 'augment.npz').exists():
+        z = np.load(a.data / 'augment.npz')
+        if keyword_of(z) == keyword:   # augment.py variants of this keyword's clips in the same split
+            aug = (z['x'][z['split'] == s], z['kind'][z['split'] == s])
+    live = live_windows(a.data, 3000, seed=1, split=2) if s == 2 else live_windows(a.data, 3000)
     probe = a.probe or ROOT / ('build/tts_probe' if keyword == 'yes' else f'build/tts_probe_{keyword}')
-    tts = tts_sequences(a.data, probe)
-    report = {'keyword': keyword, 'time_bins': N_TIME,
-              'live_test': {f'{keyword}_clips': int((live[2] == 1).sum()), 'other_clips': int((live[2] == 0).sum())},
+    tts = tts_sequences(a.data, probe) if s == 2 else None   # the probe stays held out from model choices
+    report = {'keyword': keyword, 'split': a.split, 'time_bins': N_TIME,
+              f'live_{a.split}': {f'{keyword}_clips': int((live[2] == 1).sum()), 'other_clips': int((live[2] == 0).sum())},
               'tts_utterances': (len(tts[0]) // 4) if tts else 0, 'models': {}}
     for spec in a.models:
         name, path = spec.split('=', 1)

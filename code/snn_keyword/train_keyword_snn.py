@@ -34,13 +34,15 @@ def run(args, seed, encoding):
     yt = torch.tensor(y[split == 0], device=device, dtype=torch.long)
     xv_np, yv = x[split == 1], y[split == 1]
     n_orig = len(yt)
+    aug_kinds = []
     if args.aug_fraction > 0:
-        # Edited "yes" clips from augment.py (confusable endings, window-edge cuts,
+        # Edited keyword clips from augment.py (hard negatives, window-edge cuts,
         # shifted positives); they inherit the official speaker-disjoint splits.
-        if keyword != 'yes':
-            raise SystemExit(f'augment.npz holds edited "yes" clips; use --aug-fraction 0 for "{keyword}"')
         aug = np.load(args.data / 'augment.npz')
-        use = np.isin(aug['kind'], args.aug_kinds)
+        if keyword_of(aug) != keyword:
+            raise SystemExit(f'augment.npz was made for "{keyword_of(aug)}"; run augment.py for "{keyword}" first')
+        aug_kinds = args.aug_kinds or sorted(set(aug['kind'].tolist()))
+        use = np.isin(aug['kind'], aug_kinds)
         tr, va = use & (aug['split'] == 0), use & (aug['split'] == 1)
         xt = torch.cat([xt, torch.tensor(aug['x'][tr], device=device, dtype=torch.float32) / 255])
         yt = torch.cat([yt, torch.tensor(aug['y'][tr], device=device, dtype=torch.long)])
@@ -97,7 +99,7 @@ def run(args, seed, encoding):
     np.savez_compressed(out / 'model.npz', **q)
     torch.save({'state_dict': best_state, 'hidden': args.hidden, 'steps': args.steps, 'encoding': encoding}, out / 'checkpoint.pt')
     summary = {'keyword': keyword, 'seed': seed, 'encoding': encoding, 'hidden': args.hidden, 'steps': args.steps,
-               'aug_fraction': args.aug_fraction, 'aug_kinds': args.aug_kinds, 'augmented_train': len(yt) - n_orig,
+               'aug_fraction': args.aug_fraction, 'aug_kinds': aug_kinds, 'augmented_train': len(yt) - n_orig,
                'epochs': args.epochs, 'samples_per_epoch': args.samples_per_epoch,
                'training_seconds': time.perf_counter() - start, 'device': str(device),
                'gpu': torch.cuda.get_device_name() if device.type == 'cuda' else None,
@@ -124,8 +126,7 @@ def main():
     p.add_argument('--aug-fraction', type=float, default=0,
                    help='Share of each class half-batch drawn from data/augment.npz (augment.py); '
                         '0 = release training, 0.3 = augmented trial model')
-    p.add_argument('--aug-kinds', nargs='+', default=['ts', 'ch', 'sh', 'cut', 'tail', 'head', 'shift'],
-                   choices=['ts', 'ch', 'sh', 'cut', 'tail', 'head', 'shift'], help='augment.py variants to train on')
+    p.add_argument('--aug-kinds', nargs='+', help='augment.py variants to train on (default: all in augment.npz)')
     a = p.parse_args()
     if not 0 < a.qat_epochs <= a.epochs or a.batch % 2 or a.samples_per_epoch < a.batch or not 0 <= a.aug_fraction < 1:
         p.error('Require 0 < qat_epochs <= epochs, even batch, samples >= batch, 0 <= aug_fraction < 1')

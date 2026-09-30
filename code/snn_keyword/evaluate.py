@@ -19,6 +19,8 @@ def main():
     p.add_argument('--results', type=Path, default=ROOT / 'results',
                    help='folder for evaluation.json, training histories and verification vectors')
     p.add_argument('--expect', type=int, default=6, help='number of runs that must exist (6 = the preregistered "yes" runs)')
+    p.add_argument('--deploy', type=Path, default=ROOT / 'deploy',
+                   help='where the selected model.npz goes; a build/ folder stages a candidate without touching deploy/')
     a = p.parse_args()
     torch.set_num_threads(8)
     folders = sorted(a.runs.glob('*_seed*'))
@@ -26,8 +28,8 @@ def main():
     if len(training) != a.expect:
         raise ValueError(f'Expected {a.expect} runs in {a.runs}; finish training first')
     winner = max(folders, key=lambda f: (training[f]['validation']['f1'], training[f]['encoding'] == 'current'))
-    deploy, results = ROOT / 'deploy', a.results
-    deploy.mkdir(exist_ok=True); results.mkdir(parents=True, exist_ok=True)
+    deploy, results = a.deploy, a.results
+    deploy.mkdir(parents=True, exist_ok=True); results.mkdir(parents=True, exist_ok=True)
     data = np.load(ROOT / 'data/features.npz')
     keyword = keyword_of(data)
     for folder in folders:
