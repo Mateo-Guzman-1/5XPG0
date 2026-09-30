@@ -189,7 +189,7 @@ def _moving_sum_float(s, w):
 class StreamDetector:
     """robust_eval interface for a float StreamSNN checkpoint.
 
-    Score per 10 ms frame: readout of "yes" minus the largest other class.
+    Score per 10 ms frame: readout of the keyword minus the largest other class.
     The decision rule (threshold, hold-off) is the harness's.
     """
     kind = 'stream'

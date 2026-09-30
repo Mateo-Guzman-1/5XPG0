@@ -19,7 +19,7 @@ typedef struct {
 void stream_init(void);
 void stream_reset(stream_state_t *st);
 /* One 10 ms frame of STREAM_BANDS uint8 features; returns the decision score
- * o[yes] - max(o[other]) (detect when >= STREAM_THRESHOLD). spikes[0..1]:
+ * o[keyword] - max(o[other]) (detect when >= STREAM_THRESHOLD). spikes[0..1]:
  * layer-1 and layer-2 spikes of this frame; events: synaptic additions done. */
 int32_t stream_step(stream_state_t *st, const uint8_t *frame, uint32_t spikes[2], uint32_t *events);
 #endif

@@ -14,6 +14,14 @@ The "synthesized words" are offline Windows voices (David, Zira; 24 words × 4
 rates × 3 pitches; `make_tts_probe.ps1`). They were never used for training.
 With only two voices, they indicate trends, not accuracy.
 
+**Which keyword.** Entries 1-21 are about **"yes"**: the first release
+(`deploy/`), the streaming SNN of phases 0-7 and the iteration loop that
+followed. From entry 22 the keyword is **"sheila"**, detected against everything
+else (entry 22 explains the change; since 2026-09-30 it is also the default of
+`keyword_config.py`). Numbers of the two keywords are never mixed in one table
+without saying so. In result files, `yes`, `yes_class` and `yes_detected` mean
+the keyword.
+
 ---
 
 ## 2026-09-24
@@ -825,8 +833,8 @@ construction, with a causal gain control relative to a running peak
 (`logmel_agc`).
 
 **Keyword changed to "sheila"** (user request).
-- `keyword_config.py` (env `KWS_KEYWORD`, default "yes") drives data
-  selection, training, evaluation, vectors and TTS.
+- `keyword_config.py` (env `KWS_KEYWORD`, default "yes" at the time; "sheila"
+  since 2026-09-30) drives data selection, training, evaluation, vectors and TTS.
   - Models record their keyword, and the detectors refuse a mismatch.
   - "yes" reproduces exactly: the derived labels equal `features.npz`'s y.
 - Speech Commands v2 has 2,022 "sheila" clips (1,606 / 204 / 212); the
@@ -1447,6 +1455,49 @@ before and/or after it. The CTC target is the phonemes of all of them in
 order; the head label stays "is the middle word the keyword". Stage 1's
 training streams keep at least 0.1-0.6 s between words and would need the
 same later.
+
+### 35. Context words in the head's training: the limit is stage 1
+
+`train_verifier.py --context-p .5` (entry 34's next step): half of the
+keyword-batch clips, keyword and other words alike, are cut to their spoken part
+and get a real neighbouring word from another speaker before and/or after (0-0.1 s
+apart). The CTC target is all the phonemes in order; the head label is "the middle
+word is the keyword". Keyword head from verifier seed 0 with near-miss negatives,
+10 epochs.
+
+**Validation** (≤ 1.6 FA/h): 87.8% live recall (94.9% complete) at 1.05 FA/h, "she-"
+words 3/183, MSWC other words 0.36%, mics / rooms / both 86.8 / 84.8 / 85.3%. That
+is the recall of the near-miss head of entry 32 (87.8% at 1.16 FA/h): isolated
+words lose nothing. It is not a new candidate; no test run was spent on it.
+
+**Sentence probe** (`tts_sentence_probe.py`, the same 1,536 utterances as entry 34).
+"Proposed" is the share of utterances where stage 1 reaches the head's `t1`
+(3785 for the near-miss head, 7080 for the context head, as selected on validation):
+
+| Position of "sheila" | Near-miss head: proposed / cascade | Context head: proposed / cascade |
+|---|---|---|
+| alone | 99% / 72% | 98% / 76% |
+| start | 92% / 63% | 79% / 60% |
+| middle | 65% / 6% | 39% / 7% |
+| end | 89% / 13% | 79% / 21% |
+| near-miss sentences, no keyword | 60% / 7% | 34% / 7% |
+
+- **The verifier improves with context.** Of the proposals, it accepts 18% in the
+  middle and 27% at the end, against 9% and 15% for the near-miss head. That is
+  still low.
+- **Stage 1 is the first limit in the middle of sentences.** The median stage-1
+  peak for "Tell Sheila that I called." is 5,213, under `t1` = 7,080; even at
+  `t1` = 3785 it proposes for 65%. In continuous speech "sheila" is shorter and its
+  last vowel merges with the next word, unlike a Speech Commands recording read
+  on its own.
+- The same probe: 7% of the near-miss sentences ("She laughed at me." above all)
+  are accepted by either head.
+
+**Next.** Stage 1 needs "sheila" in continuous speech, with the same voice on both
+sides: TTS sentences with the keyword at known times (Piper voices of the training
+speakers; the keyword's end from the concatenation), mixed into the streams of
+`train_stream.py`, then the verifier's context training again. Real recordings of the
+user's voice in sentences would settle it (open items).
 
 ## Open items
 

@@ -1,5 +1,9 @@
 # Group 2 experiment plan (before training)
 
+> **Historical.** The plan of the first release, for the keyword **"yes"** with a
+> dense 768-64 window model. The project's keyword is now **"sheila"**, detected
+> against everything else with a streaming SNN (README, JOURNAL entry 22 onwards).
+
 Question: can a 768-input, 64-LIF-neuron network detect the word **yes**
 with useful precision/recall while fitting the 256 KiB PicoRV32 BRAM and
 finishing inference within a 250 ms audio hop at an assumed 100 MHz?

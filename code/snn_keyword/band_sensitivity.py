@@ -7,7 +7,7 @@ to the whole buffer (speech + noise) as a microphone would:
   high-pass  2nd-order Butterworth at 100 ... 500 Hz
   peak       +-9 dB peaking EQ (Q 1.4) at 250 Hz ... 6 kHz
   gain       -20 ... +10 dB (level only; log-mel has an absolute floor)
-Recall of "yes" and other-word accepts at the model's own threshold, so every
+Recall of the keyword and other-word accepts at the model's own threshold, so every
 row differs from the clean row only by that filter.
 """
 import argparse

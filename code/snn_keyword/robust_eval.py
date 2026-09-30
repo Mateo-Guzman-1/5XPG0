@@ -15,9 +15,9 @@ For window models the score is the "2 of 3" confirmed margin
             same noise placement. Recall and false accepts at the operating
             threshold, and recall at the false-accept rate of the Speech
             Commands live test (equal-FA drop). Near-miss words per group.
-  stream    One hour of continuous audio: Speech Commands non-"yes" words,
-            LibriSpeech [40] read speech (utterances containing "yes"
-            removed) and "yes" clips at known times, over varying background
+  stream    One hour of continuous audio: Speech Commands non-keyword words,
+            LibriSpeech [40] read speech (utterances containing the keyword
+            removed) and keyword clips at known times, over varying background
             noise. False accepts per hour, recall, latency from the end of
             the word to the detection, and the recall/false-accept curve.
   tts       Synthesized-word probe of confusables.py (Windows voices).
@@ -68,11 +68,15 @@ TTS_GROUPS = {**K.TTS_GROUPS[K.KEYWORD], YES_PREFIXED: [w for w in ('yesterday',
 # --------------------------------------------------------------------------- detectors
 
 class WindowDetector:
-    """1 s window every 250 ms through integer_forward; score = "2 of 3" confirmed margin."""
+    """1 s window every 250 ms through integer_forward; score = "2 of 3" confirmed margin.
+
+    The window models (deploy/, runs/) are "yes" models: they record no keyword.
+    """
     kind = 'window'
     _cache = {}
 
     def __init__(self, q):
+        K.check_model_keyword(q.get('keyword'), 'window model')
         self.q = q
         self.threshold = int(q.get('stream_threshold', q['decision_threshold']))
         self.single_threshold = int(q['decision_threshold'])
@@ -163,8 +167,8 @@ def edge_clipped(a, frame=160, margin_db=15):
     """True if the content ends within 15 dB of its loudest 10 ms frame: the /s/ is cut off.
 
     MSWC clips are zero-padded after the alignment cut, so the test looks at
-    the last 20 ms of the non-silent part. A complete /s/ fades out; about
-    5% of MSWC and Speech Commands "yes" clips end this loud.
+    the last 20 ms of the non-silent part. A complete /s/ or /a/ fades out; 22% of
+    the Speech Commands "sheila" clips and 5% of the "yes" clips end this loud.
     """
     nz = np.flatnonzero(np.abs(a) > 1e-4)
     if len(nz) < 4 * frame:
@@ -205,7 +209,9 @@ def word_span(a, frame=160):
 
 
 def build_stream(data, split, seconds=STREAM_SECONDS, seed=7):
-    """Continuous audio with "yes" at known times. Returns audio, yes (start, end) in s, composition."""
+    """Continuous audio with the keyword at known times. Returns audio, keyword (start, end) in s, composition.
+
+    (Internal names such as `yes`, `yes_class` and `yes_detected` mean the keyword.)"""
     import soundfile as sf
     cfg = SPLITS[split]
     d = np.load(data / 'features.npz')
@@ -258,7 +264,7 @@ def negative_stream(data, split, chunk_seconds=600, seed=11):
     """Long negatives-only stream for false accepts per hour, in chunks of chunk_seconds.
 
     Every LibriSpeech utterance of the split's held-out subsets (NEG_LIBRI; none
-    whose transcript contains YES) and every non-"yes" Speech Commands word of
+    whose transcript contains a word beginning with the keyword) and every non-keyword Speech Commands word of
     the split, shuffled, 0.3-2 s apart, over the background noise as in
     build_stream. The 1 h stream of build_stream holds only about 2 false
     accepts at the operating point, too few to set or compare a <= 2/h
@@ -376,7 +382,7 @@ def source_of(t, segments, span=1.0):
         o = min(e, t) - max(s, t - span)
         if o > best:
             best, kind = o, k
-    return {'word': 'speech commands word', 'libri': 'librispeech', 'yes': 'yes (duplicate)'}.get(kind, kind)
+    return {'word': 'speech commands word', 'libri': 'librispeech', 'yes': 'keyword (duplicate)'}.get(kind, kind)
 
 
 def score_stream(times, score, threshold, marks, hours, segments=None):

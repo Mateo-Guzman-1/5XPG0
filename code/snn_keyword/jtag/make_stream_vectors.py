@@ -1,6 +1,6 @@
 """Write the streaming (ABI v3) board vectors for jtag/stream_board_test.tcl.
 
-Same 40 streams as verify_stream_rtl.py (the first 20 "yes" and 20 other live
+Same 40 streams as verify_stream_rtl.py (the first 20 keyword and 20 other live
 test clips placed in noise as in robust_eval.py), split into hops of --hop
 frames. For every hop the expected best score, last score, spikes (layer 1 +
 layer 2) and detection (bit0 with the firmware's 100-frame hold-off, bit1 any
@@ -64,7 +64,7 @@ def cascade_hops(x, q, qv, t1, t2, hop, warmup=5, boundary=10):
 
 
 def test_streams(q, data, streams=40):
-    """Feature frames (uint8, T x 24) of verify_stream_rtl.py's streams: first yes clips, then others."""
+    """Feature frames (uint8, T x 24) of verify_stream_rtl.py's streams: first keyword clips, then others."""
     cfg = SPLITS['test']
     clips, y, rng = sc_live_clips(data, cfg['sc'], seed=cfg['seed'])
     audio = place_clips(clips, bg_noise(data), rng)
@@ -83,7 +83,7 @@ def hops(x, q, hop, cascade=None):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument('--model', type=Path, default=ROOT / 'runs_stream/s2_nokd_qat/int_last.npz')
+    p.add_argument('--model', type=Path, default=ROOT / 'results/models/sheila_stream_int8.npz')
     p.add_argument('--data', type=Path, default=ROOT / 'data')
     p.add_argument('--streams', type=int, default=40)
     p.add_argument('--hop', type=int, default=25)
