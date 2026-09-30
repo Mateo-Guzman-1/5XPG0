@@ -1043,6 +1043,40 @@ test word.
 - Native C on the full test set (`verify_stream.py`).
 - The phoneme verifier retargeted to SH IY L AH.
 
+### 31. Neuron engine: the accumulator pipelined, timing met with the default strategy
+
+Branch `engine-timing`. Entry 19 found the engine's critical path:
+`acc[idx] += w` in one clock, i.e. a 128-way 18-bit read multiplexer, the
+adder and the write decode, 11 logic levels. The rebuilt bitstream met
+100 MHz only with Performance_ExplorePostRoutePhysOpt.
+
+**Change** (`rtl/neuron_engine.v`): two stages after the synapse register.
+- Stage A reads `acc[post]`. If stage B writes the same neuron in this
+  clock, stage A takes B's sum instead (forwarding), so back-to-back events
+  to one neuron stay exact.
+- Stage B adds the weight and writes.
+- A frame waits for both stages before the recurrence. This costs one
+  engine clock per frame.
+
+**Checks:**
+- Streaming RTL check (`verify_stream_rtl.py --engine`, "sheila"
+  candidate): 40 streams, 355 hops bit-exact. Worst hop 1,029,278 cycles
+  (unchanged); mean 988,705 (was 988,684).
+- Vivado 2025.2, default strategy (`vivado/build.tcl`):
+
+  | | WNS | Hold (WHS) | LUTs | BRAM36 | DSP |
+  |---|---|---|---|---|---|
+  | before, default strategy | −0.023 ns | | | | |
+  | before, ExplorePostRoutePhysOpt | +0.348 ns | | 12,894 | 88 | |
+  | **pipelined, default strategy** | **+0.406 ns** | +0.040 ns | 14,627 (27%) | 88 | 12 |
+
+  All constraints are met, with 0 failing endpoints
+  (`results/engine_pipe_timing_summary.rpt`, `_utilization.rpt`).
+- The worst path is now in the Poisson encoder (a DSP multiply,
+  3 logic levels), not in the engine.
+
+The bitstream is `build/keyword_engine_pipe.bit`. It has not been on a board.
+
 ## Open items
 
 Status of `IMPLEMENTATION_PLAN.md`: Phases 0-6 done; the streaming firmware and
