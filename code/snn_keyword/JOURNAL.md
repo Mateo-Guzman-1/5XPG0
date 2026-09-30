@@ -1483,6 +1483,54 @@ Validation, ≤ 1.6 FA/h:
     250 ms request allow about 1.3× the weights) or recordings from the
     actual microphone and user.
 
+### 34. "sheila" inside sentences: the verifier only knows the isolated word
+
+Every positive so far, in training and in evaluation, is an isolated Speech
+Commands word; the 1 h stream inserts the same clips with pauses around
+them. A user says the keyword inside sentences. LibriSpeech has one
+utterance with "sheila" (test-other), so `tts_sentence_probe.py`
+synthesizes sentences with Piper voices that no model has heard: 12
+libritts_r test-split speakers and 12 speakers of each held-out voice model
+(vctk, l2arctic, arctic). There are 1,536 utterances in background noise,
+through the integer stage 1 and the integer candidate verifier with the
+cascade's request timing. It is a probe, not a test split: synthetic voices
+are not the user, and nothing here chooses a model.
+
+| Position of "sheila" | Stage 1 alone | Stage 1 proposes (t1 = 3785) | Verifier accepts, of those | Cascade |
+|---|---|---|---|---|
+| alone ("Sheila.") | 40% | 99% | 72% | 72% |
+| start ("Sheila, turn on the lights.") | 31% | 92% | 69% | 63% |
+| **middle** ("Tell Sheila that I called.") | 1% | 65% | **9%** | **6%** |
+| **end** ("Thank you, Sheila.") | 20% | 89% | **14%** | **13%** |
+| near-miss sentences, no keyword | 2% | 60% | 12% | **7%** |
+
+- **The verifier is the bottleneck, not stage 1.**
+  - At the cascade's threshold, stage 1 proposes for most sentence
+    positions.
+  - With speech before the keyword in its 1.5 s window, the head's median
+    score is −4172 in the middle and −3671 at the end, against +3663 for
+    the isolated word.
+  - It was only ever trained on one clip in 1.6 s of silence. It learned
+    that other speech in the window means "not sheila".
+- **Consistent across voices:** in the middle, 0-15% for every voice model;
+  at the end, 0-23%. Isolated and start positions vary with the voice
+  (libritts_r 67% / 23%, arctic 100% / 97%). The isolated baseline (72%) is
+  below the real Speech Commands recall (88%), which is the synthetic-voice
+  gap.
+- **Near-miss sentences:** "She laughed at me." is accepted for 24 of 48
+  voices, "She left the house early." 9, "Tequila and vanilla." 9.
+- **What the earlier numbers mean:** 86.8% on test is recall for "sheila"
+  said on its own, as a wake word followed by a pause. It is not recall for
+  "sheila" inside a sentence.
+
+**Next:** context augmentation for the verifier (`train_verifier.py
+--context-p`). A share of the keyword-batch clips, keyword and other words
+alike, is cut to its spoken part and gets real neighbouring words 0-0.1 s
+before and/or after it. The CTC target is the phonemes of all of them in
+order; the head label stays "is the middle word the keyword". Stage 1's
+training streams keep at least 0.1-0.6 s between words and would need the
+same later.
+
 ## Open items
 
 Status of `IMPLEMENTATION_PLAN.md`: Phases 0-6 done; the streaming firmware and

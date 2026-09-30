@@ -16,6 +16,12 @@ Every step has two sub-batches, both through augment_online.Augmenter
             --hardwords: a pool of the training words that stage 1 proposes
             most (mine_verifier_negatives.py --words), --hardword-share of
             each keyword sub-batch.
+            --context-p: that share of the keyword-batch clips (keyword and
+            other words alike) is cut to its spoken part and gets another
+            word right before and/or after it (0-0.1 s apart), as inside a
+            sentence; the CTC target is the phonemes of all of them in
+            order. Isolated clips taught the verifier that speech before or
+            after the keyword means "no" (tts_sentence_probe.py, JOURNAL 34).
 Waveforms are zero-padded by 12% before augmentation, because a 0.9 speed
 change stretches them and would cut off the last phonemes.
 The frame-stacking phase is random (the first frame is dropped half the time).
@@ -119,7 +125,7 @@ class KeywordBatches:
         counts = self.rng.multinomial(n, list(self.share.values()))
         return np.concatenate([self.rng.choice(self.pools[k], c) for k, c in zip(self.share, counts) if c])
 
-    def waves(self, ids, seconds=1.6, rng=None):
+    def waves(self, ids, seconds=1.6, rng=None, context_p=0.):
         rng = rng or self.rng
         n = int(seconds * SR)
         w = np.zeros((len(ids), n), np.float32)
@@ -128,9 +134,31 @@ class KeywordBatches:
         clips = np.empty((len(ids), SR), np.float32)
         clips[order] = self.clips[rows[order]].astype(np.float32) / 32768
         off = rng.integers(0, n - SR + 1, len(ids))
+        targets = [self.tg[i] for i in ids]
         for j in range(len(ids)):
-            w[j, off[j]:off[j] + SR] = clips[j]
-        return w, [self.tg[i] for i in ids]
+            if context_p <= 0 or rng.random() >= context_p:
+                w[j, off[j]:off[j] + SR] = clips[j]
+                continue
+            s0, e0 = word_span(clips[j])
+            parts, tgs = [clips[j][s0:e0]], [self.tg[ids[j]]]
+            for side in ('before', 'after'):
+                if rng.random() < .6:
+                    c = int(rng.choice(self.pools['other']))
+                    cw = self.clips[self.row[c]].astype(np.float32) / 32768
+                    a0, b0 = word_span(cw)
+                    gap = np.zeros(int(rng.uniform(0, .1) * SR), np.float32)
+                    if side == 'before':
+                        parts.insert(0, np.r_[cw[a0:b0], gap]); tgs.insert(0, self.tg[c])
+                    else:
+                        parts.append(np.r_[gap, cw[a0:b0]]); tgs.append(self.tg[c])
+            while sum(len(p) for p in parts) > n and len(parts) > 1:   # too long: drop a neighbour
+                k = len(parts) - 1 if len(parts) == 3 or tgs[0] is self.tg[ids[j]] else 0
+                parts.pop(k); tgs.pop(k)
+            seg = np.concatenate(parts)[:n]
+            o = rng.integers(0, n - len(seg) + 1)
+            w[j, o:o + len(seg)] = seg
+            targets[j] = np.concatenate(tgs)
+        return w, targets
 
 
 class HardWindows:
@@ -150,6 +178,15 @@ class HardWindows:
         for j in order:
             w[j] = self.audio[end[j] - self.n:end[j]] / 32768
         return w
+
+
+def word_span(x, frame=400, hop=160, drop_db=30., pad=800):
+    """(start, end) samples of the spoken part of a clip: frames within drop_db of the loudest, +-pad."""
+    n = max(1, (len(x) - frame) // hop + 1)
+    idx = np.arange(n)[:, None] * hop + np.arange(frame)[None]
+    e = 10 * np.log10(np.mean(x[idx] ** 2, 1) + 1e-10)
+    on = np.flatnonzero(e >= e.max() - drop_db)
+    return max(0, int(on[0]) * hop - pad), min(len(x), int(on[-1]) * hop + frame + pad)
 
 
 def pad_targets(tg, dev):
@@ -273,6 +310,7 @@ def main():
     p.add_argument('--kw-real-only', action='store_true', help='no synthetic keyword clips')
     p.add_argument('--hardwords', type=Path, help='mined training words (mine_verifier_negatives.py --words)')
     p.add_argument('--hardword-share', type=float, default=.1)
+    p.add_argument('--context-p', type=float, default=0., help='share of keyword-batch clips with neighbouring words')
     p.add_argument('--lr', type=float, default=3e-3)
     p.add_argument('--seed', type=int, default=0)
     p.add_argument('--clean-steps', type=int, default=0,
@@ -381,7 +419,7 @@ def main():
                 wl, tl = libri.batch(a.libri_seconds, a.warm_seconds if warm else None)
                 xl = phase(features(aug, wl, dev, train=not warm), rng)
                 ids = kw.draw(a.kw_batch)
-                wk, tk = kw.waves(ids)
+                wk, tk = kw.waves(ids, context_p=0. if warm else a.context_p)
                 xk = phase(features(aug, wk, dev, train=not warm), rng)
                 if hard is not None:
                     xh = phase(features(aug, hard.waves(a.hard_batch), dev, train=not warm), rng)
