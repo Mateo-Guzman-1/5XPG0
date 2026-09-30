@@ -1355,6 +1355,15 @@ within every 250 ms request.
   words 3/183 and MSWC other words 0.33%, at 1.55 FA/h. Recall and near-miss
   rejection repeat; the false-accept rate at the chosen threshold varies
   between seeds (1.16 and 1.55 FA/h), inside the validation budget both times.
+- **Correction to entries 28-30 ("probably mislabelled").** The other words
+  that the candidate accepts are almost all Speech Commands clips labelled
+  "zero": 2/2 on clean validation, 10/16 across the three device
+  conditions, and 14/22 on test (plus a few seven, four, nine). "zero"
+  /zɪroʊ/ has the structure of "sheila" /ʃiːlə/: a sibilant, a front vowel,
+  a liquid and a vowel. A 49k-parameter phoneme model that confuses
+  Z → SH, IH → IY, R → L and OW → AH explains the "SH IY L AH" decodings as
+  well as mislabelling does. Both remain possible until someone listens, and
+  "zero" is the main acoustic near-miss that is not yet in `NEAR_MISS`.
 
 ## Open items
 
