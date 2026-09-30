@@ -1365,6 +1365,41 @@ within every 250 ms request.
   well as mislabelling does. Both remain possible until someone listens, and
   "zero" is the main acoustic near-miss that is not yet in `NEAR_MISS`.
 
+### 33. Hard training words for the head: no measurable gain; where the ceiling is
+
+The candidate's remaining false accepts are mostly "zero" (entry 32).
+`mine_verifier_negatives.py --words` runs stage 1 over the 92,400 kept
+training clips of `data/multi_sheila_full` (3 augmented passes: mics, rooms,
+noise; 6.5 min). The top 3000 are the expected confusions: zero 421, four
+214, two 196, sheep 180, shield 125, stop 119, she 106, shell 99, tree 98,
+chief 92, visual 86, cheap 84, tequila 81. They became a 15% share of the
+head's negatives next to the near-miss words (`--hardwords`).
+
+Validation, ≤ 1.6 FA/h:
+
+| Keyword head | Live recall | Complete | FA/h | Other words, clean / rooms / mics + rooms | Verifier calls per hour |
+|---|---|---|---|---|---|
+| near-miss (candidate, entry 32) | 87.8% | 94.3% | 1.16 | 0.07 / 0.13 / 0.27% | 2,150 |
+| near-miss, seed 1 | 87.8% | 94.9% | 1.55 | 0.17 / 0.23 / 0.30% | 2,150 |
+| near-miss + hard words | 87.3% | 94.9% | 1.38 | 0.00 / 0.27 / 0.37% | 118 |
+
+- **No measurable gain.** The other-word differences are a few clips out
+  of 3000, and recall is within the seed spread. The candidate stays.
+- **One useful side effect:** the hard-word head is selected at a higher
+  stage-1 threshold (11448), with 18× fewer verifier calls. On a
+  battery-powered device that would matter; on this board every call fits
+  its request anyway.
+- **Where the ceiling is:**
+  - Recall on complete recordings is 94-95% (validation) and 92% (test).
+    Most of the remaining misses are Speech Commands recordings cut off by
+    their 1 s window (entry 23), which continuous speech does not have.
+  - The remaining false accepts are "zero"-like words and "she ..."
+    phrases, confusions that a 49k-parameter phoneme model shares with
+    them.
+  - Further gains need a larger verifier (the 144 KB model region and the
+    250 ms request allow about 1.3× the weights) or recordings from the
+    actual microphone and user.
+
 ## Open items
 
 Status of `IMPLEMENTATION_PLAN.md`: Phases 0-6 done; the streaming firmware and
