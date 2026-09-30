@@ -11,24 +11,23 @@ means `code/snn_keyword/JOURNAL.md`.
 
 - **Best system: a two-stage detector for "sheila" on the PicoRV32.** A
   streaming SNN (neuron-engine accelerator) proposes. A small GRU verifier
-  with a keyword head confirms, running only when the SNN proposes. Test
-  split (thresholds fixed on validation, JOURNAL 30):
-  - 91.0% of live "sheila" detected, 96.6% of complete recordings (the SNN
+  with a keyword head, trained against the SNN's false proposals and
+  near-miss words ("she", "sheep", "shield"), confirms; it runs only when the
+  SNN proposes. Test split (thresholds fixed on validation, JOURNAL 32):
+  - 86.8% of live "sheila" detected, 92.0% of complete recordings (the SNN
     alone: 63.7% and 70.7%);
-  - 87.7-90.6% under held-out microphones and real rooms (SNN alone:
+  - 84.9-86.3% under held-out microphones and real rooms (SNN alone:
     58.0-66.5%);
-  - 0.20% of other words accepted;
-  - **2.11 false alarms per hour** on 19 h of unseen speech: just above the
-    ≤ 2 target. 16 of the 40 are Speech Commands clips labelled "zero",
-    "two", ... that the verifier decodes as "...IY L AH" (probably
-    mislabelled; nobody has listened yet);
+  - **1.42 false alarms per hour** on 19 h of unseen speech and **0.07% of
+    other words accepted**: inside both targets (≤ 2/h, ≤ 0.2%);
+  - isolated near-miss words ("she-", MSWC) accepted 6/183 (SNN alone 23/183);
   - median detection 0.18 s after the word;
   - worst request 117 ms of compute per 250 ms of audio.
 
-  Both stages are bit-exact from the Python oracle to the RTL. The system has
-  **not yet run on a board** (the engine and the stage-1 firmware have, over
-  JTAG, with the earlier "yes" model). The SNN alone (1.58 FA/h, 63.7%)
-  remains the fallback that meets the false-alarm target.
+  Both stages are bit-exact from the Python oracle to the RTL, on the
+  pipelined neuron engine that now meets 100 MHz with the default Vivado
+  strategy. The system has **not yet run on a board** (the engine and the
+  stage-1 firmware have, over JTAG, with the earlier "yes" model).
 - **Clip accuracy did not predict live behaviour.** The clip classifiers (the
   "yes" release, Damien's "sheila v2") score 98% on isolated clips but fire
   52-366 times per hour on ordinary speech. At an equal false-alarm rate
@@ -56,7 +55,8 @@ means `code/snn_keyword/JOURNAL.md`.
 | `Rework` | Mateo | 8 | JTAG bring-up, `kdot`, "2 of 3", the full streaming-SNN plan (phases 0-7), neuron engine, iteration loop, keyword → "sheila" | base |
 | `Mateo_AI` (upstream) | Mateo | 4 | the first 4 commits of `Rework` | contained |
 | `explore-yes-boundary` | Mateo (worktree) | +1 on `Rework` | later decision point, "reject yesterday" policy | merged |
-| `explore-verifier` | Mateo (worktree, agent) | +35 on `Rework` | verifier on the PicoRV32 (CTC GRU + keyword head, int8, C, RTL), the cascade firmware, JOURNAL 28-30 | merged (twice) |
+| `explore-verifier` | Mateo (worktree, agent) | +39 on `Rework` | verifier on the PicoRV32 (CTC GRU + keyword head, int8, C, RTL), the cascade firmware, JOURNAL 28-30, 32 | merged (three times) |
+| `engine-timing` | Mateo (worktree, agent) | +2 on `Rework` | pipelined neuron-engine accumulator, JOURNAL 31 | merged |
 | `Pedro` (upstream) | Pedro | 3 (on `Mateo_AI`) | Ethernet path on PYNQ Linux, `board_server.py` double-request fix, E0-E8 research plan | merged |
 | `Alex-parallel` (upstream) | Alex | 2 (on `Mateo_AI`) | one-click demo scripts, 64-neuron parallel LIF layer (sketch) | merged, sketch relocated |
 | `damien-dicking-around` (upstream) | Damien | 4 (from `c2009be`, before `714db5c`) | independent clip pipeline (8×16 features, ZeroMQ), front-end sweeps, "sheila v2" on his board | merged, 3 files renamed |
@@ -87,7 +87,8 @@ Status: ✅ worked and kept · ⚠️ partly / open · ❌ did not work.
 | `kdot` custom instruction (PCPI dot-product coprocessor) | Release window model 5.98 M → 267k cycles (**22×**); bit-exact, board = RTL; +180 LUT, +2 DSP | ✅ | JOURNAL 3 |
 | Bus fix `READ_WAIT` 8 → 1 | Release: RV32IM 59.8 → 24.7 ms, `kdot` 2.67 → 1.45 ms (on the board: 144,642 cycles) | ✅ | JOURNAL 13, 18 |
 | Event-driven **neuron engine** (`rtl/neuron_engine.v`) | Streaming SNN: 113 ms (software) → 77 ms (`kdot`) → **10.2 ms per hop**. Bit-exact on 40 streams in RTL and on the board over JTAG. 12.9k LUT, 88 BRAM36. 20× fewer synaptic operations than a dense equivalent. | ✅ | JOURNAL 16, 18 |
-| Engine timing margin | Rebuild with the host ABI fix: WNS −0.023 ns with the default strategy, +0.348 ns with Performance_ExplorePostRoutePhysOpt. The `acc[idx] += w` path is at the edge of 10 ns. | ⚠️ pipeline it | JOURNAL 19 |
+| Engine timing margin | Rebuild with the host ABI fix: WNS −0.023 ns with the default strategy, +0.348 ns with Performance_ExplorePostRoutePhysOpt. The `acc[idx] += w` path was at the edge of 10 ns. | ✅ fixed | JOURNAL 19 |
+| **Pipelined accumulator** (read with forwarding, then add and write) | Default strategy: **WNS +0.406 ns**, hold met; 14.6k LUTs (27%). RTL bit-exact (stage 1 and the cascade); +1 clock per frame. Worst path now in the Poisson encoder. | ✅ | JOURNAL 31 |
 | 64 parallel LIF neurons, row-wide weight BRAM (Alex) | Sketch; its header says "not compiled, simulated or synthesized" (it lints). Removes `kdot` and the LED timer from `spike_soc.v`, and maps to the engine's address. | ⚠️ idea only | `rtl_sketches/snn_layer.v` |
 
 ### C. The "yes" window model (the current release)
@@ -158,7 +159,8 @@ Validation data, full rule.
 | Cascade, phoneme-path score (stage 1 at a lower threshold, the verifier confirms) | Validation +16 points; **test, once:** 84.0% (90.2% complete) at **2.37 FA/h** | ⚠️ over the FA target | JOURNAL 28-29, `results/final_sheila_cascade_test.json` |
 | Capped-margin path score; policy (b) after the keyword; hinge fine-tuning on mined proposals | −11 points; no gain; no gain | ❌ | JOURNAL 29-30 |
 | Near-miss words in verifier training | "she-" words 26/183 → 4/183 accepted, but −3.4 points of recall | ⚠️ trade-off | JOURNAL 29 |
-| **Keyword head** on the verifier, trained on stage-1 false proposals mined from training speech | Validation 89.2% / 87.8% (2 seeds) at ≤ 1.6 FA/h. **Test, once:** 91.0% (96.6% complete), mics/rooms 87.7-90.6%, 0.20% other words, **2.11 FA/h**. Firmware `-DCASCADE`, RTL bit-exact, 117 ms worst request. | ✅ (FA/h see In short) | JOURNAL 30, `results/final_sheila_head_cascade_test.json` |
+| **Keyword head** on the verifier, trained on stage-1 false proposals mined from training speech | Validation 89.2% / 87.8% (2 seeds) at ≤ 1.6 FA/h. **Test, once:** 91.0% (96.6% complete), mics/rooms 87.7-90.6%, 0.20% other words, **2.11 FA/h** (just over). Firmware `-DCASCADE`, RTL bit-exact, 117 ms worst request. | ⚠️ over the FA target | JOURNAL 30, `results/final_sheila_head_cascade_test.json` |
+| **Keyword head with near-miss negatives** (the candidate) | Validation 87.8% at 1.16 FA/h, "she-" words 1/183. **Test, once:** **86.8% (92.0% complete) at 1.42 FA/h, 0.07% other words**; mics/rooms 84.9-86.3%; "she-" words 6/183. RTL bit-exact on the pipelined engine. | ✅ both FA targets met | JOURNAL 32, `results/final_sheila_head_near_cascade_test.json` |
 | Suspected Speech Commands label errors | About 30 negative clips labelled with digits decode as "...IY L AH"; both cascade test runs are inside the FA target without them | ⚠️ listen to them | `results/sheila_suspected_label_errors_*.json` |
 
 ### H. Damien's front-end findings
@@ -177,26 +179,27 @@ From `research/SHEILA_V2_REPORT.md` and `FRONTEND_SWEEP_REPORT.md`, clip accurac
 
 ## Still to do (in priority order)
 
-1. **Listen to the suspected label errors** (about 30 short clips,
-   `results/sheila_suspected_label_errors_*.json`). This decides whether the
-   cascade meets the ≤ 2 FA/h target on test.
-2. **Board test of the cascade** with `build/keyword_engine_abi3.bit` and the
-   `-DCASCADE` firmware (`verify_verifier_rtl.py --cascade 7080 1588` builds
-   it; `jtag/make_stream_vectors.py --cascade results/models/sheila_verifier_head.pt
-   7080 1588` and `jtag/stream_board_test.tcl` check it). The stage-1 firmware
-   alone is the fallback. The engine bitstream with the ABI fix has not been
-   loaded on any board.
-3. **Decide the release.** Replace `deploy/` ("yes" window model) with the
-   "sheila" system after item 2, and write "sheila" acceptance targets (the
+1. **Board test of the cascade** with `build/keyword_engine_pipe.bit`
+   (pipelined engine) and the `-DCASCADE` firmware:
+   `verify_verifier_rtl.py results/models/sheila_verifier_head_near.pt
+   --cascade 3785 1524` builds it; `jtag/make_stream_vectors.py --cascade
+   results/models/sheila_verifier_head_near.pt 3785 1524` and
+   `jtag/stream_board_test.tcl` check it. Neither the pipelined bitstream nor
+   the ABI-fix bitstream has been loaded on a board yet.
+2. **Decide the release.** Replace `deploy/` ("yes" window model) with the
+   "sheila" cascade after item 1, and write "sheila" acceptance targets (the
    IMPLEMENTATION_PLAN targets were written for "yes").
-4. **Other words under rooms:** 0.27-0.50% accepted by the cascade (target
-   0.2% on clean audio). Mine hard negatives in reverberant and
-   conversational speech, not only read speech.
+3. **Listen to the suspected label errors** (about 30 short clips,
+   `results/sheila_suspected_label_errors_*.json`): Speech Commands digits
+   that the verifier hears as "...IY L AH". They count as false alarms in
+   every number above.
+4. **Other words under rooms:** 0.27% accepted by the candidate (target 0.2%
+   on clean audio). Mine hard negatives in reverberant and conversational
+   speech, not only read speech.
 5. **One deployment script** for v2 and v3, the engine bitstream and both
    boards (merge Alex's and Pedro's). The Ethernet protocol does not carry
    the cascade's fields yet.
-6. **Engine timing margin:** pipeline the accumulator read-modify-write.
-7. Recordings of the actual user and microphone (evaluation).
+6. Recordings of the actual user and microphone (evaluation).
 
 ## Keep / change / delete
 
@@ -261,7 +264,9 @@ branch:
 | `Alex-parallel` | `fc5b78c` | `spike_soc.v`: ours (engine, `kdot`, LED timer). `snn_layer.v` → `rtl_sketches/`, because the Vivado build adds every `rtl/*.v`. His rebuilt `spike_top.bit` reverted (built from his SoC). `code/ann_vs_snn_mnist` deleted (he and Damien both deleted it). |
 | `damien-dicking-around` | `6d2e54c` | Separate lineage. Our `train_keyword_snn.py`, `pc_keyword_demo.py` and `README.md` keep their names; his become `train_keyword_snn_clip.py`, `pc_keyword_demo_zmq.py` and `README_clip_pipeline.md` (importer, install script and README updated). Root README describes both. |
 | Follow-up | `df165ad` | Tests fixed for Pedro's views (his branch did not update them; they failed there too). The two candidate models added to `results/models/`. This summary. |
-| `explore-verifier` again | (this commit) | Journal merged automatically (entries 28-30), open items rewritten. The verifier with keyword head added as `results/models/sheila_verifier_head.pt`. |
+| `explore-verifier` again | `3d03ecb` | Journal merged automatically (entries 28-30), open items rewritten. The verifier with keyword head added as `results/models/sheila_verifier_head.pt`. |
+| `engine-timing` | `(merge)` | Journal: entry 31 after 30 (conflict at the same place, both kept). Open item "timing margin" closed. |
+| `explore-verifier` a third time | (this commit) | Entry 32 and the built-in keyword phonemes (the verifier runtime no longer needs `data_verifier/cmudict.dict`). The candidate verifier as `results/models/sheila_verifier_head_near.pt`. |
 
 **Verified on `merge-all`:**
 - all Python byte-compiles;
@@ -274,9 +279,10 @@ branch:
   to `Rework`, so the verifier and cascade additions change nothing for the
   stage-1 firmware (`results/verification_stream_rtl_engine_rw1_merge.json`,
   re-run after the second verifier merge);
-- the cascade firmware with the keyword head (on `explore-verifier`, same
-  files): 934 requests bit-exact on the SoC RTL
-  (`results/verification_cascade_rtl_engine_sheila_head_cascade.json`).
+- the cascade firmware with the candidate verifier on the **pipelined
+  engine**, on `merge-all` itself: 934 requests bit-exact, 182 verifier runs,
+  11/12 keyword clips and 0/12 other words detected, worst request 117 ms
+  (`results/verification_cascade_rtl_engine_sheila_head_near_cascade_merge.json`).
 
 **Not in git** (regenerate or copy):
 - `data/`: the corpora; `fetch_corpora.py`, `prepare_multicorpus.py`,

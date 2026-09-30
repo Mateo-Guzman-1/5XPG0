@@ -1389,29 +1389,78 @@ adder and the write decode, 11 logic levels. The rebuilt bitstream met
 
 The bitstream is `build/keyword_engine_pipe.bit`. It has not been on a board.
 
+### 32. Near-miss words as head negatives: the first cascade inside both false-accept targets
+
+The keyword head of entry 30 was trained again from verifier seed 0, now on
+`data/multi_sheila_full`: its real MSWC near-miss words (she, sheep, shell,
+shield, ...) are 15% of each keyword sub-batch, and the synthetic "sheila"
+clips are left out (`--near-share .15 --kw-real-only`). 10 epochs, 23 min.
+
+**Validation** (≤ 1.6 FA/h):
+
+| Keyword head | Live recall | Complete | FA/h | "she-" words accepted | MSWC other | Other words, rooms / mics + rooms |
+|---|---|---|---|---|---|---|
+| seed 0 (entry 30) | 89.2% | 95.6% | 1.55 | 23/183 | 1.16% | 0.33 / 0.50% |
+| seed 1 | 87.8% | 94.9% | 1.38 | 20/183 | 0.85% | 0.27 / 0.33% |
+| **near-miss negatives** | 87.8% | 94.3% | **1.16** | **1/183** | **0.22%** | **0.13 / 0.27%** |
+
+**Choosing the candidate.** The recall of the near-miss head is 1.5 points
+below seed 0, the same as the spread between the two plain seeds. A
+tie-break was fixed before its test run: when validation recall differs by
+no more than the seed spread, the larger false-accept margin wins. That
+makes the near-miss head the candidate (t1 = 3785, t2 = 1524). Its stage-1
+threshold is low: 2,200 verifier calls per hour of speech, 117 ms each,
+within every 250 ms request.
+
+**Test split, once** (`results/final_sheila_head_near_cascade_test.json`):
+
+| | Stage 1 alone | Head, seed 0 (entry 30) | **Head, near-miss negatives** |
+|---|---|---|---|
+| Live recall | 63.7% | 91.0% | **86.8%** |
+| Complete recordings | 70.7% | 96.6% | **92.0%** |
+| Held-out mics / rooms / both | 66.5 / 60.9 / 58.0% | 88.7 / 90.6 / 87.7% | 86.3 / 85.9 / 84.9% |
+| Live other words accepted | 0.00% | 0.20% | **0.07%** |
+| **FA/h (18.97 h)** | 1.58 | 2.11 | **1.42** |
+| MSWC "she-" words / other words | 23/183 / 0.83% | 26/183 / 1.18% | **6/183 / 0.36%** |
+| 1 h stream: recall, false accepts | 69.3%, 1 | 91.4%, 2 | 87.9%, 1 |
+| Latency after the word (median, p90) | 0.04 s, 0.11 s | 0.18 s, 0.33 s | 0.18 s, 0.32 s |
+
+- **This is the first cascade inside both false-accept targets on test**
+  (≤ 2 FA/h, ≤ 0.2% other words), at +23.1 points of live recall (50 clips
+  only by the cascade, 1 only by stage 1).
+- Under rooms, other words stay at 0.27%, just over the clean-audio 0.2%
+  (stage 1 alone: 0.20-0.40%).
+- Candidates tested so far, one test run each: the path cascade (entry 29),
+  head seed 0 (entry 30) and this one. Each was chosen on validation before
+  its test; the test results were not used to choose between them.
+
 ## Open items
 
 Status of `IMPLEMENTATION_PLAN.md`: Phases 0-6 done; the streaming firmware and
 engine are verified on the board over JTAG (entry 18); Phase 7 evaluated for "yes",
 not promoted (entry 17). The keyword is now "sheila" (entry 22). The best system
-is the cascade of the stage-1 SNN and the verifier with a keyword head (entry
-30): 91.0% live recall on test at 2.11 FA/h, RTL bit-exact, not yet on a board.
+is the cascade of the stage-1 SNN and the verifier with a keyword head trained
+against near-miss words (entry 32): 86.8% live recall on test at 1.42 FA/h and
+0.07% other words, inside both false-accept targets; RTL bit-exact with the
+pipelined engine (entry 31); not yet on a board.
 See `MERGE_SUMMARY.md` at the repository root for all branches.
 
 1. **Board test of the cascade** (`firmware -DCASCADE` with the head,
    `build/keyword_stream_cascade_engine.bin` on `build/keyword_engine_pipe.bit`,
-   entry 31):
-   `jtag/make_stream_vectors.py --cascade runs_verifier/sheila_head/last.pt
-   7080 1588`, then `jtag/stream_board_test.tcl`. Needs a board and the
+   entries 31-32): `verify_verifier_rtl.py
+   results/models/sheila_verifier_head_near.pt --cascade 3785 1524` builds the
+   firmware, `jtag/make_stream_vectors.py --cascade
+   results/models/sheila_verifier_head_near.pt 3785 1524` the vectors, then
+   `jtag/stream_board_test.tcl`. Needs a board and the
    team's go-ahead. The stage-1-only candidate (entry 27) is also not yet
    board-tested.
 2. **Suspected Speech Commands label errors** (entries 28-30). About 30
    negative clips labelled zero, two, four, and so on decode as "...IY L AH".
    Listening to them decides whether both cascade test runs are inside the
    ≤ 2 FA/h target (`results/sheila_suspected_label_errors_*.json`).
-3. **Other words accepted under rooms** (entry 30): 0.27-0.50% for the head
-   cascade (target 0.2% on clean audio). More varied hard negatives are
-   needed: rooms, conversational speech, TV.
+3. **Other words accepted under rooms**: 0.27% for the candidate (entry 32;
+   target 0.2% on clean audio). More varied hard negatives are needed:
+   rooms, conversational speech, TV.
 4. **v3 streaming over Ethernet.** Pedro's run (entry 18b) covers the v2
    release. `board_server.py` serves v3 and has his fix; `net_board_test.py`
    checks stage 1 against the oracle (the cascade's fields are not in the
