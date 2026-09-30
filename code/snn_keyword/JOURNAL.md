@@ -14,6 +14,14 @@ The "synthesized words" are offline Windows voices (David, Zira; 24 words × 4
 rates × 3 pitches; `make_tts_probe.ps1`). They were never used for training.
 With only two voices, they indicate trends, not accuracy.
 
+**Which keyword.** Entries 1-21 are about **"yes"**: the first release
+(`deploy/`), the streaming SNN of phases 0-7 and the iteration loop that
+followed. From entry 22 the keyword is **"sheila"**, detected against everything
+else (entry 22 explains the change; since 2026-09-30 it is also the default of
+`keyword_config.py`). Numbers of the two keywords are never mixed in one table
+without saying so. In result files, `yes`, `yes_class` and `yes_detected` mean
+the keyword.
+
 ---
 
 ## 2026-09-24
@@ -825,8 +833,8 @@ construction, with a causal gain control relative to a running peak
 (`logmel_agc`).
 
 **Keyword changed to "sheila"** (user request).
-- `keyword_config.py` (env `KWS_KEYWORD`, default "yes") drives data
-  selection, training, evaluation, vectors and TTS.
+- `keyword_config.py` (env `KWS_KEYWORD`, default "yes" at the time; "sheila"
+  since 2026-09-30) drives data selection, training, evaluation, vectors and TTS.
   - Models record their keyword, and the detectors refuse a mismatch.
   - "yes" reproduces exactly: the derived labels equal `features.npz`'s y.
 - Speech Commands v2 has 2,022 "sheila" clips (1,606 / 204 / 212); the

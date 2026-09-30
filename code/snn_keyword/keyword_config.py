@@ -1,10 +1,14 @@
-"""The keyword the whole pipeline detects, and its per-keyword data.
+"""The keyword the whole pipeline detects against everything else, and its per-keyword data.
 
-Set it with the environment variable KWS_KEYWORD (default "yes", the release
-keyword). It must be one of the 35 Speech Commands words, so that stage 1
-(35 words, keyword-agnostic) and the live test sets exist for it. Every
-stream checkpoint and integer model records its keyword; the detectors refuse
-a model trained for another one.
+The task is one keyword against everything else (every other word, running
+speech, silence and noise). The keyword is "sheila". Set the environment
+variable KWS_KEYWORD=yes for the earlier keyword: the window-model release in
+deploy/, its pipeline scripts (prepare_data.py, train_keyword_snn.py, ...) and
+JOURNAL entries 1-21 are for "yes". The keyword must be one of the 35 Speech
+Commands words, so that stage 1 (35 words, keyword-agnostic) and the live test
+sets exist for it. Every stream checkpoint and integer model records its
+keyword; the detectors refuse a model trained for another one (a model
+without the record is a "yes" model).
 
 Per keyword:
   NEAR_MISS     real words fetched from MSWC as hard negatives and grouped in
@@ -18,7 +22,7 @@ import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-KEYWORD = os.environ.get('KWS_KEYWORD', 'yes').strip().lower()
+KEYWORD = os.environ.get('KWS_KEYWORD', 'sheila').strip().lower()
 
 NEAR_MISS = {
     'yes': ('yet', 'yeah', 'yesterday', 'yellow', 'yell', 'yep', 'year', 'years', 'young', 'you',
@@ -111,4 +115,5 @@ def check_model_keyword(recorded, what='model'):
     """Refuse a model trained for another keyword (models from before this module are "yes")."""
     rec = str(recorded if recorded is not None else 'yes').lower()
     if rec != KEYWORD:
-        raise ValueError(f'{what} was trained for {rec!r}, but KWS_KEYWORD={KEYWORD!r}')
+        raise ValueError(f'{what} was trained for {rec!r}, but KWS_KEYWORD={KEYWORD!r} '
+                         f'(set KWS_KEYWORD={rec} to use it)')

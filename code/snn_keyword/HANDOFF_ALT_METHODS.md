@@ -1,5 +1,10 @@
 # Hand-off: alternative-methods track (second PC)
 
+> **State when written: keyword "yes".** The project's keyword is now **"sheila"**
+> (JOURNAL entry 22); the tracks below apply to it unchanged (`KWS_KEYWORD` is
+> "sheila" by default), but their "yes" wording and the /s/ arguments refer to the
+> earlier keyword. Compare on the same rule (JOURNAL 19, 26).
+
 For a Claude Code session on the second PC (RX 6700 XT 12 GB, i5-12400F,
 32 GB). It runs in parallel with the main session on the RTX 4060 PC, which
 keeps the streaming SNN line and all board and JTAG work.

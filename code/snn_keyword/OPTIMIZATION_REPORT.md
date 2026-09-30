@@ -1,5 +1,11 @@
 # Optimization routes for spiking keyword detection on the PYNQ-Z2
 
+> **Keyword.** Written when the keyword was **"yes"**; the route it chose (a
+> streaming delay-SNN with an event-driven engine) was implemented, and the
+> project's keyword is now **"sheila"** (JOURNAL entry 22). The analysis is
+> keyword-independent except for the arguments about the /s/ of "yes"
+> (microphone bandwidth, cut-off recordings); for "sheila" see JOURNAL 23-27.
+
 Group 2, 5XPG0. This report compares ways to improve the "yes" detector
 beyond the current release. It weighs model, training, data, quantization
 and hardware options, and ends with the route chosen and why.
