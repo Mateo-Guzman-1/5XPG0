@@ -68,6 +68,9 @@ code and result files, `yes`, `YES`, `yes_class`, `yes_detected` and `o[yes]`
 are historical names for the keyword and its class (class 2 of the three-class
 readout).
 
+The block design of the system, with the alternatives for each block, is in
+[system_description.md](../../system_description.md); the repository's layout and
+rules are in [Repo-Architecture.md](../../Repo-Architecture.md).
 See [JOURNAL.md](JOURNAL.md) (dated log of every change, its motivation and its
 outcome; entries 1-21 are for "yes", from entry 22 the keyword is "sheila"),
 [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) (phases, acceptance targets and

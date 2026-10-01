@@ -100,7 +100,7 @@ Places to start (they are all commented in the source):
 | Change the neuron/network    | `firmware/main.c` (the LIF + weights)             |
 | Add output neurons / layers  | `firmware/main.c`, `board.h` (`NCH`)              |
 | Add a real input path (PC→PL)| `host/spike_pynq.py` mailbox + a new BRAM buffer  |
-| Add ISA extensions           | `picorv32` PCPI hooks (group 4 extra)             |
+| Add ISA extensions           | `picorv32` PCPI hooks (see `rtl/kdot_pcpi.v`)     |
 
 ## Memory map (needed for your own code)
 
