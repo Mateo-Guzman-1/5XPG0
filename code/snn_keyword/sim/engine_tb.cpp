@@ -1,7 +1,10 @@
-// Unit test of rtl/neuron_engine.v against a C++ model of layer 2 and the readout
+// Unit test of rtl/neuron_engine.v against a C++ model of the streaming SNN
 // (the arithmetic of firmware/stream_infer.c). Random tables within the export
-// bounds, random layer-1 spike patterns from silent to every neuron firing,
-// state resets. Reports mismatches and the engine cycles per frame by activity.
+// bounds. First half of the frames: random layer-1 spike patterns from silent to
+// every neuron firing, sent as SPIKE writes (CTRL bit1). Second half: random
+// input frames from silent to saturated, with layer 1 in the engine (FRAME,
+// CTRL bit2). State resets in both. Reports mismatches and the engine cycles
+// per frame.
 // usage: Vneuron_engine [frames] [seed]
 #include "Vneuron_engine.h"
 #include "verilated.h"
@@ -20,13 +23,32 @@ struct Model {
     std::vector<int8_t> rect;        // rec[j][k] at k*N2 + j
     std::vector<int8_t> wot;         // j*C + c
     std::vector<int32_t> theta, p, km, ka, bq, b2, ko, bo;
+    std::vector<int8_t> w1;          // h*24 + i
+    std::vector<int32_t> theta1, r1, km1, ka1, bq1, b1;
     // state
     std::vector<std::vector<uint8_t>> ring{32}; int pos = 0;
     int32_t u[N2] = {}, a[N2] = {}; uint8_t s[N2] = {}; int32_t o[4] = {};
+    int32_t u1[N1] = {}, a1[N1] = {}; uint8_t s1[N1] = {};
     static int32_t sat16(int64_t v) { return int32_t(std::min<int64_t>(32767, std::max<int64_t>(-32768, v))); }
     static int32_t sat32(int64_t v) { return int32_t(std::min<int64_t>(INT32_MAX, std::max<int64_t>(INT32_MIN, v))); }
     void reset() { for (auto &r : ring) r.clear(); pos = 0; std::fill(u, u + N2, 0); std::fill(a, a + N2, 0);
-                   std::fill(s, s + N2, 0); std::fill(o, o + 4, 0); }
+                   std::fill(s, s + N2, 0); std::fill(o, o + 4, 0);
+                   std::fill(u1, u1 + N1, 0); std::fill(a1, a1 + N1, 0); std::fill(s1, s1 + N1, 0); }
+    // Layer 1 of one frame: returns the indices of the neurons that spike.
+    std::vector<uint8_t> layer1(const uint8_t *x) {
+        std::vector<uint8_t> l1;
+        for (int h = 0; h < N1; ++h) {
+            int64_t acc = 0;
+            for (int i = 0; i < 24; ++i) acc += int64_t(w1[h * 24 + i]) * x[i];
+            int64_t cur = (acc >> r1[h]) + b1[h];
+            a1[h] = a1[h] - (a1[h] >> ka1[h]) + (int32_t(s1[h]) << 8);
+            int64_t thr = theta1[h] + ((int64_t(bq1[h]) * a1[h]) >> 8);
+            u1[h] = sat16(int64_t(u1[h]) - (u1[h] >> km1[h]) + cur);
+            s1[h] = u1[h] >= thr;
+            if (s1[h]) { u1[h] = sat16(int64_t(u1[h]) - thr); l1.push_back(uint8_t(h)); }
+        }
+        return l1;
+    }
     // returns score; spikes2, events out
     int32_t step(const std::vector<uint8_t> &l1, uint32_t &n2, uint32_t &ev) {
         ring[pos] = l1;
@@ -89,6 +111,11 @@ int main(int argc, char **argv) {
             m.ka.push_back(uni(2, 8)); m.bq.push_back(uni(0, 4000)); m.b2.push_back(uni(-60000, 20000));
         }
         for (int c = 0; c < C; ++c) { m.ko.push_back(uni(1, 6)); m.bo.push_back(uni(-3000, 3000)); }
+        for (int t = 0; t < N1 * 24; ++t) m.w1.push_back(int8_t(uni(0, 9) ? uni(-128, 127) : 0));
+        for (int h = 0; h < N1; ++h) {
+            m.theta1.push_back(uni(1024, 2047)); m.r1.push_back(uni(0, 7)); m.km1.push_back(uni(1, 8));
+            m.ka1.push_back(uni(2, 8)); m.bq1.push_back(uni(0, 4000)); m.b1.push_back(uni(-60000, 20000));
+        }
         Tb tb; tb.d.wr = 0; tb.d.resetn = 0; tb.tick(); tb.d.resetn = 1; tb.wait_idle();
         if (tb.read(0x1c) != 0x4E454E47u) throw std::runtime_error("bad ID");
         auto table = [&](int t, const std::vector<uint32_t> &words) {
@@ -105,11 +132,44 @@ int main(int argc, char **argv) {
         for (int jj = 0; jj < N2; ++jj) v.push_back(uint32_t(m.b2[jj])); table(6, v); v.clear();
         for (int c = 0; c < C; ++c) v.push_back(uint32_t(m.ko[c])); table(7, v); v.clear();
         for (int c = 0; c < C; ++c) v.push_back(uint32_t(m.bo[c])); table(8, v); v.clear();
+        for (int i = 0; i < 24; ++i)            // table 9: row = input * 8 + block, 4 words of 4 neurons
+            for (int blk = 0; blk < 8; ++blk)
+                for (int w = 0; w < 4; ++w) {
+                    uint32_t x = 0;
+                    for (int k = 0; k < 4; ++k) x |= uint32_t(uint8_t(m.w1[(blk * 16 + w * 4 + k) * 24 + i])) << (8 * k);
+                    v.push_back(x);
+                }
+        table(9, v); v.clear();
+        for (int h = 0; h < N1; ++h) v.push_back(uint32_t(m.theta1[h]) | m.r1[h] << 16 | m.km1[h] << 20 | m.ka1[h] << 24);
+        table(10, v); v.clear();
+        for (int h = 0; h < N1; ++h) v.push_back(uint32_t(m.bq1[h])); table(11, v); v.clear();
+        for (int h = 0; h < N1; ++h) v.push_back(uint32_t(m.b1[h])); table(12, v); v.clear();
         tb.write(0x28, YES | C << 4 | PO << 8);
         tb.write(0x00, 1); tb.wait_idle(); m.reset();
-        uint64_t worst = 0, worst_events = 0; int mism = 0, fires = 0, sat_frames = 0;
+        uint64_t worst = 0, worst_events = 0, worst_l1 = 0; int mism = 0, fires = 0, sat_frames = 0, l1_fires = 0;
         for (int f = 0; f < frames; ++f) {
-            if (f % 500 == 499) { tb.write(0x00, 1); tb.wait_idle(); m.reset(); }
+            if (f % 500 == 499 || f == frames / 2) { tb.write(0x00, 1); tb.wait_idle(); m.reset(); }
+            if (f >= frames / 2) {
+                // Layer 1 in the engine: one random input frame, silent to saturated.
+                int mode = uni(0, 9);
+                uint8_t x[24];
+                for (int i = 0; i < 24; ++i)
+                    x[i] = uint8_t(mode == 0 ? 0 : mode == 1 ? 255 : mode == 2 ? (uni(0, 3) ? 0 : uni(0, 255)) : uni(0, 255));
+                for (int k = 0; k < 24; k += 4)
+                    tb.write(0x2c, uint32_t(x[k]) | uint32_t(x[k + 1]) << 8 | uint32_t(x[k + 2]) << 16 | uint32_t(x[k + 3]) << 24);
+                tb.write(0x00, 4); tb.wait_idle();
+                std::vector<uint8_t> l1 = m.layer1(x);
+                uint32_t n2, ev; int32_t score = m.step(l1, n2, ev);
+                uint32_t hw_score = tb.read(0x0c), hw_n2 = tb.read(0x10), hw_ev = tb.read(0x14), hw_n1 = tb.read(0x2c), cyc = tb.read(0x18);
+                if (int32_t(hw_score) != score || hw_n2 != n2 || hw_ev != ev || hw_n1 != l1.size()) {
+                    if (mism < 5) printf("L1 frame %d: score %d/%d spikes1 %u/%zu spikes2 %u/%u events %u/%u\n", f, int32_t(hw_score), score,
+                                         hw_n1, l1.size(), hw_n2, n2, hw_ev, ev);
+                    ++mism;
+                }
+                l1_fires += !l1.empty(); fires += n2 > 0; sat_frames += score == INT32_MAX || score == INT32_MIN;
+                if (cyc > worst_l1) worst_l1 = cyc;
+                continue;
+            }
             // Activity from silent to saturated: density per frame drawn from a wide range.
             int mode = uni(0, 9);
             double density = mode == 0 ? 0.0 : mode == 9 ? 1.0 : mode == 8 ? uni(50, 100) / 100.0 : uni(0, 15) / 100.0;
@@ -127,9 +187,10 @@ int main(int argc, char **argv) {
             fires += n2 > 0; sat_frames += score == INT32_MAX || score == INT32_MIN;
             if (cyc > worst) { worst = cyc; worst_events = ev; }
         }
-        printf("%s: %d frames, %d mismatches, %d frames with layer-2 spikes, %d saturated scores; worst %llu engine cycles "
-               "per frame (%llu synaptic events)\n", mism ? "FAIL" : "PASS", frames, mism, fires, sat_frames,
-               (unsigned long long)worst, (unsigned long long)worst_events);
+        printf("%s: %d frames (%d with layer 1 in the engine), %d mismatches, %d frames with layer-1 spikes (engine layer 1), "
+               "%d frames with layer-2 spikes, %d saturated scores; worst %llu engine cycles per frame with SPIKE input "
+               "(%llu synaptic events), %llu with layer 1 in the engine\n", mism ? "FAIL" : "PASS", frames, frames - frames / 2, mism,
+               l1_fires, fires, sat_frames, (unsigned long long)worst, (unsigned long long)worst_events, (unsigned long long)worst_l1);
         return mism ? 1 : 0;
     } catch (const std::exception &e) { fprintf(stderr, "%s\n", e.what()); return 2; }
 }

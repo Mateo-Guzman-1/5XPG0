@@ -197,7 +197,7 @@ module spike_soc #(
                     case (cpu_mem_addr[15:12])
                     4'h0: case (cpu_mem_addr[3:2])                  // SYSCTRL
                           2'd0: peri_rdata_r <= 32'h534B_454C;     // "SKEL"
-                          2'd1: peri_rdata_r <= 32'h0002_0003;     // v2.0 + bit0: kdot coprocessor, bit1: neuron engine
+                          2'd1: peri_rdata_r <= 32'h0002_0007;     // v2.0 + bit0: kdot coprocessor, bit1: neuron engine, bit2: engine layer 1
                           2'd2: peri_rdata_r <= sys_scratch;
                           2'd3: peri_rdata_r <= {31'b0, core_trap};
                           endcase

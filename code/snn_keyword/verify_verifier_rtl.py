@@ -61,6 +61,7 @@ def main():
     p.add_argument('--cascade', type=int, nargs=2, metavar=('T1', 'T2'),
                    help='cascade firmware: stage-1 threshold T1 and verifier threshold T2 (needs --frames)')
     p.add_argument('--neg-records', type=int, default=8, help='--cascade: 30 s pieces of the negatives stream')
+    p.add_argument('--engine-l1', action='store_true', help='--cascade: stage-1 layers 1 and 2 in the neuron engine (CTRL bit2)')
     a = p.parse_args()
     if a.cascade:
         return cascade_main(a)
@@ -113,14 +114,14 @@ def cascade_main(a):
     from verifier_cascade import cascade_requests
     from verifier_model import NEG
     t1, t2 = a.cascade
-    tag = 'engine' + (f'_{a.tag}' if a.tag else '')
+    tag = ('engine_l1' if a.engine_l1 else 'engine') + (f'_{a.tag}' if a.tag else '')
     qv = load_quantized(a.checkpoint)
     q1 = dict(np.load(a.stage1))
     window = int(q1.get('decision_window', 1))
     info = export(qv, ROOT / 'build/verifier', warmup=a.warmup, boundary=a.boundary, thresholds=(t2, NEG), cascade_t1=t1)
     export_stream(a.stage1, ROOT / 'build/stream')
     command(['make', '-C', 'firmware', 'cascade'])
-    fw = 'build/keyword_stream_cascade_engine'
+    fw = 'build/keyword_stream_cascade_engine' + ('_l1' if a.engine_l1 else '')
     command(['bash', '-lc', ' '.join([
         'verilator --cc --exe --build -j 8 -Wno-fatal --top-module spike_soc', '--Mdir build/obj_cascade',
         "-CFLAGS '-O3'", '../pynqz2_riscv_flow/rtl/spike_soc.v', '../pynqz2_riscv_flow/rtl/picorv32.v',

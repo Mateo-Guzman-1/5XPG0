@@ -1,7 +1,8 @@
 """Phase 5 check: streaming firmware on the PicoRV32 SoC RTL (Verilator), bit-exact with the oracle.
 
 Builds build/stream headers (export_model.export_stream), the ABI v3 firmware
-(firmware/stream_main.c; --kdot uses the kdot coprocessor for layer 1), and
+(firmware/stream_main.c; --kdot uses the kdot coprocessor for layer 1, --engine
+runs layer 2 in the neuron engine, --engine-l1 both layers), and
 sim/soc_stream.cpp against rtl/spike_soc.v. --read-wait N simulates a copy of
 spike_soc.v with READ_WAIT = N (the bus fix, report E2) without changing the
 source. Streams: 20 keyword and 20 other test clips placed in noise as in
@@ -33,17 +34,18 @@ def main():
     p.add_argument('--data', type=Path, default=ROOT / 'data')
     p.add_argument('--kdot', action='store_true')
     p.add_argument('--engine', action='store_true', help='layer 2 in rtl/neuron_engine.v (implies kdot)')
+    p.add_argument('--engine-l1', action='store_true', help='layers 1 and 2 in rtl/neuron_engine.v (CTRL bit2)')
     p.add_argument('--read-wait', type=int, default=1)
     p.add_argument('--streams', type=int, default=40)
     p.add_argument('--hop', type=int, default=25)
     p.add_argument('--tag', default='', help='suffix of the result files, so other models keep theirs')
     a = p.parse_args()
-    tag = f"{'engine' if a.engine else 'kdot' if a.kdot else 'rv32im'}_rw{a.read_wait}"
+    tag = f"{'engine_l1' if a.engine_l1 else 'engine' if a.engine else 'kdot' if a.kdot else 'rv32im'}_rw{a.read_wait}"
     out_tag = tag + (f'_{a.tag}' if a.tag else '')
     q = dict(np.load(a.model))
     export_stream(a.model, ROOT / 'build/stream')
     command(['make', '-C', 'firmware', 'stream'])
-    fw = f"build/keyword_stream{'_engine' if a.engine else '_kdot' if a.kdot else ''}.bin"
+    fw = f"build/keyword_stream{'_engine_l1' if a.engine_l1 else '_engine' if a.engine else '_kdot' if a.kdot else ''}.bin"
     # RTL copy with the requested read wait.
     src = (RTL / 'spike_soc.v').read_text()
     src, n = re.subn(r"localparam \[3:0\] READ_WAIT = 4'd\d+;", f"localparam [3:0] READ_WAIT = 4'd{a.read_wait};", src)
@@ -77,7 +79,7 @@ def main():
     print(res.stdout.strip())
     rows = np.genfromtxt(csv, delimiter=',', names=True)
     full = rows[rows['frames'] == a.hop]
-    summary = {'model': a.model.as_posix(), 'firmware': fw, 'read_wait': a.read_wait, 'kdot': a.kdot,
+    summary = {'model': a.model.as_posix(), 'firmware': fw, 'read_wait': a.read_wait, 'kdot': a.kdot, 'engine': a.engine, 'engine_l1': a.engine_l1,
                'streams': len(seqs), 'hops': len(rows), 'bit_exact': 'PASS' in res.stdout,
                'cycles_per_hop': {'max': int(full['cycles'].max()), 'mean': float(full['cycles'].mean()),
                                   'p99': float(np.percentile(full['cycles'], 99))},

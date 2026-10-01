@@ -2,8 +2,17 @@
 // (snn_keyword/IMPLEMENTATION_PLAN.md, Phase 6). Bit-exact with
 // model.integer_forward_stream() and firmware/stream_infer.c.
 //
-// The PicoRV32 computes layer 1 (kdot) and writes the indices of the layer-1
-// neurons that spiked this frame to SPIKE, then writes CTRL.start. Per frame:
+// Two ways to start a frame:
+//   CTRL bit1  the PicoRV32 has computed layer 1 (kdot) and written the indices
+//              of the layer-1 neurons that spiked this frame to SPIKE;
+//   CTRL bit2  layer 1 runs here too (branch ALIF-Layer1): the CPU writes the
+//              24 input bytes to FRAME (six words) and the engine computes
+//   layer1    for each input i and each block of 16 neurons, acc1 += x[i] * w1
+//             (16 lanes per clock, 192 clocks), then the ALIF update of the 128
+//             layer-1 neurons, pipelined, one per clock, with
+//             current = (acc1 >>> r1) + b1 and the layer-2 arithmetic below;
+//             the indices of the neurons that spike go into this frame's ring slot.
+// Then, per frame:
 //   delayed   for tau = 0..31, for every layer-1 neuron that spiked tau frames
 //             ago, stream its synapses of delay tau from a CSR table (one
 //             synaptic event per clock) into the layer-2 accumulators
@@ -20,7 +29,8 @@
 // which need random and 16-wide access, are registers.
 //
 // MMIO (byte offsets from 0x1000_4000; reads combinational):
-//   0x00 W CTRL     bit0 reset network state, bit1 start frame
+//   0x00 W CTRL     bit0 reset network state, bit1 start frame (layer-1 spikes from
+//                   SPIKE), bit2 start frame with layer 1 in the engine (input from FRAME)
 //   0x04 R STATUS   bit0 busy
 //   0x08 W SPIKE    index of a layer-1 neuron that spiked this frame
 //   0x0C R SCORE    decision score of the last frame (int32)
@@ -31,10 +41,16 @@
 //   0x20 W TADDR    table[31:28], address[15:0]: start of a table write burst
 //   0x24 W TDATA    one table word; the address then increments
 //   0x28 W CONFIG   yes[1:0], classes[6:4], PO[11:8]
+//   0x2C W FRAME    next four input bytes (byte 0 = lowest band); six writes per
+//                   frame, the index restarts with every CTRL bit2
+//        R SPIKES1  layer-1 spikes of the last frame (CTRL bit2 frames)
 // Tables: 0 OFF (16 bit, N1*32+1), 1 SYN ({w[15:8], post[7:0]}), 2 REC (int8
 // rec[j][k] at byte k*N2 + j, four per word), 3 WOT (per j: int8 per class),
 // 4 NP0 (per j: theta[15:0] | p[19:16] | km[23:20] | ka[27:24]), 5 BQ, 6 B2,
-// 7 KO (per class), 8 BO (per class).
+// 7 KO (per class), 8 BO (per class);
+// layer 1: 9 W1 (row = input * 8 + block, four words per row, byte k of word w
+// = int8 w1[16*block + 4*w + k][input]), 10 NP1 (per neuron: theta[15:0] |
+// r1[19:16] | km[23:20] | ka[27:24]), 11 BQ1, 12 B1.
 module neuron_engine #(
     parameter N1      = 128,
     parameter N2      = 128,
@@ -77,10 +93,11 @@ module neuron_engine #(
     // ------------------------------------------------------------------
     // Sequencer registers
     // ------------------------------------------------------------------
-    localparam S_IDLE = 4'd0, S_DSLOT = 4'd1, S_DIDX = 4'd2, S_DOFF = 4'd3, S_DSYN = 4'd4,
-               S_REC = 4'd5, S_UPD = 4'd6, S_OUT1 = 4'd7, S_OUT2 = 4'd8, S_SC1 = 4'd9,
-               S_SC2 = 4'd10, S_SC3 = 4'd11, S_RESET = 4'd12, S_SC1B = 4'd13, S_SC1C = 4'd14;
-    reg [3:0]  state;
+    localparam S_IDLE = 5'd0, S_DSLOT = 5'd1, S_DIDX = 5'd2, S_DOFF = 5'd3, S_DSYN = 5'd4,
+               S_REC = 5'd5, S_UPD = 5'd6, S_OUT1 = 5'd7, S_OUT2 = 5'd8, S_SC1 = 5'd9,
+               S_SC2 = 5'd10, S_SC3 = 5'd11, S_RESET = 5'd12, S_SC1B = 5'd13, S_SC1C = 5'd14,
+               S_L1MAC = 5'd15, S_L1UPD = 5'd16;
+    reg [4:0]  state;
     reg        busy;
     reg [4:0]  pos;
     reg [5:0]  tau;
@@ -125,9 +142,63 @@ module neuron_engine #(
             rec_q[32*g +: 32] <= mem[{s2_list[row[10:3]], row[2:0]}];
         end
     end endgenerate
+    // Ring slot of this frame: written by SPIKE (CPU, idle) or by a firing layer-1
+    // neuron (l1_fire, busy); never both in one clock.
+    wire       l1_fire;
+    wire [6:0] l1_fire_j;
     always @(posedge clk) begin
-        if (wr && addr == 8'h08 && !busy) ring_mem[{pos, ring_cnt[pos][6:0]}] <= wdata[6:0];
+        if ((wr && addr == 8'h08 && !busy) || l1_fire)
+            ring_mem[{pos, ring_cnt[pos][6:0]}] <= l1_fire ? l1_fire_j : wdata[6:0];
         ring_q <= ring_mem[{slot, n[6:0]}];
+    end
+
+    // ------------------------------------------------------------------
+    // Layer 1 (CTRL bit2): input bytes, weights, parameters and state
+    // ------------------------------------------------------------------
+    reg [31:0] frame_w [0:5];         // 24 input bytes, byte i at frame_w[i/4][8*(i%4) +: 8]
+    reg [2:0]  fidx;                  // next FRAME word
+    reg [7:0]  row1;                  // weight row issued: input row1[7:3], block row1[2:0]
+    reg [7:0]  j1;                    // layer-1 update issue index
+    reg [31:0] spikes1;
+    wire [4:0] row1_in = row1[7:3];
+    // 128-bit weight rows (16 neurons of one block for one input), four 32-bit RAMs.
+    reg [127:0] w1_q;
+    generate for (g = 0; g < 4; g = g + 1) begin : w1_bank
+        reg [31:0] mem [0:255];
+        always @(posedge clk) begin
+            if (twr && tsel == 4'd9 && taddr[1:0] == g) mem[taddr[9:2]] <= wdata;
+            w1_q[32*g +: 32] <= mem[row1];
+        end
+    end endgenerate
+    reg [31:0] np1_mem [0:N1-1], bq1_mem [0:N1-1], b1_mem [0:N1-1];
+    reg [31:0] np1_q, bq1_q, b1_q;
+    wire [6:0] j1_rd = j1[6:0];
+    always @(posedge clk) begin
+        if (twr && tsel == 4'd10) np1_mem[taddr[6:0]] <= wdata;
+        np1_q <= np1_mem[j1_rd];
+    end
+    always @(posedge clk) begin
+        if (twr && tsel == 4'd11) bq1_mem[taddr[6:0]] <= wdata;
+        bq1_q <= bq1_mem[j1_rd];
+    end
+    always @(posedge clk) begin
+        if (twr && tsel == 4'd12) b1_mem[taddr[6:0]] <= wdata;
+        b1_q <= b1_mem[j1_rd];
+    end
+    reg signed [15:0] u1_mem [0:N1-1];
+    reg [31:0] a1_mem [0:N1-1];
+    reg        s1_mem [0:N1-1];
+    reg        st1_we;
+    reg [6:0]  st1_wa;
+    reg signed [15:0] st1_u;
+    reg [31:0] st1_a;
+    reg        st1_s;
+    reg signed [15:0] u1_q;
+    reg [31:0] a1_q;
+    reg        s1_q;
+    always @(posedge clk) begin
+        if (st1_we) begin u1_mem[st1_wa] <= st1_u; a1_mem[st1_wa] <= st1_a; s1_mem[st1_wa] <= st1_s; end
+        u1_q <= u1_mem[j1_rd]; a1_q <= a1_mem[j1_rd]; s1_q <= s1_mem[j1_rd];
     end
 
     // Per-neuron parameters: written by the table port, read at the issue index j.
@@ -189,6 +260,37 @@ module neuron_engine #(
     reg signed [7:0]  evb_w;
     wire signed [17:0] evb_sum = evb_acc + evb_w;
 
+    // Layer-1 accumulators, 16 lanes per clock: m0 has issued a weight row and
+    // registered its input byte, m1 multiplies, the clock after adds into
+    // acc1[16*block + lane]. |acc1| <= 24 * 128 * 255 < 2^20.
+    reg signed [21:0] acc1 [0:N1-1];
+    reg signed [21:0] acc1_q;
+    reg        m0_v, m1_v;
+    reg [2:0]  m0_blk, m1_blk;
+    reg [7:0]  m0_x;
+    reg signed [16:0] m1_prod [0:15];
+    // Layer-1 update pipeline: the layer-2 arithmetic below, with
+    // current = (acc1 >>> r1) + b1. k: RAM data valid (issued last cycle);
+    // q1, q2, q3 as p1, p2, p3; q3 fires, resets, writes back and, on a spike,
+    // appends the neuron to this frame's ring slot.
+    reg        k_v; reg [6:0] k_j;
+    reg        q1_v; reg [6:0] q1_j; reg [31:0] q1_a; reg signed [39:0] q1_cur;
+    reg signed [15:0] q1_u; reg [15:0] q1_theta; reg [3:0] q1_km; reg signed [31:0] q1_bq;
+    reg        q2_v; reg [6:0] q2_j; reg [31:0] q2_a; reg signed [47:0] q2_prod;
+    reg signed [39:0] q2_u; reg [15:0] q2_theta;
+    reg        q3_v; reg [6:0] q3_j; reg [31:0] q3_a; reg signed [39:0] q3_thr, q3_u;
+    wire [3:0] k_ka = np1_q[27:24];
+    wire [31:0] k_anew = a1_q - (a1_q >> k_ka) + {23'd0, s1_q, 8'd0};
+    wire signed [39:0] k_cur = ($signed({{18{acc1_q[21]}}, acc1_q}) >>> np1_q[19:16])
+                             + $signed({{8{b1_q[31]}}, b1_q});
+    wire        q3_fire = q3_u >= q3_thr;
+    wire signed [39:0] q3_rst = q3_u - q3_thr;
+    wire signed [15:0] q3_fin = !q3_fire ? q3_u[15:0] :
+                                (q3_rst > 40'sd32767) ? 16'sd32767 :
+                                (q3_rst < -40'sd32768) ? -16'sd32768 : q3_rst[15:0];
+    assign l1_fire   = q3_v && q3_fire;
+    assign l1_fire_j = q3_j;
+
     // ------------------------------------------------------------------
     // Update pipeline
     //   issue (S_UPD, j):   RAM addresses; acc_q <= acc[j]; acc[j] <= 0
@@ -237,6 +339,7 @@ module neuron_engine #(
             8'h14: rdata = events;
             8'h18: rdata = cycles;
             8'h1c: rdata = 32'h4E454E47;
+            8'h2c: rdata = spikes1;
             default: rdata = 32'd0;
         endcase
     end
@@ -244,11 +347,45 @@ module neuron_engine #(
     integer l, c;
     always @(posedge clk) begin
         st_we <= 1'b0;
+        st1_we <= 1'b0;
         if (!resetn) begin
             state <= S_RESET; busy <= 1'b1; j <= 8'd0;
             i_v <= 1'b0; p1_v <= 1'b0; p2_v <= 1'b0; p3_v <= 1'b0; wb_fire <= 1'b0; ev_v <= 1'b0; evb_v <= 1'b0;
+            m0_v <= 1'b0; m1_v <= 1'b0; k_v <= 1'b0; q1_v <= 1'b0; q2_v <= 1'b0; q3_v <= 1'b0;
+            fidx <= 3'd0; spikes1 <= 32'd0;
         end else begin
             if (busy) cycles <= cycles + 32'd1;
+
+            // ---- layer 1: input bytes from the CPU while idle ----
+            if (wr && addr == 8'h2c && !busy) begin
+                frame_w[fidx] <= wdata;
+                fidx <= (fidx == 3'd5) ? 3'd0 : fidx + 3'd1;
+            end
+            // ---- layer 1: multiply (m1) and accumulate, 16 lanes ----
+            m1_v <= m0_v; m1_blk <= m0_blk;
+            for (l = 0; l < 16; l = l + 1)
+                m1_prod[l] <= $signed(w1_q[8*l +: 8]) * $signed({1'b0, m0_x});
+            if (m1_v)
+                for (l = 0; l < 16; l = l + 1)
+                    acc1[{m1_blk, 4'd0} + l] <= acc1[{m1_blk, 4'd0} + l] + m1_prod[l];
+            m0_v <= 1'b0;
+            // ---- layer 1: update pipeline ----
+            q1_v <= k_v; q1_j <= k_j; q1_a <= k_anew; q1_cur <= k_cur; q1_u <= u1_q;
+            q1_theta <= np1_q[15:0]; q1_km <= np1_q[23:20]; q1_bq <= bq1_q;
+            q2_v <= q1_v; q2_j <= q1_j; q2_a <= q1_a; q2_theta <= q1_theta;
+            q2_prod <= $signed({{16{q1_bq[31]}}, q1_bq}) * $signed({16'd0, q1_a});
+            q2_u <= $signed({{24{q1_u[15]}}, q1_u}) - $signed({{24{q1_u[15]}}, q1_u >>> q1_km}) + q1_cur;
+            q3_v <= q2_v; q3_j <= q2_j; q3_a <= q2_a;
+            q3_thr <= $signed({24'd0, q2_theta}) + (q2_prod >>> 8);
+            q3_u <= (q2_u > 40'sd32767) ? 40'sd32767 : (q2_u < -40'sd32768) ? -40'sd32768 : q2_u;
+            if (q3_v) begin
+                st1_we <= 1'b1; st1_wa <= q3_j; st1_u <= q3_fin; st1_a <= q3_a; st1_s <= q3_fire;
+                if (q3_fire) begin                    // the ring write itself is l1_fire
+                    ring_cnt[pos] <= ring_cnt[pos] + 8'd1;
+                    spikes1 <= spikes1 + 32'd1;
+                end
+            end
+            k_v <= 1'b0;
 
             // ---- update pipeline (runs whenever stages hold valid data) ----
             p1_v <= i_v; p1_j <= i_j; p1_a <= i_anew; p1_cur <= i_cur; p1_u <= u_q;
@@ -286,6 +423,8 @@ module neuron_engine #(
                 // One neuron and one ring slot per clock.
                 st_we <= 1'b1; st_wa <= j[6:0]; st_u <= 16'sd0; st_a <= 32'd0; st_s <= 1'b0;
                 acc[j[6:0]] <= 18'sd0;
+                st1_we <= 1'b1; st1_wa <= j[6:0]; st1_u <= 16'sd0; st1_a <= 32'd0; st1_s <= 1'b0;
+                acc1[j[6:0]] <= 22'sd0;
                 if (j < 8'd32) ring_cnt[j[4:0]] <= 8'd0;
                 if (j < 8'd4) begin o[j[1:0]] <= 32'sd0; acc_o[j[1:0]] <= 32'sd0; end
                 if (j == N2 - 1) begin
@@ -297,9 +436,32 @@ module neuron_engine #(
                 if (wr && addr == 8'h08) ring_cnt[pos] <= ring_cnt[pos] + 8'd1;
                 if (wr && addr == 8'h00 && wdata[0]) begin
                     state <= S_RESET; busy <= 1'b1; j <= 8'd0;
+                end else if (wr && addr == 8'h00 && wdata[2]) begin
+                    state <= S_L1MAC; busy <= 1'b1; cycles <= 32'd0; spikes1 <= 32'd0;
+                    events <= 32'd0; tau <= 6'd0; n <= 8'd0; row1 <= 8'd0; fidx <= 3'd0;
                 end else if (wr && addr == 8'h00 && wdata[1]) begin
                     state <= S_DSLOT; busy <= 1'b1; cycles <= 32'd0;
                     events <= 32'd0; tau <= 6'd0; n <= 8'd0;
+                end
+            end
+            // ---- layer 1: 192 weight rows, 16 neurons each ----
+            S_L1MAC: begin
+                if (row1 < 8'd192) begin              // w1_q <= weight row row1
+                    m0_v <= 1'b1; m0_blk <= row1[2:0]; row1 <= row1 + 8'd1;
+                    m0_x <= frame_w[row1_in[4:2]][8*row1_in[1:0] +: 8];
+                end else if (!m0_v && !m1_v) begin
+                    state <= S_L1UPD; j1 <= 8'd0;
+                end
+            end
+            // ---- layer 1: ALIF update issue, one neuron per clock ----
+            S_L1UPD: begin
+                if (j1 < N1) begin
+                    k_v <= 1'b1; k_j <= j1[6:0];
+                    acc1_q <= acc1[j1[6:0]];
+                    acc1[j1[6:0]] <= 22'sd0;
+                    j1 <= j1 + 8'd1;
+                end else if (!k_v && !q1_v && !q2_v && !q3_v) begin
+                    state <= S_DSLOT;                 // tau = n = 0 since the start
                 end
             end
             // ---- delayed synapses, one event per clock ----

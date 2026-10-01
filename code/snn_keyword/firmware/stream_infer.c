@@ -71,6 +71,27 @@ void stream_init(void)
     engine_begin(8);
     for (unsigned c = 0; c < STREAM_CLASSES; ++c) ENG(0x24) = (uint32_t)stream_bo[c];
     ENG(0x28) = STREAM_YES | STREAM_CLASSES << 4 | STREAM_PO << 8;
+#ifdef USE_ENGINE_L1
+    /* Layer 1 in the engine too (CTRL bit2): weight rows of 16 neurons, row = input * 8 + block. */
+    _Static_assert(STREAM_N1 == 128 && STREAM_BANDS == 24, "engine layer 1 is built for 24 inputs x 128 neurons");
+    engine_begin(9);
+    for (unsigned i = 0; i < STREAM_BANDS; ++i)
+        for (unsigned blk = 0; blk < 8; ++blk)
+            for (unsigned w = 0; w < 4; ++w) {
+                uint32_t word = 0;
+                for (unsigned k = 0; k < 4; ++k)
+                    word |= (uint32_t)(uint8_t)stream_w1[(blk * 16 + w * 4 + k) * STREAM_BANDS + i] << (8 * k);
+                ENG(0x24) = word;
+            }
+    engine_begin(10);
+    for (unsigned h = 0; h < STREAM_N1; ++h)
+        ENG(0x24) = (uint32_t)stream_theta1[h] | (uint32_t)stream_r1[h] << 16 |
+                    (uint32_t)stream_km1[h] << 20 | (uint32_t)stream_ka1[h] << 24;
+    engine_begin(11);
+    for (unsigned h = 0; h < STREAM_N1; ++h) ENG(0x24) = (uint32_t)stream_bq1[h];
+    engine_begin(12);
+    for (unsigned h = 0; h < STREAM_N1; ++h) ENG(0x24) = (uint32_t)stream_b1[h];
+#endif
 }
 #else
 void stream_init(void) {}
@@ -89,6 +110,17 @@ void stream_reset(stream_state_t *st)
 int32_t stream_step(stream_state_t *st, const uint8_t *frame, uint32_t spikes[2], uint32_t *events)
 {
     uint32_t n1 = 0, n2 = 0, ev = 0;
+#ifdef USE_ENGINE_L1
+    /* The whole network in the engine: send the 24 input bytes, start, read the results. */
+    for (unsigned k = 0; k < STREAM_BANDS; k += 4)
+        ENG(0x2c) = (uint32_t)frame[k] | (uint32_t)frame[k + 1] << 8 |
+                    (uint32_t)frame[k + 2] << 16 | (uint32_t)frame[k + 3] << 24;
+    ENG(0x00) = 4;
+    while (ENG(0x04) & 1) ;
+    (void)st;
+    spikes[0] = ENG(0x2c); spikes[1] = ENG(0x10); *events = ENG(0x14);
+    return (int32_t)ENG(0x0c);
+#endif
 #ifdef PROFILE
     uint32_t t_ = TIMER_NOW;
 #endif

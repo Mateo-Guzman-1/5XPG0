@@ -44,6 +44,9 @@ class Board:
         # ABI bit0: kdot PCPI coprocessor present (deploy/keyword_kdot.bit).
         if 'kdot' in Path(firmware).name and not abi & 1:
             raise RuntimeError('kdot firmware needs deploy/keyword_kdot.bit (ABI bit0)')
+        # ABI bit2: layer 1 in the neuron engine (keyword_stream*_engine_l1.bin, branch ALIF-Layer1).
+        if '_l1' in Path(firmware).name and not abi & 4:
+            raise RuntimeError('layer-1 engine firmware needs a bitstream with ABI bit2 (rtl/neuron_engine.v, CTRL bit2)')
         if self.read_reg(0x10) != 100000000:
             raise RuntimeError('Expected 100 MHz fabric clock')
         image = Path(firmware).read_bytes()
