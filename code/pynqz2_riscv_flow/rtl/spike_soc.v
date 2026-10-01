@@ -134,7 +134,7 @@ module spike_soc #(
     wire [31:0] snn_rdata;
 
     snn_layer #(
-        .P          (64),        // parallel neurons (sweep this!)
+        .P          (16),        // parallel neurons (sweep this!); 16 so two cores fit the BRAM (64 needs 8 BRAM36 per core)
         .N_IN       (256),       // 16 x 16 spectrogram inputs
         .XBITS      (1),         // 1 = binary spikes, 8 = direct 8-bit input
         .LEAK_SHIFT (3)          // beta = 1 - 2^-3 = 0.875

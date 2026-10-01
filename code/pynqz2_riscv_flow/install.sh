@@ -5,7 +5,8 @@
 # Given the board IP, this copies everything to the board and leaves it ready:
 #   - the prebuilt bitstream           (vivado/spike_top.bit)
 #   - the RISC-V firmware              (firmware/spike.bin)
-#   - the host tool + smoke test       (host/spike_pynq.py, host/smoke_test.sh)
+#   - the host tool + smoke tests      (host/spike_pynq.py, host/smoke_test.sh,
+#                                       host/smoke_test_dual.sh for the two cores)
 #   - Python deps in the PYNQ venv     (requirements.txt: pyzmq)
 #
 # Usage:
@@ -79,9 +80,9 @@ echo "ok  - ssh + passwordless sudo"
 step "1. deploy bitstream, firmware, host tool"
 ssh "$BOARD_HOST" "mkdir -p $REMOTE_DIR"
 scp -q "$PREBUILT_BIT" "$FIRMWARE_BIN" \
-    "$HERE/host/spike_pynq.py" "$HERE/host/smoke_test.sh" "$HERE/host/demo.sh" \
-    "$BOARD_HOST:$REMOTE_DIR/"
-ssh "$BOARD_HOST" "chmod +x $REMOTE_DIR/smoke_test.sh $REMOTE_DIR/demo.sh"
+    "$HERE/host/spike_pynq.py" "$HERE/host/smoke_test.sh" "$HERE/host/smoke_test_dual.sh" \
+    "$HERE/host/demo.sh" "$BOARD_HOST:$REMOTE_DIR/"
+ssh "$BOARD_HOST" "chmod +x $REMOTE_DIR/smoke_test.sh $REMOTE_DIR/smoke_test_dual.sh $REMOTE_DIR/demo.sh"
 echo "deployed to $BOARD_HOST:$REMOTE_DIR"
 
 step "2. install Python deps in the PYNQ venv"
