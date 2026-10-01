@@ -13,7 +13,7 @@ LDFLAGS="$ARCH -T linker.ld -static -nostdlib -Wl,--build-id=none -Wl,--gc-secti
 
 # snn_vectors.h ships pre-generated; only regenerate if it is missing
 if [ ! -f snn_vectors.h ]; then
-    python3 ../sim/golden_lif.py hwvec --out snn_vectors.h
+    python3 ../sim/golden_alif.py hwvec --out snn_vectors.h
 fi
 
 ${CROSS}gcc $CFLAGS -c -o start_smoke.o start.S

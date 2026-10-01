@@ -1,12 +1,14 @@
 #!/bin/bash
-# snn_smoke_test.sh -- on-board check of the 64-neuron snn_layer bitstream.
+# snn_smoke_test.sh -- on-board check of the ALIF snn_layer (16 neurons per core).
 # Runs ON THE PYNQ-Z2, in the directory holding spike_top.bit, snn_smoke.bin, spike_pynq.py.
 #
-# Usage: ./snn_smoke_test.sh [bitstream] [test-firmware]     (defaults: spike_top.bit snn_smoke.bin)
+# Usage: [CORE=1] ./snn_smoke_test.sh [bitstream] [test-firmware]
+#        (defaults: core 0, spike_top.bit, snn_smoke.bin)
 #
-# PASS means: the fabric loads, the CPU runs the test, and all 64 neurons produced exactly the
-# golden-model results (fire vector + membrane of every neuron at every tick, final counters)
-# for three event scripts, one polled and two pushed without polling.
+# PASS means: the fabric loads, the CPU of that core runs the test, and every neuron produced
+# exactly the golden-model results (golden_alif.py: fire vector, membrane u and adaptation
+# trace a of every neuron at every tick, final counters) for three sets -- the trained
+# sheila layer 1, polled, and two random sets pushed without polling.
 
 set -u
 cd "$(dirname "$0")"
@@ -15,7 +17,9 @@ PY=/usr/local/share/pynq-venv/bin/python3
 BIT="${1:-spike_top.bit}"
 BIN="${2:-snn_smoke.bin}"
 
-run() { sudo bash -c "source /etc/profile.d/xrt_setup.sh && $PY spike_pynq.py $*"; }
+CORE="${CORE:-0}"
+
+run() { sudo bash -c "source /etc/profile.d/xrt_setup.sh && $PY spike_pynq.py --core $CORE $*"; }
 fail() { echo; echo "SNN SMOKE TEST FAILED: $*"; exit 1; }
 pass() { echo "ok  - $*"; }
 
@@ -54,4 +58,4 @@ read -r w0 w1 w2 w3 <<< "$R"
 pass "verdict PASS, ${w1} checks, 0 mismatches"
 
 echo
-echo "SNN SMOKE TEST PASSED - weights, events, ticks and readback of all 64 neurons match the golden model on the FPGA."
+echo "SNN SMOKE TEST PASSED (core $CORE) - weights, ALIF parameters, events, ticks and readback of every neuron match the golden model on the FPGA."

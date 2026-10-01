@@ -1,12 +1,15 @@
-// snn_smoke.c -- ON-BOARD functional check of rtl/snn_layer.v (the 64-neuron bitstream).
+// snn_smoke.c -- ON-BOARD functional check of the ALIF rtl/snn_layer.v.
 //
-// Replays the golden-model vectors (snn_vectors.h, made by `golden_lif.py hwvec`)
-// through the same MMIO paths the real firmware will use, and compares EVERY
-// tick against the expected result:
-//   * fire vector (SPK regs) and the membrane of all 64 neurons (VMEM regs),
+// Replays the golden-model vectors (snn_vectors.h, made by `golden_alif.py hwvec`)
+// through the same MMIO paths the real firmware will use. Per set it loads the
+// weights and the per-neuron ALIF parameters (NP, BQ, BIAS; read back), then
+// compares EVERY tick against the expected result:
+//   * fire vector (SPK regs), membrane u (U regs) and adaptation trace a (A regs)
+//     of every neuron,
 //   * final spike counters and tick counter,
 //   * evt_ovf must stay 0 (sets B and C push events WITHOUT polling busy).
-// Also checks the reset state (THR reads 64, ticks 0, not busy).
+// Set A is layer 1 of the trained 'sheila' ALIF model (first SNN_P neurons).
+// Also checks the reset state (ID "ALIF", CONFIG, NP reset value, ticks 0, not busy).
 //
 // Result reporting (the PS reads it with the existing host tool):
 //   spike_pynq.py console      -> short text report (ring is only 512 bytes)
@@ -30,11 +33,16 @@
 #define SNN_CTRL       (SNN_REG_BASE + 0x000u)            // W: bit0 CLR, bit1 TICK
 #define SNN_STATUS     (SNN_REG_BASE + 0x004u)            // R: bit0 busy, bit1 evt_ovf
 #define SNN_EVT        (SNN_REG_BASE + 0x008u)            // W: (x << 16) | input row
-#define SNN_THR        (SNN_REG_BASE + 0x00Cu)            // RW
+#define SNN_CONFIG     (SNN_REG_BASE + 0x00Cu)            // R: P | XBITS << 8 | N_IN << 16
 #define SNN_SPK(n)     (SNN_REG_BASE + 0x010u + 4u * (u32)(n))
 #define SNN_TICKS      (SNN_REG_BASE + 0x030u)
+#define SNN_ID         (SNN_REG_BASE + 0x034u)            // R: 0x414C4946 "ALIF"
 #define SNN_CNT(c)     (SNN_REG_BASE + 0x400u + 4u * (u32)(c))
-#define SNN_VMEM(c)    (SNN_REG_BASE + 0x800u + 4u * (u32)(c))
+#define SNN_NP(c)      (SNN_REG_BASE + 0x500u + 4u * (u32)(c))  // theta | r<<16 | km<<20 | ka<<24
+#define SNN_BQ(c)      (SNN_REG_BASE + 0x600u + 4u * (u32)(c))  // signed, 18 bits
+#define SNN_BIAS(c)    (SNN_REG_BASE + 0x700u + 4u * (u32)(c))
+#define SNN_U(c)       (SNN_REG_BASE + 0x800u + 4u * (u32)(c))  // membrane (sign-extended)
+#define SNN_A(c)       (SNN_REG_BASE + 0x900u + 4u * (u32)(c))  // adaptation trace
 
 #define VERDICT_PASS   0x50415353u                        // "PASS"
 #define VERDICT_FAIL   0x4641494Cu                        // "FAIL"
@@ -138,24 +146,41 @@ static int wait_idle(void)
     return 0;
 }
 
+#define EXP_PER_TICK (SNN_SPKW + 2u * SNN_P)              // fire words, u[P], a[P]
+
 static void check_tick(const u32 *exp, u32 t, u32 set)
 {
-    const u32 *e = exp + t * (SNN_SPKW + SNN_P);
+    const u32 *e = exp + t * EXP_PER_TICK;
     for (u32 n = 0; n < SNN_SPKW; n++)
         chk(REG_RD(SNN_SPK(n)), e[n], "fire", set, t, n);
-    for (u32 c = 0; c < SNN_P; c++)
-        chk(REG_RD(SNN_VMEM(c)), e[SNN_SPKW + c], "vmem", set, t, c);
+    for (u32 c = 0; c < SNN_P; c++) {
+        chk(REG_RD(SNN_U(c)), e[SNN_SPKW + c], "u", set, t, c);
+        chk(REG_RD(SNN_A(c)), e[SNN_SPKW + SNN_P + c], "a", set, t, c);
+    }
 }
 
 static void run_set(const snn_set_t *s, u32 idx)
 {
     u32 before = mismatches;
 
-    REG_WR(SNN_CTRL, 1u);                         // CLR: membranes, counters, ticks, evt_ovf
-    for (int i = 0; i < 4; i++)                   // clearing the membranes is registered
+    // this set's weights (4 packed 8-bit weights per word, word w = row*(P/4) + group)
+    // and ALIF parameters, read back
+    for (u32 w = 0; w < SNN_WORDS; w++)
+        REG_WR(SNN_WGT_BASE + 4u * w, s->weights[w]);
+    for (u32 c = 0; c < SNN_P; c++) {
+        REG_WR(SNN_NP(c), s->params[3u * c]);
+        REG_WR(SNN_BQ(c), s->params[3u * c + 1u]);
+        REG_WR(SNN_BIAS(c), s->params[3u * c + 2u]);
+    }
+    for (u32 c = 0; c < SNN_P; c++) {
+        chk(REG_RD(SNN_NP(c)), s->params[3u * c], "np", idx, c, 0);
+        chk(REG_RD(SNN_BQ(c)), s->params[3u * c + 1u], "bq", idx, c, 0);
+        chk(REG_RD(SNN_BIAS(c)), s->params[3u * c + 2u], "bias", idx, c, 0);
+    }
+
+    REG_WR(SNN_CTRL, 1u);                         // CLR: acc, u, a, s, counters, ticks, evt_ovf
+    for (int i = 0; i < 4; i++)                   // clearing the state is registered
         (void)REG_RD(SNN_STATUS);
-    REG_WR(SNN_THR, SNN_THR_VAL);
-    chk(REG_RD(SNN_THR), SNN_THR_VAL, "thr", idx, 0, 0);
 
     u32 t = 0;
     for (u32 i = 0; i < s->ncmd; i++) {
@@ -177,7 +202,7 @@ static void run_set(const snn_set_t *s, u32 idx)
     }
     chk(t, SNN_T, "ticks-run", idx, 0, 0);
 
-    const u32 *fin = s->expect + SNN_T * (SNN_SPKW + SNN_P);
+    const u32 *fin = s->expect + SNN_T * EXP_PER_TICK;
     for (u32 c = 0; c < SNN_P; c++)
         chk(REG_RD(SNN_CNT(c)), fin[c], "cnt", idx, c, 0);
     chk(REG_RD(SNN_TICKS), fin[SNN_P], "ticks", idx, 0, 0);
@@ -250,18 +275,14 @@ void main(void)
     out_dec(SNN_NIN);
     out_puts(" T=");
     out_dec(SNN_T);
-    out_puts(" THR=");
-    out_dec(SNN_THR_VAL);
-    out_putc('\n');
+    out_puts(" ALIF\n");
 
     // state right after reset (the CPU reset also resets snn_layer)
-    chk(REG_RD(SNN_THR), 64u, "thr@rst", 0, 0, 0);
+    chk(REG_RD(SNN_ID), 0x414C4946u, "id", 0, 0, 0);
+    chk(REG_RD(SNN_CONFIG), (u32)SNN_P | ((u32)SNN_XBITS << 8) | ((u32)SNN_NIN << 16), "config", 0, 0, 0);
+    chk(REG_RD(SNN_NP(0)), 0x00330400u, "np@rst", 0, 0, 0);
     chk(REG_RD(SNN_TICKS), 0u, "ticks@rst", 0, 0, 0);
     chk(REG_RD(SNN_STATUS) & 3u, 0u, "stat@rst", 0, 0, 0);
-
-    // weights: 4 packed 8-bit weights per 32-bit word, word w = row*(P/4) + group
-    for (u32 w = 0; w < SNN_WORDS; w++)
-        REG_WR(SNN_WGT_BASE + 4u * w, snn_weights[w]);
 
     for (u32 i = 0; i < SNN_NSETS; i++)
         run_set(&snn_sets[i], i);

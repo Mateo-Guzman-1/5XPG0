@@ -126,7 +126,7 @@ module spike_soc #(
         .total   (po_total)
     );
 
-    // SNN layer: P parallel LIF neurons + row-wide weight BRAM (rtl/snn_layer.v).
+    // SNN layer: P parallel ALIF neurons + row-wide weight BRAM (rtl/snn_layer.v).
     // Weight window 0x1000_4000..0x1000_7FFF (cpu_mem_addr[15:14] == 2'b01),
     // register window 0x1000_8000..0x1000_8FFF (cpu_mem_addr[15:12] == 4'h8).
     wire        snn_reg_wr = acc_wr && sel_peri && (cpu_mem_addr[15:12] == 4'h8);
@@ -136,8 +136,7 @@ module spike_soc #(
     snn_layer #(
         .P          (16),        // parallel neurons (sweep this!); 16 so two cores fit the BRAM (64 needs 8 BRAM36 per core)
         .N_IN       (256),       // 16 x 16 spectrogram inputs
-        .XBITS      (1),         // 1 = binary spikes, 8 = direct 8-bit input
-        .LEAK_SHIFT (3)          // beta = 1 - 2^-3 = 0.875
+        .XBITS      (8)          // input value bits: 8 = bytes (log-mel frames), spikes use x = 1
     ) u_snn (
         .clk       (clk),
         .rst_n     (core_rst_n),
