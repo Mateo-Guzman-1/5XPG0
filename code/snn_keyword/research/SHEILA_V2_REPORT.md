@@ -81,16 +81,27 @@ lower cutoff retains low-frequency evidence and was the directly confirmed
 
 ### Represented time range
 
-| Duration | Mean test accuracy | Mean test F1 |
-|---:|---:|---:|
-| 600 ms | 97.85% | 83.89% |
-| 800 ms | 97.86% validation screen | 84.97% validation screen |
-| 1000 ms | **98.08%** | **85.61%** |
-| 1200 ms | 97.97% | 84.63% |
+| Duration | Validation F1 | Mean test accuracy | Mean test F1 |
+|---:|---:|---:|---:|
+| 400 ms | 72.06% | 96.89% | 76.93% |
+| 500 ms | 79.07% | 97.51% | 81.55% |
+| 600 ms | 82.86% | 97.85% | 83.89% |
+| 700 ms | 83.64% | 97.72% | 83.24% |
+| 800 ms | 84.97% | 98.05% | 85.63% |
+| 900 ms | 85.42% | 98.09% | 85.47% |
+| 1000 ms | **86.33%** | 98.08% | 85.61% |
+| 1100 ms | 84.82% | 98.08% | 85.27% |
+| 1200 ms | 85.64% | 97.97% | 84.63% |
+| 1300 ms | 84.43% | 98.05% | 85.41% |
+| 1400 ms | 82.45% | 98.20% | 86.51% |
+| 1500 ms | 84.71% | 98.23% | 86.37% |
+| 1600 ms | 83.26% | 97.84% | 83.88% |
 
-Relationship: 600-800 ms truncates useful context. With time bins fixed at
-16, 1200 ms reduces temporal resolution and adds padding. One second is the
-best measured duration and matches the dataset clip format.
+Relationship: windows below 800 ms truncate useful context. The controlled
+validation screen selected 1000 ms with the highest F1. Some longer windows
+scored highly on the held-out test set, but test results were not used to
+retune the duration. Because every candidate is pooled to 16 time bins,
+duration does not change input size, model memory, or MAC count.
 
 ## Final accuracy, latency, and memory
 

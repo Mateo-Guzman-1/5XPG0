@@ -7,7 +7,6 @@ FLOW="$HERE/../pynqz2_riscv_flow"
 BOARD_IP="${1:-192.168.2.99}"
 BOARD="xilinx@$BOARD_IP"
 REMOTE=/home/xilinx/snn_keyword
-PY=/usr/local/share/pynq-venv/bin/python3
 
 step() { printf '\n== %s\n' "$*"; }
 die() { echo "KEYWORD INSTALL FAILED: $*" >&2; exit 1; }
@@ -36,26 +35,24 @@ scp -q \
     "$FLOW/host/spike_pynq.py" \
     "$FLOW/host/keyword_bridge.py" \
     "$FLOW/host/keyword_service.sh" \
+    "$FLOW/host/keyword_boot.sh" \
+    "$FLOW/host/snn-keyword.service" \
     "$HERE/audio_features.py" \
     "$BOARD:$REMOTE/"
-ssh "$BOARD" "chmod +x '$REMOTE/keyword_service.sh' '$REMOTE/keyword_bridge.py'"
+ssh "$BOARD" "chmod +x '$REMOTE/keyword_service.sh' '$REMOTE/keyword_bridge.py' '$REMOTE/keyword_boot.sh'"
 
-step "4. load fabric and keyword firmware"
+step "4. install and start persistent keyword service"
 ssh "$BOARD" "cd '$REMOTE' && ./keyword_service.sh stop >/dev/null 2>&1 || true"
-ssh "$BOARD" "cd '$REMOTE' && sudo -n bash -c 'source /etc/profile.d/xrt_setup.sh && \
-    $PY spike_pynq.py load-bit spike_top.bit && \
-    $PY spike_pynq.py load-elf keyword.bin && \
-    $PY spike_pynq.py start'"
-sleep 1
-ssh "$BOARD" "cd '$REMOTE' && sudo -n bash -c 'source /etc/profile.d/xrt_setup.sh && \
-    $PY spike_pynq.py console'"
-
-step "5. start Ethernet-to-BRAM bridge"
-ssh "$BOARD" "cd '$REMOTE' && ./keyword_service.sh start"
+ssh "$BOARD" "sudo -n install -m 0644 '$REMOTE/snn-keyword.service' /etc/systemd/system/snn-keyword.service && \
+    sudo -n systemctl daemon-reload && \
+    sudo -n systemctl enable --now snn-keyword.service"
+sleep 2
+ssh "$BOARD" "sudo -n systemctl --no-pager --full status snn-keyword.service"
 
 cat <<EOF
 
 Keyword detector is ready at tcp://$BOARD_IP:5556.
+It is enabled as snn-keyword.service and will reload automatically at boot.
 Microphone demo:
   python pc_keyword_demo.py $BOARD_IP
 WAV test:

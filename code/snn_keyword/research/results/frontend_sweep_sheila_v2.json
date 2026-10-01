@@ -1,5 +1,5 @@
 {
-  "created": "2026-09-28T12:11:14+0200",
+  "created": "2026-10-01T14:43:58+0200",
   "dataset": "E:\\URE\\5XPG0\\code\\snn_keyword\\data\\speech_commands_v2_sheila_subset",
   "dataset_manifest_sha256": "8751c1a66975a5712e46f791c87a1969aa7cbc1fe6490fad27d409360b872eb3",
   "split": {
@@ -63,10 +63,19 @@
       "b8_f16_hz500-7600_t1000"
     ],
     "duration": [
+      "b8_f16_hz40-5120_t400",
+      "b8_f16_hz40-5120_t500",
       "b8_f16_hz40-5120_t600",
+      "b8_f16_hz40-5120_t700",
       "b8_f16_hz40-5120_t800",
+      "b8_f16_hz40-5120_t900",
       "b8_f16_hz40-5120_t1000",
-      "b8_f16_hz40-5120_t1200"
+      "b8_f16_hz40-5120_t1100",
+      "b8_f16_hz40-5120_t1200",
+      "b8_f16_hz40-5120_t1300",
+      "b8_f16_hz40-5120_t1400",
+      "b8_f16_hz40-5120_t1500",
+      "b8_f16_hz40-5120_t1600"
     ]
   },
   "screening": [
@@ -82,7 +91,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.4935479999985546,
+      "training_seconds": 3.6572674000053667,
       "threshold": 2,
       "validation": {
         "tp": 180,
@@ -114,7 +123,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.29109569999855,
+      "training_seconds": 3.7621924999984913,
       "threshold": 2,
       "validation": {
         "tp": 166,
@@ -146,7 +155,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.257913699999335,
+      "training_seconds": 3.7796796999755315,
       "threshold": 3,
       "validation": {
         "tp": 166,
@@ -178,7 +187,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.202201399995829,
+      "training_seconds": 3.6060583000071347,
       "threshold": 3,
       "validation": {
         "tp": 165,
@@ -210,7 +219,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.2059576000028756,
+      "training_seconds": 3.629773899971042,
       "threshold": 3,
       "validation": {
         "tp": 166,
@@ -242,7 +251,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.2008978000085335,
+      "training_seconds": 4.1081316999625415,
       "threshold": 3,
       "validation": {
         "tp": 159,
@@ -274,7 +283,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.2354052000009688,
+      "training_seconds": 3.9993609999655746,
       "threshold": 3,
       "validation": {
         "tp": 167,
@@ -306,7 +315,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.212016700010281,
+      "training_seconds": 3.8352593000163324,
       "threshold": 3,
       "validation": {
         "tp": 173,
@@ -338,7 +347,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.2361096999957226,
+      "training_seconds": 4.433302599994931,
       "threshold": 3,
       "validation": {
         "tp": 173,
@@ -370,7 +379,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.2974039999971865,
+      "training_seconds": 4.112387000001036,
       "threshold": 3,
       "validation": {
         "tp": 172,
@@ -402,7 +411,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.2075189000024693,
+      "training_seconds": 4.223908099986147,
       "threshold": 3,
       "validation": {
         "tp": 174,
@@ -434,7 +443,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.4989800000039395,
+      "training_seconds": 3.752695200033486,
       "threshold": 2,
       "validation": {
         "tp": 181,
@@ -466,7 +475,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.248149099992588,
+      "training_seconds": 4.003444299974944,
       "threshold": 3,
       "validation": {
         "tp": 161,
@@ -498,7 +507,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.232671100005973,
+      "training_seconds": 2.764389799966011,
       "threshold": 1,
       "validation": {
         "tp": 175,
@@ -530,7 +539,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.253743299996131,
+      "training_seconds": 2.119343200000003,
       "threshold": 3,
       "validation": {
         "tp": 170,
@@ -562,7 +571,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.1442529000050854,
+      "training_seconds": 1.9874134000274353,
       "threshold": 3,
       "validation": {
         "tp": 168,
@@ -594,7 +603,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.704234099990572,
+      "training_seconds": 1.8667799999821,
       "threshold": 2,
       "validation": {
         "tp": 174,
@@ -626,7 +635,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.2268783999898005,
+      "training_seconds": 2.0985325999790803,
       "threshold": 3,
       "validation": {
         "tp": 165,
@@ -658,7 +667,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 2.2575348999962443,
+      "training_seconds": 1.9486293999943882,
       "threshold": 2,
       "validation": {
         "tp": 175,
@@ -690,7 +699,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 4.074779200003832,
+      "training_seconds": 1.9666458999854513,
       "threshold": 2,
       "validation": {
         "tp": 182,
@@ -722,7 +731,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 4.794874900006107,
+      "training_seconds": 1.9019669000408612,
       "threshold": 1,
       "validation": {
         "tp": 183,
@@ -754,7 +763,7 @@
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 4.276894100010395,
+      "training_seconds": 2.1502951000002213,
       "threshold": 2,
       "validation": {
         "tp": 171,
@@ -780,13 +789,77 @@
         "bands": 16,
         "low_hz": 40,
         "high_hz": 5120,
+        "duration_ms": 400
+      },
+      "key": "b8_f16_hz40-5120_t400",
+      "seed": 0,
+      "epochs": 8,
+      "samples_per_epoch": 4096,
+      "training_seconds": 1.8264621999696828,
+      "threshold": 3,
+      "validation": {
+        "tp": 156,
+        "fp": 73,
+        "fn": 48,
+        "tn": 2427,
+        "accuracy": 0.9552514792899408,
+        "precision": 0.6812227074235808,
+        "recall": 0.7647058823529411,
+        "f1": 0.7205542725173211,
+        "balanced_accuracy": 0.8677529411764706
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 500
+      },
+      "key": "b8_f16_hz40-5120_t500",
+      "seed": 0,
+      "epochs": 8,
+      "samples_per_epoch": 4096,
+      "training_seconds": 1.8978956999490038,
+      "threshold": 3,
+      "validation": {
+        "tp": 153,
+        "fp": 30,
+        "fn": 51,
+        "tn": 2470,
+        "accuracy": 0.9700443786982249,
+        "precision": 0.8360655737704918,
+        "recall": 0.75,
+        "f1": 0.7906976744186046,
+        "balanced_accuracy": 0.869
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
         "duration_ms": 600
       },
       "key": "b8_f16_hz40-5120_t600",
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 4.32536170000094,
+      "training_seconds": 1.902123300009407,
       "threshold": 3,
       "validation": {
         "tp": 162,
@@ -812,13 +885,45 @@
         "bands": 16,
         "low_hz": 40,
         "high_hz": 5120,
+        "duration_ms": 700
+      },
+      "key": "b8_f16_hz40-5120_t700",
+      "seed": 0,
+      "epochs": 8,
+      "samples_per_epoch": 4096,
+      "training_seconds": 2.0987084000371397,
+      "threshold": 2,
+      "validation": {
+        "tp": 179,
+        "fp": 45,
+        "fn": 25,
+        "tn": 2455,
+        "accuracy": 0.974112426035503,
+        "precision": 0.7991071428571429,
+        "recall": 0.8774509803921569,
+        "f1": 0.8364485981308412,
+        "balanced_accuracy": 0.9297254901960784
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
         "duration_ms": 800
       },
       "key": "b8_f16_hz40-5120_t800",
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 4.213964399998076,
+      "training_seconds": 1.885024000017438,
       "threshold": 3,
       "validation": {
         "tp": 164,
@@ -844,13 +949,77 @@
         "bands": 16,
         "low_hz": 40,
         "high_hz": 5120,
+        "duration_ms": 900
+      },
+      "key": "b8_f16_hz40-5120_t900",
+      "seed": 0,
+      "epochs": 8,
+      "samples_per_epoch": 4096,
+      "training_seconds": 1.8858802000177093,
+      "threshold": 3,
+      "validation": {
+        "tp": 167,
+        "fp": 20,
+        "fn": 37,
+        "tn": 2480,
+        "accuracy": 0.9789201183431953,
+        "precision": 0.893048128342246,
+        "recall": 0.8186274509803921,
+        "f1": 0.8542199488491049,
+        "balanced_accuracy": 0.9053137254901961
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1100
+      },
+      "key": "b8_f16_hz40-5120_t1100",
+      "seed": 0,
+      "epochs": 8,
+      "samples_per_epoch": 4096,
+      "training_seconds": 1.9216876999707893,
+      "threshold": 3,
+      "validation": {
+        "tp": 162,
+        "fp": 16,
+        "fn": 42,
+        "tn": 2484,
+        "accuracy": 0.9785502958579881,
+        "precision": 0.9101123595505618,
+        "recall": 0.7941176470588235,
+        "f1": 0.8481675392670157,
+        "balanced_accuracy": 0.8938588235294118
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
         "duration_ms": 1200
       },
       "key": "b8_f16_hz40-5120_t1200",
       "seed": 0,
       "epochs": 8,
       "samples_per_epoch": 4096,
-      "training_seconds": 4.490015999996103,
+      "training_seconds": 1.845893600024283,
       "threshold": 3,
       "validation": {
         "tp": 167,
@@ -862,6 +1031,134 @@
         "recall": 0.8186274509803921,
         "f1": 0.8564102564102564,
         "balanced_accuracy": 0.905513725490196
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1300
+      },
+      "key": "b8_f16_hz40-5120_t1300",
+      "seed": 0,
+      "epochs": 8,
+      "samples_per_epoch": 4096,
+      "training_seconds": 1.8154352999990806,
+      "threshold": 3,
+      "validation": {
+        "tp": 160,
+        "fp": 15,
+        "fn": 44,
+        "tn": 2485,
+        "accuracy": 0.978180473372781,
+        "precision": 0.9142857142857143,
+        "recall": 0.7843137254901961,
+        "f1": 0.8443271767810027,
+        "balanced_accuracy": 0.8891568627450981
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1400
+      },
+      "key": "b8_f16_hz40-5120_t1400",
+      "seed": 0,
+      "epochs": 8,
+      "samples_per_epoch": 4096,
+      "training_seconds": 1.851099899969995,
+      "threshold": 3,
+      "validation": {
+        "tp": 155,
+        "fp": 17,
+        "fn": 49,
+        "tn": 2483,
+        "accuracy": 0.9755917159763313,
+        "precision": 0.9011627906976745,
+        "recall": 0.7598039215686274,
+        "f1": 0.824468085106383,
+        "balanced_accuracy": 0.8765019607843136
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1500
+      },
+      "key": "b8_f16_hz40-5120_t1500",
+      "seed": 0,
+      "epochs": 8,
+      "samples_per_epoch": 4096,
+      "training_seconds": 1.8439370000269264,
+      "threshold": 2,
+      "validation": {
+        "tp": 169,
+        "fp": 26,
+        "fn": 35,
+        "tn": 2474,
+        "accuracy": 0.9774408284023669,
+        "precision": 0.8666666666666667,
+        "recall": 0.8284313725490197,
+        "f1": 0.8471177944862155,
+        "balanced_accuracy": 0.9090156862745098
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1600
+      },
+      "key": "b8_f16_hz40-5120_t1600",
+      "seed": 0,
+      "epochs": 8,
+      "samples_per_epoch": 4096,
+      "training_seconds": 2.23535809997702,
+      "threshold": 2,
+      "validation": {
+        "tp": 179,
+        "fp": 47,
+        "fn": 25,
+        "tn": 2453,
+        "accuracy": 0.9733727810650887,
+        "precision": 0.7920353982300885,
+        "recall": 0.8774509803921569,
+        "f1": 0.8325581395348837,
+        "balanced_accuracy": 0.9293254901960784
       },
       "memory": {
         "learned_parameter_bytes_int8": 12584,
@@ -889,8 +1186,18 @@
     "b8_f32_hz40-5120_t1000",
     "b8_f16_hz40-6500_t1000",
     "b8_f16_hz40-7600_t1000",
+    "b8_f16_hz40-5120_t400",
+    "b8_f16_hz40-5120_t500",
     "b8_f16_hz40-5120_t600",
+    "b8_f16_hz40-5120_t700",
+    "b8_f16_hz40-5120_t800",
+    "b8_f16_hz40-5120_t900",
+    "b8_f16_hz40-5120_t1100",
     "b8_f16_hz40-5120_t1200",
+    "b8_f16_hz40-5120_t1300",
+    "b8_f16_hz40-5120_t1400",
+    "b8_f16_hz40-5120_t1500",
+    "b8_f16_hz40-5120_t1600",
     "b8_f24_hz300-5120_t1000",
     "b8_f20_hz300-5120_t1000",
     "b4_f20_hz300-5120_t1000",
@@ -913,7 +1220,7 @@
       "seed": 0,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 6.919921799999429,
+      "training_seconds": 2.801578700018581,
       "threshold": 2,
       "validation": {
         "tp": 180,
@@ -956,7 +1263,7 @@
       "seed": 1,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 5.959641499997815,
+      "training_seconds": 5.046665900037624,
       "threshold": 3,
       "validation": {
         "tp": 162,
@@ -999,7 +1306,7 @@
       "seed": 2,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 6.357293399996706,
+      "training_seconds": 4.621388600033242,
       "threshold": 2,
       "validation": {
         "tp": 179,
@@ -1042,7 +1349,7 @@
       "seed": 0,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 6.810854700001073,
+      "training_seconds": 5.5664491999777965,
       "threshold": 2,
       "validation": {
         "tp": 184,
@@ -1085,7 +1392,7 @@
       "seed": 1,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 7.074885200010613,
+      "training_seconds": 5.6356742000207305,
       "threshold": 3,
       "validation": {
         "tp": 171,
@@ -1128,7 +1435,7 @@
       "seed": 2,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 5.653023500010022,
+      "training_seconds": 3.479618599987589,
       "threshold": 3,
       "validation": {
         "tp": 176,
@@ -1171,7 +1478,7 @@
       "seed": 0,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.504783899988979,
+      "training_seconds": 2.8793137000175193,
       "threshold": 2,
       "validation": {
         "tp": 184,
@@ -1214,7 +1521,7 @@
       "seed": 1,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.898121500009438,
+      "training_seconds": 2.82719460001681,
       "threshold": 3,
       "validation": {
         "tp": 171,
@@ -1257,7 +1564,7 @@
       "seed": 2,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.3718589000054635,
+      "training_seconds": 5.9071257000323385,
       "threshold": 2,
       "validation": {
         "tp": 180,
@@ -1300,7 +1607,7 @@
       "seed": 0,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.3795456000079866,
+      "training_seconds": 5.473534899996594,
       "threshold": 2,
       "validation": {
         "tp": 180,
@@ -1343,7 +1650,7 @@
       "seed": 1,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.6098063999961596,
+      "training_seconds": 6.1410685000009835,
       "threshold": 3,
       "validation": {
         "tp": 161,
@@ -1386,7 +1693,7 @@
       "seed": 2,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.4200561000034213,
+      "training_seconds": 6.1018306000041775,
       "threshold": 2,
       "validation": {
         "tp": 170,
@@ -1429,7 +1736,7 @@
       "seed": 0,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.4005905000085477,
+      "training_seconds": 6.267675300012343,
       "threshold": 2,
       "validation": {
         "tp": 181,
@@ -1472,7 +1779,7 @@
       "seed": 1,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.333756699998048,
+      "training_seconds": 6.009473100013565,
       "threshold": 3,
       "validation": {
         "tp": 173,
@@ -1515,7 +1822,7 @@
       "seed": 2,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.332816800000728,
+      "training_seconds": 6.327210199960973,
       "threshold": 2,
       "validation": {
         "tp": 172,
@@ -1558,7 +1865,7 @@
       "seed": 0,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.3892361000034725,
+      "training_seconds": 6.292473399953451,
       "threshold": 3,
       "validation": {
         "tp": 177,
@@ -1601,7 +1908,7 @@
       "seed": 1,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.4470127999957185,
+      "training_seconds": 5.780944799946155,
       "threshold": 4,
       "validation": {
         "tp": 160,
@@ -1644,7 +1951,7 @@
       "seed": 2,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.32870530000946,
+      "training_seconds": 5.620952700031921,
       "threshold": 2,
       "validation": {
         "tp": 179,
@@ -1687,7 +1994,7 @@
       "seed": 0,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.3139889999874867,
+      "training_seconds": 5.482654899999034,
       "threshold": 2,
       "validation": {
         "tp": 181,
@@ -1730,7 +2037,7 @@
       "seed": 1,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.7539013999921735,
+      "training_seconds": 4.929644499963615,
       "threshold": 3,
       "validation": {
         "tp": 178,
@@ -1773,7 +2080,7 @@
       "seed": 2,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.4961139999941224,
+      "training_seconds": 4.9034851000178605,
       "threshold": 2,
       "validation": {
         "tp": 177,
@@ -1816,7 +2123,7 @@
       "seed": 0,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.389823699995759,
+      "training_seconds": 5.390722699987236,
       "threshold": 2,
       "validation": {
         "tp": 176,
@@ -1859,7 +2166,7 @@
       "seed": 1,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.5079279000055976,
+      "training_seconds": 6.036581699969247,
       "threshold": 3,
       "validation": {
         "tp": 177,
@@ -1902,7 +2209,7 @@
       "seed": 2,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.536738199996762,
+      "training_seconds": 6.052767399989534,
       "threshold": 2,
       "validation": {
         "tp": 181,
@@ -1945,7 +2252,7 @@
       "seed": 0,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.470653600001242,
+      "training_seconds": 5.8442994999932125,
       "threshold": 3,
       "validation": {
         "tp": 171,
@@ -1988,7 +2295,7 @@
       "seed": 1,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.677925199997844,
+      "training_seconds": 4.703274799976498,
       "threshold": 3,
       "validation": {
         "tp": 173,
@@ -2031,7 +2338,7 @@
       "seed": 2,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.8346508000104222,
+      "training_seconds": 5.623640300007537,
       "threshold": 2,
       "validation": {
         "tp": 183,
@@ -2074,7 +2381,7 @@
       "seed": 0,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.4273738999909256,
+      "training_seconds": 5.220327300019562,
       "threshold": 2,
       "validation": {
         "tp": 174,
@@ -2117,7 +2424,7 @@
       "seed": 1,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.4268173999880673,
+      "training_seconds": 5.48605010000756,
       "threshold": 2,
       "validation": {
         "tp": 179,
@@ -2160,7 +2467,7 @@
       "seed": 2,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.4674804999958724,
+      "training_seconds": 5.508455500006676,
       "threshold": 2,
       "validation": {
         "tp": 175,
@@ -2203,7 +2510,7 @@
       "seed": 0,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.501127700001234,
+      "training_seconds": 6.085052700014785,
       "threshold": 3,
       "validation": {
         "tp": 163,
@@ -2246,7 +2553,7 @@
       "seed": 1,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.472008199998527,
+      "training_seconds": 5.892289900046308,
       "threshold": 2,
       "validation": {
         "tp": 174,
@@ -2289,7 +2596,7 @@
       "seed": 2,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.8083575000055134,
+      "training_seconds": 6.270220000005793,
       "threshold": 3,
       "validation": {
         "tp": 161,
@@ -2326,13 +2633,271 @@
         "bands": 16,
         "low_hz": 40,
         "high_hz": 5120,
+        "duration_ms": 400
+      },
+      "key": "b8_f16_hz40-5120_t400",
+      "seed": 0,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 7.7321091999765486,
+      "threshold": 2,
+      "validation": {
+        "tp": 158,
+        "fp": 52,
+        "fn": 46,
+        "tn": 2448,
+        "accuracy": 0.9637573964497042,
+        "precision": 0.7523809523809524,
+        "recall": 0.7745098039215687,
+        "f1": 0.7632850241545893,
+        "balanced_accuracy": 0.8768549019607843
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 170,
+        "fp": 74,
+        "fn": 42,
+        "tn": 2926,
+        "accuracy": 0.9638854296388543,
+        "precision": 0.6967213114754098,
+        "recall": 0.8018867924528302,
+        "f1": 0.7456140350877193,
+        "balanced_accuracy": 0.8886100628930818
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 400
+      },
+      "key": "b8_f16_hz40-5120_t400",
+      "seed": 1,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 7.324265900009777,
+      "threshold": 3,
+      "validation": {
+        "tp": 145,
+        "fp": 42,
+        "fn": 59,
+        "tn": 2458,
+        "accuracy": 0.9626479289940828,
+        "precision": 0.7754010695187166,
+        "recall": 0.7107843137254902,
+        "f1": 0.7416879795396419,
+        "balanced_accuracy": 0.8469921568627451
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 158,
+        "fp": 41,
+        "fn": 54,
+        "tn": 2959,
+        "accuracy": 0.9704234122042341,
+        "precision": 0.7939698492462312,
+        "recall": 0.7452830188679245,
+        "f1": 0.7688564476885644,
+        "balanced_accuracy": 0.8658081761006289
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 400
+      },
+      "key": "b8_f16_hz40-5120_t400",
+      "seed": 2,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 6.985936200013384,
+      "threshold": 2,
+      "validation": {
+        "tp": 153,
+        "fp": 45,
+        "fn": 51,
+        "tn": 2455,
+        "accuracy": 0.9644970414201184,
+        "precision": 0.7727272727272727,
+        "recall": 0.75,
+        "f1": 0.7611940298507462,
+        "balanced_accuracy": 0.866
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 171,
+        "fp": 48,
+        "fn": 41,
+        "tn": 2952,
+        "accuracy": 0.9722914072229141,
+        "precision": 0.7808219178082192,
+        "recall": 0.8066037735849056,
+        "f1": 0.7935034802784223,
+        "balanced_accuracy": 0.8953018867924528
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 500
+      },
+      "key": "b8_f16_hz40-5120_t500",
+      "seed": 0,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 6.369388199993409,
+      "threshold": 2,
+      "validation": {
+        "tp": 170,
+        "fp": 46,
+        "fn": 34,
+        "tn": 2454,
+        "accuracy": 0.9704142011834319,
+        "precision": 0.7870370370370371,
+        "recall": 0.8333333333333334,
+        "f1": 0.8095238095238095,
+        "balanced_accuracy": 0.9074666666666666
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 177,
+        "fp": 53,
+        "fn": 35,
+        "tn": 2947,
+        "accuracy": 0.9726027397260274,
+        "precision": 0.7695652173913043,
+        "recall": 0.8349056603773585,
+        "f1": 0.8009049773755657,
+        "balanced_accuracy": 0.9086194968553458
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 500
+      },
+      "key": "b8_f16_hz40-5120_t500",
+      "seed": 1,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 6.4017937000025995,
+      "threshold": 2,
+      "validation": {
+        "tp": 164,
+        "fp": 39,
+        "fn": 40,
+        "tn": 2461,
+        "accuracy": 0.970784023668639,
+        "precision": 0.8078817733990148,
+        "recall": 0.803921568627451,
+        "f1": 0.8058968058968059,
+        "balanced_accuracy": 0.8941607843137256
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 173,
+        "fp": 43,
+        "fn": 39,
+        "tn": 2957,
+        "accuracy": 0.9744707347447074,
+        "precision": 0.8009259259259259,
+        "recall": 0.8160377358490566,
+        "f1": 0.8084112149532711,
+        "balanced_accuracy": 0.9008522012578617
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 500
+      },
+      "key": "b8_f16_hz40-5120_t500",
+      "seed": 2,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 6.428829699987546,
+      "threshold": 2,
+      "validation": {
+        "tp": 168,
+        "fp": 26,
+        "fn": 36,
+        "tn": 2474,
+        "accuracy": 0.9770710059171598,
+        "precision": 0.865979381443299,
+        "recall": 0.8235294117647058,
+        "f1": 0.8442211055276382,
+        "balanced_accuracy": 0.9065647058823529
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 180,
+        "fp": 38,
+        "fn": 32,
+        "tn": 2962,
+        "accuracy": 0.9782067247820673,
+        "precision": 0.8256880733944955,
+        "recall": 0.8490566037735849,
+        "f1": 0.8372093023255814,
+        "balanced_accuracy": 0.9181949685534592
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
         "duration_ms": 600
       },
       "key": "b8_f16_hz40-5120_t600",
       "seed": 0,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 4.143626499993843,
+      "training_seconds": 5.839748500031419,
       "threshold": 2,
       "validation": {
         "tp": 176,
@@ -2375,7 +2940,7 @@
       "seed": 1,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 6.023749899992254,
+      "training_seconds": 6.5178851000382565,
       "threshold": 3,
       "validation": {
         "tp": 168,
@@ -2418,7 +2983,7 @@
       "seed": 2,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 6.015342800004873,
+      "training_seconds": 7.195835700025782,
       "threshold": 2,
       "validation": {
         "tp": 173,
@@ -2455,13 +3020,529 @@
         "bands": 16,
         "low_hz": 40,
         "high_hz": 5120,
+        "duration_ms": 700
+      },
+      "key": "b8_f16_hz40-5120_t700",
+      "seed": 0,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 6.116426400025375,
+      "threshold": 2,
+      "validation": {
+        "tp": 177,
+        "fp": 18,
+        "fn": 27,
+        "tn": 2482,
+        "accuracy": 0.9833579881656804,
+        "precision": 0.9076923076923077,
+        "recall": 0.8676470588235294,
+        "f1": 0.8872180451127819,
+        "balanced_accuracy": 0.9302235294117647
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 179,
+        "fp": 26,
+        "fn": 33,
+        "tn": 2974,
+        "accuracy": 0.9816313823163139,
+        "precision": 0.8731707317073171,
+        "recall": 0.8443396226415094,
+        "f1": 0.8585131894484412,
+        "balanced_accuracy": 0.9178364779874213
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 700
+      },
+      "key": "b8_f16_hz40-5120_t700",
+      "seed": 1,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 3.8968110000132583,
+      "threshold": 3,
+      "validation": {
+        "tp": 177,
+        "fp": 40,
+        "fn": 27,
+        "tn": 2460,
+        "accuracy": 0.9752218934911243,
+        "precision": 0.815668202764977,
+        "recall": 0.8676470588235294,
+        "f1": 0.8408551068883611,
+        "balanced_accuracy": 0.9258235294117647
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 181,
+        "fp": 61,
+        "fn": 31,
+        "tn": 2939,
+        "accuracy": 0.9713574097135741,
+        "precision": 0.7479338842975206,
+        "recall": 0.8537735849056604,
+        "f1": 0.7973568281938326,
+        "balanced_accuracy": 0.9167201257861635
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 700
+      },
+      "key": "b8_f16_hz40-5120_t700",
+      "seed": 2,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 3.00780299998587,
+      "threshold": 2,
+      "validation": {
+        "tp": 177,
+        "fp": 29,
+        "fn": 27,
+        "tn": 2471,
+        "accuracy": 0.9792899408284024,
+        "precision": 0.8592233009708737,
+        "recall": 0.8676470588235294,
+        "f1": 0.8634146341463415,
+        "balanced_accuracy": 0.9280235294117647
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 183,
+        "fp": 40,
+        "fn": 29,
+        "tn": 2960,
+        "accuracy": 0.9785180572851806,
+        "precision": 0.820627802690583,
+        "recall": 0.8632075471698113,
+        "f1": 0.8413793103448276,
+        "balanced_accuracy": 0.924937106918239
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 800
+      },
+      "key": "b8_f16_hz40-5120_t800",
+      "seed": 0,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 3.230179500009399,
+      "threshold": 2,
+      "validation": {
+        "tp": 180,
+        "fp": 29,
+        "fn": 24,
+        "tn": 2471,
+        "accuracy": 0.9803994082840237,
+        "precision": 0.861244019138756,
+        "recall": 0.8823529411764706,
+        "f1": 0.8716707021791767,
+        "balanced_accuracy": 0.9353764705882353
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 191,
+        "fp": 39,
+        "fn": 21,
+        "tn": 2961,
+        "accuracy": 0.9813200498132005,
+        "precision": 0.8304347826086956,
+        "recall": 0.9009433962264151,
+        "f1": 0.8642533936651584,
+        "balanced_accuracy": 0.9439716981132076
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 800
+      },
+      "key": "b8_f16_hz40-5120_t800",
+      "seed": 1,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 3.0475636000046507,
+      "threshold": 3,
+      "validation": {
+        "tp": 174,
+        "fp": 34,
+        "fn": 30,
+        "tn": 2466,
+        "accuracy": 0.9763313609467456,
+        "precision": 0.8365384615384616,
+        "recall": 0.8529411764705882,
+        "f1": 0.8446601941747572,
+        "balanced_accuracy": 0.9196705882352941
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 184,
+        "fp": 41,
+        "fn": 28,
+        "tn": 2959,
+        "accuracy": 0.9785180572851806,
+        "precision": 0.8177777777777778,
+        "recall": 0.8679245283018868,
+        "f1": 0.8421052631578947,
+        "balanced_accuracy": 0.92712893081761
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 800
+      },
+      "key": "b8_f16_hz40-5120_t800",
+      "seed": 2,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 3.1002111000125296,
+      "threshold": 2,
+      "validation": {
+        "tp": 176,
+        "fp": 23,
+        "fn": 28,
+        "tn": 2477,
+        "accuracy": 0.9811390532544378,
+        "precision": 0.8844221105527639,
+        "recall": 0.8627450980392157,
+        "f1": 0.8734491315136477,
+        "balanced_accuracy": 0.9267725490196079
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 185,
+        "fp": 32,
+        "fn": 27,
+        "tn": 2968,
+        "accuracy": 0.9816313823163139,
+        "precision": 0.8525345622119815,
+        "recall": 0.8726415094339622,
+        "f1": 0.8624708624708625,
+        "balanced_accuracy": 0.9309874213836478
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 900
+      },
+      "key": "b8_f16_hz40-5120_t900",
+      "seed": 0,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 2.9796245000325143,
+      "threshold": 2,
+      "validation": {
+        "tp": 184,
+        "fp": 25,
+        "fn": 20,
+        "tn": 2475,
+        "accuracy": 0.9833579881656804,
+        "precision": 0.8803827751196173,
+        "recall": 0.9019607843137255,
+        "f1": 0.8910411622276029,
+        "balanced_accuracy": 0.9459803921568628
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 194,
+        "fp": 46,
+        "fn": 18,
+        "tn": 2954,
+        "accuracy": 0.9800747198007472,
+        "precision": 0.8083333333333333,
+        "recall": 0.9150943396226415,
+        "f1": 0.8584070796460177,
+        "balanced_accuracy": 0.9498805031446541
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 900
+      },
+      "key": "b8_f16_hz40-5120_t900",
+      "seed": 1,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 2.942815000016708,
+      "threshold": 3,
+      "validation": {
+        "tp": 168,
+        "fp": 15,
+        "fn": 36,
+        "tn": 2485,
+        "accuracy": 0.9811390532544378,
+        "precision": 0.9180327868852459,
+        "recall": 0.8235294117647058,
+        "f1": 0.8682170542635659,
+        "balanced_accuracy": 0.9087647058823529
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 170,
+        "fp": 25,
+        "fn": 42,
+        "tn": 2975,
+        "accuracy": 0.9791407222914073,
+        "precision": 0.8717948717948718,
+        "recall": 0.8018867924528302,
+        "f1": 0.8353808353808354,
+        "balanced_accuracy": 0.8967767295597484
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 900
+      },
+      "key": "b8_f16_hz40-5120_t900",
+      "seed": 2,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 2.82102939998731,
+      "threshold": 3,
+      "validation": {
+        "tp": 168,
+        "fp": 17,
+        "fn": 36,
+        "tn": 2483,
+        "accuracy": 0.9803994082840237,
+        "precision": 0.9081081081081082,
+        "recall": 0.8235294117647058,
+        "f1": 0.8637532133676092,
+        "balanced_accuracy": 0.908364705882353
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 178,
+        "fp": 19,
+        "fn": 34,
+        "tn": 2981,
+        "accuracy": 0.9834993773349938,
+        "precision": 0.9035532994923858,
+        "recall": 0.839622641509434,
+        "f1": 0.8704156479217604,
+        "balanced_accuracy": 0.9166446540880504
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1100
+      },
+      "key": "b8_f16_hz40-5120_t1100",
+      "seed": 0,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 3.0259303000057116,
+      "threshold": 2,
+      "validation": {
+        "tp": 180,
+        "fp": 24,
+        "fn": 24,
+        "tn": 2476,
+        "accuracy": 0.9822485207100592,
+        "precision": 0.8823529411764706,
+        "recall": 0.8823529411764706,
+        "f1": 0.8823529411764706,
+        "balanced_accuracy": 0.9363764705882353
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 186,
+        "fp": 32,
+        "fn": 26,
+        "tn": 2968,
+        "accuracy": 0.9819427148194272,
+        "precision": 0.8532110091743119,
+        "recall": 0.8773584905660378,
+        "f1": 0.8651162790697674,
+        "balanced_accuracy": 0.9333459119496855
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1100
+      },
+      "key": "b8_f16_hz40-5120_t1100",
+      "seed": 1,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 2.875872500007972,
+      "threshold": 3,
+      "validation": {
+        "tp": 162,
+        "fp": 30,
+        "fn": 42,
+        "tn": 2470,
+        "accuracy": 0.9733727810650887,
+        "precision": 0.84375,
+        "recall": 0.7941176470588235,
+        "f1": 0.8181818181818182,
+        "balanced_accuracy": 0.8910588235294117
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 171,
+        "fp": 21,
+        "fn": 41,
+        "tn": 2979,
+        "accuracy": 0.9806973848069739,
+        "precision": 0.890625,
+        "recall": 0.8066037735849056,
+        "f1": 0.8465346534653465,
+        "balanced_accuracy": 0.8998018867924529
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1100
+      },
+      "key": "b8_f16_hz40-5120_t1100",
+      "seed": 2,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 2.8520232000155374,
+      "threshold": 3,
+      "validation": {
+        "tp": 168,
+        "fp": 26,
+        "fn": 36,
+        "tn": 2474,
+        "accuracy": 0.9770710059171598,
+        "precision": 0.865979381443299,
+        "recall": 0.8235294117647058,
+        "f1": 0.8442211055276382,
+        "balanced_accuracy": 0.9065647058823529
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 179,
+        "fp": 32,
+        "fn": 33,
+        "tn": 2968,
+        "accuracy": 0.9797633872976339,
+        "precision": 0.8483412322274881,
+        "recall": 0.8443396226415094,
+        "f1": 0.8463356973995272,
+        "balanced_accuracy": 0.9168364779874214
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
         "duration_ms": 1200
       },
       "key": "b8_f16_hz40-5120_t1200",
       "seed": 0,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 4.8368926999974065,
+      "training_seconds": 2.9122750000096858,
       "threshold": 2,
       "validation": {
         "tp": 173,
@@ -2504,7 +3585,7 @@
       "seed": 1,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.399628400002257,
+      "training_seconds": 3.313005500007421,
       "threshold": 3,
       "validation": {
         "tp": 165,
@@ -2547,7 +3628,7 @@
       "seed": 2,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.3463713999954052,
+      "training_seconds": 2.852171000035014,
       "threshold": 3,
       "validation": {
         "tp": 166,
@@ -2581,6 +3662,522 @@
     {
       "config": {
         "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1300
+      },
+      "key": "b8_f16_hz40-5120_t1300",
+      "seed": 0,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 2.8194543999852613,
+      "threshold": 2,
+      "validation": {
+        "tp": 172,
+        "fp": 23,
+        "fn": 32,
+        "tn": 2477,
+        "accuracy": 0.9796597633136095,
+        "precision": 0.882051282051282,
+        "recall": 0.8431372549019608,
+        "f1": 0.8621553884711779,
+        "balanced_accuracy": 0.9169686274509804
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 184,
+        "fp": 30,
+        "fn": 28,
+        "tn": 2970,
+        "accuracy": 0.9819427148194272,
+        "precision": 0.8598130841121495,
+        "recall": 0.8679245283018868,
+        "f1": 0.863849765258216,
+        "balanced_accuracy": 0.9289622641509434
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1300
+      },
+      "key": "b8_f16_hz40-5120_t1300",
+      "seed": 1,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 2.85880529996939,
+      "threshold": 2,
+      "validation": {
+        "tp": 181,
+        "fp": 45,
+        "fn": 23,
+        "tn": 2455,
+        "accuracy": 0.9748520710059172,
+        "precision": 0.8008849557522124,
+        "recall": 0.8872549019607843,
+        "f1": 0.8418604651162791,
+        "balanced_accuracy": 0.9346274509803921
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 189,
+        "fp": 51,
+        "fn": 23,
+        "tn": 2949,
+        "accuracy": 0.976961394769614,
+        "precision": 0.7875,
+        "recall": 0.8915094339622641,
+        "f1": 0.8362831858407079,
+        "balanced_accuracy": 0.937254716981132
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1300
+      },
+      "key": "b8_f16_hz40-5120_t1300",
+      "seed": 2,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 2.817716100020334,
+      "threshold": 3,
+      "validation": {
+        "tp": 167,
+        "fp": 19,
+        "fn": 37,
+        "tn": 2481,
+        "accuracy": 0.9792899408284024,
+        "precision": 0.8978494623655914,
+        "recall": 0.8186274509803921,
+        "f1": 0.8564102564102564,
+        "balanced_accuracy": 0.905513725490196
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 175,
+        "fp": 19,
+        "fn": 37,
+        "tn": 2981,
+        "accuracy": 0.9825653798256538,
+        "precision": 0.9020618556701031,
+        "recall": 0.8254716981132075,
+        "f1": 0.8620689655172413,
+        "balanced_accuracy": 0.9095691823899371
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1400
+      },
+      "key": "b8_f16_hz40-5120_t1400",
+      "seed": 0,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 2.891853099979926,
+      "threshold": 2,
+      "validation": {
+        "tp": 177,
+        "fp": 21,
+        "fn": 27,
+        "tn": 2479,
+        "accuracy": 0.9822485207100592,
+        "precision": 0.8939393939393939,
+        "recall": 0.8676470588235294,
+        "f1": 0.8805970149253731,
+        "balanced_accuracy": 0.9296235294117647
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 183,
+        "fp": 27,
+        "fn": 29,
+        "tn": 2973,
+        "accuracy": 0.9825653798256538,
+        "precision": 0.8714285714285714,
+        "recall": 0.8632075471698113,
+        "f1": 0.8672985781990521,
+        "balanced_accuracy": 0.9271037735849057
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1400
+      },
+      "key": "b8_f16_hz40-5120_t1400",
+      "seed": 1,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 2.9546484000165947,
+      "threshold": 3,
+      "validation": {
+        "tp": 172,
+        "fp": 30,
+        "fn": 32,
+        "tn": 2470,
+        "accuracy": 0.9770710059171598,
+        "precision": 0.8514851485148515,
+        "recall": 0.8431372549019608,
+        "f1": 0.8472906403940886,
+        "balanced_accuracy": 0.9155686274509804
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 183,
+        "fp": 30,
+        "fn": 29,
+        "tn": 2970,
+        "accuracy": 0.9816313823163139,
+        "precision": 0.8591549295774648,
+        "recall": 0.8632075471698113,
+        "f1": 0.8611764705882353,
+        "balanced_accuracy": 0.9266037735849056
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1400
+      },
+      "key": "b8_f16_hz40-5120_t1400",
+      "seed": 2,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 2.9533561000134796,
+      "threshold": 2,
+      "validation": {
+        "tp": 175,
+        "fp": 26,
+        "fn": 29,
+        "tn": 2474,
+        "accuracy": 0.9796597633136095,
+        "precision": 0.8706467661691543,
+        "recall": 0.8578431372549019,
+        "f1": 0.8641975308641975,
+        "balanced_accuracy": 0.9237215686274509
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 189,
+        "fp": 35,
+        "fn": 23,
+        "tn": 2965,
+        "accuracy": 0.9819427148194272,
+        "precision": 0.84375,
+        "recall": 0.8915094339622641,
+        "f1": 0.8669724770642202,
+        "balanced_accuracy": 0.9399213836477986
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1500
+      },
+      "key": "b8_f16_hz40-5120_t1500",
+      "seed": 0,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 3.289297900046222,
+      "threshold": 2,
+      "validation": {
+        "tp": 168,
+        "fp": 20,
+        "fn": 36,
+        "tn": 2480,
+        "accuracy": 0.9792899408284024,
+        "precision": 0.8936170212765957,
+        "recall": 0.8235294117647058,
+        "f1": 0.8571428571428571,
+        "balanced_accuracy": 0.9077647058823529
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 181,
+        "fp": 23,
+        "fn": 31,
+        "tn": 2977,
+        "accuracy": 0.9831880448318805,
+        "precision": 0.8872549019607843,
+        "recall": 0.8537735849056604,
+        "f1": 0.8701923076923077,
+        "balanced_accuracy": 0.9230534591194968
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1500
+      },
+      "key": "b8_f16_hz40-5120_t1500",
+      "seed": 1,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 3.199196600005962,
+      "threshold": 2,
+      "validation": {
+        "tp": 179,
+        "fp": 32,
+        "fn": 25,
+        "tn": 2468,
+        "accuracy": 0.9789201183431953,
+        "precision": 0.8483412322274881,
+        "recall": 0.8774509803921569,
+        "f1": 0.8626506024096385,
+        "balanced_accuracy": 0.9323254901960785
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 187,
+        "fp": 38,
+        "fn": 25,
+        "tn": 2962,
+        "accuracy": 0.9803860523038606,
+        "precision": 0.8311111111111111,
+        "recall": 0.8820754716981132,
+        "f1": 0.8558352402745996,
+        "balanced_accuracy": 0.9347044025157232
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1500
+      },
+      "key": "b8_f16_hz40-5120_t1500",
+      "seed": 2,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 2.8893852999899536,
+      "threshold": 3,
+      "validation": {
+        "tp": 159,
+        "fp": 11,
+        "fn": 45,
+        "tn": 2489,
+        "accuracy": 0.9792899408284024,
+        "precision": 0.9352941176470588,
+        "recall": 0.7794117647058824,
+        "f1": 0.8502673796791443,
+        "balanced_accuracy": 0.8875058823529411
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 173,
+        "fp": 15,
+        "fn": 39,
+        "tn": 2985,
+        "accuracy": 0.9831880448318805,
+        "precision": 0.9202127659574468,
+        "recall": 0.8160377358490566,
+        "f1": 0.865,
+        "balanced_accuracy": 0.9055188679245283
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1600
+      },
+      "key": "b8_f16_hz40-5120_t1600",
+      "seed": 0,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 2.9377391999587417,
+      "threshold": 2,
+      "validation": {
+        "tp": 180,
+        "fp": 35,
+        "fn": 24,
+        "tn": 2465,
+        "accuracy": 0.978180473372781,
+        "precision": 0.8372093023255814,
+        "recall": 0.8823529411764706,
+        "f1": 0.8591885441527446,
+        "balanced_accuracy": 0.9341764705882353
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 185,
+        "fp": 61,
+        "fn": 27,
+        "tn": 2939,
+        "accuracy": 0.9726027397260274,
+        "precision": 0.7520325203252033,
+        "recall": 0.8726415094339622,
+        "f1": 0.8078602620087336,
+        "balanced_accuracy": 0.9261540880503145
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1600
+      },
+      "key": "b8_f16_hz40-5120_t1600",
+      "seed": 1,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 2.9786384000326507,
+      "threshold": 3,
+      "validation": {
+        "tp": 160,
+        "fp": 17,
+        "fn": 44,
+        "tn": 2483,
+        "accuracy": 0.9774408284023669,
+        "precision": 0.903954802259887,
+        "recall": 0.7843137254901961,
+        "f1": 0.8398950131233596,
+        "balanced_accuracy": 0.888756862745098
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 172,
+        "fp": 23,
+        "fn": 40,
+        "tn": 2977,
+        "accuracy": 0.9803860523038606,
+        "precision": 0.882051282051282,
+        "recall": 0.8113207547169812,
+        "f1": 0.8452088452088452,
+        "balanced_accuracy": 0.9018270440251572
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1600
+      },
+      "key": "b8_f16_hz40-5120_t1600",
+      "seed": 2,
+      "epochs": 12,
+      "samples_per_epoch": 4096,
+      "training_seconds": 3.0170922999968752,
+      "threshold": 2,
+      "validation": {
+        "tp": 172,
+        "fp": 21,
+        "fn": 32,
+        "tn": 2479,
+        "accuracy": 0.9803994082840237,
+        "precision": 0.8911917098445595,
+        "recall": 0.8431372549019608,
+        "f1": 0.8664987405541562,
+        "balanced_accuracy": 0.9173686274509805
+      },
+      "memory": {
+        "learned_parameter_bytes_int8": 12584,
+        "byte_aligned_input_bytes": 256,
+        "packed_input_bytes": 256,
+        "input_mac_count": 12288
+      },
+      "test": {
+        "tp": 180,
+        "fp": 25,
+        "fn": 32,
+        "tn": 2975,
+        "accuracy": 0.9822540473225405,
+        "precision": 0.8780487804878049,
+        "recall": 0.8490566037735849,
+        "f1": 0.8633093525179856,
+        "balanced_accuracy": 0.9203616352201258
+      }
+    },
+    {
+      "config": {
+        "bits": 8,
         "bands": 24,
         "low_hz": 300,
         "high_hz": 5120,
@@ -2590,7 +4187,7 @@
       "seed": 0,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.3614966000022832,
+      "training_seconds": 2.910109199990984,
       "threshold": 2,
       "validation": {
         "tp": 173,
@@ -2633,7 +4230,7 @@
       "seed": 1,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.4278917999909027,
+      "training_seconds": 2.7410335000022314,
       "threshold": 3,
       "validation": {
         "tp": 170,
@@ -2676,7 +4273,7 @@
       "seed": 2,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.373770100006368,
+      "training_seconds": 2.8191324999788776,
       "threshold": 3,
       "validation": {
         "tp": 171,
@@ -2719,7 +4316,7 @@
       "seed": 0,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.776004600003944,
+      "training_seconds": 2.649872400041204,
       "threshold": 2,
       "validation": {
         "tp": 178,
@@ -2762,7 +4359,7 @@
       "seed": 1,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.4835428000078537,
+      "training_seconds": 2.7721653999760747,
       "threshold": 2,
       "validation": {
         "tp": 184,
@@ -2805,7 +4402,7 @@
       "seed": 2,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.3242194000049494,
+      "training_seconds": 2.841704300022684,
       "threshold": 3,
       "validation": {
         "tp": 174,
@@ -2848,7 +4445,7 @@
       "seed": 0,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.4462082000100054,
+      "training_seconds": 2.6845291000208817,
       "threshold": 2,
       "validation": {
         "tp": 179,
@@ -2891,7 +4488,7 @@
       "seed": 1,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.357524300008663,
+      "training_seconds": 2.6760152999777347,
       "threshold": 3,
       "validation": {
         "tp": 175,
@@ -2934,7 +4531,7 @@
       "seed": 2,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.487490400002571,
+      "training_seconds": 2.7875958000076935,
       "threshold": 3,
       "validation": {
         "tp": 170,
@@ -2977,7 +4574,7 @@
       "seed": 0,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.2752058999903966,
+      "training_seconds": 3.1027496000169776,
       "threshold": 2,
       "validation": {
         "tp": 180,
@@ -3020,7 +4617,7 @@
       "seed": 1,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.7047200000088196,
+      "training_seconds": 2.7592049000086263,
       "threshold": 3,
       "validation": {
         "tp": 171,
@@ -3063,7 +4660,7 @@
       "seed": 2,
       "epochs": 12,
       "samples_per_epoch": 4096,
-      "training_seconds": 3.966207099991152,
+      "training_seconds": 2.7235328999813646,
       "threshold": 2,
       "validation": {
         "tp": 177,

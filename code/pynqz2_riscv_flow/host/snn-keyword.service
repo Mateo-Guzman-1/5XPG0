@@ -1,0 +1,16 @@
+[Unit]
+Description=Group-2 Sheila keyword detector
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/xilinx/snn_keyword
+ExecStart=/home/xilinx/snn_keyword/keyword_boot.sh
+Restart=on-failure
+RestartSec=2
+TimeoutStartSec=30
+
+[Install]
+WantedBy=multi-user.target

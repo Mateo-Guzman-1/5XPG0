@@ -25,8 +25,8 @@ accuracy, measured PYNQ latency, and memory for detecting `sheila`?
 2. Frequency bands: 8, 12, 16, 20, 24, and 32.
 3. Frequency range: lower cutoffs 40-500 Hz and upper cutoffs 3.4-7.6 kHz,
    including the existing 40-5120 Hz baseline.
-4. Represented time: 600, 800, 1000, and 1200 ms, always pooled into 16 time
-   bins.
+4. Represented time: 400 through 1600 ms in 100 ms increments, always pooled
+   into 16 time bins.
 
 After the one-factor sweep, measure relevant interactions, especially 4-bit
 precision with the lowest-memory band count.

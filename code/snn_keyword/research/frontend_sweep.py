@@ -75,7 +75,7 @@ RANGES = (
     (300, 7600),
     (500, 7600),
 )
-DURATIONS_MS = (600, 800, 1000, 1200)
+DURATIONS_MS = tuple(range(400, 1601, 100))
 
 
 class SpikeMLP(nn.Module):
@@ -500,7 +500,7 @@ def main() -> int:
     ] + [
         replace(BASELINE, high_hz=value) for value in (6500, 7600)
     ] + [
-        replace(BASELINE, duration_ms=value) for value in (600, 1200)
+        replace(BASELINE, duration_ms=value) for value in DURATIONS_MS
     ]
     for cfg in confirmation_candidates:
         selected_configs[cfg.key] = cfg
