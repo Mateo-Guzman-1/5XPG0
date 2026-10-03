@@ -1,0 +1,3 @@
+date,name,note,epochs,lr,batch,surrogate,slope,scheduler,seed,hidden,timesteps,beta,encoding,neg_ratio,data_seed,val_accuracy,val_recall,val_false_alarm,best_val_acc_epoch,final_train_loss,train_minutes
+2026-10-01 17:24,baseline,skeleton settings on real data,1,0.001,16,fast_sigmoid,25.0,none,0,64,25,0.9,rate,3,0,0.9167,0.6863,0.0065,1,0.2872,0.2
+2026-10-01 17:25,epochs3,test: does more training reduce misses?,3,0.001,16,fast_sigmoid,25.0,none,0,64,25,0.9,rate,3,0,0.9473,0.8186,0.0098,3,0.1339,0.6

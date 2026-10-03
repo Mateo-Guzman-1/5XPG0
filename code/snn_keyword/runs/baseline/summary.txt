@@ -1,0 +1,10 @@
+run: baseline   note: skeleton settings on real data
+settings: {'name': 'baseline', 'note': 'skeleton settings on real data', 'epochs': 1, 'lr': 0.001, 'batch': 16, 'surrogate': 'fast_sigmoid', 'slope': 25.0, 'scheduler': 'none', 'seed': 0, 'hidden': 64, 'timesteps': 25, 'beta': 0.9, 'encoding': 'rate', 'neg_ratio': 3, 'data_seed': 0}
+
+[validation] 816 clips (204 sheila, 612 other)
+accuracy     0.917
+recall       0.686   (sheila caught: 140, missed: 64)
+false alarm  0.007   (other words fired on: 4 of 612)
+precision    0.972
+clips with no output spikes at all: 32
+most confused words: [('eight', 1), ('tree', 1), ('two', 1), ('four', 1)]

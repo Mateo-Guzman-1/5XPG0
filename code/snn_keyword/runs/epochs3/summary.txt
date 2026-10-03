@@ -1,0 +1,10 @@
+run: epochs3   note: test: does more training reduce misses?
+settings: {'name': 'epochs3', 'note': 'test: does more training reduce misses?', 'epochs': 3, 'lr': 0.001, 'batch': 16, 'surrogate': 'fast_sigmoid', 'slope': 25.0, 'scheduler': 'none', 'seed': 0, 'hidden': 64, 'timesteps': 25, 'beta': 0.9, 'encoding': 'rate', 'neg_ratio': 3, 'data_seed': 0}
+
+[validation] 816 clips (204 sheila, 612 other)
+accuracy     0.947
+recall       0.819   (sheila caught: 167, missed: 37)
+false alarm  0.010   (other words fired on: 6 of 612)
+precision    0.965
+clips with no output spikes at all: 11
+most confused words: [('eight', 2), ('four', 1), ('zero', 1), ('two', 1), ('left', 1)]

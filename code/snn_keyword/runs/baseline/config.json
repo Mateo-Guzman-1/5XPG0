@@ -1,0 +1,17 @@
+{
+  "name": "baseline",
+  "note": "skeleton settings on real data",
+  "epochs": 1,
+  "lr": 0.001,
+  "batch": 16,
+  "surrogate": "fast_sigmoid",
+  "slope": 25.0,
+  "scheduler": "none",
+  "seed": 0,
+  "hidden": 64,
+  "timesteps": 25,
+  "beta": 0.9,
+  "encoding": "rate",
+  "neg_ratio": 3,
+  "data_seed": 0
+}

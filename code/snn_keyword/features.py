@@ -20,7 +20,7 @@ N_TIME = 16                     # time bins after pooling
 MIN_PEAK = 1.0
 
 
-def mel_spectrogram(wav):
+def mel_spectrogram(wav):  #turns microphone audio into a spectogram
     """Very small hand-rolled mel-ish spectrogram -> [N_MELS, n_frames], [0,1]."""
     win = int(SAMPLE_RATE * 0.025)
     hop = int(SAMPLE_RATE * 0.010)
@@ -34,8 +34,8 @@ def mel_spectrogram(wav):
     return (spec / max(spec.max(), MIN_PEAK)).astype(np.float32)
 
 
-def clip_features(wav):
-    """1 s clip -> fixed-size [N_MELS, N_TIME] input for the SNN.
+def clip_features(wav): #pads short clips wit zeroes so all are 16,000 samples long
+    """1 s clip -> fixed-size [N_MELS, N_TIME] input for the SNN. 
 
     Pads/crops to CLIP_SAMPLES, then average-pools the ~98 spectrogram frames
     down to N_TIME bins so the network input stays small for the RISC-V core.
