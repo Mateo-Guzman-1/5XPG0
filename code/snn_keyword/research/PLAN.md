@@ -15,8 +15,10 @@ see [README.md](README.md). Progress: [STATUS.md](STATUS.md).
 
 > **Keyword change (2026-09-30).** The keyword is now **"Sheila"** (Speech Commands word
 > `sheila`), no longer "yes" (`JOURNAL.md` entry 9). Read "yes" in this plan as "the keyword".
-> - E0's baseline is the Sheila release: `deploy/model.npz`, numbers in [STATUS.md](STATUS.md),
->   evidence in `code/snn_keyword/results/sheila/`. PyTorch, the dataset, a measured CPU
+> - E0's baseline was the first Sheila release (64 hidden, evidence in
+>   `code/snn_keyword/results/sheila/`). Since 2026-10-04 `deploy/model.npz` is the
+>   hard-negative model (95 hidden, evidence in `results/sheila_hardneg/`, JOURNAL entry 11);
+>   numbers for both are in [STATUS.md](STATUS.md). PyTorch, the dataset, a measured CPU
 >   training time, `research/tools/build_firmware.py` and `code/snn_keyword/check_board.py`
 >   already exist (see STATUS.md for what E0 still has to do).
 > - The near-miss words in A3, A6, E1 and E5 were chosen for "yes". The session that runs

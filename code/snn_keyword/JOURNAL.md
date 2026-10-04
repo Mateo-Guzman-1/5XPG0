@@ -371,6 +371,29 @@ With only two voices, they indicate trends, not accuracy.
 - **Status.** Candidate loaded on the board for the user's live test; `deploy/`
   still holds the entry-9 model.
 
+## 2026-10-04
+
+### 11. Hard-negative model deployed after the user's live test
+
+- **Live test.** The entry-10 candidate ran on the board (`kdot`, live
+  microphone, "2 of 3"). Before the test the board was checked against the
+  candidate's oracle: 120/120 requests bit-exact, max 395,945 cycles. The user
+  found it clearly better than the entry-9 model: it detected a clearly spoken
+  "Sheila" almost every time. This was an informal test with one speaker and
+  one microphone, not a measurement.
+- **Decision (user).** Deploy the candidate "for now". Research experiment E2
+  (network size) uses its recipe; E8 may still replace it.
+- **Change.** `deploy/model.npz`, `keyword.bin` and `keyword_kdot.bin` are the
+  files staged in `build/sheila_hardneg/` (95 hidden, hard negatives at
+  fraction 0.3, seed 2). A fresh `build_firmware.py` build matched them byte for
+  byte. `deploy/manifest.json` names the evidence folder
+  `results/sheila_hardneg/` and the previous release (64 hidden, git 3dbfdb6).
+  Bitstreams, firmware C code, RTL, board server and protocol are unchanged.
+- **Checks.** `pytest`: 12 passed. Board from `deploy/` (`run_board.ps1`,
+  `check_board.py`): 40 vectors ×3 bit-exact for both images, max 8,877,865
+  (RV32IM) and 395,945 (`kdot`) cycles, identical to entry 10; "2 of 3"
+  patterns as specified; round trip 90.1 ms (RV32IM) and 5.0 ms (`kdot`).
+
 ## Open items
 
 1. ~~Reflash the SD card and test the standard Ethernet path~~: done on a
@@ -383,6 +406,7 @@ With only two voices, they indicate trends, not accuracy.
 4. Recordings of the actual user and microphone for training and evaluation.
 5. Optional speedups: lower `READ_WAIT`, add a LIF unit.
 6. Sheila (entry 9): words starting with "shee-" are often accepted. Entry 10
-   removes most of it with hard negatives (candidate awaiting the user's live
-   test); E1 (near-miss recordings) and E5 (hard negatives) study it properly.
+   removes most of it with hard negatives (deployed since entry 11); shield,
+   sheena, shayla and "shee" + another word still pass about a third of the
+   time. E1 (near-miss recordings) and E5 (hard negatives) study it properly.
    Items 2 and 3 above were written for "yes"; the time-convolutional layer is E4.

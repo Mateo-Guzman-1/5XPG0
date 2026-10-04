@@ -12,39 +12,51 @@ README documents the original **"yes"** release.
 
 The keyword changed from "yes" to "Sheila" ([JOURNAL.md](JOURNAL.md) entry 9).
 Firmware C code, RTL, bitstreams, board server and protocol are unchanged; only
-the weights and the two thresholds in `deploy/` are new. The evidence for the
-Sheila release is in [`results/sheila/`](results/sheila/); the files directly
-in `results/` belong to the "yes" release.
+the weights and the two thresholds in `deploy/` are new. Since 2026-10-04 the
+deployed model is the **hard-negative model** of entry 10 (95 hidden neurons),
+chosen after the user's live microphone test (entry 11). Its evidence is in
+[`results/sheila_hardneg/`](results/sheila_hardneg/). The first Sheila model
+(64 hidden neurons, entry 9) is in [`results/sheila/`](results/sheila/); the
+files directly in `results/` belong to the "yes" release.
 
 **Data.** "sheila" is one of the 35 words of Speech Commands v0.02: 2,022
 clips with the official speaker-disjoint split, 1,606 / 204 / 212 positives in
 train / validation / test (84,843 / 9,981 / 11,005 clips in total; the other
 34 words are the negatives). That is about half the positives of "yes".
 
-**Model.** Same recipe as the "yes" release: 768–64–2 LIF, current encoding,
+**Model.** Same recipe as the "yes" release: LIF network, current encoding,
 12 steps, int16 Q10 weights, 35 epochs with the last 10 quantization-aware,
-seeds 0/1/2. Trained on the CPU (Ryzen 5 7600X, PyTorch 2.11.0+cpu), about
-10 s per run. Seed 1 has the best validation F1 and is deployed (decision
-threshold 3002, stream threshold 1080; no test data used for any choice).
+seeds 0/1/2. The deployed model has **95 hidden neurons** (768–95–2, the
+largest dense network that fits the 144 KiB model memory). It is trained with
+Sheila hard negatives: 30% of each class's half-batch comes from `augment.py`
+variants cut from real "sheila" recordings ("sh", "shee", "sheet", /ʃ/ + another
+word, …; entry 10). Trained on the CPU (Ryzen 5 7600X, PyTorch 2.11.0+cpu),
+about 11 s per run. Seed 2 has the best validation F1 (0.7440, on validation
+clips plus the validation-split variants) and is deployed: decision threshold
+1594, stream threshold 403. No test data was used for any choice.
 
-| Deployed Sheila model (seed 1) | Value |
-|---|---|
-| Validation F1 | 0.9054 |
-| Test precision / recall / F1 | 85.64% / 81.60% / 0.8357 |
-| Test F1, 3 seeds (mean ± sample sd) | 0.835 ± 0.020 ("yes": 0.867 ± 0.022) |
-| Negative-clip false-positive rate | 0.269% |
-| Live windows, "Sheila" detected: single / 2 of 3 | 74.1% / 68.9% |
-| Live windows, other words accepted: single / 2 of 3 | 1.07% / 0.40% |
-| Background-noise windows with a detection | 2 of 398 |
-| Board max cycles, RV32IM / `kdot` (40 vectors ×3, bit-exact) | 5,980,921 (59.81 ms) / 266,793 (2.67 ms) |
-| Model bytes | 98,824 of 147,456 |
+| Sheila model | Deployed: 95 hidden, hard negatives (seed 2) | First: 64 hidden (seed 1) |
+|---|---|---|
+| Test precision / recall / F1 | 81.22% / 75.47% / 0.7824 | 85.64% / 81.60% / 0.8357 |
+| Test F1, 3 seeds (mean ± sample sd) | 0.781 ± 0.003 | 0.835 ± 0.020 |
+| Negative-clip false-positive rate | 0.343% | 0.269% |
+| Live windows, "Sheila" detected: single / 2 of 3 | 73.6% / 60.9% | 74.1% / 68.9% |
+| Live windows, other words accepted: single / 2 of 3 | 1.47% / 0.33% | 1.07% / 0.40% |
+| "sh" variants passing the live threshold (per window) | 1.2% | 55.8% |
+| Synthesized "she-" words detected (2 of 3) | 31% | 58% |
+| Background-noise windows with a detection | 0 of 398 | 2 of 398 |
+| Board max cycles, RV32IM / `kdot` (40 vectors ×3, bit-exact) | 8,877,865 (88.78 ms) / 395,945 (3.96 ms) | 5,980,921 (59.81 ms) / 266,793 (2.67 ms) |
+| Model bytes (of 147,456) | 146,680 | 98,824 |
 
-Synthesized words (2 Windows voices, 250 ms hop, 2 of 3): words that start
-like "Sheila" are often accepted (sheena 71%, shayla 68%, shield 64%, sheep
-55%, she 54%; "Sheila" itself 68%), words that only share its ending are not
-(leila 3%, delilah 0%), and unrelated words never were (yes, no, hello, seven,
-marvin: 0%). The network keys on the "shee-" onset; research experiments E1
-and E5 ([research/PLAN.md](research/PLAN.md)) address this.
+Synthesized words (2 Windows voices, 250 ms hop, 2 of 3): the first model keyed
+on the "shee-" onset (sheena 71%, shayla 68%, shield 64%, sheep 55%, she 54%),
+and a plain "sh" triggered the live demo. The deployed model rejects "sh"
+sounds (6%) and most "she-" words, at the cost of about 8 points of live
+recall. Words as close as shield, sheena or shayla, and "shee" followed by
+another word, still pass about a third of the time: one dense layer cannot
+follow the order of sounds (research experiments E3/E4 in
+[research/PLAN.md](research/PLAN.md)). In the user's live test (entry 11) it
+detected a clearly spoken "Sheila" almost every time.
 
 Reproduce from the repository root (`evaluate.py` overwrites
 `deploy/model.npz`; then update the hashes in `deploy/manifest.json`, which
@@ -53,18 +65,24 @@ the tests check). PyTorch for this CPU-only PC:
 
 ```powershell
 .venv/Scripts/python.exe code/snn_keyword/prepare_data.py --keyword sheila
-.venv/Scripts/python.exe code/snn_keyword/train_keyword_snn.py --encodings current --out code/snn_keyword/runs_sheila
-foreach ($s in 0,1,2) { .venv/Scripts/python.exe code/snn_keyword/tune_stream.py code/snn_keyword/runs_sheila/current_seed$s/model.npz }
-.venv/Scripts/python.exe code/snn_keyword/evaluate.py --runs code/snn_keyword/runs_sheila --results code/snn_keyword/results/sheila --expect 3
-.venv/Scripts/python.exe code/snn_keyword/robustness.py --out code/snn_keyword/results/sheila/background_noise.json
+.venv/Scripts/python.exe code/snn_keyword/augment.py
+.venv/Scripts/python.exe code/snn_keyword/train_keyword_snn.py --encodings current --hidden 95 --aug-fraction 0.3 --out code/snn_keyword/runs_sheila_r2_aug30_h95
+foreach ($s in 0,1,2) { .venv/Scripts/python.exe code/snn_keyword/tune_stream.py code/snn_keyword/runs_sheila_r2_aug30_h95/current_seed$s/model.npz }
+.venv/Scripts/python.exe code/snn_keyword/evaluate.py --runs code/snn_keyword/runs_sheila_r2_aug30_h95 --results code/snn_keyword/results/sheila_hardneg --expect 3
+.venv/Scripts/python.exe code/snn_keyword/robustness.py --out code/snn_keyword/results/sheila_hardneg/background_noise.json
 powershell -ExecutionPolicy Bypass -File code/snn_keyword/make_tts_probe.ps1 -Keyword sheila
-.venv/Scripts/python.exe code/snn_keyword/confusables.py release_seed1=code/snn_keyword/deploy/model.npz seed0=code/snn_keyword/results/sheila/models/current_seed0.npz seed2=code/snn_keyword/results/sheila/models/current_seed2.npz --out code/snn_keyword/results/sheila/confusables.json
-.venv/Scripts/python.exe code/snn_keyword/research/tools/build_firmware.py code/snn_keyword/deploy/model.npz --out code/snn_keyword/build/sheila
-Copy-Item code/snn_keyword/build/sheila/keyword*.bin code/snn_keyword/deploy/
+.venv/Scripts/python.exe code/snn_keyword/confusables.py deployed=code/snn_keyword/deploy/model.npz --out code/snn_keyword/build/confusables_deployed.json
+.venv/Scripts/python.exe code/snn_keyword/research/tools/build_firmware.py code/snn_keyword/deploy/model.npz --out code/snn_keyword/build/sheila_hardneg
+Copy-Item code/snn_keyword/build/sheila_hardneg/keyword*.bin code/snn_keyword/deploy/
 code/snn_keyword/run_board.ps1                                   # -Variant base for RV32IM
 .venv/Scripts/python.exe code/snn_keyword/check_board.py 10.43.0.1   # vectors, cycles, "2 of 3"
 .venv/Scripts/python.exe code/snn_keyword/pc_keyword_demo.py 10.43.0.1
 ```
+
+`results/sheila_hardneg/confusables.json` scores the deployed model next to
+every round-1 and round-2 alternative of entry 10. The first Sheila model comes
+from the same commands without `augment.py`, `--hidden` and `--aug-fraction`
+(runs in `runs_sheila`, results in `results/sheila`).
 
 **Changing the keyword.** `prepare_data.py --keyword <word>` accepts any of
 the 35 dataset words; with the features already cached it only relabels them

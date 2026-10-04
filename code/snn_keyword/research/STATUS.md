@@ -20,8 +20,9 @@ note open issues and the next step.
 ## Keyword change to "Sheila" (2026-09-30, before E0)
 
 The keyword is now **"Sheila"** (Speech Commands word `sheila`); see `JOURNAL.md` entry 9
-and the "Keyword change" note at the top of PLAN.md. `deploy/` holds the Sheila release;
-its evidence is in `code/snn_keyword/results/sheila/`. The "yes" release stays in git
+and the "Keyword change" note at the top of PLAN.md. The first Sheila release (evidence in
+`code/snn_keyword/results/sheila/`) was replaced on 2026-10-04 by the hard-negative model
+(evidence in `results/sheila_hardneg/`, section below). The "yes" release stays in git
 (commit 05ad009) and in the files directly in `results/`.
 
 Already done for E0 during the switch:
@@ -39,9 +40,33 @@ Still to do in E0: `bench_board.py` (build → upload → restart the server wit
 firmware → `check_board.py`; needs the `start_board.sh <variant> <fw.bin>` extension),
 `eval_model.py` (one quality JSON per model; can reuse `confusables.py`), and the E0 report.
 
-## Starting point: Sheila release (2026-09-30)
+## Deployed model: hard negatives, 95 hidden (since 2026-10-04)
 
-`deploy/model.npz` = `results/sheila/models/current_seed1.npz`: dense 768→64→2 LIF,
+`deploy/model.npz` = `results/sheila_hardneg/models/r2_aug30_h95_seed2.npz`: dense
+768→95→2 LIF, current encoding, 12 steps, int16 Q10, release recipe plus Sheila hard
+negatives (`augment.py`, fraction 0.3), seed 2 selected by validation F1 (with the
+validation-split variants). Deployed after the user's live test (JOURNAL entry 11).
+
+| Quantity | Value | Source |
+|---|---|---|
+| Validation F1 with variants, seeds 0 / 1 / 2 | 0.7174 / 0.7297 / **0.7440** | `results/sheila_hardneg/evaluation.json` |
+| Test precision / recall / F1 (seed 2) | 81.22% / 75.47% / 0.7824 | same |
+| Test F1, 3 seeds | 0.781 ± 0.003 | same |
+| Negative-clip FPR (seed 2) | 0.343% | same |
+| Thresholds: window / stream | 1594 / 403 | `deploy/model.npz` |
+| Live stream, single: Sheila / other words | 73.6% / 1.47% | `results/sheila_hardneg/confusables.json` |
+| Live stream, 2 of 3: Sheila / other words | 60.9% / 0.33% | same |
+| Hard-negative windows passing the live threshold: sh / shee / sheet / "shee"+word / onset+"eila" | 1.2% / 7.6% / 8.1% / 33.1% / 35.2% | same |
+| Synthesized words, 2 of 3: Sheila / sh sounds / she- words / other sh- words | 63% / 6% / 31% / 27% | same |
+| Background-noise windows detected | 0 / 398 | `results/sheila_hardneg/background_noise.json` |
+| Max cycles, RV32IM (board, bit-exact) | 8,877,865 (88.78 ms) | `results/sheila_hardneg/board_base.json`, re-checked 2026-10-04 |
+| Max cycles, `kdot` (board, bit-exact) | 395,945 (3.96 ms) | `results/sheila_hardneg/board_kdot.json`, re-checked 2026-10-04 |
+| Model bytes | 146,680 of 147,456 | `results/sheila_hardneg/firmware_build.json` |
+| PC ↔ board round trip, RV32IM / `kdot` | 90.1 ms / 5.0 ms | `check_board.py`, 2026-10-04 |
+
+## First Sheila release (2026-09-30 to 2026-10-04; E0's baseline)
+
+`results/sheila/models/current_seed1.npz` (git 3dbfdb6): dense 768→64→2 LIF,
 current encoding, 12 steps, int16 Q10, release recipe, selected by validation F1.
 
 | Quantity | Value | Source |
@@ -76,19 +101,16 @@ For reference, the previous "yes" release: test F1 0.8761 (seeds 0.867 ± 0.022)
 - The Sheila TTS probe is in `build/tts_probe_sheila/` (`make_tts_probe.ps1 -Keyword sheila`).
 
 ## Open issues / decisions
-- **Hard-negative candidate (JOURNAL entry 10, 2026-10-01)**, awaiting the user's live test
-  and deploy decision: 95 hidden, trained with Sheila hard negatives
-  (`augment.py`, fraction 0.3), staged in `build/sheila_hardneg/`, evidence in
-  `results/sheila_hardneg/`. Test: "sh" windows passing the live threshold 55.8% → 1.2%,
-  synthesized sh/she-/sh- words 42/58/49% → 6/31/27%, background noise 2 → 0 of 398, but
-  live 2 of 3 Sheila 68.9% → 60.9% and clip F1 0.836 → 0.782. Board: bit-exact, max
-  8,877,865 / 395,945 cycles, model 146,680 of 147,456 bytes.
+- **Resolved 2026-10-04:** the hard-negative candidate (JOURNAL entry 10) is deployed after
+  the user's live test (entry 11: a clearly spoken "Sheila" was detected almost every time).
+  Its price: live 2 of 3 Sheila 68.9% → 60.9%, clip F1 0.836 → 0.782; its gain: "sh"
+  windows 55.8% → 1.2%, synthesized sh/she-/sh- words 42/58/49% → 6/31/27%.
 - E1 and E5 must use Sheila near-miss words (PLAN.md note): mainly "she-" words; still
-  accepted by the candidate: shield, sheena, shayla, "shee" + other word.
-- The user found by live test that the entry-9 release fires on a plain "sh".
-- Test F1 is below validation F1 (0.836 vs 0.905 for seed 1). Part of it is selection on
-  validation, part sampling: with 212 test positives, one standard error of recall alone
-  is about 2.7 percentage points.
+  accepted by the deployed model: shield, sheena, shayla, "shee" + other word.
+- First Sheila model: test F1 below validation F1 (0.836 vs 0.905 for seed 1). Part of it
+  is selection on validation, part sampling: with 212 test positives, one standard error of
+  recall alone is about 2.7 percentage points. (For the hard-negative model, validation F1
+  includes the hard variants and is lower than test F1: 0.744 vs 0.782.)
 
 ## Next step
 Run **E0** (remaining parts above), then E1 with Sheila near-miss words.

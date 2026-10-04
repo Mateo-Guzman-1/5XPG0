@@ -4,29 +4,30 @@
     "keyword_kdot.bit": "0x00020001"
   },
   "keyword": "sheila",
-  "evidence": "results/sheila",
-  "previous_release": "keyword \"yes\" until 2026-09-30 (git commit 05ad009); its evidence stays in results/",
+  "evidence": "results/sheila_hardneg",
+  "model": "768-95-2 LIF, current encoding, trained with Sheila hard negatives (augment.py, fraction 0.3), seed 2; JOURNAL.md entries 10-11",
+  "previous_release": "Sheila, 64 hidden neurons without hard negatives (JOURNAL.md entry 9), until 2026-10-04 (git commit 3dbfdb6), evidence in results/sheila/; before that keyword \"yes\" until 2026-09-30 (git commit 05ad009), evidence in results/",
   "board_tested": {
     "method": "PYNQ Linux 3.0.1 over Ethernet (run_board.ps1, board_server.py, check_board.py)",
-    "date": "2026-09-30",
-    "result": "40 verification vectors x3 bit-exact for keyword.bin (max 5,980,921 cycles) and keyword_kdot.bin (max 266,793 cycles); \"2 of 3\" stream patterns as specified; synthesized clips streamed at the 250 ms hop, every window bit-exact (results/sheila/board_base.json, board_kdot.json)"
+    "date": "2026-10-01 (staged in build/sheila_hardneg), re-checked from deploy/ on 2026-10-04",
+    "result": "40 verification vectors x3 bit-exact for keyword.bin (max 8,877,865 cycles) and keyword_kdot.bin (max 395,945 cycles), identical on both dates; \"2 of 3\" stream patterns as specified; synthesized clips streamed at the 250 ms hop, every window bit-exact (results/sheila_hardneg/board_base.json, board_kdot.json); live microphone test by the user on 2026-10-04"
   },
   "files": {
     "keyword.bin": {
-      "sha256": "7008b23056c13851182311c4ca1174daa21ab87290fe61652bf398cb5ff5ac3f",
-      "bytes": 197120
+      "sha256": "da5f59588f446a6d6635a889904463d736ccf194aeeadb6125ce7b355029c237",
+      "bytes": 244984
     },
     "keyword.bit": {
       "sha256": "d2556a5f885fffa436378c8520c62dd6341e4b22a26754189bb52412fbd8a8b3",
       "bytes": 1292867
     },
     "model.npz": {
-      "sha256": "7bf2b99d117cc5103f30638fd0c2cb4dab58f9dec66456a6784898826c32c5b7",
-      "bytes": 59734
+      "sha256": "86154768ba979318b9ea7035f18fdc154789c53a404c0fe6d15eba29ee92da98",
+      "bytes": 89132
     },
     "keyword_kdot.bin": {
-      "sha256": "18c11d82bc8fe61a952199ed2c3a6d485ff70f5e7bef23216f9f85239f11f0da",
-      "bytes": 197120
+      "sha256": "59f43df53ab40d31c76eacfe3d187edff7ed4be5149ff251f4136107118a5dde",
+      "bytes": 244984
     },
     "keyword_kdot.bit": {
       "sha256": "29d86aa01a0b73ce6bb8e99f1b98410396b21bb22da662a02b9f2cc1b7c1e5f7",

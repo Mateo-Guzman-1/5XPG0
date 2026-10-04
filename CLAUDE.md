@@ -14,8 +14,10 @@ turns each 1 s window (every 250 ms) into a 24×32 mel spectrogram (768 bytes,
 - Keyword data: the `sheila` clips of Speech Commands v0.02 (official split).
   `prepare_data.py --keyword <word>` labels the cache; features, models and results store
   their keyword, and the tools refuse to mix a model with data prepared for another word.
-- Evidence of the deployed Sheila model: `code/snn_keyword/results/sheila/`. The files
-  directly in `results/` are the historical "yes" release.
+- Deployed model (since 2026-10-04, `JOURNAL.md` entry 11): 95 hidden neurons trained with
+  Sheila hard negatives; evidence in `code/snn_keyword/results/sheila_hardneg/`. The first
+  Sheila model (64 hidden) is in `results/sheila/`; the files directly in `results/` are the
+  historical "yes" release.
 
 ## Research programme (the current work)
 Goal: how input encoding and network size trade off against detection quality and
