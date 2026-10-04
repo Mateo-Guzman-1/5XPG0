@@ -265,6 +265,9 @@ How to read it:
   - `size_sweep.py` (the benchmark), `eval_model.py`, `bench_board.py`;
   - `benchmark_inputs.py`, `code_shape.py`, `plot_size_sweep.py`;
   - `start_board.sh` gained an optional firmware path.
+- Slides: `research/reports/E2_network_size_slides.pptx` (five slides, about one minute,
+  script in the speaker notes), built by `research/tools/make_e2_slides.py` (needs
+  python-pptx).
 - Ignored by git: training runs in `code/snn_keyword/runs_e2/`, firmware builds in
   `code/snn_keyword/build/bench/`.
 

@@ -63,6 +63,10 @@ models are bit-exact on the board. Report: `reports/E2_size_sweep.md`; data: `re
 | Near misses at the live threshold | flat across sizes: "shee" + word 33–41%, onset + "eila" 27–35%, synthesized she- words 29–34%, "sh" 1–2% |
 | Efficient size (validation rule) | **48** (validation F1 0.740 ± 0.003, the best mean) |
 
+Slides: `reports/E2_network_size_slides.pptx`, five slides for about one minute of a larger
+talk (speaker notes contain the script). They are built by `tools/make_e2_slides.py`
+(python-pptx, installed in `.venv`).
+
 Conclusions:
 - Memory, not time, limits the dense design.
 - Quality saturates at about 16 neurons, so the memory wall costs no measurable quality.
