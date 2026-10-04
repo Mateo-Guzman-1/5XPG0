@@ -98,6 +98,12 @@ and the `firmware/Makefile` flags; it rebuilds the "yes" release byte for byte
 (`--compare deploy`). `check_board.py` compares the running board with the
 integer oracle: verification vectors (scores, spikes, decision, cycles), the
 "2 of 3" patterns, and optionally WAV clips streamed like the live demo (`--wavs`).
+For experiments, `research/tools/bench_board.py <model.npz>` builds a model's
+firmware, runs it on the board next to the release files
+(`start_board.sh <variant> <firmware.bin>`) and reports bit-exactness, cycles and
+round trips; `research/tools/eval_model.py` scores models on the fixed quality
+benchmark; `research/tools/size_sweep.py` runs both for every network size
+(research experiment E2).
 
 See [REPORT.md](REPORT.md), [presentation.pdf](presentation.pdf),
 [JOURNAL.md](JOURNAL.md) (dated log of every change, its motivation and its

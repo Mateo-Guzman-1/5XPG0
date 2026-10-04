@@ -394,6 +394,30 @@ With only two voices, they indicate trends, not accuracy.
   (RV32IM) and 395,945 (`kdot`) cycles, identical to entry 10; "2 of 3"
   patterns as specified; round trip 90.1 ms (RV32IM) and 5.0 ms (`kdot`).
 
+### 12. Measuring tools for research experiments; network size (E2)
+
+- **Change.**
+  - `start_board.sh` takes an optional firmware path (`bash start_board.sh kdot
+    bench/keyword_kdot.bin`), so experiment firmware runs next to the release files on the
+    board. Without it, it behaves exactly as before.
+  - `robustness.py` exposes its probe as functions; its command-line output is unchanged
+    (byte-identical on the deployed model).
+  - New in `research/tools/`:
+    - `eval_model.py`: quality on fixed, fingerprinted inputs;
+    - `bench_board.py`: build, upload, bit-exact check, cycles and round trips on the
+      board;
+    - `size_sweep.py`, `benchmark_inputs.py`, `code_shape.py` and `plot_size_sweep.py`.
+- **Calibration.** On the deployed model the tools reproduced every stored quality value
+  (73 of 73) and the stored cycle counts exactly.
+- **Outcome.** Research experiment E2 (`research/reports/E2_size_sweep.md`): 7 sizes × 3
+  seeds, all bit-exact on the board.
+  - Memory and cycles grow linearly. Memory stops the dense network at 95 neurons, at 35.5%
+    of the time budget without `kdot`.
+  - Quality saturates at about 16 neurons. Near-miss acceptance does not change with size.
+  - For 8 and 16 neurons GCC unrolls the neuron loop, which makes `kdot` inference cheaper
+    per neuron.
+  - The board was restored to the release demo afterwards.
+
 ## Open items
 
 1. ~~Reflash the SD card and test the standard Ethernet path~~: done on a

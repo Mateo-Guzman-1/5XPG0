@@ -1,0 +1,208 @@
+{
+  "benchmark": "c11137528abcc8fe",
+  "date": "2026-10-04 18:12",
+  "board": "10.43.0.1",
+  "model": "code/snn_keyword/research/results/E2/models/h8_seed2.npz",
+  "model_sha256": "0a90b2de7164ea2dbcbd9a1f864f99ad3bf90442c2ce95d37055ba3f9b6f38d2",
+  "keyword": "sheila",
+  "hidden": 8,
+  "decision_threshold": 2369,
+  "stream_threshold": 1266,
+  "vectors": "code/snn_keyword/results/sheila_hardneg/verification_vectors.npz",
+  "repeat": 3,
+  "firmware": {
+    "model": "code/snn_keyword/research/results/E2/models/h8_seed2.npz",
+    "out": "code/snn_keyword/build/bench/h8_seed2",
+    "compiler": "riscv32-xilinx-elf-gcc.exe (GCC) 13.4.0",
+    "images": {
+      "keyword": {
+        "bin_bytes": 110624,
+        "sha256": "d440bfb0fed84bfcce1da2fe1fd85341cfbcda6536d00699120af244e4a2301d",
+        "text_bytes": 1804,
+        "model_bytes": 12320,
+        "model_limit_bytes": 147456
+      },
+      "keyword_kdot": {
+        "bin_bytes": 110592,
+        "sha256": "a962ae211adeb946c4a9a87a38baf9de5a23ea659f0e36c2cc8b56ea2a73a01e",
+        "text_bytes": 1876,
+        "model_bytes": 12288,
+        "model_limit_bytes": 147456
+      }
+    }
+  },
+  "board_files_sha256": {
+    "keyword.bin": "d440bfb0fed84bfcce1da2fe1fd85341cfbcda6536d00699120af244e4a2301d",
+    "keyword_kdot.bin": "a962ae211adeb946c4a9a87a38baf9de5a23ea659f0e36c2cc8b56ea2a73a01e",
+    "keyword.bit": "d2556a5f885fffa436378c8520c62dd6341e4b22a26754189bb52412fbd8a8b3",
+    "keyword_kdot.bit": "29d86aa01a0b73ce6bb8e99f1b98410396b21bb22da662a02b9f2cc1b7c1e5f7"
+  },
+  "bitstreams_match_deploy": true,
+  "variants": {
+    "base": {
+      "server": [
+        "Loaded deploy/keyword.bit",
+        "Firmware bench/keyword.bin",
+        "Listening on 0.0.0.0:5556; backend=PicoRV32"
+      ],
+      "bit_exact": true,
+      "single_window": {
+        "requests": 120,
+        "mismatches": [],
+        "bit_exact": true,
+        "cycles_min": 733688,
+        "cycles_mean": 734508.0,
+        "cycles_max": 737342,
+        "milliseconds_max_at_100mhz": 7.37342
+      },
+      "round_trip_ms": {
+        "mean": 8.37,
+        "median": 8.32,
+        "p95": 8.74,
+        "max": 11.84
+      },
+      "stream": [
+        {
+          "pattern": "+",
+          "expected": [
+            2
+          ],
+          "board": [
+            2
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "--+",
+          "expected": [
+            0,
+            0,
+            2
+          ],
+          "board": [
+            0,
+            0,
+            2
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "++-+",
+          "expected": [
+            2,
+            3,
+            0,
+            3
+          ],
+          "board": [
+            2,
+            3,
+            0,
+            3
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "-+-+",
+          "expected": [
+            0,
+            2,
+            0,
+            3
+          ],
+          "board": [
+            0,
+            2,
+            0,
+            3
+          ],
+          "pass": true
+        }
+      ],
+      "stream_pass": true
+    },
+    "kdot": {
+      "server": [
+        "Loaded deploy/keyword_kdot.bit",
+        "Firmware bench/keyword_kdot.bin",
+        "Listening on 0.0.0.0:5556; backend=PicoRV32"
+      ],
+      "bit_exact": true,
+      "single_window": {
+        "requests": 120,
+        "mismatches": [],
+        "bit_exact": true,
+        "cycles_min": 18721,
+        "cycles_mean": 19541.0,
+        "cycles_max": 22375,
+        "milliseconds_max_at_100mhz": 0.22375
+      },
+      "round_trip_ms": {
+        "mean": 1.65,
+        "median": 1.57,
+        "p95": 1.85,
+        "max": 5.38
+      },
+      "stream": [
+        {
+          "pattern": "+",
+          "expected": [
+            2
+          ],
+          "board": [
+            2
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "--+",
+          "expected": [
+            0,
+            0,
+            2
+          ],
+          "board": [
+            0,
+            0,
+            2
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "++-+",
+          "expected": [
+            2,
+            3,
+            0,
+            3
+          ],
+          "board": [
+            2,
+            3,
+            0,
+            3
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "-+-+",
+          "expected": [
+            0,
+            2,
+            0,
+            3
+          ],
+          "board": [
+            0,
+            2,
+            0,
+            3
+          ],
+          "pass": true
+        }
+      ],
+      "stream_pass": true
+    }
+  },
+  "pass": true
+}

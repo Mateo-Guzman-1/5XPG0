@@ -1,0 +1,72 @@
+{
+  "h8": {
+    "keyword": {
+      "instructions": 269,
+      "membrane_update_copies": 8
+    },
+    "keyword_kdot": {
+      "instructions": 287,
+      "membrane_update_copies": 8
+    }
+  },
+  "h16": {
+    "keyword": {
+      "instructions": 523,
+      "membrane_update_copies": 16
+    },
+    "keyword_kdot": {
+      "instructions": 593,
+      "membrane_update_copies": 16
+    }
+  },
+  "h32": {
+    "keyword": {
+      "instructions": 109,
+      "membrane_update_copies": 1
+    },
+    "keyword_kdot": {
+      "instructions": 104,
+      "membrane_update_copies": 1
+    }
+  },
+  "h48": {
+    "keyword": {
+      "instructions": 108,
+      "membrane_update_copies": 1
+    },
+    "keyword_kdot": {
+      "instructions": 103,
+      "membrane_update_copies": 1
+    }
+  },
+  "h64": {
+    "keyword": {
+      "instructions": 108,
+      "membrane_update_copies": 1
+    },
+    "keyword_kdot": {
+      "instructions": 103,
+      "membrane_update_copies": 1
+    }
+  },
+  "h80": {
+    "keyword": {
+      "instructions": 108,
+      "membrane_update_copies": 1
+    },
+    "keyword_kdot": {
+      "instructions": 103,
+      "membrane_update_copies": 1
+    }
+  },
+  "h95": {
+    "keyword": {
+      "instructions": 108,
+      "membrane_update_copies": 1
+    },
+    "keyword_kdot": {
+      "instructions": 104,
+      "membrane_update_copies": 1
+    }
+  }
+}

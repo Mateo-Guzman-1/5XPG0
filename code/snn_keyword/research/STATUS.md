@@ -7,9 +7,9 @@ note open issues and the next step.
 
 | Exp | Title | Status | Report |
 |---|---|---|---|
-| E0 | Setup, baseline reproduction, shared tools | **next** (partly done, see below) | — |
-| E1 | Evaluation sets for near-miss words (user recordings) | to do | — |
-| E2 | Network size sweep (dense, current encoding) | to do | — |
+| E0 | Setup, baseline reproduction, shared tools | tools done (built during E2); report to do | — |
+| E1 | Evaluation sets for near-miss words (user recordings) | **next** (needs the user) | — |
+| E2 | Network size sweep (dense, current encoding) | **done** 2026-10-04 | [E2_size_sweep.md](reports/E2_size_sweep.md), background: [E2_network_size_explained.md](reports/E2_network_size_explained.md) |
 | E3 | Input encoding comparison (current / rate / temporal) | to do | — |
 | E4 | Temporal-convolution SNN topology | to do | — |
 | E5 | Hard-negative training data | to do | — |
@@ -36,9 +36,37 @@ Already done for E0 during the switch:
   "2 of 3" patterns, streamed WAVs).
 - Sheila baseline trained, evaluated and verified on the board (numbers below).
 
-Still to do in E0: `bench_board.py` (build → upload → restart the server with that
-firmware → `check_board.py`; needs the `start_board.sh <variant> <fw.bin>` extension),
-`eval_model.py` (one quality JSON per model; can reuse `confusables.py`), and the E0 report.
+Built during E2 (2026-10-04):
+- `research/tools/bench_board.py`: build, upload, restart the server with that firmware
+  (`start_board.sh <variant> <fw.bin>`), then the `check_board.py` checks.
+- `research/tools/eval_model.py`: one quality JSON per model, reusing `confusables.py`,
+  `tune_stream.py` and `robustness.py`.
+- `benchmark_inputs.py`: input fingerprint.
+- `size_sweep.py`.
+
+Both measuring tools were calibrated on the deployed model: 73 of 73 stored quality values
+and the stored cycle counts were reproduced exactly. Still to do in E0: the E0 report.
+
+## E2 results: network size (2026-10-04)
+
+Sizes 8, 16, 32, 48, 64, 80, 95 × seeds 0–2, deployed recipe (hard negatives 0.3). All 21
+models are bit-exact on the board. Report: `reports/E2_size_sweep.md`; data: `results/E2/`.
+
+| Quantity | Value |
+|---|---|
+| Model memory | 1,544 bytes per neuron + 8 (measured within 72 B); 95 neurons = 99.5% of 144 KiB |
+| RV32IM cycles | 93,340 per neuron + 7,900 (R² 0.999999); 95 neurons = 8.88 M (88.8 ms, 35.5% of the budget) |
+| `kdot` cycles | 4,056 per neuron + 7,950 from 32 neurons on; 2,700–2,800 per neuron at 8 and 16 (loop unrolled by GCC, state in registers); 95 neurons = 0.39 M (3.9 ms) |
+| Round trip | inference + 0.6–1.5 ms (`kdot`: 1.7–5.0 ms, steps of ~1.1 ms from the server's polling); PC features 0.40 ms |
+| Test F1 (mean ± sd) | 8: 0.690 ± 0.074 · 16: 0.764 ± 0.036 · 32: 0.760 ± 0.036 · **48: 0.790 ± 0.006** · 64: 0.764 ± 0.015 · 80: 0.775 ± 0.018 · 95: 0.781 ± 0.003 |
+| Live 2 of 3, "Sheila" detected | 8: 51.1% · 16: 61.2% · 32: 59.8% · 48: 63.7% · 64: 54.4% · 80: 60.9% · 95: 60.5% |
+| Near misses at the live threshold | flat across sizes: "shee" + word 33–41%, onset + "eila" 27–35%, synthesized she- words 29–34%, "sh" 1–2% |
+| Efficient size (validation rule) | **48** (validation F1 0.740 ± 0.003, the best mean) |
+
+Conclusions:
+- Memory, not time, limits the dense design.
+- Quality saturates at about 16 neurons, so the memory wall costs no measurable quality.
+- More neurons do not reduce near misses: that needs a time-aware design (E3/E4).
 
 ## Deployed model: hard negatives, 95 hidden (since 2026-10-04)
 
@@ -99,6 +127,11 @@ For reference, the previous "yes" release: test F1 0.8761 (seeds 0.867 ± 0.022)
 - Firmware: `research/tools/build_firmware.py <model.npz> --out build/<name>`.
 - Board: `run_board.ps1` (after every power cycle), then `check_board.py 10.43.0.1`.
 - The Sheila TTS probe is in `build/tts_probe_sheila/` (`make_tts_probe.ps1 -Keyword sheila`).
+- Benchmark of one model:
+  - quality: `research/tools/eval_model.py name=<model.npz> --out <json>` (~12 s);
+  - board: `research/tools/bench_board.py <model.npz> --out <json>` (~75 s, both variants,
+    leaves experimental firmware running: restore with `run_board.ps1`).
+- Whole size sweep: `research/tools/size_sweep.py --hidden …`, then `plot_size_sweep.py`.
 
 ## Open issues / decisions
 - **Resolved 2026-10-04:** the hard-negative candidate (JOURNAL entry 10) is deployed after
@@ -112,5 +145,15 @@ For reference, the previous "yes" release: test F1 0.8761 (seeds 0.867 ± 0.022)
   recall alone is about 2.7 percentage points. (For the hard-negative model, validation F1
   includes the hard variants and is lower than test F1: 0.744 vs 0.782.)
 
+- E2 → later experiments:
+  - E3 uses sizes **16 and 48** (not 16 and 64: 64 was a dip);
+  - E3/E4 must beat the dense near-miss rates;
+  - E6 (int8) should measure memory saved at equal quality, since bigger dense networks
+    are not expected to help.
+- E2's 64-neuron dip (live 54% vs 61–64% at 48/80/95, all three seeds) is unexplained; with
+  three seeds it may be chance.
+
 ## Next step
-Run **E0** (remaining parts above), then E1 with Sheila near-miss words.
+Run **E1** (two recording sessions on different days, Sheila near-miss words; needs the
+user, about 15 min each), then E3 with sizes 16 and 48. The short E0 report can be written
+in any session.

@@ -1,0 +1,8 @@
+{
+  "model": "C:\\Users\\pedro\\Desktop\\Projects\\Semiconductor Technology\\5XPG0\\code\\snn_keyword\\runs_e2\\h16\\current_seed0\\model.npz",
+  "decision_threshold": 2199,
+  "stream_threshold": 783,
+  "max_fa": 0.003,
+  "validation_confirmed_recall": 0.6078431372549019,
+  "validation_confirmed_fa": 0.003
+}
