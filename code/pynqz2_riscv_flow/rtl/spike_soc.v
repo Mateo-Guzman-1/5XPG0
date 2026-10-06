@@ -222,6 +222,7 @@ module spike_soc #(
         .ENABLE_FAST_MUL   (1),
         .ENABLE_DIV        (1),
         .ENABLE_IRQ        (0),
+        .BARREL_SHIFTER    (1),
         .ENABLE_TRACE      (0),
         .PROGADDR_RESET    (32'h0000_0000),
         .STACKADDR         (32'h0000_0000)
