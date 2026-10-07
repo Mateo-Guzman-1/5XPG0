@@ -1,0 +1,70 @@
+{
+  "date": "2026-09-28",
+  "board": {
+    "address": "192.168.2.99",
+    "platform": "PYNQ-Z2",
+    "clock_hz": 100000000,
+    "cpu": "PicoRV32 RV32IM"
+  },
+  "compiler": "riscv64-unknown-elf-gcc 14.2.0",
+  "source_evidence_commit": "05ad009ddf1796f7d94973a158fdaee6391f2fe2",
+  "vectors": 40,
+  "measurements": [
+    {
+      "encoding": "current",
+      "implementation": "baseline_rv32im",
+      "score_mismatches": 0,
+      "spike_mismatches": 0,
+      "cycles_min": 5985957,
+      "cycles_mean": 5989562.8,
+      "cycles_max": 5992157,
+      "milliseconds_mean": 59.895628,
+      "milliseconds_max": 59.92157
+    },
+    {
+      "encoding": "rate",
+      "implementation": "baseline_rv32im",
+      "score_mismatches": 0,
+      "spike_mismatches": 0,
+      "cycles_min": 57680800,
+      "cycles_mean": 59815133.15,
+      "cycles_max": 71873640,
+      "milliseconds_mean": 598.1513315,
+      "milliseconds_max": 718.7364
+    },
+    {
+      "encoding": "current",
+      "implementation": "kdot_pcpi",
+      "score_mismatches": 0,
+      "spike_mismatches": 0,
+      "cycles_min": 261193,
+      "cycles_mean": 264798.8,
+      "cycles_max": 267393,
+      "milliseconds_mean": 2.647988,
+      "milliseconds_max": 2.67393
+    }
+  ],
+  "memory": {
+    "current": {
+      "learned_parameter_bytes": 98824,
+      "linked_model_section_bytes": 98816,
+      "input_buffer_bytes": 768,
+      "text_bytes": 1124,
+      "bss_bytes": 4,
+      "inference_stack_frame_bytes": 656
+    },
+    "rate": {
+      "learned_parameter_bytes": 98824,
+      "linked_model_section_bytes": 98816,
+      "input_buffer_bytes": 768,
+      "text_bytes": 1244,
+      "bss_bytes": 4,
+      "inference_stack_frame_bytes": 2976
+    }
+  },
+  "notes": [
+    "Cycle counts cover PicoRV32 inference only.",
+    "All score and hidden-spike results matched the independent integer oracle.",
+    "Observed maxima over this vector set are not formal worst-case execution times."
+  ]
+}

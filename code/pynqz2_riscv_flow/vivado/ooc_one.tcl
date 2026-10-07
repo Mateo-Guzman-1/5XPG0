@@ -21,7 +21,7 @@ set XB [lindex $argv 1]
 set impl [expr {[llength $argv] > 2 && [lindex $argv 2] eq "impl"}]
 
 set part xc7z020clg400-1                       ;# same part as build.tcl
-set rtl  [file normalize ../rtl/snn_layer.v]
+set rtl  [file normalize ../rtl_sketches/snn_layer.v]
 set tag  P${P}_X${XB}
 file mkdir ooc_reports
 

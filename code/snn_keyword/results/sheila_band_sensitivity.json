@@ -1,0 +1,332 @@
+{
+ "clean": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6373,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.5098,
+   "other_accepted": 0.0
+  }
+ },
+ "lowpass 3500 Hz": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6176,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.5588,
+   "other_accepted": 0.0007
+  }
+ },
+ "lowpass 4000 Hz": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6716,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.5784,
+   "other_accepted": 0.0003
+  }
+ },
+ "lowpass 4500 Hz": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.701,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.5735,
+   "other_accepted": 0.0
+  }
+ },
+ "lowpass 5000 Hz": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6618,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.5931,
+   "other_accepted": 0.0003
+  }
+ },
+ "lowpass 5500 Hz": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6569,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.5784,
+   "other_accepted": 0.0
+  }
+ },
+ "lowpass 6000 Hz": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6569,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.5441,
+   "other_accepted": 0.0003
+  }
+ },
+ "lowpass 7000 Hz": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6176,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4608,
+   "other_accepted": 0.0
+  }
+ },
+ "lowpass 7500 Hz": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6373,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.5,
+   "other_accepted": 0.0
+  }
+ },
+ "highpass 100 Hz": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6471,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4951,
+   "other_accepted": 0.0
+  }
+ },
+ "highpass 200 Hz": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6324,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4755,
+   "other_accepted": 0.0003
+  }
+ },
+ "highpass 300 Hz": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6716,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4608,
+   "other_accepted": 0.0
+  }
+ },
+ "highpass 400 Hz": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6765,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4804,
+   "other_accepted": 0.0
+  }
+ },
+ "highpass 500 Hz": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.652,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4559,
+   "other_accepted": 0.0
+  }
+ },
+ "peak 250 Hz -9 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6569,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4853,
+   "other_accepted": 0.0
+  }
+ },
+ "peak 250 Hz +9 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.5882,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4902,
+   "other_accepted": 0.0
+  }
+ },
+ "peak 500 Hz -9 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.652,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.5245,
+   "other_accepted": 0.0003
+  }
+ },
+ "peak 500 Hz +9 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6029,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4412,
+   "other_accepted": 0.0
+  }
+ },
+ "peak 1000 Hz -9 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6324,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4853,
+   "other_accepted": 0.0003
+  }
+ },
+ "peak 1000 Hz +9 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6373,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.5049,
+   "other_accepted": 0.0007
+  }
+ },
+ "peak 2000 Hz -9 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6275,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4951,
+   "other_accepted": 0.0
+  }
+ },
+ "peak 2000 Hz +9 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6225,
+   "other_accepted": 0.001
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4755,
+   "other_accepted": 0.0007
+  }
+ },
+ "peak 3000 Hz -9 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.5735,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4069,
+   "other_accepted": 0.0
+  }
+ },
+ "peak 3000 Hz +9 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6618,
+   "other_accepted": 0.0013
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4853,
+   "other_accepted": 0.0003
+  }
+ },
+ "peak 4000 Hz -9 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.5931,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4853,
+   "other_accepted": 0.0
+  }
+ },
+ "peak 4000 Hz +9 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6618,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.5049,
+   "other_accepted": 0.0007
+  }
+ },
+ "peak 5000 Hz -9 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6225,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4951,
+   "other_accepted": 0.0003
+  }
+ },
+ "peak 5000 Hz +9 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6765,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4706,
+   "other_accepted": 0.0
+  }
+ },
+ "peak 6000 Hz -9 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6324,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.5147,
+   "other_accepted": 0.0003
+  }
+ },
+ "peak 6000 Hz +9 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6176,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4804,
+   "other_accepted": 0.0
+  }
+ },
+ "gain -20 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.5392,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4314,
+   "other_accepted": 0.0
+  }
+ },
+ "gain -10 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.6324,
+   "other_accepted": 0.0003
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.5392,
+   "other_accepted": 0.0
+  }
+ },
+ "gain +10 dB": {
+  "runs_stream\\sheila_s2_wide\\model.pt": {
+   "recall": 0.5882,
+   "other_accepted": 0.0
+  },
+  "runs_stream\\sheila_s2_clip\\model.pt": {
+   "recall": 0.4167,
+   "other_accepted": 0.0
+  }
+ }
+}

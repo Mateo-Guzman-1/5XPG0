@@ -1,0 +1,47 @@
+{
+  "checkpoint": "runs_verifier/sheila_head/last.pt",
+  "stage1": "C:/Users/matut/FULL_AI/5XPG0/code/snn_keyword/runs_stream/sheila_qat_seed2/int_model.npz",
+  "firmware": "build/keyword_stream_cascade_engine.bin",
+  "t1": 7080,
+  "t2": 1588,
+  "window": 1,
+  "decision": "head",
+  "records": {
+    "keyword": 12,
+    "other word": 12,
+    "negatives stream": 6
+  },
+  "requests": 934,
+  "bit_exact": true,
+  "verifier_runs": 75,
+  "detections": 11,
+  "detections_by_kind": {
+    "keyword": 10,
+    "other word": 0,
+    "negatives stream": 1
+  },
+  "cycles_request_max": 11724985,
+  "cycles_with_verifier_max": 11724985,
+  "ms_at_100MHz_max": 117.24985,
+  "verifier_export": {
+    "model_bytes": 53320,
+    "weights": 48640,
+    "range_checks": {
+      "l1 accumulator": 33222656,
+      "l1 r * gh": 30022656,
+      "l2 accumulator": 38622208,
+      "l2 r * gh": 54949888,
+      "keyword path sum": 5118900,
+      "head accumulator": 18282496
+    }
+  },
+  "sections_bytes": {
+    ".text": 7784,
+    ".data": 0,
+    ".bss": 26920,
+    ".model": 120612
+  },
+  "model_region_used": "120612 of 147456",
+  "simulation_seconds": 417.1,
+  "harness": "cascade build: t1 7080, t2 1588, window 1\nPASS: 30 records, 934 requests bit-exact with the oracle; 75 verifier runs, 11 detections (LED on); worst request 11724985 cycles, worst with the verifier 11724985; total cycles=1722171864"
+}

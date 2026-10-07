@@ -1,38 +1,82 @@
-# Group 2: "yes" keyword detection on PicoRV32
+# Group 2: detecting "sheila" against everything else on a PicoRV32
 
-The completed local pipeline trains a spiking keyword detector on the full
-Speech Commands v0.02 dataset, exports an integer model, executes its C
-inference kernel on the PicoRV32 RTL, and builds the PYNQ-Z2 bitstream.
-The PC computes one-second mel spectrograms every 250 ms; the RISC-V core
-classifies them and a hardware countdown lights LED0 for exactly one second.
+**Task.** Detect one keyword, **"sheila"**, and reject everything else: the 34
+other Speech Commands words, running speech, synthesized near-miss words,
+silence and background noise. The decision is binary (keyword or not), taken
+by a spiking neural network on the PicoRV32 soft core of a PYNQ-Z2. The PC
+computes 24-band log-mel frames every 10 ms; a hardware countdown lights LED0
+for one second per detection. The detector must work for unseen speakers,
+microphones and rooms, so it is trained and evaluated on speaker-disjoint data
+and under held-out microphone and room conditions, and its false accepts are
+counted per hour of speech.
 
-See [REPORT.md](REPORT.md), [presentation.pdf](presentation.pdf),
-[JOURNAL.md](JOURNAL.md) (dated log of every change, its motivation and its
-outcome), and the machine-readable [results](results/). Inference is verified
-in RTL simulation and on the physical PYNQ-Z2, loaded over JTAG (see
-[JTAG workaround](#jtag-workaround-this-board-only)). The standard PYNQ
-Linux/Ethernet path has not run on hardware yet. The live microphone demo was
-tried by hand (see [Live confirmation](#live-confirmation-and-confusable-words)).
+**Current system: two stages.** Stage 1, a streaming two-layer adaptive-LIF SNN with
+learnable delays (128 + 128 neurons, 58k parameters, int8), scores every 10 ms
+frame: the score is the readout of "sheila" minus the largest other class
+(`_silence_`, `_unknown_`). An event-driven neuron engine in the fabric runs its
+second layer (10.3 ms of compute per 250 ms of audio). Stage 1 proposes a
+detection at a low threshold. Stage 2, a small GRU verifier with a keyword head
+on the same PicoRV32 (117 ms, only when stage 1 proposes), confirms it; LED0
+follows the confirmed detections. Test split, thresholds fixed on validation,
+one run per candidate (JOURNAL 27 and 32, `results/final_sheila_test.json`,
+`results/final_sheila_head_near_cascade_test.json`):
 
-## What was measured
+| "sheila" against everything else | Stage 1 alone | Stage 1 + verifier |
+|---|---|---|
+| Live "sheila" detected, clips in noise (complete recordings only) | 63.7% (70.7%) | **86.8% (92.0%)** |
+| ... through held-out microphones / real rooms / both | 66.5% / 60.9% / 58.0% | 86.3% / 85.9% / 84.9% |
+| Other words accepted, live clips (target ≤ 0.2%) | 0.00% | 0.07% |
+| False accepts per hour, 19 h of unseen speech (target ≤ 2) | 1.58 | 1.42 |
+| Median latency after the end of the word | 0.04 s | 0.18 s |
+| Worst compute per 250 ms of audio | 10.3 ms | 117 ms |
 
-- Six GPU training runs: current/rate encoding, seeds 0/1/2, 35 epochs each,
-  including ten epochs of quantization-aware training.
-- Official speaker-disjoint split: 84,843 training, 9,981 validation,
-  11,005 test clips; "yes" versus all other 34 words.
-- Deployed current model: 90.15% precision, 85.20% recall, 87.61% F1.
-- Worst of 40 RTL vectors: 5,981,521 cycles = 59.82 ms at 100 MHz with
-  plain RV32IM, or 267,393 cycles = 2.67 ms with the `kdot` custom instruction.
-- The best rate model took up to 715.52 ms and misses the 250 ms hop budget.
-- Full-test native C and RTL stress vectors match the integer oracle exactly.
-- Zero detections on 398 separate background-noise windows; this is not a
-  continuous-speech false-accepts-per-hour measurement.
-- Physical PYNQ-Z2, loaded over JTAG: the 40 vectors are bit-exact for the
-  RV32IM, `kdot` and augmented-trial firmware. Cycle counts equal RTL, and
-  the LED0 pulse is about 1 s.
-- Live windows (held-out clips in noise, 250 ms hop): "2 of 3" confirmation
-  lowers other words accepted from 1.07% to 0.13%, while "yes" detection
-  goes from 74.5% to 67.3%.
+**Limits.**
+- Recall is for "sheila" said on its own (Speech Commands clips in noise). With
+  synthetic voices that neither stage has heard, the system detects the word
+  alone in 72%, at the start of a sentence in 63%, in the middle in 6% and at the
+  end in 13% (JOURNAL 34): both stages were trained on words separated by pauses.
+- Speech Commands clips labelled "zero" (also "two", "four") are the main false
+  accepts; both stages hear "sheila" in them (JOURNAL 32-33).
+- The false-accept rate grew by 10-36% from validation to test for the
+  candidates so far; the margin to the target is thin.
+
+**Status.**
+- Both stages are bit-exact between the Python oracle and the SoC RTL (stage 1:
+  40 streams, 355 hops; both stages: 30 records, 934 requests); native C for
+  the verifier. Native C on the full test set was run for the earlier "yes"
+  model, not yet for "sheila".
+- The streaming firmware and the neuron engine have run on the physical board
+  over JTAG, with the earlier "yes" model (JOURNAL 18); the "yes" window release
+  also ran over the standard PYNQ Linux/Ethernet path on a second board
+  (JOURNAL 18b). **No "sheila" model has run on a board yet.**
+- `deploy/` still holds the first release: a dense window model for **"yes"**
+  (section at the end of this file). It is frozen there until a "sheila" system
+  passes the board test.
+
+> **Also in this folder** (merged from branch `damien-dicking-around`): a second,
+> independent pipeline for the same task, the 1 s clip classifier with 8x16
+> features, deployed over ZeroMQ (`keyword_bridge.py`). See
+> [README_clip_pipeline.md](README_clip_pipeline.md); its files are
+> `audio_features.py`, `train_keyword_snn_clip.py`, `pc_keyword_demo_zmq.py`,
+> `install_keyword_demo.sh` and `research/`. The two pipelines are compared
+> under one rule in `JOURNAL.md` entries 23 and 27 and in `../../MERGE_SUMMARY.md`.
+
+**Names.** `KWS_KEYWORD` selects the keyword (default `sheila`; `yes` selects the
+earlier one, see `keyword_config.py`). Every stream model records its keyword
+and the detectors refuse a mismatch; the window models are "yes" models. In
+code and result files, `yes`, `YES`, `yes_class`, `yes_detected` and `o[yes]`
+are historical names for the keyword and its class (class 2 of the three-class
+readout).
+
+The block design of the system, with the alternatives for each block, is in
+[system_description.md](../../system_description.md); the repository's layout and
+rules are in [Repo-Architecture.md](../../Repo-Architecture.md).
+See [JOURNAL.md](JOURNAL.md) (dated log of every change, its motivation and its
+outcome; entries 1-21 are for "yes", from entry 22 the keyword is "sheila"),
+[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) (phases, acceptance targets and
+gates), [OPTIMIZATION_REPORT.md](OPTIMIZATION_REPORT.md) (why this route) and the
+machine-readable [results](results/). [REPORT.md](REPORT.md) and
+[presentation.pdf](presentation.pdf) document the first release ("yes").
 
 ## Local environment
 
@@ -52,7 +96,374 @@ scripts and the Bash scripts directly. `setup_venv.ps1`/`.sh` remain available
 for a separate environment inside this folder; install CUDA PyTorch first if
 using that environment for GPU training.
 
-## Verify the bundled release without training data
+## Streaming SNN for "sheila" (JOURNAL 8-27)
+
+[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) Phases 0-7 built the streaming
+detector; JOURNAL.md entries 8-27 give every step and number. The network reads
+one 24-byte log-mel frame every 10 ms; layer 1 (`kdot`) feeds layer 2 through
+learnable delays of 0-31 frames, and layer 2 is recurrent. The score of a frame
+is o[sheila] - max(o[other]); a detection is a score at or above the model's
+`stream_threshold` (the sum of the last `decision_window` scores; 1 for
+"sheila"), at least 1 s after the previous one. It is bit-exact from the Python
+oracle to the SoC RTL, with an event-driven neuron engine in the fabric
+(10.3 ms per 250 ms hop, timing met at 100 MHz).
+
+Pipeline (each step writes to `results/` or `runs_*`; downloads need about 60 GB
+of disk and several hours). The candidate `sheila_qat_seed2` was trained on the
+corpus built for the earlier keyword (`data/multi`), which `data/multi_sheila`
+links to (JOURNAL 22). A corpus built for "sheila" (`KWS_KEYWORD=sheila
+KWS_MULTI=data/multi_sheila_full python prepare_multicorpus.py`, with its own
+`make_tts_negatives.py` words) gave no measurable gain (JOURNAL 24-26). Stage 1,
+35 words, does not depend on the keyword.
+
+```powershell
+python fetch_corpora.py mswc --split test      # also: librispeech, rirs, musan; mswc --split dev/train --needed-only
+$env:KWS_KEYWORD = "yes"                       # the candidate's corpus was built under "yes" ...
+python make_tts_negatives.py                   # Piper voices: 55,000 utterances (data/tts)
+python prepare_multicorpus.py                  # data/multi: clips, LibriSpeech, noise
+$env:KWS_KEYWORD = "sheila"                    # ... and is used for "sheila" through a link (the default keyword)
+cmd /c mklink /J data\multi_sheila data\multi
+python train_stream.py --stage 1 --no-kd --mic-ranges wide --epochs 50 --lr 2e-3 --name s1_wide
+python train_stream.py --stage 2 --init runs_stream/s1_wide/model.pt --mic-ranges wide --exclude-words 'sheila.+' --epochs 20 --steps-per-epoch 200 --batch 128 --lr 1e-3 --seed 2 --name sheila_s2_wide_seed2
+python train_stream.py --stage 2 --qat --init runs_stream/sheila_s2_wide_seed2/model.pt --mic-ranges wide --exclude-words 'sheila.+' --epochs 8 --steps-per-epoch 200 --batch 128 --lr 3e-4 --seed 2 --name sheila_qat_seed2
+python quantize_stream_model.py runs_stream/sheila_qat_seed2/last.pt runs_stream/sheila_qat_seed2/int_model.npz
+python stream_select.py runs_stream/sheila_qat_seed2/int_model.npz --window 1      # threshold on validation only
+python verify_stream.py runs_stream/sheila_qat_seed2/int_model.npz                  # native C = oracle
+python verify_stream_rtl.py runs_stream/sheila_qat_seed2/int_model.npz --engine --streams 40
+python final_eval.py sheila=runs_stream/sheila_qat_seed2/int_model.npz --out results/final_sheila_test.json   # the test split, once
+```
+
+The integer model is kept in `results/models/sheila_stream_int8.npz`
+(`yes_stream_int8_w20.npz` is the "yes" streaming model, for `KWS_KEYWORD=yes`).
+The false-accept and selection rules are in JOURNAL entries 19 and 26: live
+other-word accepts at most 0.2%, at most 2 false accepts per hour on 18-19 h of
+negatives, thresholds from validation data only, differences below about 7 points
+not called (seed SD 3.6 points).
+
+Streaming firmware and protocol (ABI v3): `export_model.py <int model> --out
+build/stream` writes the model headers; `make -C firmware stream` builds
+`keyword_stream.bin` (RV32IM), `keyword_stream_kdot.bin` and
+`keyword_stream_engine.bin` (needs the engine bitstream). The mailbox magic
+"KWS3" marks it; a request streams 1-100 frames of 24 bytes and the network
+state stays on the core. `board_server.py`, the JTAG relay and
+`pc_keyword_demo.py` detect the loaded ABI and serve v2 and v3. On the board, load
+the engine bitstream (`build/keyword_engine.bit`, not in git) and start
+`board_server.py --firmware build/keyword_stream_engine.bin`, or use the JTAG
+relay below. The bus fix (`READ_WAIT` 8 → 1) is in `rtl/spike_soc.v`.
+
+On the physical board (`build/keyword_engine.bit`, JOURNAL entry 18), 40 live
+test streams (358 hops) of the earlier "yes" model are bit-exact with the
+oracle for all three firmwares. Every field and cycle count equals RTL. Worst
+case per 250 ms hop: 10.2 ms with the engine, 88.8 ms with `kdot`, 125.4 ms with
+RV32IM. For "sheila", the same test with its own vectors:
+
+```powershell
+$X = "C:/AMDDesignTools/2025.2/Vivado/bin/xsdb.bat"
+.venv/Scripts/python.exe code/snn_keyword/jtag/make_stream_vectors.py    # default model: results/models/sheila_stream_int8.npz
+& $X code/snn_keyword/jtag/bringup.tcl code/snn_keyword/build/keyword_engine.bit code/snn_keyword/build/keyword_stream_engine.bin
+& $X code/snn_keyword/jtag/stream_board_test.tcl
+```
+
+## Stage 2: a verifier confirms the SNN's proposals (JOURNAL 28-34)
+
+A small verifier (two GRU layers of 64, 49k parameters, int8) runs on the same
+PicoRV32, only when stage 1's decision score reaches `t1` in the current or the
+previous 250 ms request (about 2,200 calls per hour of speech). It scores the
+last 1.5 s of frames, and the LED lights when its keyword head reaches `t2`.
+- CTC training on phonemes (LibriSpeech train-clean-100 and the keyword clips),
+  then a keyword head: a linear readout of the last GRU layer, maximum over time.
+- The head is trained against stage 1's false proposals, mined from LibriSpeech
+  *training* speech (`mine_verifier_negatives.py`), and against near-miss words
+  ("she", "sheep", "shield", ... from MSWC; `data/multi_sheila_full`).
+- Tried and dropped (JOURNAL 29-35): a capped-margin phoneme-path score, a
+  boundary rule after the last phoneme, hinge fine-tuning of the path score,
+  hard training words, context words around the keyword (a small gain at the
+  end of sentences).
+
+```powershell
+$env:KWS_KEYWORD = "sheila"
+# Stage 1 as above; candidate runs_stream/sheila_qat_seed2/int_model.npz.
+python fetch_corpora.py librispeech --subset train-clean-100     # and data_verifier/cmudict.dict (github.com/cmusphinx/cmudict)
+python verifier_data.py                                   # phoneme targets; LibriSpeech train-clean-100 packed
+python train_verifier.py --frontend logmel --clean-steps 4000 --epochs 40 --name sheila_logmel
+python mine_verifier_negatives.py                         # stage 1's proposals on the training speech
+$env:KWS_MULTI = "data/multi_sheila_full"                 # near-miss words (MSWC) for the head
+python train_verifier.py --init runs_verifier/sheila_logmel/last.pt --hard data_verifier/hard_sheila.npz `
+    --head-weight 1 --hard-weight 0 --pos-weight 0 --near-share .15 --kw-real-only --epochs 10 --lr 1e-3 --name sheila_head_near
+Remove-Item Env:KWS_MULTI
+python verifier_cascade.py cache                          # stage-1 scores of every validation set (about 30 min)
+python verifier_cascade.py score runs_verifier/sheila_head_near/last.pt --score head --out data_verifier/v.npz
+python verifier_cascade.py select data_verifier/v.npz --verify-ms 107.3 --max-fa-hour 1.6 --out results/c.json
+python verifier_cascade.py cache --split test --device    # the test run, once per candidate:
+python verifier_cascade.py score runs_verifier/sheila_head_near/last.pt --score head --split test --out data_verifier/vt.npz
+python verifier_cascade.py final data_verifier/vt.npz --t1 3785 --t2 1524 --stage1-threshold 18462 --verify-ms 107.3 --out results/f.json
+python tts_sentence_probe.py --verifier runs_verifier/sheila_head_near/last.pt --t1 3785 --t2 1524   # the keyword inside sentences (a probe, not a test)
+```
+
+Firmware and checks. `-DCASCADE` builds the stream firmware with the verifier
+(`firmware/verifier.c`); the LED follows confirmed detections only (MB[11]
+bit0; bit1 stage 1 proposed, bit2 the verifier ran; MB[32] the head score).
+`verify_verifier_rtl.py --cascade` exports both models, builds
+`build/keyword_stream_cascade_engine.bin` and compares every request on the
+SoC RTL with the oracle (`verifier_cascade.cascade_requests`). The board test
+uses the same vectors over JTAG:
+
+```powershell
+python verify_verifier_rtl.py runs_verifier/sheila_head_near/last.pt --cascade 3785 1524 --frames data_verifier/cache_validation_sheila.npz
+python jtag/make_stream_vectors.py --model runs_stream/sheila_qat_seed2/int_model.npz `
+    --cascade runs_verifier/sheila_head_near/last.pt 3785 1524 --out build/stream_board_vectors_cascade.tcl
+& $X jtag/bringup.tcl build/keyword_engine.bit build/keyword_stream_cascade_engine.bin
+& $X jtag/stream_board_test.tcl build/stream_board_vectors_cascade.tcl
+```
+
+Branch `engine-timing` (JOURNAL 31) pipelines the engine's accumulator so that the
+bitstream meets 100 MHz with Vivado's default strategy; use its
+`keyword_engine_pipe.bit` for the board test. Neither bitstream has been loaded
+with the cascade on a board yet.
+
+## Build the FPGA image
+
+Vivado **2025.2** with the XC7Z020 device was used successfully locally. The command
+below builds the release image; the neuron engine and the ABI fix (`ps7_init`
+version `0x00020003`) are part of the same project (`rtl/*.v` is added
+automatically), see JOURNAL entries 16 and 19.
+The earlier claim that this design requires only 2024.1 is not applicable
+to this installed toolchain. Run from `code/pynqz2_riscv_flow/vivado`:
+
+```powershell
+& C:/AMDDesignTools/2025.2/Vivado/bin/vivado.bat -mode batch -source build.tcl -tclargs ../../snn_keyword/build/vivado_rebuild ../../snn_keyword/deploy/keyword.bit
+```
+
+Use a fresh project directory on each build. The Tcl script emits routed
+timing, utilization, and DRC reports. This bitstream adds the LED duration
+register, fixes AXI read/write arbitration and byte enables, and exposes
+the Zynq DDR/fixed I/O ports. Do not use the original `spike_top.bit` for
+this demo: the server requires hardware ABI version 2.
+
+## Custom instruction: `kdot` dot-product coprocessor
+
+The input layer (64 × 768 int16 × uint8 multiply-accumulates) was about
+99% of inference time. Every CPU read waits on the BRAM bus, so the
+pure-RV32IM loop costs about 120 cycles per MAC. `rtl/kdot_pcpi.v`
+(in `pynqz2_riscv_flow`) attaches to PicoRV32's PCPI port and adds two
+custom-0 (opcode `0x0B`) R-type instructions:
+
+| Instruction | Encoding | Effect |
+|---|---|---|
+| `klen x0, rs1, x0` | funct3=1 | length register ← rs1 (elements, multiple of 4) |
+| `kdot rd, rs1, rs2` | funct3=0 | rd ← Σ int16 w[rs1+2i] · uint8 x[rs2+i], 32-bit wrap |
+
+The core stalls on `kdot`. Meanwhile the unit borrows BRAM port B, streams
+one input word and two weight words per four elements, and keeps a
+registered DSP multiply stage and an accumulate stage. The result is
+bit-exact with the C loop. `firmware/Makefile` builds both
+`keyword.bin` (pure RV32IM) and `keyword_kdot.bin` (`-DUSE_KDOT`).
+The fabric advertises the unit through ABI bit 0 (`0x00020001`).
+The baseline image still runs unchanged on the new fabric.
+
+**KX extension** (`kdot_pcpi` parameter `KX`, default 1, also a `spike_soc` parameter; ABI
+bit 3, so this branch's fabric reports `0x0002000F`). It speeds up the verifier
+(`firmware/verifier.c`, `-DUSE_KX`, targets `verifier_kx` and `cascade_kx`) without changing a
+result bit. All are custom-0 R-type; `funct3` 0/1 with `funct7` 0 stay `kdot`/`klen`:
+
+| Instruction | funct3, funct7 | Operation |
+|---|---|---|
+| `kdotc rd, rs1, rs2` | 2, 0 | rd ← S = Σ a[i] · (u[i] − 128), i < len (= `kdot` − 128 · Σa) |
+| `kload x0, rs1, x0` | 3, 0 | activation buffer (128 × int16, LUTRAM) ← a[0 .. len) at rs1 |
+| `kdotb rd, rs1, x0` | 4, 0 | rd ← S(buffer + 4·off, u at rs1, len), 4 MACs per cycle |
+| `kset x0, rs1, x0` | 5, sel | setup register sel ← rs1: 0 off, 1 e base, 2 b base, 3 sigmoid table, 4 tanh table, 5 row pointer, 6 {bi, ei}, 7 row stride |
+| `kpre rd, rs1, rs2` / `ksig` | 6, 0 / 1 | (S(row rs1) >> e[ei]) + b[bi], rs2 = {bi, ei}; `ksig` applies `sigmoid_q` |
+| `kpren rd` / `ksign rd` | 6, 2 / 3 | the same on the row pointer and indices, which then advance |
+| `ktanh rd, rs1, x0` | 7, 0 | `tanh_q(rs1)` |
+
+`firmware/verifier.c` uses them in levels (`KX_LEVEL`, default 4): 1 `kdotc`, 2 the
+activation buffer, 3 `kpre`/`ksig`/`ktanh`, 4 auto-incrementing rows. Without `USE_KDOT`
+the same functions are C (native reference, RV32IM), bit-exact. `sim/kx_unit.sh` tests every
+instruction against the golden semantics (`sim/kx_vectors.py`); `verify_verifier_rtl.py --kx
+[--kx-level N]` runs the whole SoC. Verilator, 12 records, 13 verifier calls, bit-exact:
+
+| Firmware | Verifier cycles per call (max) | At 100 MHz |
+|---|---|---|
+| `keyword_stream_verifier_engine` (kdot) | 10,583,399 | 105.8 ms |
+| KX level 1 (`kdotc`) | 9,365,406 | 93.7 ms |
+| KX level 2 (activation buffer) | 7,418,906 | 74.2 ms |
+| KX level 3 (`kpre` / `ksig` / `ktanh`) | 4,717,611 | 47.2 ms |
+| KX level 4 (auto-incrementing rows) | 4,178,066 | 41.8 ms |
+
+RTL simulation, 40 verification vectors, same SoC:
+
+| Firmware | Cycles (max) | Latency at 100 MHz | Scores vs oracle |
+|---|---|---|---|
+| `keyword.bin` (RV32IM) | 5,981,498 | 59.81 ms | 40/40 exact |
+| `keyword_kdot.bin` | 267,370 | 2.67 ms | 40/40 exact |
+
+That is a 22.4× worst-case speedup. Adding the stream command (see
+below) later cost 23 cycles per inference in both images. After `kdot`,
+the 12 LIF time steps take about 72% of the remaining cycles, the 64 `kdot`
+calls about 14%, and division, bias, readout and mailbox the rest. This was
+measured by building the firmware with 6 and with 12 steps. On the physical PYNQ-Z2 (loaded over JTAG, see
+`results/board_jtag_kdot.csv`), all 40 vectors match the oracle, and
+scores, spikes and cycle counts are identical to RTL simulation.
+Implementation meets timing (WNS +0.745 ns at 100 MHz). The unit costs
+about 180 LUTs and 150 flip-flops over the baseline (`results/hardware_kdot.json`,
+`results/kdot_*.rpt`). `deploy/keyword_kdot.bit` is the matching bitstream;
+the original `keyword.bit` is unchanged.
+
+## PC simulation demo
+
+In one terminal (the simulated board serves the "sheila" streaming model;
+without `--model` it serves the "yes" release):
+
+```powershell
+.venv/Scripts/python.exe code/snn_keyword/board_server.py --simulate --model code/snn_keyword/results/models/sheila_stream_int8.npz
+```
+
+In another terminal:
+
+```powershell
+.venv/Scripts/python.exe code/snn_keyword/pc_keyword_demo.py 127.0.0.1 --wav path/to/sheila.wav
+# Or use the actual microphone:
+.venv/Scripts/python.exe code/snn_keyword/pc_keyword_demo.py 127.0.0.1
+```
+
+WAV input must be mono PCM16 at 16 kHz. The WAV command classifies one
+one-second window, padding/truncating as needed. The microphone uses a
+bounded rolling buffer and sends one-second windows with a 250 ms hop.
+The callback only queues audio; feature extraction and networking happen
+on the main thread. Responses contain scores, detection, and hidden spikes.
+Simulation reports zero cycles; only RTL/board execution measures cycles.
+The streaming model (ABI v3) decides per frame with a 1 s hold-off. The window
+release (ABI v2, "yes") uses "2 of 3" confirmation in live microphone mode
+([below](#live-confirmation-and-confusable-words)); `--single` restores
+per-window decisions, and WAV mode always classifies a single window.
+Live mode prints one dot per window and one `<KEYWORD> detected` line per spoken
+keyword (consecutive confirmed windows count once); `--json` prints every
+reply instead.
+
+## Run on the PYNQ board (standard Ethernet path)
+
+This is the intended deployment, tested on a PYNQ-Z2 with PYNQ Linux 3.0.1
+(2026-09-27, see JOURNAL.md entry 18b). It needs passwordless SSH from the PC
+to the board and passwordless sudo on the board. From the repository root on
+Windows:
+
+```powershell
+code/snn_keyword/run_board.ps1 -Board pynq          # or -Board student@10.43.0.1; -Variant base|stop
+.venv/Scripts/python.exe -m pip install numpy sounddevice   # the PC side needs only these two
+.venv/Scripts/python.exe code/snn_keyword/pc_keyword_demo.py 10.43.0.1
+```
+
+`run_board.ps1` copies `deploy/`, `board_server.py`, `protocol.py`,
+`features.py` and `start_board.sh` to `~/snn_keyword` on the board, and
+runs `start_board.sh` there. That script loads `keyword_kdot.bit` (or
+`keyword.bit` with `base`), starts `board_server.py` in the background with
+the matching firmware, and waits for `Listening on 0.0.0.0:5556`. The server
+log is `~/snn_keyword/server.log`. Nothing persists on the FPGA: run it again
+after every board reboot. By hand on the board, the steps are:
+
+```bash
+sudo env XILINX_XRT=/usr BOARD=Pynq-Z2 /usr/local/share/pynq-venv/bin/python3 -c "from pynq import Bitstream; Bitstream('deploy/keyword_kdot.bit').download()"
+sudo env XILINX_XRT=/usr BOARD=Pynq-Z2 /usr/local/share/pynq-venv/bin/python3 board_server.py --bind 0.0.0.0 --firmware deploy/keyword_kdot.bin
+```
+
+`sudo` drops the variables that `/etc/profile.d` sets; without
+`XILINX_XRT` PYNQ reports "No Devices Found".
+
+Then run `pc_keyword_demo.py <board-ip>` on the PC. The server validates
+the fabric magic, ABI version, and advertised clock, holds the CPU in reset,
+clears BRAM, loads the complete image (including weights), and releases reset.
+It also sets and reads back the physical FCLK0 at 100 MHz while the core is
+held in reset, using [PYNQ Clocks](https://pynq.readthedocs.io/en/latest/pynq_package/pynq.ps.html).
+An inference timeout or trap stops the core and terminates the server,
+preventing a new frame from overwriting input still in use.
+Each positive single-window request, or each confirmed stream window,
+retriggers LED0 for one second from that detection.
+Use the lab network; the small demo protocol has no authentication.
+
+The server accesses mailbox words and registers through 32-bit memoryviews
+(one bus access each). The earlier `struct.pack_into` version zeroed each
+word and then wrote it byte by byte. The running core saw sequence number 0,
+acknowledged it and ran every request twice, which made every positive
+stream window confirm itself (JOURNAL.md entry 18b).
+
+## JTAG workaround (this board only)
+
+This workaround exists for **one specific problem on the board used here**.
+It is not the normal way to deploy. The PYNQ-Z2's UART (COM8) stayed silent
+and the board never appeared on Ethernet. Over JTAG, the boot-mode register
+read 5 (SD card) but the BootROM status was `0x0040200A`: error `0x200A`,
+boot from SD failed. PYNQ Linux therefore never starts. Reflashing the SD card
+with the PYNQ-Z2 v3.1 image, or reseating or replacing the card, will most
+likely fix it. After that, use the standard path above and ignore this section.
+
+Update 2026-09-27: after a fresh power-up the SD card booted PYNQ Linux with
+the base overlay. `jtag/bringup.tcl` notices when the PS is already
+configured (FCLK0 = 100 MHz, level shifters on) and then only reprograms the
+PL, leaving Linux running. The test scripts and the relay reach memory
+through the APU debug port in that case. Once, the PS hung after repeated PL
+reprogramming under Linux; `rst -system` over JTAG (or a power cycle)
+recovers it (JOURNAL entry 18).
+
+JTAG stands in for the missing boot chain. `jtag/bringup.tcl` runs the
+Vivado-generated `ps7_init` (PS clocks, FCLK0 = 100 MHz), programs the
+bitstream, and enables the PS-PL level shifters. It then holds the PicoRV32
+in reset, writes the firmware into BRAM through the PS AXI port, and
+releases it. `jtag_server.py` stands in for `board_server.py` on the PC. It
+takes the demo's TCP frames and moves them through the Vivado debugger
+(xsdb) into the same mailbox.
+
+```powershell
+$X = "C:/AMDDesignTools/2025.2/Vivado/bin/xsdb.bat"   # use your installed version, e.g. 2026.1
+& $X code/snn_keyword/jtag/bringup.tcl code/snn_keyword/deploy/keyword_kdot.bit code/snn_keyword/deploy/keyword_kdot.bin
+.venv/Scripts/python.exe code/snn_keyword/jtag/make_board_vectors.py --model code/snn_keyword/deploy/model.npz
+& $X code/snn_keyword/jtag/board_test.tcl
+.venv/Scripts/python.exe code/snn_keyword/jtag_server.py   # keep running
+.venv/Scripts/python.exe code/snn_keyword/pc_keyword_demo.py 127.0.0.1
+```
+
+Limitations:
+- Nothing persists: a power cycle clears the FPGA and BRAM, so bring-up must run again.
+- Each 250 ms window costs 30–45 ms of JTAG transfer, against 2.7 ms of inference.
+- Vivado's Hardware Manager shares the cable. Close it while the demo runs. The relay re-selects a lost target and retries for up to 5 s.
+
+## The "yes" window-model release (`deploy/`)
+
+The first release detects **"yes"**, not "sheila": a dense 768-64-2 SNN over a
+one-second mel window every 250 ms, decided with "2 of 3" confirmation, with the
+`kdot` instruction (2.7 ms per window). It is frozen in `deploy/`
+(`manifest.json`: keyword "yes") and is what `board_server.py`, `verify.py` and
+the tests use by default. It stays until a "sheila" system passes the board test
+(IMPLEMENTATION_PLAN.md, acceptance targets). Its pipeline scripts
+(`prepare_data.py`, `train_keyword_snn.py`, `evaluate.py`, `select_deployment.py`,
+`verify.py`, `tune_stream.py`, `confusables.py`, `make_report.py`) are written
+for "yes" and ignore `KWS_KEYWORD`; the harness (`robust_eval.py`) refuses to
+score a window model unless `KWS_KEYWORD=yes`. [REPORT.md](REPORT.md) documents it.
+
+### What was measured
+
+- Six GPU training runs: current/rate encoding, seeds 0/1/2, 35 epochs each,
+  including ten epochs of quantization-aware training.
+- Official speaker-disjoint split: 84,843 training, 9,981 validation,
+  11,005 test clips; "yes" versus all other 34 words.
+- Deployed current model: 90.15% precision, 85.20% recall, 87.61% F1.
+- Worst of 40 RTL vectors: 5,981,521 cycles = 59.82 ms at 100 MHz with
+  plain RV32IM, or 267,393 cycles = 2.67 ms with the `kdot` custom instruction.
+- The best rate model took up to 715.52 ms and misses the 250 ms hop budget.
+- Full-test native C and RTL stress vectors match the integer oracle exactly.
+- Zero detections on 398 separate background-noise windows; this is not a
+  continuous-speech false-accepts-per-hour measurement.
+- Physical PYNQ-Z2, loaded over JTAG: the 40 vectors are bit-exact for the
+  RV32IM, `kdot` and augmented-trial firmware. Cycle counts equal RTL, and
+  the LED0 pulse is about 1 s.
+- Physical PYNQ-Z2 on PYNQ Linux over Ethernet (`board_server.py`): the same
+  40 vectors bit-exact for both firmware images (3 × 40 for RV32IM), cycle
+  counts equal RTL, LED0 pulse 999 ms, "2 of 3" sequences as specified, and
+  a 7 ms PC round trip per window (JTAG relay: 30–45 ms).
+- Live windows (held-out clips in noise, 250 ms hop): "2 of 3" confirmation
+  lowers other words accepted from 1.07% to 0.13%, while "yes" detection
+  goes from 74.5% to 67.3%.
+
+### Verify the bundled release without training data
 
 ```powershell
 .venv/Scripts/python.exe code/snn_keyword/export_model.py code/snn_keyword/deploy/model.npz
@@ -67,7 +478,7 @@ full-test verification evidence remains in `results/verification.json`.
 The RTL run executes a complete 100,000,000-cycle LED pulse; allow a few
 minutes. It does not contact a PYNQ board.
 
-## Reproduce all training and experiments
+### Reproduce all training and experiments
 
 ```powershell
 .venv/Scripts/python.exe code/snn_keyword/prepare_data.py
@@ -120,88 +531,7 @@ audio, caches, CUDA packages, and Vivado output need substantially more space.
 Dataset SHA256 is checked. Raw audio and training checkpoints stay ignored;
 six exported integer models and training histories are retained in `results/`.
 
-## Build the FPGA image
-
-Vivado **2025.2** with the XC7Z020 device was used successfully locally.
-The earlier claim that this design requires only 2024.1 is not applicable
-to this installed toolchain. Run from `code/pynqz2_riscv_flow/vivado`:
-
-```powershell
-& C:/AMDDesignTools/2025.2/Vivado/bin/vivado.bat -mode batch -source build.tcl -tclargs ../../snn_keyword/build/vivado_rebuild ../../snn_keyword/deploy/keyword.bit
-```
-
-Use a fresh project directory on each build. The Tcl script emits routed
-timing, utilization, and DRC reports. This bitstream adds the LED duration
-register, fixes AXI read/write arbitration and byte enables, and exposes
-the Zynq DDR/fixed I/O ports. Do not use the original `spike_top.bit` for
-this demo: the server requires hardware ABI version 2.
-
-## Custom instruction: `kdot` dot-product coprocessor
-
-The input layer (64 × 768 int16 × uint8 multiply-accumulates) was about
-99% of inference time. Every CPU read waits on the BRAM bus, so the
-pure-RV32IM loop costs about 120 cycles per MAC. `rtl/kdot_pcpi.v`
-(in `pynqz2_riscv_flow`) attaches to PicoRV32's PCPI port and adds two
-custom-0 (opcode `0x0B`) R-type instructions:
-
-| Instruction | Encoding | Effect |
-|---|---|---|
-| `klen x0, rs1, x0` | funct3=1 | length register ← rs1 (elements, multiple of 4) |
-| `kdot rd, rs1, rs2` | funct3=0 | rd ← Σ int16 w[rs1+2i] · uint8 x[rs2+i], 32-bit wrap |
-
-The core stalls on `kdot`. Meanwhile the unit borrows BRAM port B, streams
-one input word and two weight words per four elements, and keeps a
-registered DSP multiply stage and an accumulate stage. The result is
-bit-exact with the C loop. `firmware/Makefile` builds both
-`keyword.bin` (pure RV32IM) and `keyword_kdot.bin` (`-DUSE_KDOT`).
-The fabric advertises the unit through ABI bit 0 (`0x00020001`).
-The baseline image still runs unchanged on the new fabric.
-
-RTL simulation, 40 verification vectors, same SoC:
-
-| Firmware | Cycles (max) | Latency at 100 MHz | Scores vs oracle |
-|---|---|---|---|
-| `keyword.bin` (RV32IM) | 5,981,498 | 59.81 ms | 40/40 exact |
-| `keyword_kdot.bin` | 267,370 | 2.67 ms | 40/40 exact |
-
-That is a 22.4× worst-case speedup. Adding the stream command (see
-below) later cost 23 cycles per inference in both images. After `kdot`,
-the 12 LIF time steps take about 72% of the remaining cycles, the 64 `kdot`
-calls about 14%, and division, bias, readout and mailbox the rest. This was
-measured by building the firmware with 6 and with 12 steps. On the physical PYNQ-Z2 (loaded over JTAG, see
-`results/board_jtag_kdot.csv`), all 40 vectors match the oracle, and
-scores, spikes and cycle counts are identical to RTL simulation.
-Implementation meets timing (WNS +0.745 ns at 100 MHz). The unit costs
-about 180 LUTs and 150 flip-flops over the baseline (`results/hardware_kdot.json`,
-`results/kdot_*.rpt`). `deploy/keyword_kdot.bit` is the matching bitstream;
-the original `keyword.bit` is unchanged.
-
-## PC simulation demo
-
-In one terminal:
-
-```powershell
-.venv/Scripts/python.exe code/snn_keyword/board_server.py --simulate
-```
-
-In another terminal:
-
-```powershell
-.venv/Scripts/python.exe code/snn_keyword/pc_keyword_demo.py 127.0.0.1 --wav path/to/yes.wav
-# Or use the actual microphone:
-.venv/Scripts/python.exe code/snn_keyword/pc_keyword_demo.py 127.0.0.1
-```
-
-WAV input must be mono PCM16 at 16 kHz. The WAV command classifies one
-one-second window, padding/truncating as needed. The microphone uses a
-bounded rolling buffer and sends one-second windows with a 250 ms hop.
-The callback only queues audio; feature extraction and networking happen
-on the main thread. Responses contain scores, detection, and hidden spikes.
-Simulation reports zero cycles; only RTL/board execution measures cycles.
-Live microphone mode uses "2 of 3" confirmation (below); `--single`
-restores per-window decisions. WAV mode always classifies a single window.
-
-## Live confirmation and confusable words
+### Live confirmation and confusable words
 
 **"2 of 3" confirmation.** A real "yes" spans several overlapping 250 ms-hop
 windows, while most false accepts fire in only one. Protocol mode 1 maps to
@@ -263,67 +593,7 @@ time-convolutional front layer is the next step. The firmware already
 publishes its input size (mailbox word 14), and the RTL harness and JTAG
 relay adapt to it.
 
-## Run on the PYNQ board (standard Ethernet path)
-
-This is the intended deployment. It has **not** yet run on hardware,
-because the board used so far does not boot PYNQ Linux (see the next
-section). Copy this folder's `deploy/`,
-`board_server.py`, `protocol.py`, and `features.py` to the board. Use the
-PYNQ environment (which already provides NumPy) to load the released image:
-
-```bash
-sudo /usr/local/share/pynq-venv/bin/python3 -c "from pynq import Bitstream; Bitstream('deploy/keyword.bit').download()"
-sudo /usr/local/share/pynq-venv/bin/python3 board_server.py --bind 0.0.0.0 --firmware deploy/keyword.bin
-```
-
-Then run `pc_keyword_demo.py <board-ip>` on the PC. The server validates
-the fabric magic, ABI version, and advertised clock, holds the CPU in reset,
-clears BRAM, loads the complete image (including weights), and releases reset.
-It also sets and reads back the physical FCLK0 at 100 MHz while the core is
-held in reset, using [PYNQ Clocks](https://pynq.readthedocs.io/en/latest/pynq_package/pynq.ps.html).
-An inference timeout or trap stops the core and terminates the server,
-preventing a new frame from overwriting input still in use.
-Each positive single-window request, or each confirmed stream window,
-retriggers LED0 for one second from that detection.
-Use the lab network; the small demo protocol has no authentication.
-
-Still unchecked on hardware for this path: Ethernet connectivity, the
-PYNQ Clocks setup, and `board_server.py` itself. Inference, cycle counts and
-LED timing were measured on the board through the JTAG workaround below.
-
-## JTAG workaround (this board only)
-
-This workaround exists for **one specific problem on the board used here**.
-It is not the normal way to deploy. The PYNQ-Z2's UART (COM8) stayed silent
-and the board never appeared on Ethernet. Over JTAG, the boot-mode register
-read 5 (SD card) but the BootROM status was `0x0040200A`: error `0x200A`,
-boot from SD failed. PYNQ Linux therefore never starts. Reflashing the SD card
-with the PYNQ-Z2 v3.1 image, or reseating or replacing the card, will most
-likely fix it. After that, use the standard path above and ignore this section.
-
-JTAG stands in for the missing boot chain. `jtag/bringup.tcl` runs the
-Vivado-generated `ps7_init` (PS clocks, FCLK0 = 100 MHz), programs the
-bitstream, and enables the PS-PL level shifters. It then holds the PicoRV32
-in reset, writes the firmware into BRAM through the PS AXI port, and
-releases it. `jtag_server.py` stands in for `board_server.py` on the PC. It
-takes the demo's TCP frames and moves them through the Vivado debugger
-(xsdb) into the same mailbox.
-
-```powershell
-$X = "C:/AMDDesignTools/2025.2/Vivado/bin/xsdb.bat"
-& $X code/snn_keyword/jtag/bringup.tcl code/snn_keyword/deploy/keyword_kdot.bit code/snn_keyword/deploy/keyword_kdot.bin
-.venv/Scripts/python.exe code/snn_keyword/jtag/make_board_vectors.py --model code/snn_keyword/deploy/model.npz
-& $X code/snn_keyword/jtag/board_test.tcl
-.venv/Scripts/python.exe code/snn_keyword/jtag_server.py   # keep running
-.venv/Scripts/python.exe code/snn_keyword/pc_keyword_demo.py 127.0.0.1
-```
-
-Limitations:
-- Nothing persists: a power cycle clears the FPGA and BRAM, so bring-up must run again.
-- Each 250 ms window costs 30–45 ms of JTAG transfer, against 2.7 ms of inference.
-- Vivado's Hardware Manager shares the cable. Close it while the demo runs. The relay re-selects a lost target and retries for up to 5 s.
-
-## Interface and arithmetic
+### Interface and arithmetic
 
 Frontend: 16 kHz, periodic Hann 400 samples, hop 160, FFT 512; 24 normalized
 HTK mel triangles from 80 to 7600 Hz; log power clipped to [-80,0] dB;

@@ -7,8 +7,11 @@ set root [file normalize [file join [file dirname [info script]] ..]]
 set vectors [expr {[llength $argv] > 0 ? [lindex $argv 0] : "$root/build/board_vectors.tcl"}]
 set csv [expr {[llength $argv] > 1 ? [lindex $argv 1] : "$root/build/board_jtag.csv"}]
 connect -url tcp:127.0.0.1:3121
+# APU debug port (physical addresses) when PYNQ Linux runs with the MMU on,
+# otherwise the halted core as after the ps7_init path of jtag/bringup.tcl.
 targets -set -filter {name =~ "ARM*#0"}
 configparams force-mem-access 1
+if {[catch {mrd -force 0x40040014}]} {targets -set -filter {name =~ "APU"}}
 proc rd {addr} {
     set value [lindex [mrd -force -value $addr] 0]
     return [expr {wide($value)}]

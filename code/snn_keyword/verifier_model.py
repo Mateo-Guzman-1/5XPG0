@@ -1,0 +1,339 @@
+"""Verifier track: small causal CTC phoneme recogniser and its integer twin.
+
+Stage 2 of the cascade. It sees the last ~1.5 s of the stage-1 input frames
+(features.frame_features, 24 uint8 log-mel bands per 10 ms) and checks for
+the keyword's phoneme sequence (verifier_data.KEYWORD: CMUdict "yes" Y EH S,
+"sheila" SH IY L AH).
+
+Float model (training):
+  two 10 ms frames stacked -> 48 inputs per 20 ms step, scaled x / 256
+  GRU(48 -> H1) -> GRU(H1 -> H2) -> linear(H2 -> 40)      (PyTorch GRU equations)
+  40 classes: CTC blank + 39 phonemes (verifier_data.SYMBOLS)
+
+Integer model (quantize / integer_forward; firmware/verifier.c is bit-exact):
+  activations Q10 (1.0 = 1024) in int16; inputs x_q = frame * 4;
+  weights int8 with one power-of-two scale per output row (w_q = round(w 2^e));
+  the r/z rows of a layer use one scale over [W_i | W_h];
+  pre-activation = (sum w_q a_q) >> e + b_q  (Q10, arithmetic shift);
+  sigmoid, tanh: 512-entry int16 tables (sigmoid over [-8, 8), tanh over [-4, 4));
+  n   = tanh(gx_n + (r * gh_n) >> 10);  h' = n + (z * (h - n)) >> 10;
+  logits Q10.
+
+Keyword head (optional, cfg head=True): a linear readout of GRU 2 per step,
+head_t = w . h2_t + b (Q10 in the integer model, one int8 row with its own
+power-of-two scale). Its score is the maximum over steps >= warmup
+(head_score): a direct keyword/not-keyword decision, trained on the keyword
+against stage-1 false proposals, next to the CTC phoneme outputs.
+
+Keyword score (keyword_score): with c_t(k) = logit_t(k) - max_j logit_t(j) <= 0,
+the best-scoring path p1+ b* p2+ b* ... pN+ (b = blank; CTC: a blank is
+required between two equal phonemes) over any segment of the window, where
+the unconstrained best path costs 0. The softmax normaliser cancels, so no
+exp or log is needed. The segment must start at step >= warmup. States:
+2i = phoneme i, 2i+1 = blank after phoneme i (i < N-1).
+Policy (b) (reject-prefix) appends `boundary` steps after the last phoneme in
+which no new phoneme may start: each costs max(c_t(blank), c_t(pN)).
+
+Capped margin (cap > 0): c_t(k) = min(cap, logit_t(k) - max_{j != k} logit_t(j)).
+A step whose label is the best class then adds up to `cap` instead of 0, so a
+confidently decoded keyword scores above one that only just wins; cap = 0 is
+the score above exactly (the best path costs 0 again). Tested for "sheila"
+(JOURNAL entry 28): every cap > 0 loses recall in the cascade (72% at 0.5
+logit against 83% at 0), because clean read speech ("she laughed") earns
+larger margins than keywords in noise. The firmware implements cap = 0 only.
+"""
+import numpy as np
+import torch
+from torch import nn
+
+from verifier_data import BLANK, KEYWORD, SYMBOLS
+
+N_MELS = 24
+Q = 10                       # activation fraction bits
+ONE = 1 << Q
+SIG_RANGE, TANH_RANGE = 8, 4  # table input ranges [-R, R)
+LUT = 512
+NEG = -(1 << 30)
+
+
+class Verifier(nn.Module):
+    def __init__(self, h1=64, h2=64, stack=2, classes=len(SYMBOLS), head=False):
+        super().__init__()
+        self.cfg = dict(h1=h1, h2=h2, stack=stack, classes=classes, head=head)
+        self.stack = stack
+        self.gru1 = nn.GRU(N_MELS * stack, h1, batch_first=True)
+        self.gru2 = nn.GRU(h1, h2, batch_first=True)
+        self.out = nn.Linear(h2, classes)
+        self.head = nn.Linear(h2, 1) if head else None
+        # Per-input normalisation (x - mu) / sd, folded into layer 1 by quantize(). Without it
+        # CTC training stays on the "same label sequence for every input" plateau (JOURNAL).
+        self.register_buffer('mu', torch.zeros(N_MELS * stack))
+        self.register_buffer('sd', torch.full((N_MELS * stack,), 256.))
+
+    def stack_frames(self, x):
+        b, t, m = x.shape
+        t = t // self.stack * self.stack
+        return x[:, :t].reshape(b, t // self.stack, m * self.stack)
+
+    def forward(self, x, with_head=False):
+        """x: (B, T, 24) uint8-valued frames -> logits (B, T // stack, classes) [, head (B, T // stack)]."""
+        h, _ = self.gru1((self.stack_frames(x) - self.mu) / self.sd)
+        h, _ = self.gru2(h)
+        if with_head:
+            return self.out(h), self.head(h).squeeze(-1)
+        return self.out(h)
+
+
+def n_params(model):
+    return sum(p.numel() for p in model.parameters())
+
+
+# --------------------------------------------------------------------------- integer model
+
+def tables():
+    i = np.arange(LUT)
+    xs = (i * (2 * SIG_RANGE * ONE // LUT) + SIG_RANGE * ONE // LUT - SIG_RANGE * ONE) / ONE
+    xt = (i * (2 * TANH_RANGE * ONE // LUT) + TANH_RANGE * ONE // LUT - TANH_RANGE * ONE) / ONE
+    return (np.rint(ONE / (1 + np.exp(-xs))).astype(np.int16), np.rint(ONE * np.tanh(xt)).astype(np.int16))
+
+
+SIG_SHIFT = int(np.log2(2 * SIG_RANGE * ONE // LUT))    # 5
+TANH_SHIFT = int(np.log2(2 * TANH_RANGE * ONE // LUT))  # 4
+
+
+def row_exponent(w):
+    """Largest e with max|w_row| * 2^e <= 127 (per row)."""
+    m = np.abs(w).max(1)
+    return np.floor(np.log2(127 / np.maximum(m, 1e-12))).clip(-8, 24).astype(np.int64)
+
+
+def quantize_rows(w, e):
+    return np.clip(np.rint(w * 2.0 ** e[:, None]), -127, 127).astype(np.int8)
+
+
+def quantize(model):
+    """Float Verifier -> dict of numpy arrays for integer_forward (and the C export)."""
+    q = {k: np.array(v) for k, v in model.cfg.items()}
+    mu, sd = model.mu.detach().cpu().double().numpy(), model.sd.detach().cpu().double().numpy()
+    for name, gru in (('l1', model.gru1), ('l2', model.gru2)):
+        wi = gru.weight_ih_l0.detach().cpu().double().numpy()
+        wh = gru.weight_hh_l0.detach().cpu().double().numpy()
+        bi = gru.bias_ih_l0.detach().cpu().double().numpy()
+        if name == 'l1':   # W (x - mu) / sd = (W 256 / sd) (x / 256) - W mu / sd; the integer input is x / 256
+            bi = bi - wi @ (mu / sd)
+            wi = wi * (256 / sd)[None]
+        bh = gru.bias_hh_l0.detach().cpu().double().numpy()
+        H = wh.shape[1]
+        w = np.concatenate([wi, wh], 1)           # (3H, in + H)
+        e = row_exponent(w)
+        q[f'{name}_w'] = quantize_rows(w, e)
+        q[f'{name}_e'] = e
+        # r, z: one bias (b_i + b_h); n: b_in and b_hn apart (b_hn is gated by r).
+        b = np.concatenate([bi[:2 * H] + bh[:2 * H], bi[2 * H:], bh[2 * H:]])
+        q[f'{name}_b'] = np.rint(b * ONE).astype(np.int32)
+    wo = model.out.weight.detach().cpu().double().numpy()
+    e = row_exponent(wo)
+    q['out_w'] = quantize_rows(wo, e)
+    q['out_e'] = e
+    q['out_b'] = np.rint(model.out.bias.detach().cpu().double().numpy() * ONE).astype(np.int32)
+    if model.head is not None:
+        wh = model.head.weight.detach().cpu().double().numpy()
+        e = row_exponent(wh)
+        q['head_w'], q['head_e'] = quantize_rows(wh, e), e
+        q['head_b'] = np.rint(model.head.bias.detach().cpu().double().numpy() * ONE).astype(np.int32)
+    q['sig'], q['tanh'] = tables()
+    return q
+
+
+def _lut(table, pre, rng, shift):
+    idx = (np.clip(pre, -rng * ONE, rng * ONE - 1) + rng * ONE) >> shift
+    return table[idx].astype(np.int64)
+
+
+def gru_step_int(a, h, w, e, b, sig, tanh):
+    """One integer GRU step for a batch: a (B, in), h (B, H) int64 Q10 -> new h."""
+    H = h.shape[1]
+    n_in = a.shape[1]
+    ah = np.concatenate([a, h], 1)
+    acc = ah @ w[:2 * H].astype(np.int64).T                            # (B, 2H)
+    pre = (acc >> e[:2 * H]) + b[:2 * H]
+    r = _lut(sig, pre[:, :H], SIG_RANGE, SIG_SHIFT)
+    z = _lut(sig, pre[:, H:], SIG_RANGE, SIG_SHIFT)
+    gx = ((a @ w[2 * H:, :n_in].astype(np.int64).T) >> e[2 * H:]) + b[2 * H:3 * H]
+    gh = ((h @ w[2 * H:, n_in:].astype(np.int64).T) >> e[2 * H:]) + b[3 * H:]
+    n = _lut(tanh, gx + ((r * gh) >> Q), TANH_RANGE, TANH_SHIFT)
+    return n + ((z * (h - n)) >> Q)
+
+
+def integer_forward(frames, q, with_head=False):
+    """frames (B, T, 24) uint8 -> logits (B, T // stack, classes) int64 (Q10) [, head (B, T // stack)].
+    Zero initial state."""
+    frames = np.asarray(frames)
+    b, t, m = frames.shape
+    st = int(q['stack'])
+    t = t // st * st
+    x = frames[:, :t].reshape(b, t // st, m * st).astype(np.int64) << (Q - 8)
+    h1 = np.zeros((b, int(q['h1'])), np.int64)
+    h2 = np.zeros((b, int(q['h2'])), np.int64)
+    wo = q['out_w'].astype(np.int64)
+    out = np.empty((b, t // st, len(q['out_b'])), np.int64)
+    head = np.empty((b, t // st), np.int64)
+    for k in range(t // st):
+        h1 = gru_step_int(x[:, k], h1, q['l1_w'], q['l1_e'], q['l1_b'], q['sig'], q['tanh'])
+        h2 = gru_step_int(h1, h2, q['l2_w'], q['l2_e'], q['l2_b'], q['sig'], q['tanh'])
+        out[:, k] = ((h2 @ wo.T) >> q['out_e']) + q['out_b']
+        if with_head:
+            head[:, k] = ((h2 @ q['head_w'][0].astype(np.int64)) >> q['head_e'][0]) + q['head_b'][0]
+    return (out, head) if with_head else out
+
+
+def head_score(head, warmup=0):
+    """Keyword head decision: the maximum of the per-step head over steps >= warmup."""
+    return head[:, warmup:].max(1)
+
+
+class IntegerTorch:
+    """integer_forward in float64 on a torch device (exact: every value < 2^53). For bulk evaluation."""
+
+    def __init__(self, q, device='cuda'):
+        d = lambda v: torch.tensor(np.asarray(v), dtype=torch.float64, device=device)
+        self.q, self.device = q, device
+        self.st, self.h1, self.h2 = int(q['stack']), int(q['h1']), int(q['h2'])
+        self.L = {}
+        for name in ('l1', 'l2'):
+            w, e = q[f'{name}_w'], q[f'{name}_e']
+            self.L[name] = (d(w), d(2.0 ** -e), d(q[f'{name}_b']), w.shape[1] - (self.h1 if name == 'l1' else self.h2))
+        self.wo, self.so, self.bo = d(q['out_w']), d(2.0 ** -q['out_e']), d(q['out_b'])
+        self.sig, self.tanh = d(q['sig']), d(q['tanh'])
+        self.has_head = 'head_w' in q
+        if self.has_head:
+            self.wh, self.sh, self.bh = d(q['head_w'][0]), float(2.0 ** -q['head_e'][0]), float(q['head_b'][0])
+
+    @staticmethod
+    def _shift(acc, scale):   # arithmetic >> e == floor(acc * 2^-e)
+        return torch.floor(acc * scale)
+
+    def _lut(self, table, pre, rng, shift):
+        idx = torch.floor((pre.clamp(-rng * ONE, rng * ONE - 1) + rng * ONE) / (1 << shift)).long()
+        return table[idx]
+
+    def _step(self, a, h, name):
+        w, s, b, n_in = self.L[name]
+        H = h.shape[1]
+        ah = torch.cat([a, h], 1)
+        pre = self._shift(ah @ w[:2 * H].T, s[:2 * H]) + b[:2 * H]
+        r = self._lut(self.sig, pre[:, :H], SIG_RANGE, SIG_SHIFT)
+        z = self._lut(self.sig, pre[:, H:], SIG_RANGE, SIG_SHIFT)
+        gx = self._shift(a @ w[2 * H:, :n_in].T, s[2 * H:]) + b[2 * H:3 * H]
+        gh = self._shift(h @ w[2 * H:, n_in:].T, s[2 * H:]) + b[3 * H:]
+        n = self._lut(self.tanh, gx + torch.floor(r * gh / ONE), TANH_RANGE, TANH_SHIFT)
+        return n + torch.floor(z * (h - n) / ONE)
+
+    @torch.no_grad()
+    def __call__(self, frames, with_head=False):
+        x = torch.as_tensor(np.asarray(frames), device=self.device).double()
+        b, t, m = x.shape
+        t = t // self.st * self.st
+        x = x[:, :t].reshape(b, t // self.st, m * self.st) * (1 << (Q - 8))
+        h1 = torch.zeros(b, self.h1, dtype=torch.float64, device=self.device)
+        h2 = torch.zeros(b, self.h2, dtype=torch.float64, device=self.device)
+        out, head = [], []
+        for k in range(t // self.st):
+            h1 = self._step(x[:, k], h1, 'l1')
+            h2 = self._step(h1, h2, 'l2')
+            out.append(self._shift(h2 @ self.wo.T, self.so) + self.bo)
+            if with_head:
+                head.append(torch.floor(h2 @ self.wh * self.sh) + self.bh)
+        return (torch.stack(out, 1), torch.stack(head, 1)) if with_head else torch.stack(out, 1)
+
+
+# --------------------------------------------------------------------------- keyword score
+
+def step_costs(lg, cap=0):
+    """c_t(k) = logit - max over the other classes, at most cap (cap = 0: logit - max)."""
+    top = lg.max(-1, keepdims=True)
+    if cap <= 0:
+        return lg - top
+    top2 = np.sort(lg, -1)[..., -2:-1]
+    return np.minimum(lg - np.where(lg == top, top2, top), cap)
+
+
+def step_costs_torch(lg, cap=0):
+    top = lg.max(-1, keepdim=True)[0]
+    if cap <= 0:
+        return lg - top
+    top2 = lg.topk(2, -1)[0][..., 1:2]
+    return torch.clamp(lg - torch.where(lg == top, top2, top), max=cap)
+
+
+def keyword_score(logits, warmup=0, boundary=0, keyword=KEYWORD, return_end=False, cap=0):
+    """Best p1+ b* ... pN+ [boundary] path score per window (int64, <= 0; NEG if none fits).
+
+    logits: (B, T, C) integer (or float) array. Works on numpy int64 exactly as
+    firmware/verifier.c does in int32. boundary > 0: that many steps after the
+    last phoneme, each costing max(c(blank), c(pN)) (policy b).
+    """
+    c = step_costs(np.asarray(logits), cap)
+    b_, t_, _ = c.shape
+    n = len(keyword)
+    cph, cb = [c[..., k] for k in keyword], c[..., BLANK]
+    cp = np.maximum(cb, cph[-1])
+    last = 2 * n - 2                    # state of the last phoneme
+    ns = last + 1 + boundary
+    D = np.full((b_, ns), NEG, np.int64)
+    best = np.full(b_, NEG, np.int64)
+    end = np.full(b_, -1, np.int64)
+    for t in range(t_):
+        P = D.copy()
+        start = 0 if t >= warmup else NEG
+        D[:, 0] = np.maximum(P[:, 0], start) + cph[0][:, t]
+        for i in range(1, n):
+            s = 2 * i
+            D[:, s - 1] = np.maximum(P[:, s - 2], P[:, s - 1]) + cb[:, t]
+            prev = np.maximum(P[:, s - 1], P[:, s])
+            if keyword[i] != keyword[i - 1]:
+                prev = np.maximum(prev, P[:, s - 2])
+            D[:, s] = prev + cph[i][:, t]
+        for j in range(boundary):
+            D[:, last + 1 + j] = P[:, last + j] + cp[:, t]
+        D = np.maximum(D, NEG)             # keep "impossible" from drifting (int32 in C)
+        fin = D[:, ns - 1]
+        upd = fin > best
+        best = np.where(upd, fin, best)
+        end = np.where(upd, t, end)
+    return (best, end) if return_end else best
+
+
+def keyword_score_torch(logits, warmup=0, boundary=0, keyword=KEYWORD, cap=0):
+    """keyword_score on a torch tensor (float64 of integers, or float for training diagnostics).
+
+    All states of a step are one (B, S) tensor: state s pays the cost of its
+    label and comes from itself (phoneme and blank states), from s-1, or from
+    s-2 (a phoneme after a different phoneme, skipping the blank). Boundary
+    states only come from s-1.
+    """
+    c = step_costs_torch(logits, cap)
+    b_, t_, _ = c.shape
+    last = 2 * len(keyword) - 2
+    S = last + 1 + boundary
+    cb = c[..., BLANK]
+    cols = [c[..., keyword[s // 2]] if s % 2 == 0 else cb for s in range(last + 1)]
+    cols += [torch.maximum(cb, cols[last])] * boundary
+    C = torch.stack(cols, -1)                                    # (B, T, S)
+    dev, dt = c.device, c.dtype
+    stay_ok = torch.tensor([s <= last for s in range(S)], device=dev)
+    skip_ok = torch.tensor([s <= last and s >= 2 and s % 2 == 0 and keyword[s // 2] != keyword[s // 2 - 1]
+                            for s in range(S)], device=dev)
+    neg = torch.tensor(float(NEG), dtype=dt, device=dev)
+    pad1 = torch.full((b_, 1), float(NEG), dtype=dt, device=dev)
+    pad2 = torch.full((b_, 2), float(NEG), dtype=dt, device=dev)
+    D = torch.full((b_, S), float(NEG), dtype=dt, device=dev)
+    best = torch.full((b_,), float(NEG), dtype=dt, device=dev)
+    for t in range(t_):
+        m = torch.maximum(torch.where(stay_ok, D, neg), torch.cat([pad1, D[:, :-1]], 1))
+        m = torch.maximum(m, torch.where(skip_ok, torch.cat([pad2, D[:, :-2]], 1), neg))
+        if t >= warmup:                                          # a keyword may start here
+            m = torch.cat([m[:, :1].clamp(min=0.), m[:, 1:]], 1)
+        D = (m + C[:, t]).clamp(min=float(NEG))
+        best = torch.maximum(best, D[:, -1])
+    return best

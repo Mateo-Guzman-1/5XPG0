@@ -9,9 +9,9 @@ Everything a last-year EE student needs is here; nothing is solved for you.
 
 ```
 rtl/       picorv32.v (core, vendored)  spike_soc.v  poisson.v  ps_if.v  spike_top.v
-firmware/  main.c (the demo neuron)     board.h     hal.h     start.S   linker.ld
-vivado/    build.tcl  spike_top.xdc  spike_top.bit (prebuilt)  board_files/
-host/      spike_pynq.py (load/run/read)  demo.sh  smoke_test.sh
+    firmware/  main.c (demo neuron)  keyword_main.c (Group 2)  board.h  hal.h
+    vivado/    build.tcl  spike_top.xdc  spike_top.bit (prebuilt)  board_files/
+    host/      spike_pynq.py  keyword_bridge.py  demo.sh  smoke_test.sh
 install.sh  run_demo.sh  Makefile  requirements.txt
 ```
 
@@ -82,6 +82,7 @@ sudo bash -c "source /etc/profile.d/xrt_setup.sh && $PY spike_pynq.py spikes"
 
 ```bash
 make firmware                 # RISC-V toolchain (riscv64-unknown-elf-gcc)
+make -C firmware keyword.bin  # Group 2 quantized keyword firmware
 make bitstream                # Vivado 2024.1, ~15 min
 ```
 
@@ -99,11 +100,13 @@ Places to start (they are all commented in the source):
 | Change the neuron/network    | `firmware/main.c` (the LIF + weights)             |
 | Add output neurons / layers  | `firmware/main.c`, `board.h` (`NCH`)              |
 | Add a real input path (PC→PL)| `host/spike_pynq.py` mailbox + a new BRAM buffer  |
-| Add ISA extensions           | `picorv32` PCPI hooks (group 4 extra)             |
+| Add ISA extensions           | `picorv32` PCPI hooks (see `rtl/kdot_pcpi.v`)     |
 
 ## Memory map (needed for your own code)
 
 RISC-V view: `0x0000_0000` BRAM, `0x1000_0000` sysctrl,
-`0x1000_1000` timer, `0x1000_2000` LED, `0x1000_3000` Poisson.
+`0x1000_1000` timer, `0x1000_2000` LED, `0x1000_3000` Poisson,
+`0x1000_4000` neuron engine, `0x1000_8000` ALIF snn_layer registers,
+`0x1000_C000` snn_layer weights (write-only).
 PS/AXI view: `0x4000_0000` BRAM, `0x4004_0000` syscon.
 See `firmware/board.h` and `host/spike_pynq.py` (they must stay in sync).

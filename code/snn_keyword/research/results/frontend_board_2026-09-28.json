@@ -1,0 +1,56 @@
+{
+  "date": "2026-09-28",
+  "board": "PYNQ-Z2",
+  "address": "192.168.2.99",
+  "clock_hz": 100000000,
+  "compiler": "riscv64-unknown-elf-gcc 14.2.0",
+  "measurements": [
+    {
+      "label": "active_branch_baseline_8bit_16band_40_5120hz_1000ms",
+      "vectors": 320,
+      "score_mismatches": 0,
+      "cycles_min": 1751886,
+      "cycles_mean": 1755149.515625,
+      "cycles_max": 1760898,
+      "milliseconds_mean": 17.55149515625,
+      "milliseconds_max": 17.60898,
+      "firmware_text_bytes": 14324,
+      "parameter_bytes": 12584,
+      "byte_aligned_input_bytes": 256
+    },
+    {
+      "label": "quality_8bit_20band_150_7600hz_1000ms",
+      "vectors": 40,
+      "score_mismatches": 0,
+      "cycles_min": 2112291,
+      "cycles_mean": 2118909.325,
+      "cycles_max": 2124045,
+      "milliseconds_mean": 21.18909325,
+      "milliseconds_max": 21.24045,
+      "firmware_text_bytes": 17400,
+      "parameter_bytes": 15656,
+      "byte_aligned_input_bytes": 320,
+      "packed_input_bytes": 320
+    },
+    {
+      "label": "compact_4bit_20band_150_7600hz_1000ms",
+      "vectors": 40,
+      "score_mismatches": 0,
+      "cycles_min": 2111871,
+      "cycles_mean": 2119529.55,
+      "cycles_max": 2126100,
+      "milliseconds_mean": 21.1952955,
+      "milliseconds_max": 21.261,
+      "firmware_text_bytes": 17400,
+      "parameter_bytes": 15656,
+      "byte_aligned_input_bytes": 320,
+      "packed_input_bytes": 160,
+      "packed_input_implemented": false
+    }
+  ],
+  "notes": [
+    "All returned output spike counts matched the independent integer oracle.",
+    "Latency covers PicoRV32 inference only.",
+    "The board was restored to the active branch's 16-band service after measurement."
+  ]
+}

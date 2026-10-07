@@ -1,0 +1,56 @@
+{
+ "bitstream": "build/keyword_engine.bit",
+ "model": "runs_stream/s2_nokd_qat/int_last.npz",
+ "vectors": "jtag/make_stream_vectors.py (40 live test streams, 25-frame hops)",
+ "engine": {
+  "firmware": "build/keyword_stream_engine.bin",
+  "streams": 40,
+  "hops": 358,
+  "bit_exact_vs_oracle": true,
+  "rtl_hops_compared": 358,
+  "fields_equal_rtl": true,
+  "cycles_equal_rtl": "358/358",
+  "ms_per_hop_max": 10.22239,
+  "ms_per_hop_mean": 9.87,
+  "hops_with_detection": 12
+ },
+ "kdot": {
+  "firmware": "build/keyword_stream_kdot.bin",
+  "streams": 40,
+  "hops": 358,
+  "bit_exact_vs_oracle": true,
+  "rtl_hops_compared": 72,
+  "fields_equal_rtl": true,
+  "cycles_equal_rtl": "72/72",
+  "ms_per_hop_max": 88.76661,
+  "ms_per_hop_mean": 54.66,
+  "hops_with_detection": 12
+ },
+ "rv32im": {
+  "firmware": "build/keyword_stream.bin",
+  "streams": 40,
+  "hops": 358,
+  "bit_exact_vs_oracle": true,
+  "rtl_hops_compared": 72,
+  "fields_equal_rtl": true,
+  "cycles_equal_rtl": "72/72",
+  "ms_per_hop_max": 125.36929,
+  "ms_per_hop_mean": 91.27,
+  "hops_with_detection": 12
+ },
+ "release_v2_on_engine_bit": {
+  "firmware": "deploy/keyword_kdot.bin",
+  "vectors": 40,
+  "bit_exact_vs_oracle": true,
+  "cycles_max": 144642,
+  "cycles_mean": 143502,
+  "note": "release kdot firmware on the new bitstream (READ_WAIT=1); 267,393 cycles worst on the release bitstream (READ_WAIT=8)"
+ },
+ "led_ms": {
+  "engine": "passed the 850-1100 ms check (value not captured)",
+  "kdot": 999, "rv32im": 992,
+  "release_v2": 990
+ },
+ "host_abi_register": "0x00020001 in this bitstream (ps_if.v not yet updated); the SoC-side syscon reads 0x00020003; ps_if.v fixed afterwards, needs a rebuild",
+ "date": "2026-09-27"
+}

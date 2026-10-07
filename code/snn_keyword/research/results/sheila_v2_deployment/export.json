@@ -1,0 +1,36 @@
+{
+  "checkpoint": "E:\\URE\\5XPG0\\code\\snn_keyword\\research\\results\\frontend_sweep_sheila_v2_models\\b8_f8_hz40-5120_t1000_seed0.pt",
+  "keyword": "sheila",
+  "config": {
+    "bits": 8,
+    "bands": 8,
+    "low_hz": 40,
+    "high_hz": 5120,
+    "duration_ms": 1000
+  },
+  "integer_validation": {
+    "tp": 177,
+    "fp": 25,
+    "fn": 27,
+    "tn": 2475,
+    "accuracy": 0.9807692307692307,
+    "precision": 0.8762376237623762,
+    "recall": 0.8676470588235294,
+    "f1": 0.8719211822660099,
+    "balanced_accuracy": 0.9288235294117647
+  },
+  "integer_test": {
+    "tp": 186,
+    "fp": 36,
+    "fn": 26,
+    "tn": 2964,
+    "accuracy": 0.9806973848069739,
+    "precision": 0.8378378378378378,
+    "recall": 0.8773584905660378,
+    "f1": 0.8571428571428571,
+    "balanced_accuracy": 0.9326792452830188
+  },
+  "decision_threshold": 2,
+  "vectors": 40,
+  "parameter_bytes": 6440
+}

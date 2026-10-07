@@ -1,0 +1,12 @@
+{
+  "label": "sheila-v2-8band",
+  "vectors": 40,
+  "score_mismatches": 0,
+  "cycles_min": 1034471,
+  "cycles_mean": 1039190.975,
+  "cycles_max": 1046013,
+  "milliseconds_mean_at_100mhz": 10.39190975,
+  "milliseconds_max_at_100mhz": 10.46013,
+  "ethernet_roundtrip_ms_mean": 13.721165000242763,
+  "ethernet_roundtrip_ms_max": 26.370699997642078
+}

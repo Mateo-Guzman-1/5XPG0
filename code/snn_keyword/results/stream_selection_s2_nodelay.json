@@ -1,0 +1,87 @@
+{
+  "config": {
+    "split": "validation",
+    "time_bins": 32,
+    "live": {
+      "yes": 397,
+      "other": 3000
+    },
+    "device": {
+      "mic_profiles": 16,
+      "mic_seed": 20260925,
+      "real_rirs": 0
+    },
+    "mswc": {
+      "split": "dev",
+      "yes": 332,
+      "yes_edge_clipped": 8,
+      "near_miss": {
+        "ye- (yet, yeah, yep, yell, yellow, yesterday)": 245,
+        "/s/-final (guess, less, this, us, ...)": 599,
+        "/ts/-final (its, gets, lets, eats, ...)": 323,
+        "/t\u0283/-final (each, reach, speech, ...)": 340,
+        "/st/, /ks/ (best, test, next, ...)": 420,
+        "other near (year, you, said, cheese, ...)": 628
+      },
+      "random_other": 3000
+    },
+    "stream": {
+      "seconds": 3600,
+      "clips": {
+        "yes": 138,
+        "word": 508,
+        "libri": 276
+      },
+      "speech_seconds": {
+        "yes": 135.6,
+        "word": 496.9,
+        "libri": 1895.5
+      },
+      "libri_subset": "dev-clean",
+      "seed": 7,
+      "yes_inserted": 138,
+      "holdoff_s": 1.0,
+      "hit_tolerance_s": 1.25
+    }
+  },
+  "rule": {
+    "checkpoints": [
+      "runs_stream\\s2_nodelay\\model.pt",
+      "runs_stream\\s2_nodelay\\last.pt"
+    ],
+    "data": "C:\\Users\\matut\\FULL_AI\\5XPG0\\code\\snn_keyword\\data",
+    "max_live_fa": 0.002,
+    "max_fa_hour": 2.0,
+    "out": "results\\stream_selection_s2_nodelay.json"
+  },
+  "models": {
+    "runs_stream\\s2_nodelay\\model.pt": {
+      "threshold": 9.291545968306695,
+      "live_recall": 0.3350125944584383,
+      "live_fa": 0.001,
+      "stream": {
+        "recall": 0.3913,
+        "false_accepts": 2,
+        "fa_per_hour": 2.0,
+        "latency_median_s": 0.129,
+        "latency_p90_s": 0.219
+      },
+      "mswc_recall": 0.2921686746987952,
+      "mswc_other_fa": 0.004500450045004501
+    },
+    "runs_stream\\s2_nodelay\\last.pt": {
+      "threshold": 8.958279860647087,
+      "live_recall": 0.2216624685138539,
+      "live_fa": 0.0006666666666666666,
+      "stream": {
+        "recall": 0.3188,
+        "false_accepts": 1,
+        "fa_per_hour": 1.0,
+        "latency_median_s": 0.146,
+        "latency_p90_s": 0.218
+      },
+      "mswc_recall": 0.18072289156626506,
+      "mswc_other_fa": 0.0034203420342034203
+    }
+  }
+}

@@ -28,7 +28,7 @@
 #include "snn_vectors.h"
 
 // ---- snn_layer register map (see the header of rtl/snn_layer.v) ----
-#define SNN_WGT_BASE   0x10004000u                        // weight window, write-only
+#define SNN_WGT_BASE   0x1000C000u                        // weight window, write-only (0x1000_4000 is the neuron engine)
 #define SNN_REG_BASE   0x10008000u
 #define SNN_CTRL       (SNN_REG_BASE + 0x000u)            // W: bit0 CLR, bit1 TICK
 #define SNN_STATUS     (SNN_REG_BASE + 0x004u)            // R: bit0 busy, bit1 evt_ovf

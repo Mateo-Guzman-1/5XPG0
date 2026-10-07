@@ -35,7 +35,8 @@
 
 module ps_if #(
     parameter [31:0]  CLK_HZ    = 32'd100_000_000,
-    parameter integer NUM_CORES = 2                  // 1 .. 8
+    parameter integer NUM_CORES = 2,                 // 1 .. 8
+    parameter         KX        = 1                  // ABI bit3: kdot_pcpi KX instructions (keep equal to spike_soc's KX)
 ) (
     input  wire        aclk,
     input  wire        aresetn,
@@ -61,7 +62,9 @@ module ps_if #(
 
     // BRAM port A of each core (word address) — driven only by this module
     output reg  [NUM_CORES-1:0]    bram_we,
-    output reg  [16*NUM_CORES-1:0] bram_addr,
+    // dont_touch: one register per bit drives every BRAM tile; replicas could split the
+    // address of a cascaded RAMB36 pair (DRC REQP-1962 in the KX build).
+    (* dont_touch = "true" *) output reg  [16*NUM_CORES-1:0] bram_addr,
     output reg  [32*NUM_CORES-1:0] bram_wdata,
     output reg  [4*NUM_CORES-1:0]  bram_be,
     input  wire [32*NUM_CORES-1:0] bram_rdata,
@@ -232,7 +235,7 @@ module ps_if #(
                         5'd4:  rd_sys_q <= CLK_HZ;                                  // CLK_HZ
                         5'd5:  rd_sys_q <= 32'h534B_454C;                           // MAGIC "SKEL"
                         5'd6:  rd_sys_q <= {22'h0, led[10*c +: 10]};                // LED
-                        5'd7:  rd_sys_q <= 32'h0002_0001;                 // keyword pulse ABI + bit0 kdot
+                        5'd7:  rd_sys_q <= 32'h0002_0007 | (KX ? 32'h8 : 32'h0); // keyword pulse ABI + bit0 kdot + bit1 neuron engine + bit2 engine layer 1 + bit3 KX
                         default: rd_sys_q <= 32'h0;
                         endcase
                     end

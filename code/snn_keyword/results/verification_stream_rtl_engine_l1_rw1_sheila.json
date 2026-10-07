@@ -1,0 +1,26 @@
+{
+  "model": "results/models/sheila_stream_int8.npz",
+  "firmware": "build/keyword_stream_engine_l1.bin",
+  "read_wait": 1,
+  "kdot": false,
+  "engine": false,
+  "engine_l1": true,
+  "streams": 40,
+  "hops": 355,
+  "bit_exact": true,
+  "cycles_per_hop": {
+    "max": 100112,
+    "mean": 64135.29245283019,
+    "p99": 94987.38999999997
+  },
+  "ms_per_hop_at_100MHz": {
+    "max": 1.00112,
+    "mean": 0.6413529245283018
+  },
+  "events_per_hop": {
+    "max": 81543,
+    "mean": 40267.84905660377
+  },
+  "simulation_seconds": 33.2,
+  "harness": "PASS: 40 streams, 355 hops bit-exact with the oracle; malformed requests, reset, duplicate sequence, 1 s LED pulse; worst 100112 cycles per 25-frame hop, mean 64135; total cycles=124612019"
+}

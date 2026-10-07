@@ -55,11 +55,14 @@ typedef int32_t  s32;
 //   0x10000             console ring             (1 KB)
 //   0x10400             mailbox                  (1 KB)
 //   0x11000 ..          spike log ring
+//   0x22000             keyword input frame      (256 bytes)
 //   0x3D000 .. 0x3FFFF  stack
 // ------------------------------------------------------------------
 #define CONSOLE_BASE  0x10000u
 #define MAILBOX_BASE  0x10400u
 #define SPIKE_LOG_BASE 0x11000u
+#define INPUT_FRAME_BASE 0x22000u
+#define INPUT_FRAME_BYTES 256u
 #define STACK_TOP     0x40000u
 
 // console ring: head/tail free-running, 512-byte buffer.
@@ -85,6 +88,7 @@ typedef int32_t  s32;
 #define MB_CMD_SET_THRESHOLD 5  // a0=threshold
 #define MB_CMD_SET_LEAK     6   // a0=leak
 #define MB_CMD_RESET_V      7   // reset membrane potential to 0
+#define MB_CMD_CLASSIFY     8   // a0=frame address a1=bytes a2=sequence
 
 typedef volatile struct {
     u32 seq_in;      // PS bumps after writing cmd

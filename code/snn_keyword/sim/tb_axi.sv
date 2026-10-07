@@ -14,7 +14,7 @@ module tb_axi;
     reg [31:0] mem[0:65535];
     wire core_rst; wire [31:0] scratch;
     integer i;
-    ps_if dut(.aclk(clk),.aresetn(resetn),
+    ps_if #(.NUM_CORES(1)) dut(.aclk(clk),.aresetn(resetn),
       .s_axil_awaddr(awaddr),.s_axil_awvalid(awvalid),.s_axil_awready(awready),
       .s_axil_wdata(wdata),.s_axil_wstrb(wstrb),.s_axil_wvalid(wvalid),.s_axil_wready(wready),
       .s_axil_bresp(bresp),.s_axil_bvalid(bvalid),.s_axil_bready(bready),

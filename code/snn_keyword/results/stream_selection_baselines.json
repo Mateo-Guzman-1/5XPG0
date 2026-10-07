@@ -1,0 +1,102 @@
+{
+  "config": {
+    "split": "validation",
+    "time_bins": 32,
+    "live": {
+      "yes": 397,
+      "other": 3000
+    },
+    "device": {
+      "mic_profiles": 16,
+      "mic_seed": 20260925,
+      "real_rirs": 0
+    },
+    "mswc": {
+      "split": "dev",
+      "yes": 332,
+      "yes_edge_clipped": 8,
+      "near_miss": {
+        "ye- (yet, yeah, yep, yell, yellow, yesterday)": 245,
+        "/s/-final (guess, less, this, us, ...)": 599,
+        "/ts/-final (its, gets, lets, eats, ...)": 323,
+        "/t\u0283/-final (each, reach, speech, ...)": 340,
+        "/st/, /ks/ (best, test, next, ...)": 420,
+        "other near (year, you, said, cheese, ...)": 628
+      },
+      "random_other": 3000
+    },
+    "stream": {
+      "seconds": 3600,
+      "clips": {
+        "yes": 138,
+        "word": 508,
+        "libri": 276
+      },
+      "speech_seconds": {
+        "yes": 135.6,
+        "word": 496.9,
+        "libri": 1895.5
+      },
+      "libri_subset": "dev-clean",
+      "seed": 7,
+      "yes_inserted": 138,
+      "holdoff_s": 1.0,
+      "hit_tolerance_s": 1.25
+    }
+  },
+  "rule": {
+    "checkpoints": [
+      "deploy\\model.npz",
+      "results\\models\\augmented_current_seed2.npz",
+      "runs_phase1\\dense_sc-mswc-tts+libri_seed0\\model.npz"
+    ],
+    "data": "C:\\Users\\matut\\FULL_AI\\5XPG0\\code\\snn_keyword\\data",
+    "max_live_fa": 0.002,
+    "max_fa_hour": 2.0,
+    "out": "results\\stream_selection_baselines.json"
+  },
+  "models": {
+    "deploy\\model.npz": {
+      "threshold": 6265.7593984962405,
+      "live_recall": 0.38287153652392947,
+      "live_fa": 0.0,
+      "stream": {
+        "recall": 0.4638,
+        "false_accepts": 2,
+        "fa_per_hour": 2.0,
+        "latency_median_s": 0.192,
+        "latency_p90_s": 0.469
+      },
+      "mswc_recall": 0.29819277108433734,
+      "mswc_other_fa": 0.00882088208820882
+    },
+    "results\\models\\augmented_current_seed2.npz": {
+      "threshold": 3219.9849624060153,
+      "live_recall": 0.35516372795969775,
+      "live_fa": 0.0003333333333333333,
+      "stream": {
+        "recall": 0.3913,
+        "false_accepts": 2,
+        "fa_per_hour": 2.0,
+        "latency_median_s": 0.222,
+        "latency_p90_s": 0.375
+      },
+      "mswc_recall": 0.25301204819277107,
+      "mswc_other_fa": 0.010981098109810981
+    },
+    "runs_phase1\\dense_sc-mswc-tts+libri_seed0\\model.npz": {
+      "threshold": 1894.872180451126,
+      "live_recall": 0.5188916876574308,
+      "live_fa": 0.0016666666666666668,
+      "stream": {
+        "recall": 0.6087,
+        "false_accepts": 2,
+        "fa_per_hour": 2.0,
+        "latency_median_s": 0.301,
+        "latency_p90_s": 0.434
+      },
+      "mswc_recall": 0.37349397590361444,
+      "mswc_other_fa": 0.01242124212421242
+    }
+  }
+}

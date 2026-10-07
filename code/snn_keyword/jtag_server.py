@@ -1,4 +1,8 @@
-"""Expose the real PicoRV32 over the existing PC demo protocol through XSDB."""
+"""Expose the real PicoRV32 over the existing PC demo protocol through XSDB.
+
+The relay detects the loaded firmware: ABI v2 (window model) or v3 (streaming
+model); board_server.handle() serves whichever clients match (protocol.py).
+"""
 import argparse
 from pathlib import Path
 import socket
@@ -21,16 +25,29 @@ class JtagBoard:
         self.sock=socket.create_connection(('127.0.0.1',5557),timeout=5)
         self.stream=self.sock.makefile('rwb',buffering=0)
 
-    def infer(self,payload,opcode=1):
-        self.stream.write(f'{opcode} {payload.hex()}\n'.encode())
+    def _ask(self,line,prefix,n):
+        self.stream.write((line+'\n').encode())
         while True:
-            line=self.stream.readline().decode()
-            if not line or line.startswith('ERROR'):
-                raise RuntimeError('JTAG transport failed: '+line.strip())
-            if line.startswith('RESULT '):
-                values=tuple(map(int,line.split()[1:]))
-                if len(values)!=6:raise RuntimeError('Malformed XSDB response')
+            reply=self.stream.readline().decode()
+            if not reply or reply.startswith('ERROR'):
+                raise RuntimeError('JTAG transport failed: '+reply.strip())
+            if reply.startswith(prefix+' '):
+                values=tuple(map(int,reply.split()[1:]))
+                if len(values)!=n:raise RuntimeError('Malformed XSDB response')
                 return values
+
+    def info(self):
+        if not hasattr(self,'_info'):self._info=self._ask('I','INFO',4)
+        return self._info
+
+    def infer(self,payload,opcode=1):
+        return self._ask(f'{opcode} {payload.hex()}','RESULT',6)
+
+    def frames(self,payload):
+        return self._ask(f'4 {payload.hex()}','RESULT',8)
+
+    def reset(self):
+        return self._ask('5','RESULT',8)
 
     def close(self):
         self.stream.close();self.sock.close()
@@ -40,7 +57,9 @@ class JtagBoard:
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--xsdb',type=Path,default=Path('C:/AMDDesignTools/2025.2/Vivado/bin/xsdb.bat'))
+    # Newest installed Vivado (2025.2 and 2026.1 both work).
+    installed=sorted(Path('C:/AMDDesignTools').glob('*/Vivado/bin/xsdb.bat'))
+    p.add_argument('--xsdb',type=Path,default=installed[-1] if installed else Path('C:/AMDDesignTools/2025.2/Vivado/bin/xsdb.bat'))
     p.add_argument('--port',type=int,default=5556)
     a=p.parse_args()
     backend=JtagBoard(a.xsdb)

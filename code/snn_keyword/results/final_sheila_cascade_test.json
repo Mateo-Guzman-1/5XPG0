@@ -1,0 +1,143 @@
+{
+ "split": "test",
+ "keyword": "sheila",
+ "stage1": "C:\\Users\\matut\\FULL_AI\\5XPG0\\code\\snn_keyword\\runs_stream\\sheila_qat_seed2\\int_model.npz",
+ "scores": "data_verifier\\vscores_sheila_logmel_test.npz",
+ "verifier": "runs_verifier\\sheila_logmel\\last.pt",
+ "window": 1,
+ "policy": "a",
+ "verify_ms": 107.3,
+ "fixed_thresholds": "chosen on validation (select); nothing is selected here",
+ "stage1_frame": {
+  "t1": 18462,
+  "t2": null,
+  "live_recall": 0.6368,
+  "live_recall_complete": 0.7069,
+  "live_fa": 0.0,
+  "live_mic": {
+   "recall": 0.6651,
+   "other_accepted": 0.0003,
+   "recall_complete": 0.7011
+  },
+  "live_room": {
+   "recall": 0.6085,
+   "other_accepted": 0.002,
+   "recall_complete": 0.6954
+  },
+  "live_mic+room": {
+   "recall": 0.5802,
+   "other_accepted": 0.004,
+   "recall_complete": 0.6494
+  },
+  "fa_per_hour": 1.582,
+  "neg_hours": 18.97,
+  "stream_recall": 0.6929,
+  "stream_fa": 1,
+  "latency_median_s": 0.044,
+  "latency_p90_s": 0.108,
+  "mswc_recall": 0.5,
+  "mswc_other_fa": 0.0083,
+  "mswc_prefixed_accepted": "0/0",
+  "mswc_groups_accepted": {
+   "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "23/183",
+   "/\u0283\u025b/ (shell, shelf, shelter, ...)": "1/118",
+   "/t\u0283i\u02d0/ (cheap, cheese, chief)": "4/179",
+   "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+   "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+   "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "1/95",
+   "random other words": "1/3000"
+  },
+  "prefixed_clips_accepted": "0/0",
+  "prefixed_libri_with_detection": "0/0"
+ },
+ "stage1_hop": {
+  "t1": 18462,
+  "t2": null,
+  "live_recall": 0.6368,
+  "live_recall_complete": 0.7069,
+  "live_fa": 0.0,
+  "live_mic": {
+   "recall": 0.6651,
+   "other_accepted": 0.0003,
+   "recall_complete": 0.7011
+  },
+  "live_room": {
+   "recall": 0.6085,
+   "other_accepted": 0.002,
+   "recall_complete": 0.6954
+  },
+  "live_mic+room": {
+   "recall": 0.5802,
+   "other_accepted": 0.004,
+   "recall_complete": 0.6494
+  },
+  "fa_per_hour": 1.582,
+  "neg_hours": 18.97,
+  "stream_recall": 0.6929,
+  "stream_fa": 1,
+  "latency_median_s": 0.149,
+  "latency_p90_s": 0.285,
+  "mswc_recall": 0.5,
+  "mswc_other_fa": 0.0083,
+  "mswc_prefixed_accepted": "0/0",
+  "mswc_groups_accepted": {
+   "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "23/183",
+   "/\u0283\u025b/ (shell, shelf, shelter, ...)": "1/118",
+   "/t\u0283i\u02d0/ (cheap, cheese, chief)": "4/179",
+   "-ila/-ela names (leila, delilah, stella, ...)": "0/32",
+   "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+   "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "1/95",
+   "random other words": "1/3000"
+  },
+  "prefixed_clips_accepted": "0/0",
+  "prefixed_libri_with_detection": "0/0"
+ },
+ "cascade": {
+  "t1": 13744,
+  "t2": -11,
+  "live_recall": 0.8396,
+  "live_recall_complete": 0.9023,
+  "live_fa": 0.001,
+  "live_mic": {
+   "recall": 0.8255,
+   "other_accepted": 0.0023,
+   "recall_complete": 0.8793
+  },
+  "live_room": {
+   "recall": 0.8302,
+   "other_accepted": 0.0017,
+   "recall_complete": 0.8678
+  },
+  "live_mic+room": {
+   "recall": 0.8255,
+   "other_accepted": 0.0037,
+   "recall_complete": 0.8966
+  },
+  "fa_per_hour": 2.373,
+  "neg_hours": 18.97,
+  "stream_recall": 0.8429,
+  "stream_fa": 0,
+  "latency_median_s": 0.25,
+  "latency_p90_s": 0.382,
+  "mswc_recall": 1.0,
+  "mswc_other_fa": 0.0113,
+  "mswc_prefixed_accepted": "0/0",
+  "mswc_groups_accepted": {
+   "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": "23/183",
+   "/\u0283\u025b/ (shell, shelf, shelter, ...)": "2/118",
+   "/t\u0283i\u02d0/ (cheap, cheese, chief)": "8/179",
+   "-ila/-ela names (leila, delilah, stella, ...)": "2/32",
+   "-illa (tequila, vanilla, gorilla, ...)": "0/25",
+   "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": "4/95",
+   "random other words": "2/3000"
+  },
+  "prefixed_clips_accepted": "0/0",
+  "prefixed_libri_with_detection": "0/0",
+  "verifier_calls_per_hour": 55.6,
+  "paired_vs_stage1_frame": {
+   "only_cascade": 44,
+   "only_stage1": 1,
+   "p_exact": 0.0
+  }
+ }
+}

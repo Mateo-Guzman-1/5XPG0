@@ -13,11 +13,12 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-# Loaded over JTAG (jtag/bringup.tcl): SD boot failed on the available board, so
-# the PYNQ Linux / Ethernet path (board_server.py) has not run on hardware.
-BOARD_TESTED={'method':'JTAG (jtag/bringup.tcl, jtag/board_test.tcl)','date':'2026-09-24',
-              'result':'40/40 verification vectors bit-exact, LED0 pulse about 1 s',
-              'not_tested':'PYNQ Linux, Ethernet board_server.py, PYNQ Clocks setup'}
+# First loaded over JTAG (jtag/bringup.tcl) on a board whose SD boot failed; then
+# the standard PYNQ Linux / Ethernet path (board_server.py) on a second PYNQ-Z2.
+BOARD_TESTED={'method':'JTAG (jtag/bringup.tcl, jtag/board_test.tcl); PYNQ Linux 3.0.1 over Ethernet (run_board.ps1, board_server.py)',
+              'date':'2026-09-24 (JTAG), 2026-09-27 (Ethernet)',
+              'result':'40/40 verification vectors bit-exact, LED0 pulse about 1 s; over Ethernet also "2 of 3" '
+                        'stream confirmation and the live microphone demo'}
 
 
 def implementation(project,released):

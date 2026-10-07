@@ -1,0 +1,77 @@
+{
+  "keyword": "sheila",
+  "config": {
+    "keyword": "sheila",
+    "split": "validation",
+    "time_bins": 32,
+    "live": {
+      "yes": 204,
+      "other": 3000
+    },
+    "device": {
+      "mic_profiles": 16,
+      "mic_seed": 20260925,
+      "real_rirs": 0
+    },
+    "mswc": {
+      "split": "dev",
+      "yes": 2,
+      "yes_edge_clipped": 0,
+      "near_miss": {
+        "sheila-prefixed (not a false accept)": 0,
+        "/\u0283i\u02d0/ onset (she, sheet, shield, ...)": 183,
+        "/\u0283\u025b/ (shell, shelf, shelter, ...)": 118,
+        "/t\u0283i\u02d0/ (cheap, cheese, chief)": 179,
+        "-ila/-ela names (leila, delilah, stella, ...)": 32,
+        "-illa (tequila, vanilla, gorilla, ...)": 25,
+        "-i\u02d0l\u0259r/-i\u02d0l\u026a\u014b (dealer, feeling, ceiling, ...)": 95
+      },
+      "random_other": 3000
+    },
+    "stream": {
+      "seconds": 3600,
+      "clips": {
+        "yes": 136,
+        "word": 494,
+        "libri": 271
+      },
+      "speech_seconds": {
+        "yes": 130.7,
+        "word": 483.2,
+        "libri": 1936.5
+      },
+      "libri_subset": "dev-clean",
+      "seed": 7,
+      "yes_inserted": 136,
+      "holdoff_s": 1.0,
+      "hit_tolerance_s": 1.25
+    }
+  },
+  "rule": {
+    "checkpoints": [
+      "runs_stream\\sheila_s2_wide_lp4500\\model.pt",
+      "runs_stream\\sheila_s2_wide_lp5500\\model.pt"
+    ],
+    "data": "C:\\Users\\matut\\FULL_AI\\5XPG0\\code\\snn_keyword\\data",
+    "max_live_fa": 0.002,
+    "max_fa_hour": 2.0,
+    "fa_source": "negatives",
+    "window": [
+      1,
+      10,
+      20
+    ],
+    "no_write": false,
+    "out": "results\\sheila_selection_neg_s2_wide_lp.json"
+  },
+  "models": {
+    "runs_stream\\sheila_s2_wide_lp4500\\model.pt": {
+      "best": null,
+      "by_window": []
+    },
+    "runs_stream\\sheila_s2_wide_lp5500\\model.pt": {
+      "best": null,
+      "by_window": []
+    }
+  }
+}

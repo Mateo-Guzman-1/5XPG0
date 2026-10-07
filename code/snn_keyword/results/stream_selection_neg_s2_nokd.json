@@ -1,0 +1,137 @@
+{
+  "config": {
+    "split": "validation",
+    "time_bins": 32,
+    "live": {
+      "yes": 397,
+      "other": 3000
+    },
+    "device": {
+      "mic_profiles": 16,
+      "mic_seed": 20260925,
+      "real_rirs": 0
+    },
+    "mswc": {
+      "split": "dev",
+      "yes": 332,
+      "yes_edge_clipped": 8,
+      "near_miss": {
+        "ye- (yet, yeah, yep, yell, yellow, yesterday)": 245,
+        "/s/-final (guess, less, this, us, ...)": 599,
+        "/ts/-final (its, gets, lets, eats, ...)": 323,
+        "/t\u0283/-final (each, reach, speech, ...)": 340,
+        "/st/, /ks/ (best, test, next, ...)": 420,
+        "other near (year, you, said, cheese, ...)": 628
+      },
+      "random_other": 3000
+    },
+    "stream": {
+      "seconds": 3600,
+      "clips": {
+        "yes": 138,
+        "word": 508,
+        "libri": 276
+      },
+      "speech_seconds": {
+        "yes": 135.6,
+        "word": 496.9,
+        "libri": 1895.5
+      },
+      "libri_subset": "dev-clean",
+      "seed": 7,
+      "yes_inserted": 138,
+      "holdoff_s": 1.0,
+      "hit_tolerance_s": 1.25
+    }
+  },
+  "rule": {
+    "checkpoints": [
+      "runs_stream\\s2_nokd_seed0\\model.pt"
+    ],
+    "data": "C:\\Users\\matut\\FULL_AI\\5XPG0\\code\\snn_keyword\\data",
+    "max_live_fa": 0.002,
+    "max_fa_hour": 2.0,
+    "fa_source": "negatives",
+    "window": [
+      1,
+      10,
+      20
+    ],
+    "no_write": true,
+    "out": "results\\stream_selection_neg_s2_nokd.json"
+  },
+  "models": {
+    "runs_stream\\s2_nokd_seed0\\model.pt": {
+      "best": {
+        "threshold": 60.769237995147705,
+        "window": 10,
+        "live_recall": 0.5465994962216625,
+        "live_fa": 0.0003333333333333333,
+        "fa_per_hour": 1.904,
+        "fa_hours": 17.85,
+        "stream": {
+          "recall": 0.5942,
+          "false_accepts": 2,
+          "fa_per_hour": 2.0,
+          "latency_median_s": 0.155,
+          "latency_p90_s": 0.211
+        },
+        "mswc_recall": 0.39156626506024095,
+        "mswc_other_fa": 0.00486048604860486
+      },
+      "by_window": [
+        {
+          "threshold": 8.793392181396484,
+          "window": 1,
+          "live_recall": 0.48866498740554154,
+          "live_fa": 0.0006666666666666666,
+          "fa_per_hour": 1.96,
+          "fa_hours": 17.85,
+          "stream": {
+            "recall": 0.529,
+            "false_accepts": 0,
+            "fa_per_hour": 0.0,
+            "latency_median_s": 0.128,
+            "latency_p90_s": 0.2
+          },
+          "mswc_recall": 0.3704819277108434,
+          "mswc_other_fa": 0.004500450045004501
+        },
+        {
+          "threshold": 60.769237995147705,
+          "window": 10,
+          "live_recall": 0.5465994962216625,
+          "live_fa": 0.0003333333333333333,
+          "fa_per_hour": 1.904,
+          "fa_hours": 17.85,
+          "stream": {
+            "recall": 0.5942,
+            "false_accepts": 2,
+            "fa_per_hour": 2.0,
+            "latency_median_s": 0.155,
+            "latency_p90_s": 0.211
+          },
+          "mswc_recall": 0.39156626506024095,
+          "mswc_other_fa": 0.00486048604860486
+        },
+        {
+          "threshold": 99.4650981426239,
+          "window": 20,
+          "live_recall": 0.5037783375314862,
+          "live_fa": 0.0,
+          "fa_per_hour": 1.904,
+          "fa_hours": 17.85,
+          "stream": {
+            "recall": 0.5725,
+            "false_accepts": 3,
+            "fa_per_hour": 3.0,
+            "latency_median_s": 0.203,
+            "latency_p90_s": 0.272
+          },
+          "mswc_recall": 0.32228915662650603,
+          "mswc_other_fa": 0.0032403240324032404
+        }
+      ]
+    }
+  }
+}
