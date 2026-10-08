@@ -61,6 +61,7 @@ data/
 checkpoints/
 *.pt
 *.pth
+code/snn_keyword/research/results/extended_encoding_board_exports/
 
 # Build artifacts — keep the sources and the single released bitstream only
 code/pynqz2_riscv_flow/firmware/*.o
