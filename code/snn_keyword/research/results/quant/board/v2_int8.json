@@ -1,0 +1,12 @@
+{
+  "label": "v2_int8",
+  "vectors": 40,
+  "score_mismatches": 0,
+  "cycles_min": 840643,
+  "cycles_mean": 846043.625,
+  "cycles_max": 852328,
+  "milliseconds_mean_at_100mhz": 8.46043625,
+  "milliseconds_max_at_100mhz": 8.52328,
+  "ethernet_roundtrip_ms_mean": 12.30587060013022,
+  "ethernet_roundtrip_ms_max": 19.51849699980812
+}

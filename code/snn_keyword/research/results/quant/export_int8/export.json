@@ -1,0 +1,51 @@
+{
+  "source": "/home/mark/Documents/TUe/Semicon/Quant_test/5XPG0/code/snn_keyword/research/results/quant/qat.json",
+  "seed": 2,
+  "seed_selection": "best validation F1 of QAT runs at 4 bit",
+  "bits_w1": 8,
+  "bits_w2": 8,
+  "scale_w1": 256,
+  "scale_w2": 256,
+  "threshold1": 65280,
+  "threshold2": 256,
+  "decision_threshold": 3,
+  "w1_range": [
+    -97,
+    72
+  ],
+  "w1_words": 1536,
+  "bytes": {
+    "w1": 6144,
+    "w2": 96,
+    "bias": 200,
+    "total": 6440
+  },
+  "integer_validation": {
+    "tp": 166,
+    "fp": 10,
+    "fn": 38,
+    "tn": 2490,
+    "accuracy": 0.9822485207100592,
+    "precision": 0.9431818181818182,
+    "recall": 0.8137254901960784,
+    "f1": 0.8736842105263158,
+    "balanced_accuracy": 0.9048627450980392
+  },
+  "integer_test": {
+    "tp": 173,
+    "fp": 12,
+    "fn": 39,
+    "tn": 2988,
+    "accuracy": 0.9841220423412205,
+    "precision": 0.9351351351351351,
+    "recall": 0.8160377358490566,
+    "f1": 0.871536523929471,
+    "balanced_accuracy": 0.9060188679245282
+  },
+  "checks": {
+    "unpack_matches_weights": true,
+    "rescore_matches_qat_json": true
+  },
+  "vectors": 40,
+  "vector_spikes_keyword_class": 274
+}

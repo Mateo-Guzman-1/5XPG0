@@ -1,0 +1,12 @@
+{
+  "label": "v0_damien",
+  "vectors": 40,
+  "score_mismatches": 0,
+  "cycles_min": 1033116,
+  "cycles_mean": 1037909.475,
+  "cycles_max": 1044811,
+  "milliseconds_mean_at_100mhz": 10.37909475,
+  "milliseconds_max_at_100mhz": 10.44811,
+  "ethernet_roundtrip_ms_mean": 14.689709674894402,
+  "ethernet_roundtrip_ms_max": 22.155261000079918
+}

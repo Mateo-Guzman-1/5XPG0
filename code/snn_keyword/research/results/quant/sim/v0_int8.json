@@ -1,0 +1,12 @@
+{
+  "label": "v0_int8",
+  "vectors": 40,
+  "score_mismatches": 0,
+  "cycles_min": 1033734,
+  "cycles_mean": 1039134.625,
+  "cycles_max": 1045419,
+  "layer1_cycles_min": 726225,
+  "layer1_cycles_mean": 726225.0,
+  "layer1_cycles_max": 726225,
+  "layer1_fraction_mean": 0.6988747969013158
+}

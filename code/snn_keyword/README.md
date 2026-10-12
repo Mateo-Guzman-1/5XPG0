@@ -17,7 +17,37 @@ The network really executes on the RISC-V soft core. The ARM processing system
 only terminates Ethernet, copies 128 input bytes into BRAM, and relays the
 mailbox result.
 
-## Current reference result
+## Default model: QAT int4, packed (Quantization branch)
+
+The firmware default (`firmware/keyword_model.h`, `firmware/keyword.bin`) is
+the quantization-aware-trained 4-bit model from `research/qat_sweep.py`
+(seed 2, chosen by validation F1). Its 6,144 layer-1 weights are stored as
+signed 4-bit values, packed 8 per 32-bit BRAM word, and read with one `lw`
+per 8 weights (loop variant 3 in `keyword_main.c`, selected automatically for
+a 4-bit model).
+
+| | Previous default (Damien, int8; rebuilt with GCC 13.2) | QAT int4 packed (default) |
+|---|---|---|
+| Test accuracy (integer model) | 98.07 % | 98.47 % |
+| Test F1 / balanced accuracy | 85.71 % / 93.27 % | 88.19 % / 92.83 % |
+| Model parameters | 6,440 B | 3,368 B |
+| Firmware binary | 8,140 B | 5,304 B |
+| PicoRV32 inference (board, 40 vectors) | 1,037,909 cycles, 10.38 ms | 800,722 cycles, 8.01 ms |
+| Ethernet round trip (mean) | 14.7 ms | 12.4 ms |
+| Board vectors matching the integer model | 40/40 | 40/40 |
+
+Most of the speed-up comes from processing several weights per loop pass;
+storing the weights in 4 bits instead of 8 adds about 2.6 % on top of an
+unrolled int8 control loop. The full comparison (post-training rounding at
+8-2 bits, QAT vs a fine-tuning control, firmware variants V0-V3 and their
+board measurements) is in `research/results/quant/`.
+
+Damien's int8 model stays reproducible: it is archived in
+`research/results/sheila_v2_deployment/keyword_model.h`, and building
+`keyword_main.c` against it gives his firmware byte for byte
+(`research/build_quant_firmware.sh`, build `v0_damien`).
+
+## Previous reference result (Damien, int8)
 
 The data preparation keeps every v2 `sheila` clip and a deterministic,
 label-balanced sample from all other command directories. The official
@@ -52,8 +82,13 @@ The current research plan and full results are in
 | `train_keyword_snn.py` | Legacy Mini Speech Commands training baseline |
 | `pc_keyword_demo.py` | Live microphone or WAV client |
 | `install_keyword_demo.sh` | Builds if needed, deploys, loads, and starts the board chain |
+| `research/quant_sweep.py` | Post-training weight rounding sweep (8-2 bits) |
+| `research/qat_sweep.py` | Quantization-aware fine-tuning vs a float fine-tuning control |
+| `research/export_quant.py` | Packed firmware headers and board vectors for QAT models |
+| `research/build_quant_firmware.sh` | Builds the firmware loop variants V0-V3 |
+| `research/check_firmware_host.py` | Runs every variant natively against the integer model |
 | `../pynqz2_riscv_flow/firmware/keyword_main.c` | Integer LIF inference and one-second LED control |
-| `../pynqz2_riscv_flow/firmware/keyword_model.h` | Generated quantized weights |
+| `../pynqz2_riscv_flow/firmware/keyword_model.h` | Generated quantized weights (default: QAT int4, packed) |
 | `../pynqz2_riscv_flow/host/keyword_bridge.py` | Board-side TCP/BRAM/mailbox bridge |
 
 ## Run the checked-in demo
@@ -127,6 +162,20 @@ with an RV32-capable GNU toolchain:
 ```bash
 cd code/pynqz2_riscv_flow/firmware
 make keyword.bin
+```
+
+The default QAT int4 model is produced from the same float checkpoints by the
+quantization pipeline (Linux, from `code/snn_keyword`, `.venv` active; the
+sweep above written to `research/results/repro/frontend_sweep_sheila_v2_repro.json`):
+
+```bash
+python research/quant_sweep.py              # post-training rounding, 8-2 bits
+python research/qat_sweep.py                # QAT vs fine-tuning control
+python research/export_quant.py             # packed headers + board vectors
+research/build_quant_firmware.sh            # firmware variants V0-V3
+python research/check_firmware_host.py      # 40/40 natively, every variant
+cp research/results/quant/export_int4/keyword_model.h ../pynqz2_riscv_flow/firmware/
+make -C ../pynqz2_riscv_flow/firmware keyword.bin
 ```
 
 The export uses signed int8 weights, int32 membrane/current state, Q8 leak

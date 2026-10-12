@@ -1,0 +1,36 @@
+{
+  "checkpoint": "/home/mark/Documents/TUe/Semicon/Quant_test/5XPG0/code/snn_keyword/research/results/repro/frontend_sweep_sheila_v2_repro_models/b8_f8_hz40-5120_t1000_seed1.pt",
+  "keyword": "sheila",
+  "config": {
+    "bits": 8,
+    "bands": 8,
+    "low_hz": 40,
+    "high_hz": 5120,
+    "duration_ms": 1000
+  },
+  "integer_validation": {
+    "tp": 170,
+    "fp": 16,
+    "fn": 34,
+    "tn": 2484,
+    "accuracy": 0.981508875739645,
+    "precision": 0.9139784946236559,
+    "recall": 0.8333333333333334,
+    "f1": 0.8717948717948718,
+    "balanced_accuracy": 0.9134666666666666
+  },
+  "integer_test": {
+    "tp": 185,
+    "fp": 27,
+    "fn": 27,
+    "tn": 2973,
+    "accuracy": 0.9831880448318805,
+    "precision": 0.8726415094339622,
+    "recall": 0.8726415094339622,
+    "f1": 0.8726415094339622,
+    "balanced_accuracy": 0.9318207547169811
+  },
+  "decision_threshold": 3,
+  "vectors": 40,
+  "parameter_bytes": 6440
+}

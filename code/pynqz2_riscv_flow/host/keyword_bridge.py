@@ -21,6 +21,8 @@ from spike_pynq import Bram, Regs
 
 INPUT_FRAME_BASE = 0x22000
 MB_CMD_CLASSIFY = 8
+KW_TIMING_BASE = 0x10440        # firmware/board.h: magic, sequence, layer1, total
+KW_TIMING_MAGIC = 0x4B57544D
 CLK_HZ = 100_000_000
 
 
@@ -44,7 +46,7 @@ def classify(bram: Bram, regs: Regs, packet: bytes) -> dict:
         raise RuntimeError(
             f"firmware rejected frame address/size: {score_not:#x}/{score_keyword:#x}"
         )
-    return {
+    response = {
         "sequence": sequence,
         "keyword": bool(decision),
         "score_not": signed32(score_not),
@@ -53,6 +55,11 @@ def classify(bram: Bram, regs: Regs, packet: bytes) -> dict:
         "inference_ms": cycles * 1000.0 / CLK_HZ,
         "led": regs.dump()["LED"],
     }
+    # Older firmware has no timing words; then layer1_cycles is left out.
+    if (bram.rd32(KW_TIMING_BASE) == KW_TIMING_MAGIC
+            and bram.rd32(KW_TIMING_BASE + 4) == sequence):
+        response["layer1_cycles"] = bram.rd32(KW_TIMING_BASE + 8)
+    return response
 
 
 def main() -> int:

@@ -37,6 +37,7 @@ def main() -> int:
     socket.connect(f"tcp://{args.board}:5556")
     actual = []
     cycles = []
+    layer1_cycles = []
     roundtrip_ms = []
     try:
         for index, frame in enumerate(x):
@@ -51,6 +52,8 @@ def main() -> int:
                 raise RuntimeError(response["error"])
             actual.append([response["score_not"], response["score_keyword"]])
             cycles.append(response["cycles"])
+            if "layer1_cycles" in response:
+                layer1_cycles.append(response["layer1_cycles"])
     finally:
         socket.close()
         context.term()
@@ -70,6 +73,15 @@ def main() -> int:
         "ethernet_roundtrip_ms_mean": float(roundtrip_array.mean()),
         "ethernet_roundtrip_ms_max": float(roundtrip_array.max()),
     }
+    # Only firmware with the layer-1 timer reports it (for every vector).
+    if len(layer1_cycles) == len(x):
+        layer1_array = np.asarray(layer1_cycles)
+        result.update({
+            "layer1_cycles_min": int(layer1_array.min()),
+            "layer1_cycles_mean": float(layer1_array.mean()),
+            "layer1_cycles_max": int(layer1_array.max()),
+            "layer1_fraction_mean": float(layer1_array.mean() / cycle_array.mean()),
+        })
     rendered = json.dumps(result, indent=2)
     print(rendered)
     if args.output:

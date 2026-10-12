@@ -60,6 +60,7 @@ typedef int32_t  s32;
 // ------------------------------------------------------------------
 #define CONSOLE_BASE  0x10000u
 #define MAILBOX_BASE  0x10400u
+#define KW_TIMING_BASE 0x10440u   // keyword firmware timing words (below)
 #define SPIKE_LOG_BASE 0x11000u
 #define INPUT_FRAME_BASE 0x22000u
 #define INPUT_FRAME_BYTES 256u
@@ -89,6 +90,12 @@ typedef int32_t  s32;
 #define MB_CMD_SET_LEAK     6   // a0=leak
 #define MB_CMD_RESET_V      7   // reset membrane potential to 0
 #define MB_CMD_CLASSIFY     8   // a0=frame address a1=bytes a2=sequence
+
+// keyword timing words at KW_TIMING_BASE, rewritten after every
+// MB_CMD_CLASSIFY (the mailbox reply has no free word left):
+//   [0] KW_TIMING_MAGIC  [1] sequence (a2 of the command)
+//   [2] layer-1 cycles   [3] total classify cycles (same as resp[3])
+#define KW_TIMING_MAGIC 0x4B57544Du      // "KWTM"
 
 typedef volatile struct {
     u32 seq_in;      // PS bumps after writing cmd

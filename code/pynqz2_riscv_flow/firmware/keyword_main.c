@@ -7,11 +7,47 @@
 
 #include "board.h"
 #include "hal.h"
+// KW_MODEL_HEADER selects another generated model (quantization experiments);
+// without it the deployed keyword_model.h next to this file is used.
+#ifdef KW_MODEL_HEADER
+#include KW_MODEL_HEADER
+#else
 #include "keyword_model.h"
+#endif
+
+// KW_VARIANT selects the layer-1 inner loop (research/build_quant_firmware.sh):
+//   0  one int8 weight per byte, one lb per weight (Damien's loop)
+//   1  same storage, loop unrolled 4x (control for the packed loops)
+//   2  int8 weights packed 4 per 32-bit word, one lw per 4 weights
+//   3  int4 weights packed 8 per 32-bit word, one lw per 8 weights
+// Without -DKW_VARIANT the model header decides: a 4-bit packed model (the
+// default QAT int4 model) uses loop 3, any other model uses loop 0.
+#ifndef KW_VARIANT
+#if defined(KW_WEIGHT_BITS) && KW_WEIGHT_BITS == 4
+#define KW_VARIANT 3
+#else
+#define KW_VARIANT 0
+#endif
+#endif
+#if defined(KW_WEIGHT_BITS)
+#define KW_REPORT_VARIANT 1
+#endif
+
+// Sign-extended lane j of a packed word: shift the lane to the top, then
+// arithmetic-shift it back down (matches research/export_quant.py).
+#define KW_LANE(word, j, bits) \
+    (((s32)((word) << (32 - ((j) + 1) * (bits)))) >> (32 - (bits)))
+
+// Clock used for the layer-1 timer; the native host check
+// (research/firmware_host_check.c) has no TIMER peripheral and stubs it out.
+#ifndef KW_LAYER1_NOW
+#define KW_LAYER1_NOW() timer_now()
+#endif
 
 static console_ring_t *const con = (console_ring_t *)CONSOLE_BASE;
 static mailbox_t *const mb = (mailbox_t *)MAILBOX_BASE;
 static volatile u32 *const sph = (volatile u32 *)SPIKE_LOG_BASE;
+static volatile u32 *const timing = (volatile u32 *)KW_TIMING_BASE;
 
 static u32 led_off_at;
 static int led_on;
@@ -76,7 +112,8 @@ static void spike_log_push(u32 out_id)
 }
 
 
-static void classify(const volatile u8 *input, s32 score[KW_OUTPUTS])
+static void classify(const volatile u8 *input, s32 score[KW_OUTPUTS],
+                     u32 *layer1_cycles)
 {
     s32 current1[KW_HIDDEN];
     s32 mem1[KW_HIDDEN];
@@ -86,13 +123,58 @@ static void classify(const volatile u8 *input, s32 score[KW_OUTPUTS])
     // The first-layer current is constant across the SNN time axis.  Hoisting
     // this dot product is mathematically identical to recomputing it at each
     // step and saves most of the PicoRV32 work.
+    u32 layer1_started = KW_LAYER1_NOW();
     for (int h = 0; h < KW_HIDDEN; h++) {
         s32 sum = kw_b1[h];
+#if KW_VARIANT == 0
         for (int i = 0; i < KW_INPUTS; i++)
             sum += (s32)kw_w1[h * KW_INPUTS + i] * (s32)input[i];
+#elif KW_VARIANT == 1
+        _Static_assert(KW_INPUTS % 4 == 0, "unroll needs a multiple of 4 inputs");
+        for (int i = 0; i < KW_INPUTS; i += 4) {
+            const int8_t *w = &kw_w1[h * KW_INPUTS + i];
+            sum += (s32)w[0] * (s32)input[i];
+            sum += (s32)w[1] * (s32)input[i + 1];
+            sum += (s32)w[2] * (s32)input[i + 2];
+            sum += (s32)w[3] * (s32)input[i + 3];
+        }
+#elif KW_VARIANT == 2
+#if !defined(KW_WEIGHT_BITS) || KW_WEIGHT_BITS != 8
+#error "variant 2 needs a model exported with 8-bit packed weights"
+#endif
+        const u32 *wp = &kw_w1_packed[h * (KW_INPUTS / 4)];
+        for (int k = 0; k < KW_INPUTS / 4; k++) {
+            u32 word = wp[k];
+            const volatile u8 *x = &input[4 * k];
+            sum += KW_LANE(word, 0, 8) * (s32)x[0];
+            sum += KW_LANE(word, 1, 8) * (s32)x[1];
+            sum += KW_LANE(word, 2, 8) * (s32)x[2];
+            sum += KW_LANE(word, 3, 8) * (s32)x[3];
+        }
+#elif KW_VARIANT == 3
+#if !defined(KW_WEIGHT_BITS) || KW_WEIGHT_BITS != 4
+#error "variant 3 needs a model exported with 4-bit packed weights"
+#endif
+        const u32 *wp = &kw_w1_packed[h * (KW_INPUTS / 8)];
+        for (int k = 0; k < KW_INPUTS / 8; k++) {
+            u32 word = wp[k];
+            const volatile u8 *x = &input[8 * k];
+            sum += KW_LANE(word, 0, 4) * (s32)x[0];
+            sum += KW_LANE(word, 1, 4) * (s32)x[1];
+            sum += KW_LANE(word, 2, 4) * (s32)x[2];
+            sum += KW_LANE(word, 3, 4) * (s32)x[3];
+            sum += KW_LANE(word, 4, 4) * (s32)x[4];
+            sum += KW_LANE(word, 5, 4) * (s32)x[5];
+            sum += KW_LANE(word, 6, 4) * (s32)x[6];
+            sum += KW_LANE(word, 7, 4) * (s32)x[7];
+        }
+#else
+#error "unknown KW_VARIANT"
+#endif
         current1[h] = sum;
         mem1[h] = 0;
     }
+    *layer1_cycles = KW_LAYER1_NOW() - layer1_started;
     for (int o = 0; o < KW_OUTPUTS; o++) {
         mem2[o] = 0;
         score[o] = 0;
@@ -156,9 +238,14 @@ static void mb_service(void)
             return;
         }
         s32 score[KW_OUTPUTS];
+        u32 layer1_cycles;
         u32 started = timer_now();
-        classify((const volatile u8 *)a0, score);
+        classify((const volatile u8 *)a0, score, &layer1_cycles);
         u32 cycles = timer_now() - started;
+        timing[0] = KW_TIMING_MAGIC;
+        timing[1] = a2;
+        timing[2] = layer1_cycles;
+        timing[3] = cycles;
         // A strict confidence policy rejects ties, weak output activity, and
         // marginal wins that are common for silence or stationary noise.
         u32 decision =
@@ -197,6 +284,14 @@ void main(void)
     con_putdec(KW_HIDDEN);
     con_puts(" steps=");
     con_putdec(KW_TIMESTEPS);
+#ifdef KW_REPORT_VARIANT
+    con_puts(" variant=");
+    con_putdec(KW_VARIANT);
+#ifdef KW_WEIGHT_BITS
+    con_puts(" weight_bits=");
+    con_putdec(KW_WEIGHT_BITS);
+#endif
+#endif
     con_puts("\n");
 
     for (;;) {
