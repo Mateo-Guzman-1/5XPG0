@@ -182,6 +182,27 @@ module spike_soc #(
     end
 
     assign core_running = core_rst_n;
+    wire pcpi_valid;
+    wire [31:0] pcpi_insn;
+    wire [31:0] pcpi_rs1;
+    wire [31:0] pcpi_rs2;
+    wire pcpi_wr;
+    wire [31:0] pcpi_rd;
+    wire pcpi_wait;
+    wire pcpi_ready;
+
+    kw_mac_pcpi u_kw_mac_pcpi(
+        .clk        (clk),
+        .rst_n      (core_rst_n),
+        .pcpi_valid (pcpi_valid),
+        .pcpi_insn  (pcpi_insn),
+        .pcpi_rs1   (pcpi_rs1),
+        .pcpi_rs2   (pcpi_rs2),
+        .pcpi_wr    (pcpi_wr),
+        .pcpi_rd    (pcpi_rd),
+        .pcpi_wait  (pcpi_wait),
+        .pcpi_ready (pcpi_ready)
+    );
 
     // ------------------------------------------------------------------
     // CPU
@@ -195,7 +216,8 @@ module spike_soc #(
         .ENABLE_IRQ        (0),
         .ENABLE_TRACE      (0),
         .PROGADDR_RESET    (32'h0000_0000),
-        .STACKADDR         (32'h0000_0000)
+        .STACKADDR         (32'h0000_0000),
+        .ENABLE_PCPI       (1)
     ) u_cpu (
         .clk         (clk),
         .resetn      (core_rst_n),

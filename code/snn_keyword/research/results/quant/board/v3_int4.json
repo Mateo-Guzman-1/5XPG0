@@ -2,11 +2,15 @@
   "label": "v3_int4",
   "vectors": 40,
   "score_mismatches": 0,
-  "cycles_min": 795089,
-  "cycles_mean": 800721.6,
-  "cycles_max": 806896,
-  "milliseconds_mean_at_100mhz": 8.007216,
-  "milliseconds_max_at_100mhz": 8.06896,
-  "ethernet_roundtrip_ms_mean": 12.379734699925393,
-  "ethernet_roundtrip_ms_max": 19.860782998875948
+  "cycles_min": 795334,
+  "cycles_mean": 800966.6,
+  "cycles_max": 807141,
+  "milliseconds_mean_at_100mhz": 8.009666,
+  "milliseconds_max_at_100mhz": 8.07141,
+  "ethernet_roundtrip_ms_mean": 19.186131750029745,
+  "ethernet_roundtrip_ms_max": 289.46613900006923,
+  "layer1_cycles_min": 487650,
+  "layer1_cycles_mean": 487650.0,
+  "layer1_cycles_max": 487650,
+  "layer1_fraction_mean": 0.6088268849162999
 }

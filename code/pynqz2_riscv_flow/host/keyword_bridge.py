@@ -23,6 +23,7 @@ INPUT_FRAME_BASE = 0x22000
 MB_CMD_CLASSIFY = 8
 KW_TIMING_BASE = 0x10440        # firmware/board.h: magic, sequence, layer1, total
 KW_TIMING_MAGIC = 0x4B57544D
+KW_NO_MAC_UNIT = 0x4B4D4143     # firmware/kw_mac.h: variant 4/5 on an old bitstream
 CLK_HZ = 100_000_000
 
 
@@ -42,6 +43,10 @@ def classify(bram: Bram, regs: Regs, packet: bytes) -> dict:
         [INPUT_FRAME_BASE, len(payload), sequence],
     )
     decision, score_not, score_keyword, cycles = result
+    if decision == 0xFFFFFFFF and score_not == KW_NO_MAC_UNIT:
+        raise RuntimeError(
+            f"firmware needs the MAC-unit bitstream (v1.1), found version {score_keyword:#x}"
+        )
     if decision == 0xFFFFFFFF:
         raise RuntimeError(
             f"firmware rejected frame address/size: {score_not:#x}/{score_keyword:#x}"

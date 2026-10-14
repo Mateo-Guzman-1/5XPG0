@@ -20,6 +20,10 @@
 //   1  same storage, loop unrolled 4x (control for the packed loops)
 //   2  int8 weights packed 4 per 32-bit word, one lw per 4 weights
 //   3  int4 weights packed 8 per 32-bit word, one lw per 8 weights
+//   4  int8 packed, MAC co-processor: one lw + one KW_MAC4 per 4 weights
+//   5  int4 packed, MAC co-processor: one lw + one KW_MAC8 per 8 weights
+// Variants 4 and 5 need the bitstream with the MAC unit (rtl/kw_mac_pcpi.v,
+// SYSCTRL VERSION >= 1.1); on an older one every classify is refused.
 // Without -DKW_VARIANT the model header decides: a 4-bit packed model (the
 // default QAT int4 model) uses loop 3, any other model uses loop 0.
 #ifndef KW_VARIANT
@@ -31,6 +35,9 @@
 #endif
 #if defined(KW_WEIGHT_BITS)
 #define KW_REPORT_VARIANT 1
+#endif
+#if KW_VARIANT >= 4
+#include "kw_mac.h"
 #endif
 
 // Sign-extended lane j of a packed word: shift the lane to the top, then
@@ -124,6 +131,14 @@ static void classify(const volatile u8 *input, s32 score[KW_OUTPUTS],
     // this dot product is mathematically identical to recomputing it at each
     // step and saves most of the PicoRV32 work.
     u32 layer1_started = KW_LAYER1_NOW();
+#if KW_VARIANT >= 4
+    // Copy the frame into the MAC unit once (4 inputs per instruction); every
+    // neuron below then reads its inputs from there.
+    _Static_assert(KW_INPUTS == 128, "the MAC unit buffers exactly 128 inputs");
+    const volatile u32 *x4 = (const volatile u32 *)input;
+    for (int k = 0; k < KW_INPUTS / 4; k++)
+        kw_ldx(4 * k, x4[k]);
+#endif
     for (int h = 0; h < KW_HIDDEN; h++) {
         s32 sum = kw_b1[h];
 #if KW_VARIANT == 0
@@ -168,6 +183,22 @@ static void classify(const volatile u8 *input, s32 score[KW_OUTPUTS],
             sum += KW_LANE(word, 6, 4) * (s32)x[6];
             sum += KW_LANE(word, 7, 4) * (s32)x[7];
         }
+#elif KW_VARIANT == 4
+#if !defined(KW_WEIGHT_BITS) || KW_WEIGHT_BITS != 8
+#error "variant 4 needs a model exported with 8-bit packed weights"
+#endif
+        const u32 *wp = &kw_w1_packed[h * (KW_INPUTS / 4)];
+        kw_setacc(sum);
+        for (int k = 0; k < KW_INPUTS / 4; k++)
+            sum = kw_mac4(wp[k]);
+#elif KW_VARIANT == 5
+#if !defined(KW_WEIGHT_BITS) || KW_WEIGHT_BITS != 4
+#error "variant 5 needs a model exported with 4-bit packed weights"
+#endif
+        const u32 *wp = &kw_w1_packed[h * (KW_INPUTS / 8)];
+        kw_setacc(sum);
+        for (int k = 0; k < KW_INPUTS / 8; k++)
+            sum = kw_mac8(wp[k]);
 #else
 #error "unknown KW_VARIANT"
 #endif
@@ -237,6 +268,13 @@ static void mb_service(void)
             mb_reply(0xFFFFFFFFu, a0, a1, 0);
             return;
         }
+#if KW_VARIANT >= 4
+        // Without the MAC unit the custom instructions would trap the CPU.
+        if (rd32(SYS_VERSION) < KW_MAC_MIN_VERSION) {
+            mb_reply(0xFFFFFFFFu, KW_NO_MAC_UNIT, rd32(SYS_VERSION), 0);
+            return;
+        }
+#endif
         s32 score[KW_OUTPUTS];
         u32 layer1_cycles;
         u32 started = timer_now();
@@ -293,6 +331,10 @@ void main(void)
 #endif
 #endif
     con_puts("\n");
+#if KW_VARIANT >= 4
+    if (rd32(SYS_VERSION) < KW_MAC_MIN_VERSION)
+        con_puts("ERROR: this bitstream has no MAC unit; load the v1.1 bitstream\n");
+#endif
 
     for (;;) {
         mb_service();

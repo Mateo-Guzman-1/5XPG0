@@ -30,6 +30,8 @@ VARIANTS = {
     "v2_int8": (2, "int8", QUANT / "export_int8/board_vectors.npz"),
     "v0_int4": (0, "int4", QUANT / "export_int4/board_vectors.npz"),
     "v3_int4": (3, "int4", QUANT / "export_int4/board_vectors.npz"),
+    "v4_int8": (4, "int8", QUANT / "export_int8/board_vectors.npz"),
+    "v5_int4": (5, "int4", QUANT / "export_int4/board_vectors.npz"),
 }
 
 

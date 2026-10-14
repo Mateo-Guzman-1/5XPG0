@@ -11,6 +11,8 @@
 #   v2_int8       2  packed, lw per 4 weights  export_int8
 #   v0_int4       0  one lb per weight         export_int4
 #   v3_int4       3  packed, lw per 8 weights  export_int4
+#   v4_int8       4  MAC unit, KW_MAC4         export_int8   (needs MAC bitstream)
+#   v5_int4       5  MAC unit, KW_MAC8         export_int4   (needs MAC bitstream)
 #
 # Per build: <name>.bin (load with spike_pynq.py load-elf), .elf, .dis (objdump),
 # and one line in sizes.txt.
@@ -48,6 +50,8 @@ build v1_int8 -DKW_VARIANT=1 "$(model int8)"
 build v2_int8 -DKW_VARIANT=2 "$(model int8)"
 build v0_int4 -DKW_VARIANT=0 "$(model int4)"
 build v3_int4 -DKW_VARIANT=3 "$(model int4)"
+build v4_int8 -DKW_VARIANT=4 "$(model int8)"
+build v5_int4 -DKW_VARIANT=5 "$(model int4)"
 
 echo "        text    data     bss     dec     hex filename"
 cat "$OUT/sizes.txt"

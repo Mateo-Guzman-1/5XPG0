@@ -22,7 +22,7 @@ all: spike.bin keyword.bin
 %.o: %.c board.h hal.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-keyword_main.o: keyword_main.c keyword_model.h board.h hal.h
+keyword_main.o: keyword_main.c keyword_model.h board.h hal.h kw_mac.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 spike.elf: $(DEMO_OBJS) linker.ld

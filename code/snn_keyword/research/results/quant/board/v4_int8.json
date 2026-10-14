@@ -1,0 +1,16 @@
+{
+  "label": "v4_int8",
+  "vectors": 40,
+  "score_mismatches": 0,
+  "cycles_min": 425085,
+  "cycles_mean": 430485.625,
+  "cycles_max": 436770,
+  "milliseconds_mean_at_100mhz": 4.30485625,
+  "milliseconds_max_at_100mhz": 4.3677,
+  "ethernet_roundtrip_ms_mean": 14.639788925160246,
+  "ethernet_roundtrip_ms_max": 285.36841300046945,
+  "layer1_cycles_min": 117561,
+  "layer1_cycles_mean": 117561.0,
+  "layer1_cycles_max": 117561,
+  "layer1_fraction_mean": 0.2730892582069378
+}
