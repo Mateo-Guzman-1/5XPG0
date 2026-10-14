@@ -17,30 +17,48 @@ The network really executes on the RISC-V soft core. The ARM processing system
 only terminates Ethernet, copies 128 input bytes into BRAM, and relays the
 mailbox result.
 
-## Default model: QAT int4, packed (Quantization branch)
+## Default model: QAT int4, packed, MAC unit (Quantization branch)
 
 The firmware default (`firmware/keyword_model.h`, `firmware/keyword.bin`) is
 the quantization-aware-trained 4-bit model from `research/qat_sweep.py`
 (seed 2, chosen by validation F1). Its 6,144 layer-1 weights are stored as
-signed 4-bit values, packed 8 per 32-bit BRAM word, and read with one `lw`
-per 8 weights (loop variant 3 in `keyword_main.c`, selected automatically for
-a 4-bit model).
+signed 4-bit values, packed 8 per 32-bit BRAM word. Layer 1 runs on the MAC
+co-processor (`rtl/kw_mac_pcpi.v`): one `lw` plus one custom `KW_MAC8`
+instruction per 8 weights (loop variant 5 in `keyword_main.c`, selected
+automatically for a 4-bit model). Variant 5 needs the bitstream with the MAC
+unit (`vivado/spike_top.bit`, SYSCTRL version 1.1); on an older bitstream the
+firmware refuses to classify.
 
-| | Previous default (Damien, int8; rebuilt with GCC 13.2) | QAT int4 packed (default) |
+| | Previous default (Damien, int8; rebuilt with GCC 13.2) | QAT int4 packed + MAC unit (default, V5) |
 |---|---|---|
 | Test accuracy (integer model) | 98.07 % | 98.47 % |
 | Test F1 / balanced accuracy | 85.71 % / 93.27 % | 88.19 % / 92.83 % |
 | Model parameters | 6,440 B | 3,368 B |
-| Firmware binary | 8,140 B | 5,304 B |
-| PicoRV32 inference (board, 40 vectors) | 1,037,909 cycles, 10.38 ms | 800,722 cycles, 8.01 ms |
-| Ethernet round trip (mean) | 14.7 ms | 12.4 ms |
+| Firmware binary | 8,228 B | 5,412 B |
+| PicoRV32 inference (board, 40 vectors) | 1,037,909 cycles, 10.38 ms | 376,958 cycles, 3.77 ms |
+| Layer 1 alone | — | 63,801 cycles |
 | Board vectors matching the integer model | 40/40 | 40/40 |
 
-Most of the speed-up comes from processing several weights per loop pass;
-storing the weights in 4 bits instead of 8 adds about 2.6 % on top of an
-unrolled int8 control loop. The full comparison (post-training rounding at
-8-2 bits, QAT vs a fine-tuning control, firmware variants V0-V3 and their
-board measurements) is in `research/results/quant/`.
+### All firmware variants
+
+Every variant is built by `research/build_quant_firmware.sh` and checked
+natively by `research/check_firmware_host.py`. Board numbers are the mean
+over the 40 vectors, all 40/40 correct (`research/results/quant/board/`).
+
+| Variant | Weights in BRAM | Layer-1 loop | Layer 1 (cycles) | Total | Time |
+|---|---|---|---|---|---|
+| V0 int8 | int8, 1 per byte | `lb` per weight (Damien's loop) | 726,225 | 1,039,135 | 10.39 ms |
+| V0 int4 | int4, 1 per byte | `lb` per weight | — | 1,039,198 | 10.39 ms |
+| V1 int8 | int8, 1 per byte | unrolled 4x (control) | — | 822,416 | 8.22 ms |
+| V2 int8 | int8, packed 4/word | `lw` + shifts | — | 846,044 | 8.46 ms |
+| V3 int4 | int4, packed 8/word | `lw` + shifts | 487,650 | 800,967 | 8.01 ms |
+| V4 int8 | int8, packed 4/word | `lw` + `KW_MAC4` (MAC unit) | 117,561 | 430,486 | 4.30 ms |
+| **V5 int4** | int4, packed 8/word | `lw` + `KW_MAC8` (MAC unit) | **63,801** | **376,958** | **3.77 ms** |
+
+To deploy another variant, build the variants with
+`research/build_quant_firmware.sh` and copy one over the default, e.g.
+`cp research/results/quant/build/v3_int4.bin ../pynqz2_riscv_flow/firmware/keyword.bin`
+(each `.bin` already contains its own int8 or int4 weights).
 
 Damien's int8 model stays reproducible: it is archived in
 `research/results/sheila_v2_deployment/keyword_model.h`, and building
@@ -85,8 +103,12 @@ The current research plan and full results are in
 | `research/quant_sweep.py` | Post-training weight rounding sweep (8-2 bits) |
 | `research/qat_sweep.py` | Quantization-aware fine-tuning vs a float fine-tuning control |
 | `research/export_quant.py` | Packed firmware headers and board vectors for QAT models |
-| `research/build_quant_firmware.sh` | Builds the firmware loop variants V0-V3 |
+| `research/build_quant_firmware.sh` | Builds the firmware loop variants V0-V5 |
 | `research/check_firmware_host.py` | Runs every variant natively against the integer model |
+| `research/board_benchmark_variants.sh` | Runs the 40 vectors on the board for chosen variants (cycles + layer-1 cycles) |
+| `../pynqz2_riscv_flow/rtl/kw_mac_pcpi.v` | MAC co-processor on the PicoRV32 PCPI port (custom instructions) |
+| `../pynqz2_riscv_flow/firmware/kw_mac.h` | C wrappers for the custom instructions (+ C model for host checks) |
+| `../pynqz2_riscv_flow/sim/tb_kw_mac.v`, `run_tb_kw_mac.sh` | Unit testbench for the MAC unit (Vivado xsim) |
 | `../pynqz2_riscv_flow/firmware/keyword_main.c` | Integer LIF inference and one-second LED control |
 | `../pynqz2_riscv_flow/firmware/keyword_model.h` | Generated quantized weights (default: QAT int4, packed) |
 | `../pynqz2_riscv_flow/host/keyword_bridge.py` | Board-side TCP/BRAM/mailbox bridge |
@@ -172,7 +194,7 @@ sweep above written to `research/results/repro/frontend_sweep_sheila_v2_repro.js
 python research/quant_sweep.py              # post-training rounding, 8-2 bits
 python research/qat_sweep.py                # QAT vs fine-tuning control
 python research/export_quant.py             # packed headers + board vectors
-research/build_quant_firmware.sh            # firmware variants V0-V3
+research/build_quant_firmware.sh            # firmware variants V0-V5
 python research/check_firmware_host.py      # 40/40 natively, every variant
 cp research/results/quant/export_int4/keyword_model.h ../pynqz2_riscv_flow/firmware/
 make -C ../pynqz2_riscv_flow/firmware keyword.bin

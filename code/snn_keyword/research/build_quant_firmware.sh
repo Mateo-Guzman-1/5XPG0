@@ -4,7 +4,7 @@
 # touches firmware/keyword.bin or firmware/keyword_model.h.
 #
 #   name          loop (KW_VARIANT)            model
-#   default       auto (no defines at all)     firmware/keyword_model.h (QAT int4 -> loop 3)
+#   default       auto (no defines at all)     firmware/keyword_model.h (QAT int4 -> loop 5)
 #   v0_damien     0  one lb per weight         Damien's original model (sheila_v2_deployment)
 #   v0_int8       0  one lb per weight         export_int8
 #   v1_int8       1  unrolled 4x, lb           export_int8

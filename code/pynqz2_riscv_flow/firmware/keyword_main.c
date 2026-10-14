@@ -25,10 +25,10 @@
 // Variants 4 and 5 need the bitstream with the MAC unit (rtl/kw_mac_pcpi.v,
 // SYSCTRL VERSION >= 1.1); on an older one every classify is refused.
 // Without -DKW_VARIANT the model header decides: a 4-bit packed model (the
-// default QAT int4 model) uses loop 3, any other model uses loop 0.
+// default QAT int4 model) uses loop 5 (MAC unit), any other model uses loop 0.
 #ifndef KW_VARIANT
 #if defined(KW_WEIGHT_BITS) && KW_WEIGHT_BITS == 4
-#define KW_VARIANT 3
+#define KW_VARIANT 5
 #else
 #define KW_VARIANT 0
 #endif
