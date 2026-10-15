@@ -9,10 +9,11 @@
      (accuracy, hits, misses, false alarms).
 
 Everything else (network, encoding, training loop) is the skeleton, and the
-default settings are the skeleton's except EPOCHS = 10 (chosen by the epoch
-sweep), so a run with no options trains the best network so far. The
-skeleton BASELINE that training experiments (epochs, learning rate, surrogate
-gradient, ...) are compared against is:  python train_sheila.py --epochs 1
+default settings are the skeleton's except EPOCHS = 10 and SLOPE = 5
+(chosen by the epoch and surrogate-slope sweeps), so a run with no options
+trains the best network so far. The skeleton BASELINE that training
+experiments (epochs, learning rate, surrogate gradient, ...) are compared
+against is:  python train_sheila.py --epochs 1 --slope 25
 Sections that differ from the skeleton are marked "# CHANGED" or "# NEW".
 
 Run one experiment (anything not given keeps the skeleton value):
@@ -66,6 +67,8 @@ BATCH = 16
 EPOCHS = 10          # chosen by the epoch sweep (skeleton value was 1:
                      # under-trained; beyond 10 validation stays flat)
 LR = 1e-3
+SLOPE = 5.0          # surrogate slope, chosen by the slope sweep (skeleton
+                     # value was 25: fewer neurons get a learning signal)
 SEED = 0             # training seed: initial weights + shuffling order
 OUT_DIR = "runs"
 # (these defaults can be overridden per run from the command line, see main)
@@ -185,8 +188,8 @@ class SpeechCommandsSheila(torch.utils.data.Dataset):
 def make_surrogate(name, slope):
     """Surrogate-gradient function used in the backward pass.
 
-    fast_sigmoid is the skeleton default (slope 25). 'slope' sets how steep
-    the smooth curve is: steeper = closer to the real step, but fewer neurons
+    fast_sigmoid is the skeleton default (slope 25 there; now SLOPE). 'slope'
+    sets how steep the smooth curve is: steeper = closer to the real step, but fewer neurons
     get a learning signal.
     """
     if name == "fast_sigmoid":
@@ -283,7 +286,7 @@ def fmt(m):
 def parse_args():
     """NEW: every TRAINING choice can be set per run; defaults = skeleton."""
     p = argparse.ArgumentParser(description="train the sheila SNN once")
-    p.add_argument("--name", default="epochs10",
+    p.add_argument("--name", default="ep10_slope5",
                    help="run name = output folder runs/<name>/")
     p.add_argument("--note", default="",
                    help="why you ran this (hypothesis), saved with the results")
@@ -292,7 +295,7 @@ def parse_args():
     p.add_argument("--batch", type=int, default=BATCH, help="batch size")
     p.add_argument("--surrogate", default="fast_sigmoid",
                    choices=["fast_sigmoid", "sigmoid", "atan"])
-    p.add_argument("--slope", type=float, default=25.0,
+    p.add_argument("--slope", type=float, default=SLOPE,
                    help="surrogate steepness (atan: alpha, default 2 there)")
     p.add_argument("--scheduler", default="none", choices=["none", "cosine"],
                    help="cosine: learning rate shrinks smoothly to 0 by the "
