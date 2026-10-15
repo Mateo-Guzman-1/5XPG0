@@ -42,7 +42,28 @@ The current research plan and full results are in
 [`research/SHEILA_V2_PLAN.md`](research/SHEILA_V2_PLAN.md) and
 [`research/SHEILA_V2_REPORT.md`](research/SHEILA_V2_REPORT.md).
 
-## Files
+## Encoding reproducibility checks
+
+`research/verify_encoding_reproducibility.py` evaluates 61 unique configurations
+with spectral fidelity, landmark proxies, Fisher/Bhattacharyya separation and
+a nearest-centroid probe with speaker bootstrap. It also evaluates deployed-model
+occlusion and five candidates with ten matched training seeds (12 epochs,
+4096 samples per epoch, batch size 128), saving per-clip margins and thresholds.
+Results are in `research/results/encoding_reproducibility.json` and the matching
+`encoding_reproducibility_predictions.npz`. The baseline reaches 98.35% mean
+accuracy and 87.46% mean F1; 20 bands give 87.52% F1, a paired difference of
+0.06 points (95% interval -1.26 to 1.37). This supports the compact baseline
+without establishing a unique accuracy optimum. The 16-band 300–6500 Hz
+control has a -1.61 point difference (-2.69 to -0.54); majority-vote McNemar
+tests measure a different outcome and none pass Holm correction.
+
+`research/benchmark_reproducibility_board.py` compiles the five seed-zero
+models, checks 40 vectors each on the PYNQ, and restores the baseline startup
+service. All 200 reference vectors matched. Landmark measures are approximate
+time-frequency proxies, not phoneme-aligned evidence; fidelity and probe
+scores are diagnostic measures, not accuracy upper bounds.
+
+## File index
 
 | File | Purpose |
 |---|---|
