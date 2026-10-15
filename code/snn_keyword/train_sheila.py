@@ -9,9 +9,10 @@
      (accuracy, hits, misses, false alarms).
 
 Everything else (network, encoding, training loop) is the skeleton, and the
-default settings are the skeleton's, so a run with no options is the
-BASELINE that training experiments (epochs, learning rate, surrogate
-gradient, ...) are compared against.
+default settings are the skeleton's except EPOCHS = 10 (chosen by the epoch
+sweep), so a run with no options trains the best network so far. The
+skeleton BASELINE that training experiments (epochs, learning rate, surrogate
+gradient, ...) are compared against is:  python train_sheila.py --epochs 1
 Sections that differ from the skeleton are marked "# CHANGED" or "# NEW".
 
 Run one experiment (anything not given keeps the skeleton value):
@@ -62,7 +63,8 @@ N_HIDDEN = 64
 N_CLASSES = 2        # 0 = not "sheila", 1 = "sheila"
 N_TIMESTEPS = 25     # simulation steps per sample (rate encoding)
 BATCH = 16
-EPOCHS = 1           # <-- skeleton value: the baseline is under-trained
+EPOCHS = 10          # chosen by the epoch sweep (skeleton value was 1:
+                     # under-trained; beyond 10 validation stays flat)
 LR = 1e-3
 SEED = 0             # training seed: initial weights + shuffling order
 OUT_DIR = "runs"
@@ -281,7 +283,7 @@ def fmt(m):
 def parse_args():
     """NEW: every TRAINING choice can be set per run; defaults = skeleton."""
     p = argparse.ArgumentParser(description="train the sheila SNN once")
-    p.add_argument("--name", default="baseline",
+    p.add_argument("--name", default="epochs10",
                    help="run name = output folder runs/<name>/")
     p.add_argument("--note", default="",
                    help="why you ran this (hypothesis), saved with the results")
