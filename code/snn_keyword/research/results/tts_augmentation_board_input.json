@@ -1,0 +1,232 @@
+{
+  "paired_ten_seed": {
+    "summaries": {
+      "tts_00pct": {
+        "config": {
+          "bits": 8,
+          "bands": 8,
+          "time_bins": 16,
+          "low_hz": 300,
+          "high_hz": 3400,
+          "duration_ms": 1000,
+          "rms_gate_u6": 3000,
+          "rms_full_scale_u6": 20000,
+          "band_mapping": "equal",
+          "fft_window_ms": 25,
+          "fft_hop_ms": 10,
+          "quantizer": "linear",
+          "feature_mode": "absolute"
+        },
+        "checkpoint": "E:\\URE\\5XPG0-tts\\code\\snn_keyword\\data\\tts_models\\tts_00pct_seed0.pt",
+        "accuracy": {
+          "mean": 0.9834682440846825,
+          "std": 0.002093375097716001,
+          "ci95_low": 0.9819708377908969,
+          "ci95_high": 0.9849656503784681,
+          "min": 0.9803860523038606,
+          "max": 0.9863013698630136
+        },
+        "f1": {
+          "mean": 0.8746084071834431,
+          "std": 0.012370204096530647,
+          "ci95_low": 0.8657599110444727,
+          "ci95_high": 0.8834569033224136,
+          "min": 0.8551724137931035,
+          "max": 0.8905472636815921
+        }
+      },
+      "tts_05pct": {
+        "config": {
+          "bits": 8,
+          "bands": 8,
+          "time_bins": 16,
+          "low_hz": 300,
+          "high_hz": 3400,
+          "duration_ms": 1000,
+          "rms_gate_u6": 3000,
+          "rms_full_scale_u6": 20000,
+          "band_mapping": "equal",
+          "fft_window_ms": 25,
+          "fft_hop_ms": 10,
+          "quantizer": "linear",
+          "feature_mode": "absolute"
+        },
+        "checkpoint": "E:\\URE\\5XPG0-tts\\code\\snn_keyword\\data\\tts_models\\tts_05pct_seed6.pt",
+        "accuracy": {
+          "mean": 0.9828767123287673,
+          "std": 0.0017854556386555959,
+          "ci95_low": 0.9815995630431401,
+          "ci95_high": 0.9841538616143944,
+          "min": 0.9794520547945206,
+          "max": 0.9853673723536738
+        },
+        "f1": {
+          "mean": 0.8682702539678264,
+          "std": 0.01287542855134299,
+          "ci95_low": 0.8590603671353124,
+          "ci95_high": 0.8774801408003404,
+          "min": 0.8457943925233645,
+          "max": 0.8904428904428905
+        }
+      }
+    }
+  },
+  "physical_board_shortlist": {
+    "board": "192.168.2.99",
+    "clock_hz": 100000000,
+    "candidate_count": 2,
+    "all_reference_vectors_matched": true,
+    "candidates": {
+      "tts_00pct": {
+        "config": {
+          "bits": 8,
+          "bands": 8,
+          "time_bins": 16,
+          "low_hz": 300,
+          "high_hz": 3400,
+          "duration_ms": 1000,
+          "rms_gate_u6": 3000,
+          "rms_full_scale_u6": 20000,
+          "band_mapping": "equal",
+          "fft_window_ms": 25,
+          "fft_hop_ms": 10,
+          "quantizer": "linear",
+          "feature_mode": "absolute"
+        },
+        "ten_seed": {
+          "accuracy": {
+            "mean": 0.9834682440846825,
+            "std": 0.002093375097716001,
+            "ci95_low": 0.9819708377908969,
+            "ci95_high": 0.9849656503784681,
+            "min": 0.9803860523038606,
+            "max": 0.9863013698630136
+          },
+          "f1": {
+            "mean": 0.8746084071834431,
+            "std": 0.012370204096530647,
+            "ci95_low": 0.8657599110444727,
+            "ci95_high": 0.8834569033224136,
+            "min": 0.8551724137931035,
+            "max": 0.8905472636815921
+          }
+        },
+        "integer_validation": {
+          "tp": 174,
+          "fp": 16,
+          "fn": 30,
+          "tn": 2484,
+          "accuracy": 0.9829881656804734,
+          "precision": 0.9157894736842105,
+          "recall": 0.8529411764705882,
+          "f1": 0.883248730964467,
+          "balanced_accuracy": 0.9232705882352941
+        },
+        "integer_test": {
+          "tp": 180,
+          "fp": 14,
+          "fn": 32,
+          "tn": 2986,
+          "accuracy": 0.9856787048567871,
+          "precision": 0.9278350515463918,
+          "recall": 0.8490566037735849,
+          "f1": 0.8866995073891626,
+          "balanced_accuracy": 0.9221949685534592
+        },
+        "host_feature_ms_per_clip_mean": 0.5014221353955387,
+        "host_feature_ms_per_clip_min": 0.4046890625204469,
+        "host_feature_ms_per_clip_max": 0.6392984374770094,
+        "elf_text_bytes": 8192,
+        "elf_data_bytes": 0,
+        "elf_bss_bytes": 24,
+        "elf_linked_bytes": 8216,
+        "firmware_binary_bytes": 8192,
+        "label": "tts_00pct",
+        "vectors": 400,
+        "score_mismatches": 0,
+        "cycles_min": 1033200,
+        "cycles_mean": 1038533.525,
+        "cycles_max": 1048862,
+        "milliseconds_mean_at_100mhz": 10.38533525,
+        "milliseconds_max_at_100mhz": 10.48862,
+        "ethernet_roundtrip_ms_mean": 13.193796500308963,
+        "ethernet_roundtrip_ms_max": 14.427300004172139
+      },
+      "tts_05pct": {
+        "config": {
+          "bits": 8,
+          "bands": 8,
+          "time_bins": 16,
+          "low_hz": 300,
+          "high_hz": 3400,
+          "duration_ms": 1000,
+          "rms_gate_u6": 3000,
+          "rms_full_scale_u6": 20000,
+          "band_mapping": "equal",
+          "fft_window_ms": 25,
+          "fft_hop_ms": 10,
+          "quantizer": "linear",
+          "feature_mode": "absolute"
+        },
+        "ten_seed": {
+          "accuracy": {
+            "mean": 0.9828767123287673,
+            "std": 0.0017854556386555959,
+            "ci95_low": 0.9815995630431401,
+            "ci95_high": 0.9841538616143944,
+            "min": 0.9794520547945206,
+            "max": 0.9853673723536738
+          },
+          "f1": {
+            "mean": 0.8682702539678264,
+            "std": 0.01287542855134299,
+            "ci95_low": 0.8590603671353124,
+            "ci95_high": 0.8774801408003404,
+            "min": 0.8457943925233645,
+            "max": 0.8904428904428905
+          }
+        },
+        "integer_validation": {
+          "tp": 178,
+          "fp": 16,
+          "fn": 26,
+          "tn": 2484,
+          "accuracy": 0.9844674556213018,
+          "precision": 0.9175257731958762,
+          "recall": 0.8725490196078431,
+          "f1": 0.8944723618090452,
+          "balanced_accuracy": 0.9330745098039216
+        },
+        "integer_test": {
+          "tp": 187,
+          "fp": 26,
+          "fn": 25,
+          "tn": 2974,
+          "accuracy": 0.9841220423412205,
+          "precision": 0.8779342723004695,
+          "recall": 0.8820754716981132,
+          "f1": 0.88,
+          "balanced_accuracy": 0.9367044025157232
+        },
+        "host_feature_ms_per_clip_mean": 0.48201015620937443,
+        "host_feature_ms_per_clip_min": 0.46609999992597295,
+        "host_feature_ms_per_clip_max": 0.4980499999192034,
+        "elf_text_bytes": 8192,
+        "elf_data_bytes": 0,
+        "elf_bss_bytes": 24,
+        "elf_linked_bytes": 8216,
+        "firmware_binary_bytes": 8192,
+        "label": "tts_05pct",
+        "vectors": 400,
+        "score_mismatches": 0,
+        "cycles_min": 1033991,
+        "cycles_mean": 1037698.27,
+        "cycles_max": 1044828,
+        "milliseconds_mean_at_100mhz": 10.376982700000001,
+        "milliseconds_max_at_100mhz": 10.44828,
+        "ethernet_roundtrip_ms_mean": 13.748622499260819,
+        "ethernet_roundtrip_ms_max": 227.95790000236593
+      }
+    }
+  }
+}

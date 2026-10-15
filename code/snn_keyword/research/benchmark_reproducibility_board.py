@@ -14,7 +14,7 @@ import numpy as np
 
 import benchmark_extended_sweep_board as board
 import extended_encoding_sweep as sweep
-from export_extended_candidate import export_candidate
+from export_extended_candidate import export_candidate, integer_counts, quantize_weights
 
 
 def main() -> int:
@@ -28,6 +28,7 @@ def main() -> int:
     parser.add_argument("--dataset", type=Path, required=True)
     parser.add_argument("--cache-dir", type=Path, required=True)
     parser.add_argument("--models", type=Path, required=True)
+    parser.add_argument("--extra-vectors", type=Path, help="Optional NPZ with float x, labels y and paths for additional FPGA checks")
     parser.add_argument(
         "--output",
         type=Path,
@@ -93,12 +94,24 @@ def main() -> int:
                 cfg = sweep.EncodingConfig(**summary["config"])
                 key = cfg.key
                 print(f"board {index}/{len(summaries)} {label}", flush=True)
-                checkpoint = args.models / f"{key}_seed0.pt"
+                checkpoint = Path(summary.get("checkpoint", args.models / f"{key}_seed0.pt"))
                 cache = args.cache_dir / f"{key}.npy"
                 candidate = args.exports / label
                 exported = export_candidate(
                     checkpoint, args.dataset, "sheila", cache, candidate
                 )
+                if args.extra_vectors:
+                    import torch
+                    with np.load(candidate / "board_vectors.npz") as original:
+                        vectors = {name: original[name] for name in original.files}
+                    with np.load(args.extra_vectors) as extra:
+                        state = torch.load(checkpoint, map_location="cpu", weights_only=True)["state_dict"]
+                        counts = integer_counts(quantize_weights(state), extra["x"])
+                        vectors["x"] = np.concatenate([vectors["x"], np.rint(extra["x"] * 255).astype(np.uint8)])
+                        vectors["y"] = np.r_[vectors["y"], extra["y"]]
+                        vectors["counts"] = np.concatenate([vectors["counts"], counts])
+                        vectors["paths"] = np.r_[vectors["paths"], extra["paths"]]
+                    np.savez_compressed(candidate / "board_vectors.npz", **vectors)
                 shutil.copyfile(candidate / "keyword_model.h", firmware / "keyword_model.h")
                 sizes = board.build_firmware(firmware, args.bash)
                 shutil.copyfile(firmware / "keyword.bin", candidate / "keyword.bin")

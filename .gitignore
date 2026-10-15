@@ -65,6 +65,7 @@ code/snn_keyword/research/results/extended_encoding_board_exports/
 code/snn_keyword/research/results/extended_board_exports/
 code/snn_keyword/research/results/frontend_board_exports/
 code/snn_keyword/research/results/*_training_progress.json
+code/snn_keyword/research/results/tts_augmentation_validation.json
 
 # Build artifacts — keep the sources and the single released bitstream only
 code/pynqz2_riscv_flow/firmware/*.o

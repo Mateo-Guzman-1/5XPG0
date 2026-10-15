@@ -42,7 +42,19 @@ The current research plan and full results are in
 [`research/SHEILA_V2_PLAN.md`](research/SHEILA_V2_PLAN.md) and
 [`research/SHEILA_V2_REPORT.md`](research/SHEILA_V2_REPORT.md).
 
-## Encoding reproducibility checks
+## TTS hard-negative training
+
+The local Kokoro augmentation experiment is described in
+[`research/TTS_AUGMENTATION.md`](research/TTS_AUGMENTATION.md). It adds synthetic
+Sheila positives and nine confusing words/phrases using the same generation
+pipeline. Voices are disjoint across training, validation and test. The real
+Speech Commands benchmark is retained alongside a separate 360-clip TTS test
+set. `research/generate_tts_confusables.py` builds the corpus and
+`research/train_tts_confusables.py` compares fixed-budget sampling mixtures
+over ten seeds. Synthetic performance should be reported separately from
+real-speech generalization.
+
+## Encoding reproducibility results
 
 `research/verify_encoding_reproducibility.py` evaluates 61 unique configurations
 with spectral fidelity, landmark proxies, Fisher/Bhattacharyya separation and
