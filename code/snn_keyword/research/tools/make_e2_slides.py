@@ -4,8 +4,10 @@ Builds research/reports/E2_network_size_slides.pptx from research/results/E2/sum
 native PowerPoint charts and shapes in theme colors (editable; pasted into another deck
 with "Use destination theme", they take that deck's colors and fonts), titles in title
 placeholders, and the spoken text in the speaker notes. No introduction or conclusion
-slide: the five slides are one section of a larger presentation. Processing time is the
-worst case of the plain RV32IM firmware, the same variant on every slide.
+slide: the five slides are one section of a larger presentation. A sixth, backup slide in
+its own section explains how accuracy was measured (confusion matrix of the deployed
+model, from quality/h95.json), for questions. Processing time is the worst case of the
+plain RV32IM firmware, the same variant on every slide.
 Needs python-pptx (pip install python-pptx).
 
     make_e2_slides.py [--results research/results/E2] [--out research/reports/E2_network_size_slides.pptx]
@@ -93,8 +95,9 @@ def apply_theme(prs):
                 ph.left, ph.top, ph.width, ph.height = Inches(0.6), Inches(0.4), Inches(12.13), Inches(0.9)
 
 
-def add_section(prs, name):
-    """One PowerPoint section around all slides, so the block stays together when merged."""
+def add_sections(prs, groups):
+    """PowerPoint sections, groups = [(name, number of slides)] in slide order, so that each
+    block stays together when the slides are merged into another deck."""
     p14 = 'http://schemas.microsoft.com/office/powerpoint/2010/main'
     pres = prs.part._element
     ext_lst = pres.find(qn('p:extLst'))
@@ -102,10 +105,12 @@ def add_section(prs, name):
         ext_lst = etree.SubElement(pres, qn('p:extLst'))
     ext = etree.SubElement(ext_lst, qn('p:ext'), uri='{521415D9-36F7-43E2-AB2F-B90AF26B5E84}')
     sections = etree.SubElement(ext, f'{{{p14}}}sectionLst', nsmap={'p14': p14})
-    section = etree.SubElement(sections, f'{{{p14}}}section', name=name, id='{' + str(uuid.uuid4()).upper() + '}')
-    ids = etree.SubElement(section, f'{{{p14}}}sldIdLst')
-    for sld in pres.find(qn('p:sldIdLst')):
-        etree.SubElement(ids, f'{{{p14}}}sldId', id=sld.get('id'))
+    slides = iter(pres.find(qn('p:sldIdLst')))
+    for name, count in groups:
+        section = etree.SubElement(sections, f'{{{p14}}}section', name=name, id='{' + str(uuid.uuid4()).upper() + '}')
+        ids = etree.SubElement(section, f'{{{p14}}}sldIdLst')
+        for _ in range(count):
+            etree.SubElement(ids, f'{{{p14}}}sldId', id=next(slides).get('id'))
 
 
 def new_slide(prs, title, notes):
@@ -201,6 +206,37 @@ def stat(slide, x, y, w, h, value, label, key=None, value_size=36, value_w=None,
 
 def footnote(slide, words, y=6.85):
     text(slide, 0.6, y, 12.13, 0.3, words, size=11, theme=INK, brightness=0.4, name='Footnote')
+
+
+def table(slide, x, y, widths, heights, cells, name='Table'):
+    """Native table; cells = rows of (paragraphs, options) with options fill, fill_brightness,
+    theme (text color), size and bold of the first paragraph (later ones: 12 pt), align."""
+    frame = slide.shapes.add_table(len(heights), len(widths), Inches(x), Inches(y), Inches(sum(widths)),
+                                   Inches(sum(heights)))
+    frame.name = name
+    tbl = frame.table
+    tbl.first_row = tbl.horz_banding = False   # every cell gets its own fill below
+    for j, w in enumerate(widths):
+        tbl.columns[j].width = Inches(w)
+    for i, h in enumerate(heights):
+        tbl.rows[i].height = Inches(h)
+    for i, row in enumerate(cells):
+        for j, (paragraphs, opts) in enumerate(row):
+            cell = tbl.cell(i, j)
+            cell.fill.solid()
+            color(cell.fill.fore_color, opts.get('fill', PANEL), opts.get('fill_brightness', 0.0))
+            cell.vertical_anchor = MSO_ANCHOR.MIDDLE
+            cell.margin_left = cell.margin_right = Inches(0.18)
+            cell.margin_top = cell.margin_bottom = Inches(0.05)
+            for k, words in enumerate(paragraphs if isinstance(paragraphs, list) else [paragraphs]):
+                p = cell.text_frame.paragraphs[0] if k == 0 else cell.text_frame.add_paragraph()
+                p.alignment = opts.get('align', PP_ALIGN.LEFT)
+                run = p.add_run()
+                run.text = words
+                run.font.size = Pt(opts.get('size', 16) if k == 0 else 12)
+                run.font.bold = opts.get('bold', False) if k == 0 else False
+                color(run.font.color, opts.get('theme', INK2), 0.0 if k == 0 else 0.3)
+    return tbl
 
 
 # ---------------------------------------------------------------- charts
@@ -439,7 +475,7 @@ def slide_quality(prs, rows):
         {'name': '"Sheila" detected, live stream (2 of 3)', 'x': h, 'y': live, 'theme': SERIES[1],
          'marker': XL_MARKER_STYLE.SQUARE, 'sd': [r['live_2of3_detected_sd'] for r in rows],
          'labels': {0: (pct(live[0]), XL_LABEL_POSITION.LEFT), len(h) - 1: pct(live[-1])}}],
-        ymax=1.0, ymajor=0.2, yfmt='0%', ytitle='score')
+        ymax=1.0, ymajor=0.2, yfmt='0%', ytitle='F1 score / detection rate (%)')
     stat(s, 0.6, 5.55, 5.9, 1.15, f'{pct(f1[0])} → {pct(f1[1])}', 'F1 score from 8 to 16 neurons', value_size=30,
          value_w=2.7, name='Steep part')
     stat(s, 6.83, 5.55, 5.9, 1.15, 'flat after 16', 'differences smaller than the spread of 3 training runs',
@@ -501,6 +537,54 @@ def slide_efficient(prs, rows):
                 'differences to 95 are within the spread of 3 runs.')
 
 
+def slide_backup(prs, model):
+    """For questions: the confusion matrix of the deployed model and how F1 and live detection are computed."""
+    c, live = model['test']['clips'], model['test']['live']['two_of_three']
+    tp, fp, fn, tn = c['tp'], c['fp'], c['fn'], c['tn']
+    total = tp + fp + fn + tn
+    recall, precision = tp / (tp + fn), tp / (tp + fp)
+    f1 = 2 * precision * recall / (precision + recall)
+    s = new_slide(prs, 'Backup: how accuracy was measured',
+                  'We measured accuracy with the F1 score on 11,005 test recordings from speakers the network '
+                  'never heard. F1 combines recall, how many real "Sheila"s it finds, and precision, how often a '
+                  'detection is actually right. We do not use plain accuracy: 98% of the clips are not "Sheila", '
+                  'so always saying "no" would already score 98%. The second line on the quality chart simulates '
+                  'the live demo: the share of real "Sheila"s that would light the LED.')
+    header = {'fill': INK2, 'theme': T.BACKGROUND_1, 'bold': True, 'size': 15, 'align': PP_ALIGN.CENTER}
+    found = {'fill': SERIES[0], 'fill_brightness': 0.85, 'size': 24, 'bold': True, 'align': PP_ALIGN.CENTER}
+    wrong = {'fill': SERIES[1], 'fill_brightness': 0.85, 'size': 24, 'bold': True, 'align': PP_ALIGN.CENTER}
+    right = {'size': 24, 'bold': True, 'align': PP_ALIGN.CENTER}
+    table(s, 0.6, 1.6, [2.5, 1.9, 1.9], [0.65, 1.1, 1.1], [
+        [('', {'fill': T.BACKGROUND_1}), ('Network says "Sheila"', header), ('Network says "not Sheila"', header)],
+        [(['Really "Sheila"', f'{tp + fn:,} recordings'], {'bold': True}),
+         ([f'{tp:,}', 'found'], found), ([f'{fn:,}', 'missed'], wrong)],
+        [(['Really another word', f'{fp + tn:,} recordings'], {'bold': True}),
+         ([f'{fp:,}', 'false alarms'], wrong), ([f'{tn:,}', 'correctly rejected'], right)]],
+        name='Confusion matrix')
+    text(s, 0.6, 4.55, 6.3, 0.45, f'Deployed model (95 neurons) on the {total:,} test recordings, from speakers '
+         'never heard in training', size=12, theme=INK, brightness=0.3)
+    x0, w = 7.25, 5.48
+    stat(s, x0, 1.6, w, 0.9, f'{100 * recall:.1f}%', ['Recall: "Sheila"s found', f'{tp} / {tp + fn}'],
+         value_size=30, value_w=1.75, name='Recall')
+    stat(s, x0, 2.6, w, 0.9, f'{100 * precision:.1f}%', ['Precision: right detections', f'{tp} / ({tp} + {fp})'],
+         value_size=30, value_w=1.75, name='Precision')
+    stat(s, x0, 3.6, w, 0.9, f'{100 * f1:.1f}%', ['F1: combines both', '2 × P × R / (P + R)'],
+         value_size=30, value_w=1.75, name='F1')
+    notes = [('Why not plain accuracy?',
+              f'{100 * (fp + tn) / total:.0f}% of the clips are not "Sheila": always answering "no" already scores '
+              f'{100 * (fp + tn) / total:.1f}%. Ours scores {100 * (tp + tn) / total:.1f}%, which hides the {fn} misses.'),
+             ('Live detection (orange line)',
+              f'Test clips in background noise, cut into 1 s windows every 250 ms; detected if "2 of 3" fires: '
+              f'{100 * live["sheila_detected"]:.0f}% of "Sheila"s found, {100 * live["other_accepted"]:.1f}% of '
+              'other words accepted.')]
+    for (head, body), x in zip(notes, (0.6, 6.75)):
+        card(s, x, 5.1, 5.98, 1.6, name=head)
+        text(s, x + 0.3, 5.3, 5.38, 1.25, [[(head, {'bold': True, 'size': 16, 'theme': INK2, 'brightness': 0})],
+                                           [(body, {'before': 4})]], size=14, theme=INK, brightness=0.2)
+    footnote(s, 'Thresholds are chosen on separate validation recordings, never on the test set. The charts show the '
+                'mean of 3 training runs; this table is the deployed run.')
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--results', type=Path, default=TOOLS.parent / 'results/E2')
@@ -517,7 +601,10 @@ def main():
     slide_quality(prs, rows)
     slide_near_misses(prs, rows)
     slide_efficient(prs, rows)
-    add_section(prs, 'Network size (E2)')
+    # The deployed model: 95 neurons, seed 2 (weights identical to deploy/model.npz, E2 report section 3).
+    deployed = json.loads((a.results / 'quality/h95.json').read_text())['models']['h95_seed2']
+    slide_backup(prs, deployed)
+    add_sections(prs, [('Network size (E2)', 5), ('Network size: backup', 1)])
     a.out.parent.mkdir(parents=True, exist_ok=True)
     prs.save(a.out)
     print(f'Wrote {a.out} ({len(prs.slides)} slides)')

@@ -64,7 +64,8 @@ models are bit-exact on the board. Report: `reports/E2_size_sweep.md`; data: `re
 | Efficient size (validation rule) | **48** (validation F1 0.740 ± 0.003, the best mean) |
 
 Slides: `reports/E2_network_size_slides.pptx`, five slides for about one minute of a larger
-talk (speaker notes contain the script). They are built by `tools/make_e2_slides.py`
+talk (speaker notes contain the script), plus a backup slide for questions (confusion matrix
+of the deployed model: how F1 and live detection are measured). They are built by `tools/make_e2_slides.py`
 (python-pptx, installed in `.venv`).
 
 Conclusions:
