@@ -112,6 +112,34 @@ static const int32_t kw_b2[KW_OUTPUTS] = {{
     path.write_text(text, encoding="ascii", newline="\n")
 
 
+def write_board_audio_features(path: Path, config: sweep.FeatureConfig) -> None:
+    """Write the candidate-specific packet-shape validator used on the board."""
+    text = f'''"""Generated packet validator for a frontend-sweep candidate."""
+import struct
+import numpy as np
+
+N_MELS = {config.bands}
+N_TIME = {sweep.TIME_BINS}
+N_INPUTS = N_MELS * N_TIME
+PACKET_MAGIC = b"KWS1"
+PACKET_HEADER = struct.Struct("<4sIHH")
+
+def unpack_frame(packet):
+    if len(packet) < PACKET_HEADER.size:
+        raise ValueError("packet is shorter than the keyword header")
+    magic, sequence, rows, cols = PACKET_HEADER.unpack_from(packet)
+    if magic != PACKET_MAGIC:
+        raise ValueError("bad packet magic")
+    if (rows, cols) != (N_MELS, N_TIME):
+        raise ValueError(f"unsupported feature shape {{(rows, cols)}}")
+    payload = packet[PACKET_HEADER.size:]
+    if len(payload) != N_INPUTS:
+        raise ValueError(f"expected {{N_INPUTS}} payload bytes, got {{len(payload)}}")
+    return sequence, np.frombuffer(payload, dtype=np.uint8).reshape(rows, cols)
+'''
+    path.write_text(text, encoding="ascii", newline="\n")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("checkpoint", type=Path)
@@ -146,6 +174,7 @@ def main() -> int:
     write_header(
         args.output / "keyword_model.h", params, config, threshold, args.keyword
     )
+    write_board_audio_features(args.output / "audio_features.py", config)
     np.savez_compressed(
         args.output / "board_vectors.npz",
         x=np.rint(np.asarray(x[vector_index]) * 255).astype(np.uint8),

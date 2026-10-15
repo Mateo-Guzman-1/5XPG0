@@ -32,7 +32,7 @@ FFT_WINDOW = 400
 FFT_HOP = 160
 TIME_BINS = 16
 RMS_GATE = 0.003
-RMS_FULL_SCALE = 0.040
+RMS_FULL_SCALE = 0.020
 HIDDEN = 48
 TIMESTEPS = 16
 
@@ -40,16 +40,17 @@ TIMESTEPS = 16
 @dataclass(frozen=True)
 class FeatureConfig:
     bits: int = 8
-    bands: int = 16
-    low_hz: int = 40
-    high_hz: int = 5120
+    bands: int = 8
+    low_hz: int = 300
+    high_hz: int = 3400
     duration_ms: int = 1000
 
     @property
     def key(self) -> str:
         return (
             f"b{self.bits}_f{self.bands}_hz{self.low_hz}-{self.high_hz}_"
-            f"t{self.duration_ms}"
+            f"t{self.duration_ms}_g{round(RMS_GATE * 1_000_000)}_"
+            f"s{round(RMS_FULL_SCALE * 1_000_000)}"
         )
 
     @property
@@ -462,14 +463,20 @@ def main() -> int:
     configs, groups = all_configs()
     features = get_features(paths, configs, args.cache_dir, args.feature_batch)
 
+    checkpoint_dir = args.output.parent / f"{args.output.stem}_models"
+    checkpoint_dir.mkdir(parents=True, exist_ok=True)
     screen = []
     for index, cfg in enumerate(configs, 1):
         print(f"screen {index}/{len(configs)} {cfg.key}", flush=True)
-        run, _ = train_one(
+        run, state = train_one(
             features[cfg.key], labels, split, cfg, 0,
             args.screen_epochs, args.samples_per_epoch, args.train_batch, False,
         )
         screen.append(run)
+        torch.save(
+            {"state_dict": state, "run": run},
+            checkpoint_dir / f"{cfg.key}_screen_seed0.pt",
+        )
 
     by_key = {run["key"]: run for run in screen}
     selected = {}
@@ -496,7 +503,7 @@ def main() -> int:
     confirmation_candidates = [
         replace(BASELINE, bits=value) for value in (3, 4, 6)
     ] + [
-        replace(BASELINE, bands=value) for value in (8, 20, 32)
+        replace(BASELINE, bands=value) for value in (12, 16, 20, 24, 32)
     ] + [
         replace(BASELINE, high_hz=value) for value in (6500, 7600)
     ] + [
@@ -545,8 +552,6 @@ def main() -> int:
         )
 
     confirmation = []
-    checkpoint_dir = args.output.parent / f"{args.output.stem}_models"
-    checkpoint_dir.mkdir(parents=True, exist_ok=True)
     for cfg in selected_configs.values():
         for seed in (0, 1, 2):
             print(f"confirm {cfg.key} seed={seed}", flush=True)
@@ -574,6 +579,7 @@ def main() -> int:
             "rms_full_scale": RMS_FULL_SCALE,
             "selection_metric": "validation_f1",
         },
+        "baseline": BASELINE.key,
         "sweep_groups": groups,
         "screening": screen,
         "selected": selected,

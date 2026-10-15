@@ -23,16 +23,16 @@ FFT_HOP = 160             # 10 ms
 N_MELS = 8                # selected compact frequency-band count
 N_TIME = 16               # fixed board input length
 N_INPUTS = N_MELS * N_TIME
-LOW_HZ = 40
-HIGH_HZ = 5120
+LOW_HZ = 300
+HIGH_HZ = 3400
 
 # Peak-normalising every window makes electrical hiss look as strong as
 # speech.  Preserve spectral shape, but scale it by a logarithmic activity
 # factor so near-silence stays near zero.  The thresholds are deliberately
 # conservative: the 0.003 gate is below roughly 95% of the speech-command
-# clips, while 0.04 is close to the dataset's median speech RMS.
+# clips, while 0.02 is the selected full-scale point from the rebased sweep.
 RMS_GATE = 0.003
-RMS_FULL_SCALE = 0.040
+RMS_FULL_SCALE = 0.020
 
 PACKET_MAGIC = b"KWS1"
 PACKET_HEADER = struct.Struct("<4sIHH")
@@ -83,10 +83,10 @@ def read_wav(path: str | Path) -> np.ndarray:
 
 
 def extract_features(wav: np.ndarray) -> np.ndarray:
-    """Create a fixed 8x16 log-frequency/time map in the range [0, 1].
+    """Create a fixed 8x16 grouped spectral-energy map in the range [0, 1].
 
     This deliberately uses grouped FFT bins rather than a large mel-filterbank
-    dependency. Eight equal groups cover 40 Hz to 5.12 kHz, and 98 short-time
+    dependency. Eight equal groups cover 300 Hz to 3.4 kHz, and 98 short-time
     frames are mean-pooled into sixteen time bins.
     """
     wav = _fit_one_second(wav)

@@ -21,10 +21,10 @@ FFT_WINDOW = 400
 FFT_HOP = 160
 N_BANDS = 8
 N_TIME = 16
-LOW_HZ = 40
-HIGH_HZ = 5120
+LOW_HZ = 300
+HIGH_HZ = 3400
 RMS_GATE = 0.003
-RMS_FULL_SCALE = 0.040
+RMS_FULL_SCALE = 0.020
 
 
 def read_pcm16(path: Path) -> np.ndarray:

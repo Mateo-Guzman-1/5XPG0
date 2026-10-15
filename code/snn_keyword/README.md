@@ -5,7 +5,7 @@ from Google Speech Commands v2:
 
 ```text
 PC microphone/WAV
-  -> 8x16 log-frequency feature map (40-5120 Hz, 1.0 s, 8 bit)
+  -> 8x16 equal-Hz grouped-energy map (300-3400 Hz, 1.0 s, 8 bit)
   -> uint8 request over ZeroMQ/TCP
   -> PYNQ Linux bridge
   -> dual-port BRAM + mailbox
@@ -23,17 +23,18 @@ The data preparation keeps every v2 `sheila` clip and a deterministic,
 label-balanced sample from all other command directories. The official
 speaker-disjoint split contains 9,606 training, 2,704 validation, and 3,212
 test clips. Across three floating-model seeds, the selected frontend reached
-**98.27% mean test accuracy**. The deployed seed-0 integer model reached
-**98.07% test accuracy**, **85.71% F1**, and **93.27% balanced accuracy**.
+**98.36% mean test accuracy** and **87.60% mean F1**. The deployed seed-0
+integer model reached **98.57% test accuracy**, **88.67% F1**, and **92.22%
+balanced accuracy**.
 
-On synthetic additive noise, the deployed integer recurrence reached **97.38%**
-accuracy at 10 dB SNR and **96.73%** at 5 dB SNR. It produced **0/400** false
+On synthetic additive noise, the deployed integer recurrence reached **98.04%**
+accuracy at 10 dB SNR and **97.23%** at 5 dB SNR. It produced **0/400** false
 accepts on generated background and silence, including **0/100** exact-silence
 frames.
 
 The PYNQ-Z2 reproduced the Python integer spike counts for **40/40** exported
-golden vectors. Mean PicoRV32 inference latency is **10.39 ms** at 100 MHz;
-mean Ethernet request/reply latency was **13.72 ms** on the test connection.
+golden vectors. Mean PicoRV32 inference latency is **10.40 ms** at 100 MHz;
+steady-state Ethernet request/reply latency was **13.68 ms** on the test connection.
 The quantized parameters occupy **6,440 bytes**, the input frame 128 bytes,
 and the complete firmware binary 8,192 bytes.
 
@@ -48,7 +49,9 @@ The current research plan and full results are in
 | `audio_features.py` | Shared WAV/microphone preprocessing and packet format |
 | `research/prepare_speech_commands_v2.py` | Reproducible v2 Sheila subset preparation |
 | `research/frontend_sweep.py` | Encoding sweep and three-seed confirmation |
+| `research/extended_encoding_sweep.py` | Time-bin, activity, mapping, FFT, quantizer, and delta sweeps |
 | `research/export_frontend_candidate.py` | Integer validation and C-header export |
+| `research/benchmark_frontend_sweep_board.py` | Compile and time every primary candidate on the PYNQ |
 | `train_keyword_snn.py` | Legacy Mini Speech Commands training baseline |
 | `pc_keyword_demo.py` | Live microphone or WAV client |
 | `install_keyword_demo.sh` | Builds if needed, deploys, loads, and starts the board chain |
@@ -113,11 +116,16 @@ Set-Location code\snn_keyword
     --keyword sheila `
     --cache-dir .\data\frontend_sweep_cache_sheila_v2 `
     --output .\research\results\frontend_sweep_sheila_v2.json
-.\.venv\Scripts\python.exe .\research\export_frontend_candidate.py `
-    .\research\results\frontend_sweep_sheila_v2_models\b8_f8_hz40-5120_t1000_seed0.pt `
+.\.venv\Scripts\python.exe .\research\extended_encoding_sweep.py `
     --dataset .\data\speech_commands_v2_sheila_subset `
     --keyword sheila `
-    --feature-cache .\data\frontend_sweep_cache_sheila_v2\b8_f8_hz40-5120_t1000.npy `
+    --cache-dir .\data\extended_encoding_cache_sheila_v2 `
+    --output .\research\results\extended_encoding_sweep_sheila_v2.json
+.\.venv\Scripts\python.exe .\research\export_extended_candidate.py `
+    .\research\results\extended_encoding_sweep_sheila_v2_models\b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute_confirm_seed0.pt `
+    --dataset .\data\speech_commands_v2_sheila_subset `
+    --keyword sheila `
+    --feature-cache .\data\extended_encoding_cache_sheila_v2\b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute.npy `
     --output .\research\results\sheila_v2_deployment
 ```
 
@@ -134,7 +142,7 @@ The export uses signed int8 weights, int32 membrane/current state, Q8 leak
 steps. The first-layer current is constant over those steps and is computed
 once per inference, which preserves the recurrence while avoiding repeated
 dot products. The audio frontend rejects RMS levels at or below `0.003` and
-uses a logarithmic activity factor up to RMS `0.04`, so near-silence is not
+uses a logarithmic activity factor up to RMS `0.02`, so near-silence is not
 peak-normalised into a full-strength spectrogram.
 
 ## Interface contract
@@ -144,8 +152,8 @@ peak-normalised into a full-strength spectrogram.
 - BRAM input window: RISC-V/BRAM offset `0x22000`, 128 bytes used.
 - Mailbox command: `MB_CMD_CLASSIFY` (`8`), returning decision, two spike
   counts, and inference cycles.
-- Positive class: output neuron 1 must emit at least two spikes and lead the
-  non-keyword neuron by at least two spikes. Passing that confidence rule
+- Positive class: output neuron 1 must lead the non-keyword neuron by at least
+  three spikes. Passing that confidence rule
   lights all ten LEDs for one second.
 
 Keep `audio_features.py`, the trainer, and the live client together. Training
@@ -155,7 +163,7 @@ mismatch.
 ## Recommended experiment plan
 
 1. Measure precision, recall, false accepts per hour, and missed detections on
-   continuous audio; add temporal debounce on top of the existing two-spike
+   continuous audio; add temporal debounce on top of the existing three-spike
    confidence margin.
 2. Compare direct current input against rate, latency, and delta encoding at a
    fixed memory/latency budget. Report several seeds and confidence intervals.

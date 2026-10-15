@@ -39,6 +39,16 @@ def main() -> int:
     cycles = []
     roundtrip_ms = []
     try:
+        # The bridge imports Python modules and opens the accelerator on its
+        # first request.  Warm it once so request/reply latency represents the
+        # steady-state live path rather than service initialization.
+        warmup = HEADER.pack(
+            b"KWS1", 0xFFFFFFFF, args.bands, args.time_bins
+        ) + x[0].tobytes()
+        socket.send(warmup)
+        warmup_response = socket.recv_json()
+        if "error" in warmup_response:
+            raise RuntimeError(warmup_response["error"])
         for index, frame in enumerate(x):
             packet = HEADER.pack(
                 b"KWS1", index, args.bands, args.time_bins

@@ -3,7 +3,8 @@
 ## Question
 
 Which spectrogram encoding gives the best deployable trade-off among held-out
-accuracy, measured PYNQ latency, and memory for detecting `sheila`?
+accuracy, measured PYNQ latency, memory, and total input bits for detecting
+`sheila`?
 
 ## Dataset and controls
 
@@ -17,6 +18,9 @@ accuracy, measured PYNQ latency, and memory for detecting `sheila`?
   weights, and int32 state.
 - Use a fixed training budget for all one-factor comparisons and confirm
   finalists with seeds 0, 1, and 2.
+- Use one common baseline for every sweep: 8 bands, 16 time bins, 8-bit
+  values, 300-3400 Hz, 1000 ms, a 0.003 RMS silence gate, and 0.020 RMS full
+  scale.
 
 ## Variables
 
@@ -24,9 +28,18 @@ accuracy, measured PYNQ latency, and memory for detecting `sheila`?
    and 256 amplitude levels.
 2. Frequency bands: 8, 12, 16, 20, 24, and 32.
 3. Frequency range: lower cutoffs 40-500 Hz and upper cutoffs 3.4-7.6 kHz,
-   including the existing 40-5120 Hz baseline.
+   including the 40-5120 Hz reference and selected 300-3400 Hz points.
 4. Represented time: 400 through 1600 ms in 100 ms increments, always pooled
    into 16 time bins.
+5. Time bins: 8, 12, 16, 24, and 32.
+6. RMS activity scaling: silence gates 0.0015, 0.003, 0.005, and 0.008 with
+   full-scale RMS values 0.02, 0.04, and 0.08.
+7. Frequency mapping: equal-Hz grouped FFT bins, logarithmic edges, and mel
+   triangular filters.
+8. FFT resolution: valid combinations of 15, 25, and 40 ms windows with 5,
+   10, and 20 ms hops.
+9. Four-bit quantization: linear versus logarithmic code placement.
+10. Temporal channels: absolute energy versus absolute plus delta magnitude.
 
 After the one-factor sweep, measure relevant interactions, especially 4-bit
 precision with the lowest-memory band count.
@@ -42,9 +55,8 @@ integer model selected for deployment.
 
 ### Latency
 
-For every candidate, record first-layer MAC count as a hardware-independent
-scaling proxy. For the deployed candidate, replay 40 golden vectors on the
-100 MHz PYNQ-Z2 and record minimum, mean, and maximum firmware cycles plus
+For every candidate, record first-layer MAC count and replay 40 golden vectors
+on the 100 MHz PYNQ-Z2. Record minimum, mean, and maximum firmware cycles plus
 Ethernet request/reply latency. Time host feature extraction separately.
 
 ### Memory

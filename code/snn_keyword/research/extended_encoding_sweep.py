@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Six additional Sheila frontend sweeps requested after the main study.
+"""Sheila frontend sweeps for the remaining encoding variables.
 
-The experiment keeps the dataset split and SNN controls from frontend_sweep.py
-while varying time bins, activity scaling, frequency-band mapping, STFT
-resolution, four-bit quantization, and temporal-delta features.
+The experiment shares the dataset split and SNN controls with
+frontend_sweep.py while varying time bins, activity scaling, frequency-band
+mapping, STFT resolution, four-bit quantization, and temporal-delta features.
 """
 
 from __future__ import annotations
@@ -32,11 +32,11 @@ class EncodingConfig:
     bits: int = 8
     bands: int = 8
     time_bins: int = 16
-    low_hz: int = 40
-    high_hz: int = 5120
+    low_hz: int = 300
+    high_hz: int = 3400
     duration_ms: int = 1000
     rms_gate_u6: int = 3000
-    rms_full_scale_u6: int = 40_000
+    rms_full_scale_u6: int = 20_000
     band_mapping: str = "equal"
     fft_window_ms: int = 25
     fft_hop_ms: int = 10
@@ -67,6 +67,7 @@ class EncodingConfig:
     def key(self) -> str:
         return (
             f"b{self.bits}_f{self.bands}_tb{self.time_bins}_"
+            f"hz{self.low_hz}-{self.high_hz}_t{self.duration_ms}_"
             f"g{self.rms_gate_u6}_s{self.rms_full_scale_u6}_"
             f"map{self.band_mapping}_w{self.fft_window_ms}_h{self.fft_hop_ms}_"
             f"q{self.quantizer}_m{self.feature_mode}"

@@ -151,10 +151,14 @@ def export_candidate(
     paths, labels, speakers = base.discover_dataset(dataset, keyword)
     split = base.dataset_split(dataset, paths, speakers)
     validation = np.flatnonzero(split == "val")
+    test = np.flatnonzero(split == "test")
 
     validation_counts = integer_counts(params, np.asarray(features[validation]))
     validation_margin = validation_counts[:, 1] - validation_counts[:, 0]
     threshold = base.choose_threshold(labels[validation], validation_margin)
+
+    test_counts = integer_counts(params, np.asarray(features[test]))
+    test_margin = test_counts[:, 1] - test_counts[:, 0]
 
     positive = validation[labels[validation] == 1][:20]
     negative = validation[labels[validation] == 0][:20]
@@ -178,6 +182,7 @@ def export_candidate(
         "integer_validation": base.metrics(
             labels[validation], validation_margin >= threshold
         ),
+        "integer_test": base.metrics(labels[test], test_margin >= threshold),
         "decision_threshold": threshold,
         "vectors": len(vector_index),
         "parameter_bytes": int(sum(value.nbytes for value in params.values())),
