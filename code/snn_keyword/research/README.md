@@ -6,6 +6,8 @@ off against detection quality and latency on the PicoRV32 RISC-V core.
 | File | What it is |
 |---|---|
 | [PLAN.md](PLAN.md) | The full plan: background primer, method rules, and experiments E0–E8 (each with What / How / Why / Expected outcome / steps). |
+| [PLAN_SYNAPSE.md](PLAN_SYNAPSE.md) | Part 2 (current, since 2026-10-17): energy-aware network size and synapse optimisation, experiments S0–S5, for the report. |
+| [ENERGY.md](ENERGY.md) | Energy notebook: raw Vivado power values, the energy calculation, its validation, results per design. |
 | [STATUS.md](STATUS.md) | Progress log: what is done, key numbers so far, open issues, next experiment. |
 | [REPORT_TEMPLATE.md](REPORT_TEMPLATE.md) | The structure every experiment report follows. |
 | `reports/` | One report per experiment (`E2_size_sweep.md`, …) with measured data. |

@@ -281,3 +281,18 @@ How to read it:
   room made for time-aware topologies.
 - **Reuse:** `eval_model.py` and `bench_board.py` serve every later experiment, once new
   model kinds have an integer oracle.
+
+## 9. Addendum (2026-10-17): energy
+E2 had no energy numbers. Experiment S1 of [PLAN_SYNAPSE.md](../PLAN_SYNAPSE.md) adds them from
+two inputs: these 21 models' board cycle counts and Vivado's power estimate of both fabrics. There
+was no retraining and no new board run. Method, raw values and the full table are in
+[ENERGY.md](../ENERGY.md); data are in `results/S1/`.
+- **Energy per inference grows linearly:** 259 µJ per neuron with RV32IM and 11.4 µJ with kdot. At
+  95 neurons that is 24.7 mJ and 1.10 mJ.
+- **The 256 KiB BRAM is about 90 % of the PL's dynamic power** and is the same for every size. With
+  the deployed busy-polling firmware the average PL power is 363 mW (RV32IM) or 367 mW (kdot),
+  whatever the size.
+- **Size only matters for energy if the core idles between windows.** With clock gating, RV32IM
+  ranges from 101 mW (8 neurons) to 189 mW (95 neurons), and kdot from 93 to 97 mW.
+
+![Energy per inference and quality against size](../results/S1/fig_size_energy.png)

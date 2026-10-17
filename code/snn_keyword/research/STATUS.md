@@ -5,17 +5,55 @@ note open issues and the next step.
 
 ## Progress
 
+Since 2026-10-17 the programme follows **part 2, [PLAN_SYNAPSE.md](PLAN_SYNAPSE.md)** (energy-aware
+size and synapse study for the report). All energy numbers are in [ENERGY.md](ENERGY.md).
+
+| Exp | Title | Status | Results |
+|---|---|---|---|
+| S0 | Energy method (Vivado power of both fabrics, energy model) | **done** 2026-10-17 | `results/S0/`, [ENERGY.md](ENERGY.md) |
+| S1 | Network size with energy (E2 re-analysis) | **done** 2026-10-17 | `results/S1/`, [ENERGY.md](ENERGY.md) §4 |
+| S2 | Synapse precision (bits per weight, vs Mark) | **next** | — |
+| S3 | Synapse count (fixed fan-in pruning) | to do | — |
+| S4 | Exact LIF lookup (neuron side) | to do | — |
+| S5 | Synthesis, choice, report section (LaTeX) | to do | — |
+
+Part 1 ([PLAN.md](PLAN.md)):
+
 | Exp | Title | Status | Report |
 |---|---|---|---|
 | E0 | Setup, baseline reproduction, shared tools | tools done (built during E2); report to do | — |
-| E1 | Evaluation sets for near-miss words (user recordings) | **next** (needs the user) | — |
+| E1 | Evaluation sets for near-miss words (user recordings) | deferred (after the report) | — |
 | E2 | Network size sweep (dense, current encoding) | **done** 2026-10-04 | [E2_size_sweep.md](reports/E2_size_sweep.md), background: [E2_network_size_explained.md](reports/E2_network_size_explained.md) |
-| E3 | Input encoding comparison (current / rate / temporal) | to do | — |
-| E4 | Temporal-convolution SNN topology | to do | — |
-| E5 | Hard-negative training data | to do | — |
-| E6 | Weight precision int16 vs int8 | to do | — |
-| E7 | Decision rule and end-to-end latency | to do | — |
-| E8 | Synthesis and conclusion | to do | — |
+| E3 | Input encoding comparison (current / rate / temporal) | deferred (Damien measured current vs rate for "yes") | — |
+| E4 | Temporal-convolution SNN topology | deferred | — |
+| E5 | Hard-negative training data | deferred | — |
+| E6 | Weight precision int16 vs int8 | replaced by S2 | — |
+| E7 | Decision rule and end-to-end latency | deferred | — |
+| E8 | Synthesis and conclusion | replaced by S5 | — |
+
+## S0–S1 results: energy (2026-10-17)
+
+The source is Vivado 2026.1 `report_power` on the routed release RTL of both fabrics (vectorless,
+25 °C, confidence "Medium"). Raw values, formulas and the worked example are in ENERGY.md.
+
+| Quantity | RV32IM | RV32IM + kdot |
+|---|---|---|
+| PL dynamic power (dynamic − PS7) | 0.278 W | 0.282 W |
+| of which block RAM (256 KiB) | 0.251 W | 0.251 W |
+| PL static power (PL rails) | 0.085 W | 0.085 W |
+| Energy per inference, deployed model (95 neurons) | 24.7 mJ | 1.10 mJ |
+| Energy per neuron (linear fit, H ≥ 32) | 259 µJ | 11.4 µJ |
+| Average PL power, busy-polling (deployed firmware), any size | 363 mW | 367 mW |
+| Average PL power, clock-gated idle, H = 8 → 95 | 101 → 189 mW | 93 → 97 mW |
+| Average PL power, clock scaled to the deadline, H = 8 → 95 | 94 → 194 mW | 85 → 90 mW |
+
+- **The BRAM is ~90 % of the PL dynamic power,** read on both ports in every cycle.
+- **With today's busy-polling firmware the network size does not change the energy.**
+- **Savings need an idle mode.** With kdot, even then the network adds only 0.2–4.4 mW to a 93 mW
+  floor (static power plus the AXI interface).
+- **Robust to Vivado's activity assumption:** toggle rates of 6.25 % and 25 % change P_PL,dyn by
+  ≤ 2 mW.
+- **Still open:** the USB-meter validation numbers (ENERGY.md §3, from Pedro).
 
 ## Keyword change to "Sheila" (2026-09-30, before E0)
 
@@ -159,6 +197,12 @@ For reference, the previous "yes" release: test F1 0.8761 (seeds 0.867 ± 0.022)
   three seeds it may be chance.
 
 ## Next step
-Run **E1** (two recording sessions on different days, Sheila near-miss words; needs the
-user, about 15 min each), then E3 with sizes 16 and 48. The short E0 report can be written
-in any session.
+**S2** (synapse precision), then S3 and S4, then S5 and the LaTeX section ([PLAN_SYNAPSE.md](PLAN_SYNAPSE.md)).
+The board must be on for S2–S4.
+
+Code changes for S2/S3 started on 2026-10-17, not yet verified or committed:
+- `model.py`: `pow2_shift`, `fake_quant`, the mask buffer, `quantize` for n-bit and pruned models,
+  `lif_thresholds`;
+- `train_keyword_snn.py`: training-loop hooks.
+
+Part 1's E1 (recordings) is deferred until after the report.

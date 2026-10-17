@@ -23,8 +23,10 @@ turns each 1 s window (every 250 ms) into a 24×32 mel spectrogram (768 bytes,
 Goal: how input encoding and network size trade off against detection quality and
 latency on the RISC-V core. The plan is split into experiments E0–E8, one per session:
 
-1. Read `code/snn_keyword/research/PLAN.md` — Parts A–B (primer, method rules) and the
-   experiment the user asked for.
+1. Read `code/snn_keyword/research/PLAN.md` — Parts A–B (primer, method rules). Since
+   2026-10-17 the current work is part 2, `research/PLAN_SYNAPSE.md` (experiments S0–S5:
+   energy-aware size and synapse study for Pedro's report section); every energy number lives
+   in `research/ENERGY.md`.
 2. Read `code/snn_keyword/research/STATUS.md` — what is done, key numbers, open issues.
 3. Do that experiment only. Finish with its report in `research/reports/`, raw data in
    `research/results/E<n>/`, an updated `STATUS.md`, and a local commit.
@@ -46,8 +48,9 @@ latency on the RISC-V core. The plan is split into experiments E0–E8, one per 
   (+ `-objcopy`, `-size`, `-objdump`). There is **no `make`, no WSL, no Verilator**; build
   with `code/snn_keyword/research/tools/build_firmware.py <model.npz> --out <folder>`
   (the flags of `code/snn_keyword/firmware/Makefile`; `--compare deploy` checks identity).
-- Vivado/xsdb 2026.1: `C:/AMDDesignTools/2026.1/Vivado/bin/` (only needed for RTL changes
-  or the JTAG fallback).
+- Vivado/xsdb 2026.1: `C:/AMDDesignTools/2026.1/Vivado/bin/` (RTL changes, the JTAG
+  fallback, and power reports: `research/tools/power/vivado_power.tcl`, which builds a
+  `git archive` copy under `build/vivado_power/` and works around the space in the repo path).
 - Shell tips: run `ssh`/`scp` commands through the **Bash tool** (PowerShell mangles nested
   quotes). The PowerShell tool may start in a different folder: use absolute paths.
 
