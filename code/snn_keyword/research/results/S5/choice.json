@@ -1,0 +1,54 @@
+{
+  "rule": "mean val F1 >= best - sd, t_max <= 250 ms, memory <= 144 KiB; lowest E_inf",
+  "primary": {
+    "best": "h48_b8/kdot_lut",
+    "best_val_f1": 0.7452122937303326,
+    "best_val_f1_sd": 0.004721404504641161,
+    "threshold": 0.7404908892256914,
+    "qualifying": [
+      "h48_b8/kdot_lut",
+      "h48_b6/kdot_lut",
+      "h48_b4/kdot_lut",
+      "h48_b8/packed",
+      "h48_b4/packed"
+    ],
+    "choice": "h48_b8/kdot_lut"
+  },
+  "sensitivity_pooled_sd": {
+    "pooled_sd": 0.019671593234636887,
+    "best": "h48_b8/kdot_lut",
+    "best_val_f1": 0.7452122937303326,
+    "best_val_f1_sd": 0.004721404504641161,
+    "threshold": 0.7255407004956957,
+    "qualifying": [
+      "h48_b8/kdot_lut",
+      "h48_b6/kdot_lut",
+      "h48_b4/kdot_lut",
+      "h48/kdot_lut",
+      "h95/kdot_lut",
+      "h48_k64/kdot",
+      "h48/kdot",
+      "h80/kdot",
+      "h95/kdot",
+      "h48_k64/sparse",
+      "h48_k128/sparse",
+      "h48_k256/sparse",
+      "h48_b4_k256/sparse",
+      "h48_k512/sparse",
+      "h95_k256/sparse",
+      "h48/lut",
+      "h48/base",
+      "h48_b8/packed",
+      "h48/packed",
+      "h48_b4/packed",
+      "h80/base",
+      "h95/lut",
+      "h95/base"
+    ],
+    "choice": "h48_b8/kdot_lut"
+  },
+  "pareto_val_f1_vs_e_inf": [
+    "h16/kdot_lut",
+    "h48_b8/kdot_lut"
+  ]
+}

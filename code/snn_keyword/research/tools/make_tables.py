@@ -184,13 +184,95 @@ def table_precision(latex):
     return render(header, rows, latex)
 
 
+FIRMWARE = {'base': 'RV32IM', 'lut': 'RV32IM + table', 'packed': 'RV32IM packed', 'sparse': 'RV32IM sparse',
+            'kdot': 'kdot', 'kdot_lut': 'kdot + table'}
+
+
+def describe(d, latex=False):
+    h, bits, k = int(float(d['hidden'])), int(float(d['bits'])), int(float(d['fan_in']))
+    parts = [f'H={h}' if not latex else f'$H={h}$', f'{bits} bit']
+    if k < 768:
+        parts.append(f'K={k}' if not latex else f'$K={k}$')
+    fw = FIRMWARE[d['variant']]
+    return ', '.join(parts) + '; ' + (fw.replace('kdot', r'\texttt{kdot}') if latex else fw)
+
+
+def table_designs(latex):
+    """S5: the Pareto-front designs and reference points."""
+    s = {d['design']: d for d in _rows(ROOT / 'results/S5/design_summary.csv')}
+    choice = json.loads((ROOT / 'results/S5/choice.json').read_text())
+    keep = list(dict.fromkeys(choice['pareto_val_f1_vs_e_inf'] + [x for x in (
+        'h95/kdot', 'h95/base', 'h48/kdot', 'h48/base', 'h16/kdot_lut', 'h48_b4/packed', 'h48_k64/sparse',
+        'h48_b4_k256/sparse', choice['primary']['choice'], choice['sensitivity_pooled_sd']['choice']) if x in s]))
+    keep.sort(key=lambda k: float(s[k]['e_inf_uJ']))
+    pm = r' $\pm$ ' if latex else ' ± '
+    rows = []
+    for k in keep:
+        d = s[k]
+        mark = ('*' if k == choice['primary']['choice'] else '') + ('P' if k in choice['pareto_val_f1_vs_e_inf'] else '')
+        rows.append([describe(d, latex) + (f' ({mark})' if mark else ''),
+                     fmt(float(d['val_f1']), 3) + pm + fmt(float(d['val_f1_sd']), 3), fmt(float(d['test_f1']), 3),
+                     fmt(100 * float(d['live_2of3_detected']), 1), fmt(float(d['memory']) / 1024, 1),
+                     fmt(float(d['t_max_ms']), 2), fmt(float(d['e_inf_uJ']), 0), fmt(float(d['p_avg_gated_mW']), 1)])
+    header = ['Design (* chosen, P Pareto)', 'Val F1', 'Test F1', 'Live 2 of 3 (%)', 'Memory (KiB)', 't_max (ms)',
+              'E_inf (uJ)', 'P gated (mW)']
+    if latex:
+        header = [r'Design', 'Val F1', 'Test F1', r'Live (\%)', r'Mem.\ (KiB)', r'$t_\mathrm{max}$ (ms)',
+                  r'$E_\mathrm{inf}$ ($\mu$J)', r'$P_\mathrm{gated}$ (mW)']
+    return render(header, rows, latex, 'l' + 'r' * 7)
+
+
+def table_choice(latex):
+    """T4: the chosen design (mean over its seeds) next to the deployed model (h95_seed2 on kdot)."""
+    choice = json.loads((ROOT / 'results/S5/choice.json').read_text())['primary']['choice']
+    config, variant = choice.split('/')
+    models = _rows(ROOT / 'results/S5/models.csv')
+    designs = _rows(ROOT / 'results/S5/designs.csv')
+    chosen_m = [r for r in models if r['config'] == config]
+    chosen_d = [r for r in designs if r['config'] == config and r['variant'] == variant]
+    dep_m = [r for r in models if r['name'] == 'h95_seed2']
+    dep_d = [r for r in designs if r['name'] == 'h95_seed2' and r['variant'] == 'kdot']
+    pm = r' $\pm$ ' if latex else ' ± '
+    pct = r'\%' if latex else '%'
+    lines = [('Test precision', 'test_precision', 100, 1, pct), ('Test recall', 'test_recall', 100, 1, pct),
+             ('Test F1', 'test_f1', 1, 3, ''), ('Live "Sheila" detected, 2 of 3', 'live_2of3_detected', 100, 1, pct),
+             ('Live other words accepted, 2 of 3', 'live_2of3_other', 100, 2, pct),
+             ('Near miss "shee" + other word', 'hardneg_ending', 100, 1, pct),
+             ('Near miss other onset + "eila"', 'hardneg_onset', 100, 1, pct),
+             ('Synthesized she- words, 2 of 3', 'tts_2of3_she- words', 100, 1, pct)]
+    rows = []
+    for label, key, scale, digits, unit in lines:
+        m, sd = _ms(chosen_m, key)
+        rows.append([label, fmt(scale * m, digits) + pm + fmt(scale * sd, digits) + unit,
+                     fmt(scale * float(dep_m[0][key]), digits) + unit])
+    rows.append(None)
+    for label, key, scale, digits, unit in [('Model memory', 'memory', 1 / 1024, 1, ' KiB'),
+                                            ('Worst-case latency', 't_max_ms', 1, 2, ' ms'),
+                                            ('Energy per inference', 'e_inf_uJ', 1, 0, r' $\mu$J' if latex else ' uJ'),
+                                            ('Average PL power, busy-polling', 'p_avg_busy_mW', 1, 1, ' mW'),
+                                            ('Average PL power, clock-gated', 'p_avg_gated_mW', 1, 1, ' mW'),
+                                            ('Average PL power, clock scaled', 'p_avg_scaled_mW', 1, 1, ' mW')]:
+        rows.append([label, fmt(scale * _ms(chosen_d, key)[0], digits) + unit,
+                     fmt(scale * float(dep_d[0][key]), digits) + unit])
+    c0 = chosen_d[0]
+    head = [f'Chosen: {describe(c0, latex)} (mean{pm.strip()}sd, 3 seeds)', 'Deployed: H=95, 16 bit; kdot (seed 2)']
+    if latex:
+        head = [r'Chosen: ' + describe(c0, True) + r' (3 seeds)', r'Deployed: $H=95$; \texttt{kdot}']
+    if latex:   # TeX quotes
+        tex = {'Live "Sheila" detected, 2 of 3': "Live ``Sheila'' detected, 2 of 3",
+               'Near miss "shee" + other word': "Near miss ``shee'' + other word",
+               'Near miss other onset + "eila"': "Near miss other onset + ``eila''"}
+        rows = [[tex.get(r[0], r[0]), *r[1:]] if r else None for r in rows]
+    return render(['Quantity', *head], rows, latex, 'lrr')
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument('table', choices=['power', 'worked', 'size', 'precision'])
+    p.add_argument('table', choices=['power', 'worked', 'size', 'precision', 'designs', 'choice'])
     p.add_argument('--latex', action='store_true')
     p.add_argument('--out', type=Path, help='write the table to this file (UTF-8) instead of printing it')
     a = p.parse_args()
-    text = {'power': table_power, 'worked': table_worked, 'size': table_size, 'precision': table_precision}[a.table](a.latex)
+    text = {'power': table_power, 'worked': table_worked, 'size': table_size, 'precision': table_precision, 'designs': table_designs, 'choice': table_choice}[a.table](a.latex)
     if a.out:
         a.out.parent.mkdir(parents=True, exist_ok=True)
         a.out.write_text(text + '\n', encoding='utf-8')

@@ -1,0 +1,120 @@
+{
+  "benchmark": "c11137528abcc8fe",
+  "date": "2026-10-17 18:16",
+  "board": "10.43.0.1",
+  "model": "code/snn_keyword/research/results/S3/models/h48_k16_seed1.npz",
+  "model_sha256": "7c5bc2a1701877ff04cc6f678b3171550d1c0af55533941688a828815aae1b55",
+  "keyword": "sheila",
+  "hidden": 48,
+  "decision_threshold": 2387,
+  "stream_threshold": 1289,
+  "vectors": "code/snn_keyword/results/sheila_hardneg/verification_vectors.npz",
+  "repeat": 3,
+  "firmware": {
+    "model": "code/snn_keyword/research/results/S3/models/h48_k16_seed1.npz",
+    "out": "code/snn_keyword/build/bench/h48_k16_seed1",
+    "compiler": "riscv32-xilinx-elf-gcc.exe (GCC) 13.4.0",
+    "images": {
+      "keyword_sparse": {
+        "bin_bytes": 101760,
+        "sha256": "4c6a258bf199573231511c2debc88e91be6617f3721e2d3692b3742de01310fe",
+        "text_bytes": 1708,
+        "model_bytes": 3456,
+        "model_limit_bytes": 147456
+      }
+    }
+  },
+  "board_files_sha256": {
+    "keyword_sparse.bin": "4c6a258bf199573231511c2debc88e91be6617f3721e2d3692b3742de01310fe",
+    "keyword.bit": "d2556a5f885fffa436378c8520c62dd6341e4b22a26754189bb52412fbd8a8b3",
+    "keyword_kdot.bit": "29d86aa01a0b73ce6bb8e99f1b98410396b21bb22da662a02b9f2cc1b7c1e5f7"
+  },
+  "bitstreams_match_deploy": true,
+  "variants": {
+    "sparse": {
+      "fabric": "base",
+      "image": "keyword_sparse",
+      "server": [
+        "Loaded deploy/keyword.bit",
+        "Firmware bench/keyword_sparse.bin",
+        "Listening on 0.0.0.0:5556; backend=PicoRV32"
+      ],
+      "bit_exact": true,
+      "single_window": {
+        "requests": 120,
+        "mismatches": [],
+        "bit_exact": true,
+        "cycles_min": 255448,
+        "cycles_mean": 256455.8,
+        "cycles_max": 257770,
+        "milliseconds_max_at_100mhz": 2.5777
+      },
+      "round_trip_ms": {
+        "mean": 3.94,
+        "median": 3.87,
+        "p95": 4.26,
+        "max": 6.43
+      },
+      "stream": [
+        {
+          "pattern": "+",
+          "expected": [
+            2
+          ],
+          "board": [
+            2
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "--+",
+          "expected": [
+            0,
+            0,
+            2
+          ],
+          "board": [
+            0,
+            0,
+            2
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "++-+",
+          "expected": [
+            2,
+            3,
+            0,
+            3
+          ],
+          "board": [
+            2,
+            3,
+            0,
+            3
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "-+-+",
+          "expected": [
+            0,
+            2,
+            0,
+            3
+          ],
+          "board": [
+            0,
+            2,
+            0,
+            3
+          ],
+          "pass": true
+        }
+      ],
+      "stream_pass": true
+    }
+  },
+  "pass": true
+}

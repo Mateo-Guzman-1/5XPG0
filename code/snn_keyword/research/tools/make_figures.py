@@ -274,30 +274,78 @@ def fig_pruning(models, designs, out):
             n = np.array(sorted(groups)); m, sd = map(np.array, zip(*[stats(groups[k], 'val_f1') for k in n]))
             a.errorbar(n, m, yerr=sd, label=label, **ps.series_style(i, filled=i == 0))
     a.set_xscale('log')
+    a.set_ylim(0.50, 0.765)   # room below the data for the legend
     a.set_xlabel('Non-zero input synapses $H\\cdot K$')
     a.set_ylabel('Validation F1 (selection metric)')
-    a.legend(loc='lower right')
+    a.legend(loc='lower left')
     ps.panel_label(a, '(a)')
     for i, (label, sel) in enumerate([
-            ('Dense loop, RV32IM (E2)', lambda d: d['exp'] == 'E2' and d['variant'] == 'base'),
-            ('Sparse loop, RV32IM (pruned)', lambda d: d['exp'] == 'S3' and d['variant'] == 'sparse'),
-            ('kdot, dense (E2)', lambda d: d['exp'] == 'E2' and d['variant'] == 'kdot')]):
+            ('RV32IM, dense loop ($H$ = 8-95)', lambda d: d['exp'] == 'E2' and d['variant'] == 'base'),
+            ('RV32IM, sparse loop, $H$ = 48', lambda d: d['exp'] == 'S3' and d['variant'] == 'sparse' and d['hidden'] == 48),
+            ('RV32IM, sparse loop, $H$ = 95', lambda d: d['exp'] == 'S3' and d['variant'] == 'sparse' and d['hidden'] == 95),
+            ('kdot, dense ($H$ = 8-95)', lambda d: d['exp'] == 'E2' and d['variant'] == 'kdot'),
+            ('kdot + LIF table, dense', lambda d: d['exp'] == 'E2' and d['variant'] == 'kdot_lut')]):
         groups = {}
         for d in designs:
             if sel(d) and d['bits'] == 16:
                 groups.setdefault(int(d['hidden'] * d['fan_in']), []).append(d)
         if groups:
             n = np.array(sorted(groups)); m, sd = map(np.array, zip(*[stats(groups[k], 'e_inf_uJ') for k in n]))
-            b.errorbar(n, m, yerr=sd, label=label, ls='none' if i == 1 else ps.LINES[i],
-                       **{k: v for k, v in ps.series_style(i).items() if k != 'ls'})
+            b.errorbar(n, m, yerr=sd, label=label, **ps.series_style(i, filled=i in (0, 3)))
     b.set_xscale('log'); b.set_yscale('log')
+    b.set_ylim(top=4e5)   # room above the data for the legend
     ps.log_grid(b)
     b.set_xlabel('Non-zero input synapses $H\\cdot K$')
     b.set_ylabel(r'Energy per inference ($\mu$J)')
-    b.legend(loc='lower right', fontsize=7)
+    b.legend(loc='upper left', fontsize=7, bbox_to_anchor=(0.0, 0.93))
     ps.panel_label(b, '(b)')
     ps.save(fig, out / 'fig_pruning')
     plt.close(fig)
+
+
+FAMILY = [('base', 'RV32IM, dense'), ('packed', 'RV32IM, packed $n$-bit'), ('sparse', 'RV32IM, sparse (pruned)'),
+          ('lut', 'RV32IM + LIF table'), ('kdot', 'kdot'), ('kdot_lut', 'kdot + LIF table')]
+
+
+def fig_pareto(summary, choice, out):
+    """(a) validation F1 vs energy per inference for every measured design, Pareto front, rule
+    thresholds and the choice; (b) validation F1 vs model memory with the 144 KiB limit."""
+    fig, (a, b) = plt.subplots(1, 2, figsize=(ps.FULL[0], ps.FULL[1] * 1.25))
+    for ax, xkey in ((a, 'e_inf_uJ'), (b, 'memory')):
+        for i, (variant, label) in enumerate(FAMILY):
+            sel = [d for d in summary if d['variant'] == variant]
+            if sel:
+                x = np.array([d[xkey] for d in sel]) / (1024 if xkey == 'memory' else 1)
+                y = np.array([d['val_f1'] for d in sel])
+                st = ps.series_style(i, filled=variant in ('kdot_lut', 'base'))
+                ax.plot(x, y, ls='none', marker=st['marker'], mfc=st['mfc'], mec=st['mec'], mew=0.7,
+                        color=st['color'], label=label, ms=3.5)
+        ax.set_xscale('log')
+        ax.axhline(choice['primary']['threshold'], color=ps.GREY, lw=0.6, ls='--', zorder=0)
+        ax.axhline(choice['sensitivity_pooled_sd']['threshold'], color=ps.GREY, lw=0.6, ls=':', zorder=0)
+        chosen = [d for d in summary if d['design'] == choice['primary']['choice']]
+        for d in chosen:
+            ax.plot(d[xkey] / (1024 if xkey == 'memory' else 1), d['val_f1'], ls='none', marker='o', ms=9,
+                    mfc='none', mec='black', mew=0.8)
+        ax.set_ylim(0.62, 0.76)
+        ax.set_ylabel('Validation F1 (selection metric)')
+    front = sorted([d for d in summary if d['design'] in choice['pareto_val_f1_vs_e_inf']], key=lambda d: d['e_inf_uJ'])
+    a.plot([d['e_inf_uJ'] for d in front], [d['val_f1'] for d in front], color='black', lw=0.6, ls='-', zorder=0)
+    a.set_xlabel(r'Energy per inference $E_\mathrm{inf}$ ($\mu$J)')
+    fig.legend(*a.get_legend_handles_labels(), loc='outside lower center', ncol=3, fontsize=8)
+    ps.panel_label(a, '(a)')
+    ps.limit_line(b, 144, '144 KiB', axis='x', where=0.30, ha='right')
+    b.set_xlabel('Model memory (KiB)')
+    ps.panel_label(b, '(b)')
+    ps.save(fig, out / 'fig_pareto')
+    plt.close(fig)
+
+
+def s5():
+    import json
+    out = ROOT / 'results/S5'
+    fig_pareto(read_csv(out / 'design_summary.csv'), json.loads((out / 'choice.json').read_text()), out)
+    print('S5 figures written to', out)
 
 
 def s3():
@@ -324,10 +372,10 @@ def s2():
 
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument('part', choices=['s1', 's2', 's3', 's4'])
+    p.add_argument('part', choices=['s1', 's2', 's3', 's4', 's5'])
     a = p.parse_args()
     ps.apply()
-    {'s1': s1, 's2': s2, 's3': s3, 's4': s4}[a.part]()
+    {'s1': s1, 's2': s2, 's3': s3, 's4': s4, 's5': s5}[a.part]()
 
 
 if __name__ == '__main__':

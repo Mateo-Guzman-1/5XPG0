@@ -1,0 +1,51 @@
+{
+  "keyword": "sheila",
+  "fingerprint": "c11137528abcc8fe",
+  "inputs": {
+    "features": {
+      "path": "data/features.npz",
+      "bytes": 43441597,
+      "sha256": "62e8908bd5828f98c8a2a2d011e063923d265ebeb41432f2f94ada12fbe037e8"
+    },
+    "augment": {
+      "path": "data/augment.npz",
+      "bytes": 7611031,
+      "sha256": "ccc91feb62d13bef29497209437222cc2c93d89b77ca54b0c970d472eebed81b"
+    },
+    "live_validation_windows": {
+      "path": "build/live_sheila_split1_3000_2_32bins.npz",
+      "bytes": 7698187,
+      "sha256": "34061483a0345ae9ca68136ff007bc368092aeda1b2ad11e5bfefec31b553fe1"
+    },
+    "live_test_windows": {
+      "path": "build/live_sheila_split2_3000_1_32bins.npz",
+      "bytes": 7807369,
+      "sha256": "801fd032be57b4cd1c5acce5506ef29a3ad092b42d10af31def529434d349839"
+    },
+    "tts_probe": {
+      "path": "build/tts_probe_sheila/*.wav",
+      "files": 672,
+      "sha256": "c8c726861f9c30e0be85003505f91385737c7289e55445d000e3f7f9494c3470"
+    },
+    "background_noise": {
+      "path": "data/speech_commands_v0.02/_background_noise_/*.wav",
+      "files": 6,
+      "sha256": "479daae7e15a660cbbbfe865228d6dbd4b4f1e91ed1e2e0a925088fac28d0ca0"
+    },
+    "verification_vectors": {
+      "path": "results/sheila_hardneg/verification_vectors.npz",
+      "bytes": 18639,
+      "sha256": "50d58cec0a2727c758c08b7501c68ab4b1e03c21ffd17d48a21e9fdcd844a7e5"
+    },
+    "bitstream_base": {
+      "path": "deploy/keyword.bit",
+      "bytes": 1292867,
+      "sha256": "d2556a5f885fffa436378c8520c62dd6341e4b22a26754189bb52412fbd8a8b3"
+    },
+    "bitstream_kdot": {
+      "path": "deploy/keyword_kdot.bit",
+      "bytes": 1310387,
+      "sha256": "29d86aa01a0b73ce6bb8e99f1b98410396b21bb22da662a02b9f2cc1b7c1e5f7"
+    }
+  }
+}

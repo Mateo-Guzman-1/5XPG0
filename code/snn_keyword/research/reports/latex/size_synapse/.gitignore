@@ -1,0 +1,7 @@
+# latexmk by-products; standalone.pdf is kept for review
+*.aux
+*.log
+*.fls
+*.fdb_latexmk
+*.out
+*.synctex.gz

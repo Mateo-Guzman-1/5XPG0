@@ -418,6 +418,41 @@ With only two voices, they indicate trends, not accuracy.
     per neuron.
   - The board was restored to the release demo afterwards.
 
+## 2026-10-17
+
+### 13. Energy and synapse study (research part 2, S0–S5)
+
+- **Motivation.**
+  - The teacher's advice: optimise the synapses, not only the number of neurons.
+  - The application: an always-on smart-home detector, so the study looks for the least energy at
+    good quality, within 250 ms and 144 KiB.
+  - The plan is `research/PLAN_SYNAPSE.md`.
+- **Change (code; release paths byte-identical, every option off by default):**
+  - `model.py` / `train_keyword_snn.py`: n-bit input weights (QAT, power-of-two scale), fixed fan-in
+    pruning, `lif_thresholds()`.
+  - `export_model.py` / `firmware/inference.c`: `USE_PACKED`, `USE_SPARSE` and `USE_LIF_TABLE`.
+  - `research/tools/`:
+    - Vivado power flow (`power/`);
+    - energy model;
+    - sweep, collection and synthesis tools;
+    - journal-style figures and tables.
+  - Tests: 12 new, 24 pass. Retraining E2's h48 seed 0 with the defaults gives identical arrays.
+- **Energy method.**
+  - Vivado 2026.1 `report_power` of both fabrics × board cycles (`research/ENERGY.md`).
+  - BRAM is 0.251 of the 0.28 W PL dynamic power. With the busy-polling firmware the PL draws
+    363/367 mW whatever the network.
+  - USB-meter check on Alex's dual-core `8ed0b32`: Vivado 0.773 W vs 0.833 W measured (7 %).
+- **Outcome (all bit-exact on the board):**
+  - **Precision:** 4-bit QAT keeps the quality. On RV32IM the packed loop costs more energy than
+    the release loop.
+  - **Pruning:** large-sparse beats small-dense; RV32IM energy follows the non-zero synapses.
+  - **LIF table:** the 12-step neuron update has an exact 12-threshold closed form, which cuts kdot
+    energy 2.7–3.4×.
+  - **Choice by the pre-registered rule:** 48 neurons, 8-bit weights, kdot + LIF table. 165 µJ per
+    inference vs 1,103 µJ for the deployed model, with equal quality.
+  - Not deployed (needs the user's approval). The report section is `research/reports/latex/size_synapse/`.
+- **Board:** restored to the release demo afterwards (`check_board.py`: 120/120, PASS).
+
 ## Open items
 
 1. ~~Reflash the SD card and test the standard Ethernet path~~: done on a

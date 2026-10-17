@@ -12,10 +12,10 @@ size and synapse study for the report). All energy numbers are in [ENERGY.md](EN
 |---|---|---|---|
 | S0 | Energy method (Vivado power of both fabrics, energy model) | **done** 2026-10-17 | `results/S0/`, [ENERGY.md](ENERGY.md) |
 | S1 | Network size with energy (E2 re-analysis) | **done** 2026-10-17 | `results/S1/`, [ENERGY.md](ENERGY.md) §4 |
-| S2 | Synapse precision (bits per weight, vs Mark) | **next** | — |
-| S3 | Synapse count (fixed fan-in pruning) | to do | — |
-| S4 | Exact LIF lookup (neuron side) | to do | — |
-| S5 | Synthesis, choice, report section (LaTeX) | to do | — |
+| S2 | Synapse precision (bits per weight, vs Mark) | **done** 2026-10-17 | `results/S2/`, [S_energy_synapse.md](reports/S_energy_synapse.md) |
+| S3 | Synapse count (fixed fan-in pruning) | **done** 2026-10-17 | `results/S3/`, same |
+| S4 | Exact LIF lookup (neuron side) | **done** 2026-10-17 | `results/S4/`, same |
+| S5 | Synthesis, choice, report section (LaTeX) | **done** 2026-10-17 (draft for review) | `results/S5/`, `reports/latex/size_synapse/` |
 
 Part 1 ([PLAN.md](PLAN.md)):
 
@@ -53,7 +53,27 @@ The source is Vivado 2026.1 `report_power` on the routed release RTL of both fab
   floor (static power plus the AXI interface).
 - **Robust to Vivado's activity assumption:** toggle rates of 6.25 % and 25 % change P_PL,dyn by
   ≤ 2 mW.
-- **Still open:** the USB-meter validation numbers (ENERGY.md §3, from Pedro).
+- **Meter validation (ENERGY.md §3):** on Alex's dual-core design `8ed0b32`, Vivado's PL estimate
+  (0.773 W) is 7 % below the measured board increase (0.833 W).
+
+## S2–S5 results: synapses and the design choice (2026-10-17)
+
+Full record: [reports/S_energy_synapse.md](reports/S_energy_synapse.md). Every cycle count is from a
+bit-exact board run (120/120).
+
+| Lever | Quality | Cost |
+|---|---|---|
+| Bits per weight (QAT, H 16/48) | Unchanged within the seed spread down to 4 bits; 3 bits slightly lower; 2 bits fail; rounding only is worse | Memory 4× smaller at 4 bits; on RV32IM the packed loop costs *more* energy (14.1 / 18.3 / 28.1 mJ at 8 / 4 / 2 bits vs 12.5 mJ) |
+| Fixed fan-in pruning (H 48/95) | Large-sparse > small-dense at equal synapses (6,144: 0.727 vs 0.643); K = 64 keeps 0.727 | RV32IM energy ∝ non-zeros (7.4× less at K = 64); kdot gains nothing |
+| Exact LIF table | Bit-exact | kdot 2.7–3.4× fewer cycles; RV32IM 2–3 % |
+
+**Choice** (pre-registered rule; same with the pooled sd): 48 neurons, 8-bit weights,
+kdot + LIF table.
+- **Cost:** 165 µJ and 0.59 ms per window, 72.4 KiB.
+- **Quality:** test F1 0.789 ± 0.010, live 65.6 %.
+- **Against the deployed model:** 6.7× less energy per inference, half the memory, equal quality.
+- **Average PL power barely changes:** 93.6 vs 97.3 mW clock-gated, because of the static floor.
+- **Not deployed.** E8-style promotion needs Pedro's approval.
 
 ## Keyword change to "Sheila" (2026-09-30, before E0)
 
@@ -197,12 +217,10 @@ For reference, the previous "yes" release: test F1 0.8761 (seeds 0.867 ± 0.022)
   three seeds it may be chance.
 
 ## Next step
-**S2** (synapse precision), then S3 and S4, then S5 and the LaTeX section ([PLAN_SYNAPSE.md](PLAN_SYNAPSE.md)).
-The board must be on for S2–S4.
-
-Code changes for S2/S3 started on 2026-10-17, not yet verified or committed:
-- `model.py`: `pow2_shift`, `fake_quant`, the mask buffer, `quantize` for n-bit and pruned models,
-  `lif_thresholds`;
-- `train_keyword_snn.py`: training-loop hooks.
-
-Part 1's E1 (recordings) is deferred until after the report.
+The experiments of part 2 are complete. Open:
+- Pedro reviews the LaTeX section `reports/latex/size_synapse/section.tex`: wording, which figures to
+  keep, and the meter details for the method text.
+- Optional:
+  - deploy the chosen design (needs approval; kdot + LIF-table firmware and its own bit-exact check);
+  - stretch items in PLAN_SYNAPSE.md (BRAM-size what-if, clock-scaling demo with the USB meter).
+- Part 1's E1 (recordings) is deferred until after the report.

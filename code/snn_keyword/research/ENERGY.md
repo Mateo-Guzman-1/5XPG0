@@ -193,6 +193,23 @@ What it shows:
   neuromorphic chips report tens of pJ per synaptic event (values to be verified from the papers
   before citing).
 
+### S2–S5 — synapses, neuron update, design choice (2026-10-17)
+Full record: [reports/S_energy_synapse.md](reports/S_energy_synapse.md); every design's energy is in
+`results/S5/designs.csv` (per model) and `results/S5/design_summary.csv` (per design).
+
+| Design (H, bits; firmware) | E_inf | t_max | P_avg clock-gated |
+|---|---|---|---|
+| Deployed: 95, 16; kdot | 1,103 µJ | 3.96 ms | 97.3 mW |
+| **Chosen: 48, 8; kdot + LIF table** | **165 µJ** | **0.59 ms** | **93.6 mW** |
+| 16, 16; kdot + LIF table (below the quality bar) | 45 µJ | 0.16 ms | 93.2 mW |
+| 48, 16, K = 64; RV32IM sparse | 1,678 µJ | 6.06 ms | 99.5 mW |
+| 48, 4; RV32IM packed | 18,252 µJ | 65.68 ms | 163.9 mW |
+
+- **The exact LIF table is the largest energy lever with kdot:** 2.7–3.4× less energy per
+  inference.
+- **On RV32IM, pruning is the lever:** energy follows the non-zero synapses.
+- **Lower precision costs energy on RV32IM:** unpacking the weights takes extra instructions.
+
 ## 5. Limits of these numbers
 - **Estimates, not measurements.** Vectorless estimates at "Medium" confidence. They were validated
   once with a USB meter (section 3), but that meter measures the whole board, ARM included.
