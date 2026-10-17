@@ -61,7 +61,9 @@ def choose(designs, sd_key):
 
 def main():
     with open(S5 / 'designs.csv', newline='') as f:
-        rows = [r for r in csv.DictReader(f) if r['method'] == 'qat']   # rounding-only models are controls
+        # Controls are not candidate designs: rounding-only models (S2) and the one-seed paired runs of
+        # pruned models on dense kdot (S6, they only show that dense kdot cannot skip zeros).
+        rows = [r for r in csv.DictReader(f) if r['method'] == 'qat' and r['variant'] != 'kdot_lut_on_ksdot']
     designs = summarize(rows)
     with open(S5 / 'design_summary.csv', 'w', newline='') as f:
         w = csv.DictWriter(f, fieldnames=list(designs[0]))

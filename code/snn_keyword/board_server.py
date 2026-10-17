@@ -35,6 +35,9 @@ class Board:
         # ABI bit0: kdot PCPI coprocessor present (deploy/keyword_kdot.bit).
         if 'kdot' in Path(firmware).name and not abi & 1:
             raise RuntimeError('kdot firmware needs deploy/keyword_kdot.bit (ABI bit0)')
+        # ABI bit1: sparse kdot (kxload/ksdot), experimental bitstream keyword_ksdot.bit (research S6).
+        if 'ksdot' in Path(firmware).name and not abi & 2:
+            raise RuntimeError('ksdot firmware needs the sparse-kdot bitstream (ABI bit1)')
         if self.read_reg(0x10) != 100000000:
             raise RuntimeError('Expected 100 MHz fabric clock')
         image = Path(firmware).read_bytes()

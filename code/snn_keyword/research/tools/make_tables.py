@@ -185,7 +185,8 @@ def table_precision(latex):
 
 
 FIRMWARE = {'base': 'RV32IM', 'lut': 'RV32IM + table', 'packed': 'RV32IM packed', 'sparse': 'RV32IM sparse',
-            'kdot': 'kdot', 'kdot_lut': 'kdot + table'}
+            'kdot': 'kdot', 'kdot_lut': 'kdot + table', 'ksdot_lut': 'sparse kdot + table',
+            'kdot_lut_on_ksdot': 'kdot + table (S6 fabric)'}
 
 
 def describe(d, latex=False):
@@ -222,6 +223,40 @@ def table_designs(latex):
     return render(header, rows, latex, 'l' + 'r' * 7)
 
 
+def table_sparse(latex):
+    """S6: sparse kdot per pruned configuration: measured vs predicted cycles (H6), energy, memory, quality."""
+    designs = _rows(ROOT / 'results/S5/designs.csv')
+    models = _rows(ROOT / 'results/S5/models.csv')
+    ref = {h: _ms([d for d in designs if int(d['hidden']) == h and d['variant'] == 'kdot_lut' and d['exp'] == 'E2'],
+                  'cycles_mean')[0] for h in (48, 95)}
+    pm = r' $\pm$ ' if latex else ' ± '
+    rows = []
+    configs = []
+    for d in designs:
+        if d['variant'] == 'ksdot_lut' and d['config'] not in configs:
+            configs.append(d['config'])
+    configs.sort(key=lambda c: (int(c.split('_')[0][1:]), 'b' in c, int(c.split('_k')[1])))
+    rows.append(['deployed: H=48, 8 bit, dense; kdot + table' if not latex else r'deployed: $H=48$, 8 bit, dense; \texttt{kdot} + table',
+                 fmt(ref[48], 0), '--', fmt(165.4, 0), fmt(74120 / 1024, 1), '0.745' + pm + '0.005', '0.789', '65.6'])
+    for c in configs:
+        d = [x for x in designs if x['config'] == c and x['variant'] == 'ksdot_lut']
+        m = [x for x in models if x['config'] == c]
+        h, k, bits = int(d[0]['hidden']), int(d[0]['fan_in']), int(d[0]['bits'])
+        meas = _ms(d, 'cycles_mean')[0]
+        pred = ref[h] - h * (576 - k) + 200
+        v, sd = _ms(m, 'val_f1')
+        label = f'H={h}, {bits} bit, K={k}' if not latex else f'$H={h}$, {bits} bit, $K={k}$'
+        rows.append([label, fmt(meas, 0), fmt(meas - pred, 0), fmt(_ms(d, 'e_inf_uJ')[0], 0),
+                     fmt(float(d[0]['memory']) / 1024, 1), fmt(v, 3) + pm + fmt(sd, 3),
+                     fmt(_ms(m, 'test_f1')[0], 3), fmt(100 * _ms(m, 'live_2of3_detected')[0], 1)])
+    header = ['Model (sparse kdot + table)', 'Cycles', 'Measured - predicted', 'E_inf (uJ)', 'Memory (KiB)', 'Val F1',
+              'Test F1', 'Live 2 of 3 (%)']
+    if latex:
+        header = ['Model', 'Cycles', r'$\Delta$ H6', r'$E_\mathrm{inf}$ ($\mu$J)', r'Mem.\ (KiB)', 'Val F1',
+                  'Test F1', r'Live (\%)']
+    return render(header, rows, latex)
+
+
 def table_choice(latex):
     """T4: the chosen design (mean over its seeds) next to the deployed model (h95_seed2 on kdot)."""
     choice = json.loads((ROOT / 'results/S5/choice.json').read_text())['primary']['choice']
@@ -255,9 +290,9 @@ def table_choice(latex):
         rows.append([label, fmt(scale * _ms(chosen_d, key)[0], digits) + unit,
                      fmt(scale * float(dep_d[0][key]), digits) + unit])
     c0 = chosen_d[0]
-    head = [f'Chosen: {describe(c0, latex)} (mean{pm.strip()}sd, 3 seeds)', 'Deployed: H=95, 16 bit; kdot (seed 2)']
+    head = [f'Chosen: {describe(c0, latex)} (mean{pm.strip()}sd, 3 seeds)', 'Previous release: H=95, 16 bit; kdot (seed 2)']
     if latex:
-        head = [r'Chosen: ' + describe(c0, True) + r' (3 seeds)', r'Deployed: $H=95$; \texttt{kdot}']
+        head = [r'Chosen: ' + describe(c0, True), r'Previous: $H=95$; \texttt{kdot}']
     if latex:   # TeX quotes
         tex = {'Live "Sheila" detected, 2 of 3': "Live ``Sheila'' detected, 2 of 3",
                'Near miss "shee" + other word': "Near miss ``shee'' + other word",
@@ -268,11 +303,11 @@ def table_choice(latex):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument('table', choices=['power', 'worked', 'size', 'precision', 'designs', 'choice'])
+    p.add_argument('table', choices=['power', 'worked', 'size', 'precision', 'designs', 'choice', 'sparse'])
     p.add_argument('--latex', action='store_true')
     p.add_argument('--out', type=Path, help='write the table to this file (UTF-8) instead of printing it')
     a = p.parse_args()
-    text = {'power': table_power, 'worked': table_worked, 'size': table_size, 'precision': table_precision, 'designs': table_designs, 'choice': table_choice}[a.table](a.latex)
+    text = {'power': table_power, 'worked': table_worked, 'size': table_size, 'precision': table_precision, 'designs': table_designs, 'choice': table_choice, 'sparse': table_sparse}[a.table](a.latex)
     if a.out:
         a.out.parent.mkdir(parents=True, exist_ok=True)
         a.out.write_text(text + '\n', encoding='utf-8')

@@ -481,6 +481,34 @@ With only two voices, they indicate trends, not accuracy.
   - "shee" + another word still passes about a third of the time (34.9 % of windows).
 - **Still to do:** a live microphone test by the user.
 
+### 15. Sparse kdot: a zero-skipping accelerator (research S6)
+
+- **Motivation.** Pruning saved energy only on plain RV32IM, because kdot streams every weight,
+  zeros included. User request: build the "next co-design step".
+- **Change (RTL, commit `e0609e4`):**
+  - `kdot_pcpi.v` gains `kxload` (input → local 1 KiB distributed-RAM buffer) and `ksdot` (one
+    fixed fan-in synapse word per cycle, kdot's multiplier, int32 wrap).
+  - kdot is unchanged. ABI 0x0002_0003 in `spike_soc.v` and `ps_if.v`.
+  - Firmware `USE_KSDOT` and image `keyword_ksdot_lut`.
+  - `start_board.sh` takes an optional bitstream path. `board_server.py` requires ABI bit1 for
+    ksdot firmware. `bench_board.py --bitstream`.
+  - The deployed bitstreams are unchanged; they were built from the previous RTL, whose hashes are
+    in `deploy/manifest.json`.
+- **Verification:**
+  - `sim/tb_kdot.sv` (xsim): 48/48 checks.
+  - Vivado 2026.1 build of the new fabric: worst slack +0.545 ns, 3,243 LUTs, same estimated PL
+    power.
+  - The deployed firmware on the new bitstream gives identical cycles.
+  - 48 board runs of pruned models, all bit-exact.
+- **Outcome:**
+  - Cycles match the pre-registered prediction within 170 cycles.
+  - H48 K64 takes 34,221 cycles (96.5 µJ) vs 58,667 (165 µJ) for the deployed model: −42 %
+    energy, 12.4 vs 72.4 KiB.
+  - Quality is lower (val F1 0.727 vs 0.745, live 57.5 vs 65.6 %).
+  - The pre-registered rule keeps the deployed model; the sparse designs form the new low-energy
+    part of the Pareto front.
+  - The experimental bitstream is not deployed.
+
 ## Open items
 
 1. ~~Reflash the SD card and test the standard Ethernet path~~: done on a

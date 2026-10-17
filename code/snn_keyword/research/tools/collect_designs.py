@@ -19,9 +19,11 @@ from energy_model import load_power, energy
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS = ROOT / 'results'
 REPO = ROOT.parents[2]      # 5XPG0: model paths in the result files are relative to it
-EXPERIMENTS = ['E2', 'S2', 'S3']                           # experiments that own models
-BOARD = ['E2', 'S2', 'S3', 'S4']                           # experiments with board runs
-FABRIC = {'base': 'base', 'kdot': 'kdot', 'packed': 'base', 'sparse': 'base', 'lut': 'base', 'kdot_lut': 'kdot'}
+EXPERIMENTS = ['E2', 'S2', 'S3', 'S6']                     # experiments that own models
+BOARD = ['E2', 'S2', 'S3', 'S4', 'S6']                     # experiments with board runs
+FABRIC = {'base': 'base', 'kdot': 'kdot', 'packed': 'base', 'sparse': 'base', 'lut': 'base', 'kdot_lut': 'kdot',
+          'ksdot_lut': 'ksdot', 'kdot_lut_on_ksdot': 'ksdot'}
+SPARSE_VARIANTS = ('sparse', 'ksdot_lut')                   # store and execute only the kept synapses
 N_INPUT = 768
 
 
@@ -30,7 +32,7 @@ def memory(q, variant):
     the linker's measured .model size, which may hold small arrays in the code instead)."""
     h = len(q['w1'])
     rest = 4 * h + 2 * 2 * h + 4 * 2          # b1 int32, w2 int16 [2,H], b2 int32 [2]
-    if variant == 'sparse':
+    if variant in SPARSE_VARIANTS:
         return 4 * h * int(q['fan_in']) + rest
     if variant == 'packed':
         return h * N_INPUT * int(q.get('w1_bits', 16)) // 8 + rest
@@ -91,7 +93,7 @@ def design_rows(models):
                 s = r['single_window']
                 fabric = FABRIC[variant]
                 q = dict(np.load(REPO / b['model']))
-                macs = (len(q['w1']) * (m['fan_in'] if variant == 'sparse' else N_INPUT)) + 2 * len(q['w1'])
+                macs = (len(q['w1']) * (m['fan_in'] if variant in SPARSE_VARIANTS else N_INPUT)) + 2 * len(q['w1'])
                 e = energy(s['cycles_mean'], s['cycles_max'], power[fabric], macs)
                 image = r.get('image', {'base': 'keyword', 'kdot': 'keyword_kdot'}.get(variant))
                 out.append(dict(name=m['name'], exp=m['exp'], config=m['config'], seed=m['seed'], hidden=m['hidden'],

@@ -16,6 +16,7 @@ size and synapse study for the report). All energy numbers are in [ENERGY.md](EN
 | S3 | Synapse count (fixed fan-in pruning) | **done** 2026-10-17 | `results/S3/`, same |
 | S4 | Exact LIF lookup (neuron side) | **done** 2026-10-17 | `results/S4/`, same |
 | S5 | Synthesis, choice, report section (LaTeX) | **done** 2026-10-17 (draft for review) | `results/S5/`, `reports/latex/size_synapse/` |
+| S6 | Sparse kdot (kxload/ksdot hardware) vs the deployed dense-kdot model | **done** 2026-10-17 | `results/S6/`, [S_energy_synapse.md](reports/S_energy_synapse.md) §S6 |
 
 Part 1 ([PLAN.md](PLAN.md)):
 
@@ -132,7 +133,23 @@ Conclusions:
 - Quality saturates at about 16 neurons, so the memory wall costs no measurable quality.
 - More neurons do not reduce near misses: that needs a time-aware design (E3/E4).
 
-## Deployed model: hard negatives, 95 hidden (since 2026-10-04)
+## S6 result: sparse kdot (2026-10-17)
+- **Hardware:**
+  - two new PCPI instructions: `kxload` copies the input into a 1 KiB buffer; `ksdot` streams the
+    kept synapses at one per cycle;
+  - experimental bitstream `results/S6/keyword_ksdot.bit` (ABI 0x0002_0003);
+  - xsim unit test 48/48; timing +0.545 ns; +362 LUTs; same estimated power.
+- **Gates passed:** the deployed firmware gives identical cycles on the new bitstream, and all 48
+  board runs are bit-exact.
+- **Prediction H6 confirmed:** within 170 cycles for all 16 configurations.
+- **Main result:** H48 pruned to K = 64 takes 34,221 cycles and 96.5 µJ (−42 % vs the deployed
+  58,667 cycles and 165 µJ), with 12.4 KiB memory. The cost is quality: val F1 0.727 vs 0.745,
+  live 57.5 vs 65.6 %. The floor is ≈ 32k cycles.
+- **Selection rule (unchanged):** it still chooses the deployed model. The pooled-sd sensitivity
+  check picks H48 K64 sparse, by a 0.00006 margin.
+- **Not deployed:** experimental bitstream only.
+
+## Previous release: hard negatives, 95 hidden (2026-10-04 to 2026-10-17)
 
 `deploy/model.npz` = `results/sheila_hardneg/models/r2_aug30_h95_seed2.npz`: dense
 768→95→2 LIF, current encoding, 12 steps, int16 Q10, release recipe plus Sheila hard

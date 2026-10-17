@@ -2,10 +2,12 @@
 # Runs ON the PYNQ-Z2 (copied there by run_board.ps1, or by hand with the files
 # listed in README "Run on the PYNQ board"). Loads the keyword bitstream, then
 # (re)starts board_server.py in the background and waits until it listens.
-# Usage: bash start_board.sh [kdot|base] [firmware.bin]   (default kdot, deploy/<image>.bin)
+# Usage: bash start_board.sh [kdot|base] [firmware.bin] [bitstream.bit]
+#        (default kdot, deploy/<image>.bin, deploy/<image>.bit)
 #        bash start_board.sh stop
 # The optional firmware path (relative to this folder) runs another image on the
 # variant's bitstream; research/tools/bench_board.py uses it for experiment models.
+# The optional bitstream path loads an experimental fabric instead (research S6).
 set -euo pipefail
 cd "$(dirname "$0")"
 # sudo drops the variables /etc/profile.d normally sets; PYNQ finds no device without them.
@@ -26,10 +28,12 @@ case "${1:-kdot}" in
 esac
 firmware="${2:-deploy/$name.bin}"
 [ -f "$firmware" ] || { echo "No firmware $firmware" >&2; exit 2; }
+bitstream="${3:-deploy/$name.bit}"
+[ -f "$bitstream" ] || { echo "No bitstream $bitstream" >&2; exit 2; }
 
 stop_server
-sudo $PY -c "from pynq import Bitstream; Bitstream('deploy/$name.bit').download()"
-echo "Loaded deploy/$name.bit"
+sudo $PY -c "from pynq import Bitstream; Bitstream('$bitstream').download()"
+echo "Loaded $bitstream"
 echo "Firmware $firmware"
 sudo nohup $PY board_server.py --bind 0.0.0.0 --firmware "$firmware" > server.log 2>&1 &
 for _ in $(seq 100); do

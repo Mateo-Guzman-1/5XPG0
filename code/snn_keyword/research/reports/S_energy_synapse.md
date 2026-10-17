@@ -72,6 +72,39 @@ the lowest E_inf. Details in `results/S5/choice.json`.
 - **Pruned models on dense kdot:** 200,021 cycles (H48 K64) vs 203,253 dense. kdot streams the
   zeros too.
 
+## S6 — Sparse kdot (added 2026-10-17)
+**Hardware.** `rtl/kdot_pcpi.v` (commit `e0609e4`) gains two instructions:
+- `kxload` (funct3 = 2) copies the input into a local 1 KiB distributed-RAM buffer;
+- `ksdot` (funct3 = 3) streams fixed fan-in synapse words `(int16 w << 16) | index` at one per
+  cycle, through kdot's multiplier.
+
+kdot itself is unchanged; ABI 0x0002_0003.
+
+**Checks:**
+- **Unit test:** `sim/tb_kdot.sv` in xsim, 48/48 checks.
+- **Build:** Vivado 2026.1, worst slack +0.545 ns, 3,243 LUTs (+362), PL dynamic power 0.282 W
+  (unchanged).
+- **Board regression:** the deployed firmware gives identical cycles on the new bitstream
+  (58,299 / 58,671 / 59,040).
+- **Board runs:** all 48 measurements bit-exact (120/120 each).
+
+**H6** (written before building): C_ksdot − C_kdot_lut ≈ −H(576 − K) + 200. Confirmed: every
+configuration lies within 170 cycles of it (`results/S6/table_sparse.md`).
+
+| Model (sparse kdot + table) | Cycles | E_inf | Memory | Val F1 | Live 2 of 3 |
+|---|---|---|---|---|---|
+| Deployed: H48 8-bit dense (kdot + table) | 58,667 | 165 µJ | 72.4 KiB | 0.745 | 65.6 % |
+| H48 K64 | 34,221 | 97 µJ | 12.4 KiB | 0.727 | 57.5 % |
+| H48 K128 (8-bit) | 37,340 | 105 µJ | 24.4 KiB | 0.730 | 55.2 % |
+| H48 K256 (8-bit) | 43,530 | 123 µJ | 48.4 KiB | 0.733 | 60.1 % |
+| H48 K512 | 55,848 | 157 µJ | 96.4 KiB | 0.735 | 64.2 % |
+
+- **The sparse designs now form the Pareto front** between 97 and 157 µJ.
+- **The pre-registered rule still chooses the deployed model:** no pruned model reaches 0.7405.
+- **The pooled-sd sensitivity check would choose H48 K64,** but by a margin of 0.00006.
+- **In short:** pruning plus zero-skipping hardware saves up to 42 % energy and 83 % memory,
+  for about 0.02 validation F1 and 8 points of live detection.
+
 ## Threats to validity
 - **Energy is estimated, not measured.** Vivado vectorless estimates at "Medium" confidence. They
   were validated once, on a different design and at board level (7 %).

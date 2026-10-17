@@ -76,10 +76,20 @@ def split(report):
                 total=float(report['summary']['Total On-Chip Power (W)']), static_by_rail=rails)
 
 
+EXTRA_POWER = [ROOT / 'results/S6/power.json']   # later fabrics (S6: 'ksdot'), each in its own file
+
+
 def load_power(path=POWER_JSON, report='power'):
-    """{fabric: power split} for the given report name (power, power_toggle6.25, power_toggle25)."""
+    """{fabric: power split} for the given report name (power, power_toggle6.25, power_toggle25).
+    The S0 file gives 'base' and 'kdot'; fabrics measured later are added from their own files."""
     data = json.loads(Path(path).read_text())
-    return {fabric: split(data[fabric][report]) for fabric in FABRICS}
+    out = {fabric: split(data[fabric][report]) for fabric in FABRICS}
+    if Path(path) == POWER_JSON:
+        for extra in EXTRA_POWER:
+            if extra.exists():
+                out.update({fabric: split(reports[report])
+                            for fabric, reports in json.loads(extra.read_text()).items()})
+    return out
 
 
 def energy(cycles_mean, cycles_max, p, macs=None):

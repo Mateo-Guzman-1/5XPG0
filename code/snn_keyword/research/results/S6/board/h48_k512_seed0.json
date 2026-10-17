@@ -1,0 +1,217 @@
+{
+  "benchmark": "c11137528abcc8fe",
+  "date": "2026-10-17 20:11",
+  "board": "10.43.0.1",
+  "model": "code/snn_keyword/research/results/S3/models/h48_k512_seed0.npz",
+  "model_sha256": "895d0a0068d200214ed8c0047d48987b5097080ded1740a10c3aef40989b0183",
+  "keyword": "sheila",
+  "hidden": 48,
+  "decision_threshold": 2878,
+  "stream_threshold": 1124,
+  "vectors": "code/snn_keyword/results/sheila_hardneg/verification_vectors.npz",
+  "repeat": 3,
+  "firmware": {
+    "model": "code/snn_keyword/research/results/S3/models/h48_k512_seed0.npz",
+    "out": "code/snn_keyword/build/bench/s6_h48_k512_seed0",
+    "compiler": "riscv32-xilinx-elf-gcc.exe (GCC) 13.4.0",
+    "images": {
+      "keyword_ksdot_lut": {
+        "bin_bytes": 196992,
+        "sha256": "5817a40b31a3cca6f22d035f1df009a5a849a7cfa889479c69b6281af3c90752",
+        "text_bytes": 1324,
+        "model_bytes": 98688,
+        "model_limit_bytes": 147456
+      },
+      "keyword_kdot_lut": {
+        "bin_bytes": 172416,
+        "sha256": "f5f68c446292067ed92e06f695279d8e54323e0dd400a117e33865eb8582c4f0",
+        "text_bytes": 1308,
+        "model_bytes": 74112,
+        "model_limit_bytes": 147456
+      }
+    }
+  },
+  "experimental_bitstream": {
+    "file": "code/snn_keyword/research/results/S6/keyword_ksdot.bit",
+    "sha256": "89a9d69e398ad4b636c260be340da270fb107fb7d4a4e0b8f92d9f38e32a1307"
+  },
+  "board_files_sha256": {
+    "keyword_ksdot_lut.bin": "5817a40b31a3cca6f22d035f1df009a5a849a7cfa889479c69b6281af3c90752",
+    "keyword_kdot_lut.bin": "f5f68c446292067ed92e06f695279d8e54323e0dd400a117e33865eb8582c4f0",
+    "keyword_ksdot.bit": "89a9d69e398ad4b636c260be340da270fb107fb7d4a4e0b8f92d9f38e32a1307",
+    "keyword.bit": "d2556a5f885fffa436378c8520c62dd6341e4b22a26754189bb52412fbd8a8b3",
+    "keyword_kdot.bit": "29d86aa01a0b73ce6bb8e99f1b98410396b21bb22da662a02b9f2cc1b7c1e5f7"
+  },
+  "bitstreams_match_deploy": true,
+  "variants": {
+    "ksdot_lut": {
+      "fabric": "ksdot",
+      "image": "keyword_ksdot_lut",
+      "server": [
+        "Loaded bench/keyword_ksdot.bit",
+        "Firmware bench/keyword_ksdot_lut.bin",
+        "Listening on 0.0.0.0:5556; backend=PicoRV32"
+      ],
+      "bit_exact": true,
+      "single_window": {
+        "requests": 120,
+        "mismatches": [],
+        "bit_exact": true,
+        "cycles_min": 55419,
+        "cycles_mean": 55893.1,
+        "cycles_max": 56347,
+        "milliseconds_max_at_100mhz": 0.56347
+      },
+      "round_trip_ms": {
+        "mean": 1.74,
+        "median": 1.61,
+        "p95": 2.04,
+        "max": 4.58
+      },
+      "stream": [
+        {
+          "pattern": "+",
+          "expected": [
+            2
+          ],
+          "board": [
+            2
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "--+",
+          "expected": [
+            0,
+            0,
+            2
+          ],
+          "board": [
+            0,
+            0,
+            2
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "++-+",
+          "expected": [
+            2,
+            3,
+            0,
+            3
+          ],
+          "board": [
+            2,
+            3,
+            0,
+            3
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "-+-+",
+          "expected": [
+            0,
+            2,
+            0,
+            3
+          ],
+          "board": [
+            0,
+            2,
+            0,
+            3
+          ],
+          "pass": true
+        }
+      ],
+      "stream_pass": true
+    },
+    "kdot_lut_on_ksdot": {
+      "fabric": "ksdot",
+      "image": "keyword_kdot_lut",
+      "server": [
+        "Loaded bench/keyword_ksdot.bit",
+        "Firmware bench/keyword_kdot_lut.bin",
+        "Listening on 0.0.0.0:5556; backend=PicoRV32"
+      ],
+      "bit_exact": true,
+      "single_window": {
+        "requests": 120,
+        "mismatches": [],
+        "bit_exact": true,
+        "cycles_min": 58228,
+        "cycles_mean": 58702.1,
+        "cycles_max": 59156,
+        "milliseconds_max_at_100mhz": 0.59156
+      },
+      "round_trip_ms": {
+        "mean": 1.71,
+        "median": 1.61,
+        "p95": 2.23,
+        "max": 3.25
+      },
+      "stream": [
+        {
+          "pattern": "+",
+          "expected": [
+            2
+          ],
+          "board": [
+            2
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "--+",
+          "expected": [
+            0,
+            0,
+            2
+          ],
+          "board": [
+            0,
+            0,
+            2
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "++-+",
+          "expected": [
+            2,
+            3,
+            0,
+            3
+          ],
+          "board": [
+            2,
+            3,
+            0,
+            3
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "-+-+",
+          "expected": [
+            0,
+            2,
+            0,
+            3
+          ],
+          "board": [
+            0,
+            2,
+            0,
+            3
+          ],
+          "pass": true
+        }
+      ],
+      "stream_pass": true
+    }
+  },
+  "pass": true
+}

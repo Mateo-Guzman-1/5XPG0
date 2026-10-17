@@ -37,7 +37,9 @@ IMAGES = {'base': 'keyword', 'kdot': 'keyword_kdot'}   # release images; also th
 # The research images (research/PLAN_SYNAPSE.md) run on the release bitstreams.
 VARIANTS = {'base': ('base', 'keyword'), 'kdot': ('kdot', 'keyword_kdot'),
             'packed': ('base', 'keyword_packed'), 'sparse': ('base', 'keyword_sparse'),
-            'lut': ('base', 'keyword_lut'), 'kdot_lut': ('kdot', 'keyword_kdot_lut')}
+            'lut': ('base', 'keyword_lut'), 'kdot_lut': ('kdot', 'keyword_kdot_lut'),
+            # S6: fabric 'ksdot' = the experimental sparse-kdot bitstream given with --bitstream
+            'ksdot_lut': ('ksdot', 'keyword_ksdot_lut'), 'kdot_lut_on_ksdot': ('ksdot', 'keyword_kdot_lut')}
 
 
 def call(*args):
@@ -57,7 +59,11 @@ def milliseconds(seconds):
 def measure(a, variant, x, q):
     """Restart the board server with this variant's image, then run the check_board.py checks."""
     fabric, image = VARIANTS[variant]
-    started = call('ssh', a.board, 'bash', 'snn_keyword/start_board.sh', fabric, f'bench/{image}.bin')
+    if fabric == 'ksdot':   # experimental bitstream (scp'd by main); the kdot name only picks defaults
+        started = call('ssh', a.board, 'bash', 'snn_keyword/start_board.sh', 'kdot', f'bench/{image}.bin',
+                       f'bench/{a.bitstream.name}')
+    else:
+        started = call('ssh', a.board, 'bash', 'snn_keyword/start_board.sh', fabric, f'bench/{image}.bin')
     if 'Listening' not in started:
         raise SystemExit(f'Board server did not start:\n{started}')
     board = Client(a.host, a.port)
@@ -91,6 +97,7 @@ def main():
     p.add_argument('--repeat', type=int, default=3)
     p.add_argument('--out', type=Path, help='write the report as JSON')
     p.add_argument('--build-name', help='firmware folder under build/bench (default: the model file name)')
+    p.add_argument('--bitstream', type=Path, help='experimental bitstream for the ksdot variants (research S6)')
     a = p.parse_args()
     q = dict(np.load(a.model))
     x = np.load(a.vectors)['x']
@@ -99,15 +106,24 @@ def main():
     folder = KWS / 'build/bench' / (a.build_name or a.model.stem)
     firmware = build(a.model, folder, images)
     rel = os.path.relpath(folder, KWS).replace('\\', '/')
+    ksdot = any(VARIANTS[v][0] == 'ksdot' for v in variants)
+    if ksdot and not (a.bitstream and a.bitstream.is_file()):
+        raise SystemExit('the ksdot variants need --bitstream <keyword_ksdot.bit>')
     call('ssh', a.board, 'mkdir', '-p', 'snn_keyword/bench')
-    call('scp', '-q', 'start_board.sh', f'{a.board}:snn_keyword/')
+    call('scp', '-q', 'start_board.sh', 'board_server.py', 'protocol.py', f'{a.board}:snn_keyword/')
     call('scp', '-q', *[f'{rel}/{n}.bin' for n in images], f'{a.board}:snn_keyword/bench/')
-    listing = call('ssh', a.board, 'sha256sum', *[f'snn_keyword/bench/{n}.bin' for n in images],
+    extra = []
+    if ksdot:
+        call('scp', '-q', os.path.relpath(a.bitstream.resolve(), KWS).replace('\\', '/'), f'{a.board}:snn_keyword/bench/')
+        extra = [f'snn_keyword/bench/{a.bitstream.name}']
+    listing = call('ssh', a.board, 'sha256sum', *[f'snn_keyword/bench/{n}.bin' for n in images], *extra,
                    'snn_keyword/deploy/keyword.bit', 'snn_keyword/deploy/keyword_kdot.bit')
     on_board = {Path(line.split()[1]).name: line.split()[0] for line in listing.splitlines()}
     for n in images:
         if on_board[f'{n}.bin'] != firmware['images'][n]['sha256']:
             raise SystemExit(f'{n}.bin on the board differs from the build')
+    if ksdot and on_board[a.bitstream.name] != hashlib.sha256(a.bitstream.read_bytes()).hexdigest():
+        raise SystemExit(f'{a.bitstream.name} on the board differs from {a.bitstream}')
     bench = describe(keyword_of(q))
     report = {'benchmark': bench['fingerprint'], 'date': time.strftime('%Y-%m-%d %H:%M'), 'board': a.host,
               'model': shown(a.model), 'model_sha256': hashlib.sha256(a.model.read_bytes()).hexdigest(),
@@ -115,6 +131,8 @@ def main():
               'decision_threshold': int(q['decision_threshold']),
               'stream_threshold': int(q.get('stream_threshold', q['decision_threshold'])),
               'vectors': shown(a.vectors), 'repeat': a.repeat, 'firmware': firmware,
+              'experimental_bitstream': ({'file': shown(a.bitstream), 'sha256': on_board[a.bitstream.name]}
+                                         if ksdot else None),
               'board_files_sha256': on_board,
               'bitstreams_match_deploy': all(on_board[f'{n}.bit'] == bench['inputs'][f'bitstream_{v}']['sha256']
                                              for v, n in IMAGES.items()),

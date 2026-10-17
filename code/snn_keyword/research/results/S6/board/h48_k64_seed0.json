@@ -1,0 +1,217 @@
+{
+  "benchmark": "c11137528abcc8fe",
+  "date": "2026-10-17 20:00",
+  "board": "10.43.0.1",
+  "model": "code/snn_keyword/research/results/S3/models/h48_k64_seed0.npz",
+  "model_sha256": "8e3676fb61e7a8b6d6f9d8b08b433f4f9b5dd54427d896ba1d9e4d1b72d7be3d",
+  "keyword": "sheila",
+  "hidden": 48,
+  "decision_threshold": 2256,
+  "stream_threshold": 1136,
+  "vectors": "code/snn_keyword/results/sheila_hardneg/verification_vectors.npz",
+  "repeat": 3,
+  "firmware": {
+    "model": "code/snn_keyword/research/results/S3/models/h48_k64_seed0.npz",
+    "out": "code/snn_keyword/build/bench/s6_h48_k64_seed0",
+    "compiler": "riscv32-xilinx-elf-gcc.exe (GCC) 13.4.0",
+    "images": {
+      "keyword_ksdot_lut": {
+        "bin_bytes": 110976,
+        "sha256": "703e7d3ed29ef3599e813753ee7272aa28d000eaf8b872ff108831a6d6d063c2",
+        "text_bytes": 1316,
+        "model_bytes": 12672,
+        "model_limit_bytes": 147456
+      },
+      "keyword_kdot_lut": {
+        "bin_bytes": 172416,
+        "sha256": "7d157fa223dcb33554e8f9b1e6323d68a35c94d0b2b277ad4507be8100c641f2",
+        "text_bytes": 1308,
+        "model_bytes": 74112,
+        "model_limit_bytes": 147456
+      }
+    }
+  },
+  "experimental_bitstream": {
+    "file": "code/snn_keyword/research/results/S6/keyword_ksdot.bit",
+    "sha256": "89a9d69e398ad4b636c260be340da270fb107fb7d4a4e0b8f92d9f38e32a1307"
+  },
+  "board_files_sha256": {
+    "keyword_ksdot_lut.bin": "703e7d3ed29ef3599e813753ee7272aa28d000eaf8b872ff108831a6d6d063c2",
+    "keyword_kdot_lut.bin": "7d157fa223dcb33554e8f9b1e6323d68a35c94d0b2b277ad4507be8100c641f2",
+    "keyword_ksdot.bit": "89a9d69e398ad4b636c260be340da270fb107fb7d4a4e0b8f92d9f38e32a1307",
+    "keyword.bit": "d2556a5f885fffa436378c8520c62dd6341e4b22a26754189bb52412fbd8a8b3",
+    "keyword_kdot.bit": "29d86aa01a0b73ce6bb8e99f1b98410396b21bb22da662a02b9f2cc1b7c1e5f7"
+  },
+  "bitstreams_match_deploy": true,
+  "variants": {
+    "ksdot_lut": {
+      "fabric": "ksdot",
+      "image": "keyword_ksdot_lut",
+      "server": [
+        "Loaded bench/keyword_ksdot.bit",
+        "Firmware bench/keyword_ksdot_lut.bin",
+        "Listening on 0.0.0.0:5556; backend=PicoRV32"
+      ],
+      "bit_exact": true,
+      "single_window": {
+        "requests": 120,
+        "mismatches": [],
+        "bit_exact": true,
+        "cycles_min": 33855,
+        "cycles_mean": 34252.5,
+        "cycles_max": 34531,
+        "milliseconds_max_at_100mhz": 0.34531
+      },
+      "round_trip_ms": {
+        "mean": 1.67,
+        "median": 1.58,
+        "p95": 1.93,
+        "max": 5.08
+      },
+      "stream": [
+        {
+          "pattern": "+",
+          "expected": [
+            2
+          ],
+          "board": [
+            2
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "--+",
+          "expected": [
+            0,
+            0,
+            2
+          ],
+          "board": [
+            0,
+            0,
+            2
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "++-+",
+          "expected": [
+            2,
+            3,
+            0,
+            3
+          ],
+          "board": [
+            2,
+            3,
+            0,
+            3
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "-+-+",
+          "expected": [
+            0,
+            2,
+            0,
+            3
+          ],
+          "board": [
+            0,
+            2,
+            0,
+            3
+          ],
+          "pass": true
+        }
+      ],
+      "stream_pass": true
+    },
+    "kdot_lut_on_ksdot": {
+      "fabric": "ksdot",
+      "image": "keyword_kdot_lut",
+      "server": [
+        "Loaded bench/keyword_ksdot.bit",
+        "Firmware bench/keyword_kdot_lut.bin",
+        "Listening on 0.0.0.0:5556; backend=PicoRV32"
+      ],
+      "bit_exact": true,
+      "single_window": {
+        "requests": 120,
+        "mismatches": [],
+        "bit_exact": true,
+        "cycles_min": 58192,
+        "cycles_mean": 58589.5,
+        "cycles_max": 58868,
+        "milliseconds_max_at_100mhz": 0.58868
+      },
+      "round_trip_ms": {
+        "mean": 1.66,
+        "median": 1.57,
+        "p95": 1.97,
+        "max": 3.53
+      },
+      "stream": [
+        {
+          "pattern": "+",
+          "expected": [
+            2
+          ],
+          "board": [
+            2
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "--+",
+          "expected": [
+            0,
+            0,
+            2
+          ],
+          "board": [
+            0,
+            0,
+            2
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "++-+",
+          "expected": [
+            2,
+            3,
+            0,
+            3
+          ],
+          "board": [
+            2,
+            3,
+            0,
+            3
+          ],
+          "pass": true
+        },
+        {
+          "pattern": "-+-+",
+          "expected": [
+            0,
+            2,
+            0,
+            3
+          ],
+          "board": [
+            0,
+            2,
+            0,
+            3
+          ],
+          "pass": true
+        }
+      ],
+      "stream_pass": true
+    }
+  },
+  "pass": true
+}

@@ -210,6 +210,24 @@ Full record: [reports/S_energy_synapse.md](reports/S_energy_synapse.md); every d
 - **On RV32IM, pruning is the lever:** energy follows the non-zero synapses.
 - **Lower precision costs energy on RV32IM:** unpacking the weights takes extra instructions.
 
+### S6 — sparse kdot fabric (2026-10-17)
+**Fabric `ksdot`:** the kdot fabric plus the kxload/ksdot instructions, RTL at commit `e0609e4`.
+- **Vivado 2026.1 estimate:** total 1.687 W; PL dynamic 0.282 W, the same as kdot; BRAM 0.250 W;
+  kdot unit 0.006 W.
+- **Build:** 3,243 LUTs (220 as the input buffer), worst slack +0.545 ns.
+- **Files:** raw reports in `results/S6/vivado/ksdot/`, parsed in `results/S6/power.json`;
+  `energy_model.load_power()` adds this fabric automatically. Bitstream and hashes in
+  `results/S6/` (`fabric.json`).
+
+| Design (48 neurons; firmware) | Cycles | E_inf | Memory |
+|---|---|---|---|
+| Deployed: dense 8-bit; kdot + table | 58,667 | 165 µJ | 72.4 KiB |
+| Pruned K = 64; sparse kdot + table | 34,221 | 96.5 µJ | 12.4 KiB |
+| Pruned K = 256; sparse kdot + table | 43,532 | 122.8 µJ | 48.4 KiB |
+
+Average PL power with clock gating barely moves: 94.4 vs 93.6 mW. The ksdot fabric's interface
+power rounds 1 mW higher in the report.
+
 ## 5. Limits of these numbers
 - **Estimates, not measurements.** Vectorless estimates at "Medium" confidence. They were validated
   once with a USB meter (section 3), but that meter measures the whole board, ARM included.

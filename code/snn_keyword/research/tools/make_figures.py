@@ -304,7 +304,8 @@ def fig_pruning(models, designs, out):
 
 
 FAMILY = [('base', 'RV32IM, dense'), ('packed', 'RV32IM, packed $n$-bit'), ('sparse', 'RV32IM, sparse (pruned)'),
-          ('lut', 'RV32IM + LIF table'), ('kdot', 'kdot'), ('kdot_lut', 'kdot + LIF table')]
+          ('lut', 'RV32IM + LIF table'), ('kdot', 'kdot'), ('kdot_lut', 'kdot + LIF table'),
+          ('ksdot_lut', 'sparse kdot + LIF table')]
 
 
 def fig_pareto(summary, choice, out):
@@ -317,7 +318,7 @@ def fig_pareto(summary, choice, out):
             if sel:
                 x = np.array([d[xkey] for d in sel]) / (1024 if xkey == 'memory' else 1)
                 y = np.array([d['val_f1'] for d in sel])
-                st = ps.series_style(i, filled=variant in ('kdot_lut', 'base'))
+                st = ps.series_style(i, filled=variant in ('kdot_lut', 'base', 'ksdot_lut'))
                 ax.plot(x, y, ls='none', marker=st['marker'], mfc=st['mfc'], mec=st['mec'], mew=0.7,
                         color=st['color'], label=label, ms=3.5)
         ax.set_xscale('log')
@@ -339,6 +340,67 @@ def fig_pareto(summary, choice, out):
     ps.panel_label(b, '(b)')
     ps.save(fig, out / 'fig_pareto')
     plt.close(fig)
+
+
+def fig_sparse_kdot(designs, summary, out):
+    """S6: (a) measured cycles vs fan-in for sparse kdot, against the pre-registered prediction H6
+    and the dense kdot + table reference; (b) validation F1 vs energy, deployed vs sparse kdot."""
+    fig, (a, b) = plt.subplots(1, 2, figsize=ps.FULL)
+    for i, (h, label) in enumerate(((48, '$H$ = 48'), (95, '$H$ = 95'))):
+        ref = [d for d in designs if d['hidden'] == h and d['variant'] == 'kdot_lut' and d['exp'] == 'E2']
+        dense = stats(ref, 'cycles_mean')[0] if ref else None
+        groups = {}
+        for d in designs:
+            if d['hidden'] == h and d['variant'] == 'ksdot_lut' and d['bits'] == 16:
+                groups.setdefault(int(d['fan_in']), []).append(d)
+        if not groups:
+            continue
+        k = np.array(sorted(groups)); m, sd = map(np.array, zip(*[stats(groups[x], 'cycles_mean') for x in k]))
+        st = ps.series_style(i)
+        a.errorbar(k, m / 1e3, yerr=sd / 1e3, label=f'{label}, sparse kdot + table', **st)
+        if dense:
+            kk = np.linspace(14, 580, 50)
+            a.plot(kk, (dense - h * (576 - kk) + 200) / 1e3, color=st['color'], lw=0.6, ls=':')
+            a.axhline(dense / 1e3, color=st['color'], lw=0.6, ls='--')
+    # Line-style key shared by both sizes.
+    a.plot([], [], color='black', lw=0.6, ls=':', label='prediction H6')
+    a.plot([], [], color='black', lw=0.6, ls='--', label='dense kdot + table')
+    a.set_xscale('log', base=2)
+    a.set_xticks([16, 32, 64, 128, 256, 512]); a.set_xticklabels(['16', '32', '64', '128', '256', '512'])
+    a.minorticks_off()
+    a.set_xlabel('Fan-in $K$ (kept inputs per neuron)')
+    a.set_ylabel('Cycles per inference (thousands)')
+    a.set_ylim(0, 200)
+    a.legend(loc='upper right', fontsize=7)
+    ps.panel_label(a, '(a)')
+    fams = [('kdot_lut', 'Dense, kdot + LIF table'), ('ksdot_lut', 'Pruned, sparse kdot + LIF table')]
+    for i, (variant, label) in enumerate(fams):
+        sel = [d for d in summary if d['variant'] == variant]
+        x = np.array([d['e_inf_uJ'] for d in sel]); y = np.array([d['val_f1'] for d in sel])
+        e = np.array([d['val_f1_sd'] for d in sel])
+        st = ps.series_style(i + 1, filled=i == 0)
+        b.errorbar(x, y, yerr=e, ls='none', marker=st['marker'], mfc=st['mfc'], mec=st['mec'], color=st['color'],
+                   label=label, ms=3.5, elinewidth=0.5)
+    dep = [d for d in summary if d['design'] == 'h48_b8/kdot_lut']
+    for d in dep:
+        b.plot(d['e_inf_uJ'], d['val_f1'], ls='none', marker='o', ms=9, mfc='none', mec='black', mew=0.8)
+        b.annotate('deployed', (d['e_inf_uJ'], d['val_f1']), xytext=(6, 4), textcoords='offset points', fontsize=7)
+    b.set_xscale('log')
+    b.set_xticks([50, 100, 200, 300]); b.set_xticklabels(['50', '100', '200', '300'])
+    b.minorticks_off()
+    b.set_xlabel(r'Energy per inference $E_\mathrm{inf}$ ($\mu$J)')
+    b.set_ylabel('Validation F1 (selection metric)')
+    b.set_ylim(0.62, 0.79)   # room above the data for the legend
+    b.legend(loc='upper left', fontsize=7, bbox_to_anchor=(0.08, 1.0))
+    ps.panel_label(b, '(b)')
+    ps.save(fig, out / 'fig_sparse_kdot')
+    plt.close(fig)
+
+
+def s6():
+    out = ROOT / 'results/S6'
+    fig_sparse_kdot(read_csv(ROOT / 'results/S5/designs.csv'), read_csv(ROOT / 'results/S5/design_summary.csv'), out)
+    print('S6 figures written to', out)
 
 
 def s5():
@@ -372,10 +434,10 @@ def s2():
 
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument('part', choices=['s1', 's2', 's3', 's4', 's5'])
+    p.add_argument('part', choices=['s1', 's2', 's3', 's4', 's5', 's6'])
     a = p.parse_args()
     ps.apply()
-    {'s1': s1, 's2': s2, 's3': s3, 's4': s4, 's5': s5}[a.part]()
+    {'s1': s1, 's2': s2, 's3': s3, 's4': s4, 's5': s5, 's6': s6}[a.part]()
 
 
 if __name__ == '__main__':

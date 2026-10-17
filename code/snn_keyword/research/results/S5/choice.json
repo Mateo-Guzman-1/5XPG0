@@ -15,16 +15,24 @@
     "choice": "h48_b8/kdot_lut"
   },
   "sensitivity_pooled_sd": {
-    "pooled_sd": 0.019671593234636887,
+    "pooled_sd": 0.018742091678090267,
     "best": "h48_b8/kdot_lut",
     "best_val_f1": 0.7452122937303326,
     "best_val_f1_sd": 0.004721404504641161,
-    "threshold": 0.7255407004956957,
+    "threshold": 0.7264702020522423,
     "qualifying": [
+      "h48_k64/ksdot_lut",
+      "h48_b8_k128/ksdot_lut",
+      "h48_k128/ksdot_lut",
+      "h48_b8_k256/ksdot_lut",
+      "h48_k256/ksdot_lut",
+      "h48_b4_k256/ksdot_lut",
+      "h48_k512/ksdot_lut",
       "h48_b8/kdot_lut",
       "h48_b6/kdot_lut",
       "h48_b4/kdot_lut",
       "h48/kdot_lut",
+      "h95_k256/ksdot_lut",
       "h95/kdot_lut",
       "h48_k64/kdot",
       "h48/kdot",
@@ -45,10 +53,15 @@
       "h95/lut",
       "h95/base"
     ],
-    "choice": "h48_b8/kdot_lut"
+    "choice": "h48_k64/ksdot_lut"
   },
   "pareto_val_f1_vs_e_inf": [
     "h16/kdot_lut",
-    "h48_b8/kdot_lut"
+    "h48_b8/kdot_lut",
+    "h48_b8_k128/ksdot_lut",
+    "h48_b8_k256/ksdot_lut",
+    "h48_k256/ksdot_lut",
+    "h48_k512/ksdot_lut",
+    "h48_k64/ksdot_lut"
   ]
 }

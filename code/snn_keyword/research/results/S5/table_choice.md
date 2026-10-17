@@ -1,4 +1,4 @@
-| Quantity | Chosen: H=48, 8 bit; kdot + table (mean±sd, 3 seeds) | Deployed: H=95, 16 bit; kdot (seed 2) |
+| Quantity | Chosen: H=48, 8 bit; kdot + table (mean±sd, 3 seeds) | Previous release: H=95, 16 bit; kdot (seed 2) |
 |---|---|---|
 | Test precision | 84.8 ± 2.0% | 81.2% |
 | Test recall | 73.7 ± 1.2% | 75.5% |
