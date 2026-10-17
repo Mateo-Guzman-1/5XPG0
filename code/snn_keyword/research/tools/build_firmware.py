@@ -30,6 +30,11 @@ FLAGS = ['-march=rv32im', '-mabi=ilp32', '-O3', '-Wall', '-Wextra', '-Werror', '
          '-fno-tree-loop-distribute-patterns', '-nostdlib', '-msmall-data-limit=0']
 SOURCES = ['../../pynqz2_riscv_flow/firmware/start.S', 'main.c', 'inference.c', 'runtime.c']
 IMAGES = {'keyword': [], 'keyword_kdot': ['-DUSE_KDOT']}
+# Research images (research/PLAN_SYNAPSE.md, S2-S4), built only when asked for; never part of deploy/.
+EXTRA_IMAGES = {'keyword_packed': ['-DUSE_PACKED'],         # n-bit packed input weights (RV32IM)
+                'keyword_sparse': ['-DUSE_SPARSE'],         # fixed fan-in synapse list (RV32IM)
+                'keyword_lut': ['-DUSE_LIF_TABLE'],         # exact LIF threshold count (RV32IM)
+                'keyword_kdot_lut': ['-DUSE_KDOT', '-DUSE_LIF_TABLE']}
 MODEL_LIMIT = 144 * 1024
 
 
@@ -51,13 +56,18 @@ def section_sizes(elf):
     return {r[0]: int(r[1]) for r in rows if len(r) == 3 and r[0].startswith('.') and r[1].isdigit()}
 
 
-def build(model, out):
+def build(model, out, images=tuple(IMAGES)):
     out = Path(out).resolve()
-    export(model, out)
+    flags = {**IMAGES, **EXTRA_IMAGES}
+    # The research arrays are only written when an image needs them, so the release headers (and
+    # binaries) stay byte-identical; GCC drops arrays that an image does not reference.
+    export(model, out, packed='keyword_packed' in images, sparse='keyword_sparse' in images,
+           lif_table=any(name.endswith('_lut') for name in images))
     rel = os.path.relpath(out, FIRMWARE).replace('\\', '/')
     report = {'model': shown(model), 'out': shown(out),
               'compiler': run(CROSS + 'gcc', '--version').splitlines()[0], 'images': {}}
-    for name, defines in IMAGES.items():
+    for name in images:
+        defines = flags[name]
         elf = f'{rel}/{name}.elf'
         try:
             run(CROSS + 'gcc', *FLAGS, f'-I{rel}', '-I.', *defines, '-T', 'linker.ld',
@@ -80,11 +90,13 @@ def main():
     p.add_argument('model', type=Path, help='integer model .npz')
     p.add_argument('--out', type=Path, required=True, help='output folder, e.g. code/snn_keyword/build/<name>')
     p.add_argument('--compare', type=Path, help='folder whose keyword*.bin must be byte-identical')
+    p.add_argument('--images', nargs='+', choices=[*IMAGES, *EXTRA_IMAGES], default=list(IMAGES),
+                   help='images to build (default: the two release images)')
     a = p.parse_args()
-    report = build(a.model, a.out)
+    report = build(a.model, a.out, a.images)
     if a.compare:
         report['identical_to'] = {name: (a.compare / f'{name}.bin').read_bytes() == (a.out / f'{name}.bin').read_bytes()
-                                  for name in IMAGES}
+                                  for name in a.images if name in IMAGES}
     print(json.dumps(report, indent=2))
     if a.compare and not all(report['identical_to'].values()):
         raise SystemExit('Images differ from ' + str(a.compare))

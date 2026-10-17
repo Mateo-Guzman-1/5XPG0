@@ -26,10 +26,11 @@ def fmt(x, digits):
     return str(Decimal(f'{x:.9f}').quantize(q, rounding=ROUND_HALF_UP))
 
 
-def render(header, rows, latex, align=None):
+def render(header, rows, latex, align=None, head=None):
+    """Markdown or booktabs table; `head` replaces the LaTeX header row (e.g. a two-level header)."""
     if latex:
         align = align or 'l' + 'r' * (len(header) - 1)
-        lines = [r'\begin{tabular}{' + align + '}', r'\toprule', ' & '.join(header) + r' \\', r'\midrule']
+        lines = [r'\begin{tabular}{' + align + '}', r'\toprule', *(head or [' & '.join(header) + r' \\']), r'\midrule']
         for r in rows:
             if r is None:
                 lines.append(r'\midrule')
@@ -78,7 +79,18 @@ def table_power(latex):
     rows.append(['Derived: interface P_infra,dyn = P_PL,dyn - P_core,dyn'] + [w(split[f]['infra_dyn']) for f in ('base', 'kdot')])
     header = ['Quantity (W)', FABRIC['base'], FABRIC['kdot']]
     if latex:
-        rows = [[c.replace('_', r'\_') if isinstance(c, str) else c for c in r] if r else None for r in rows]
+        nice = {'Dynamic: core u_soc (CPU, kdot, BRAM)': r'Dynamic: core \texttt{u\_soc} (CPU, \texttt{kdot}, BRAM)',
+                '  of which PicoRV32 u_cpu': r'\quad of which PicoRV32 \texttt{u\_cpu}',
+                '  of which kdot u_kdot': r'\quad of which \texttt{kdot} \texttt{u\_kdot}',
+                'Dynamic: AXI interface u_ps_if': r'Dynamic: AXI interface \texttt{u\_ps\_if}',
+                'Dynamic: AXI protocol converter pc0': r'Dynamic: AXI protocol converter \texttt{pc0}',
+                'Static, PS rails (Vccp*, DDR, MIO)': r'Static, PS rails (Vccp$^\ast$, DDR, MIO)',
+                'Derived: PL dynamic P_PL,dyn = dynamic - PS7': r'Derived: $P_\mathrm{PL,dyn}$ = dynamic $-$ PS7',
+                'Derived: core P_core,dyn (u_soc)': r'Derived: $P_\mathrm{core}$ (\texttt{u\_soc})',
+                'Derived: interface P_infra,dyn = P_PL,dyn - P_core,dyn':
+                    r'Derived: $P_\mathrm{infra} = P_\mathrm{PL,dyn} - P_\mathrm{core}$'}
+        rows = [[nice.get(r[0], r[0]), *r[1:]] if r else None for r in rows]
+        header = ['Quantity (W)', 'RV32IM', r'RV32IM + \texttt{kdot}']
     return render(header, rows, latex)
 
 
@@ -121,10 +133,11 @@ def table_size(latex):
                      fmt(float(b['live_2of3_detected']) * 100, 1)])
     header = ['H', 'Model (KiB)', 'RV32IM t_max (ms)', 'RV32IM E_inf (mJ)', 'kdot t_max (ms)',
               'kdot E_inf (uJ)', 'Test F1', 'Live 2 of 3 (%)']
-    if latex:
-        header = ['$H$', 'Model (KiB)', r'$t_\mathrm{max}$ (ms)', r'$E_\mathrm{inf}$ (mJ)', r'$t_\mathrm{max}$ (ms)',
-                  r'$E_\mathrm{inf}$ ($\mu$J)', 'Test F1', r'Live 2 of 3 (\%)']
-    return render(header, rows, latex)
+    head = [r' & & \multicolumn{2}{c}{RV32IM} & \multicolumn{2}{c}{RV32IM + \texttt{kdot}} & & \\',
+            r'\cmidrule(lr){3-4}\cmidrule(lr){5-6}',
+            r'$H$ & Model (KiB) & $t_\mathrm{max}$ (ms) & $E_\mathrm{inf}$ (mJ) & $t_\mathrm{max}$ (ms) & '
+            r'$E_\mathrm{inf}$ ($\mu$J) & Test F1 & Live 2 of 3 (\%) \\']
+    return render(header, rows, latex, head=head)
 
 
 def main():

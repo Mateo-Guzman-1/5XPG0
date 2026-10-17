@@ -203,3 +203,88 @@ def test_board_timeout_stops_core(monkeypatch):
     with pytest.raises(RuntimeError,match='timed out'): board.infer(bytes(768))
     assert board.read_reg(0)==1
     with pytest.raises(RuntimeError,match='stopped'): board.infer(bytes(768))
+
+
+# ---- Research part 2 (research/PLAN_SYNAPSE.md): synapse precision, fan-in, LIF table ----
+
+def lanes_c_mirror(words,bits):
+    """numpy copy of the firmware's lane extraction: (int32)(w << (32-b(k+1))) >> (32-b)."""
+    lanes=32//bits; w=words.astype(np.uint64)[:,None]
+    k=np.arange(lanes,dtype=np.uint64)[None,:]
+    shifted=((w<<(np.uint64(32)-np.uint64(bits)*(k+np.uint64(1))))&np.uint64(0xFFFFFFFF)).astype(np.int64)
+    shifted=np.where(shifted>=2**31,shifted-2**32,shifted)
+    return (shifted>>(32-bits)).reshape(-1)
+
+
+def test_default_quantize_is_unchanged():
+    import torch
+    from model import SpikeMLP, quantize
+    torch.manual_seed(0)
+    q=quantize(SpikeMLP(4))
+    assert sorted(q)==['b1','b2','encoding','q','steps','w1','w2']
+    assert q['w1'].dtype==np.int16
+
+
+@pytest.mark.parametrize('bits',[8,6,4,3,2])
+def test_pow2_quantizer_grid_matches_export(bits):
+    import torch
+    from model import SpikeMLP, quantize, fake_quant, pow2_shift, Q
+    torch.manual_seed(bits)
+    m=SpikeMLP(4,w1_bits=bits)
+    m.fix_w1_shift()
+    s=m.w1_shift
+    wmax=float(m.fc1.weight.detach().abs().max())*Q
+    assert s==pow2_shift(wmax,bits) and wmax/2**s<=2**(bits-1)-1
+    q=quantize(m)
+    grid=(fake_quant(m.fc1.weight,s,bits).detach().numpy()*Q)
+    assert np.array_equal(np.rint(grid).astype(np.int64),q['w1'].astype(np.int64))
+    c=q['w1'].astype(np.int64)>>s
+    assert np.array_equal(c<<s,q['w1']) and c.min()>=-2**(bits-1) and c.max()<=2**(bits-1)-1
+    assert q['w1_bits']==bits and q['w1_shift']==s and q['w1_clipped']==0
+
+
+@pytest.mark.parametrize('bits',[16,8,4,2])
+def test_packed_export_and_drive(bits):
+    from export_model import pack_w1
+    rng=np.random.default_rng(bits)
+    shift=0 if bits==16 else 3
+    c=rng.integers(-2**(bits-1),2**(bits-1),size=(3,768))
+    if bits==16: c=rng.integers(-500,500,size=(3,768))
+    q=dict(w1=(c<<shift).astype(np.int16),w1_bits=bits,w1_shift=shift)
+    b,s,lanes,words=pack_w1(q)
+    assert (b,s,lanes)==(bits,shift,32//bits) and words.dtype==np.uint32
+    assert np.array_equal(lanes_c_mirror(words,bits).reshape(3,768),c)
+    # Firmware: sum(c*x) * 2^s / 255 (truncating) == oracle: trunc_div(x @ w1.T, 255), also for negative sums.
+    x=rng.integers(0,256,size=(5,768))
+    firmware=trunc_div((x@c.T)*2**s,255)
+    assert np.array_equal(firmware,trunc_div(x@q['w1'].astype(np.int64).T,255))
+    assert (x@c.T<0).any()
+
+
+def test_fan_in_pruning_and_sparse_export():
+    import torch
+    from model import SpikeMLP, quantize
+    from export_model import sparse_w1
+    torch.manual_seed(1)
+    m=SpikeMLP(5,fan_in=32)
+    m.prune_to(100); m.prune_to(32)
+    assert (m.w1_mask.sum(1)==32).all() and (m.fc1.weight[m.w1_mask==0]==0).all()
+    q=quantize(m)
+    assert q['fan_in']==32 and (q['w1_mask'].sum(1)==32).all() and (q['w1'][q['w1_mask']==0]==0).all()
+    k,words=sparse_w1(q)
+    assert k==32 and len(words)==5*32
+    w=(words.astype(np.int64)>>16); w=np.where(w>=2**15,w-2**16,w); idx=words&0x3ff
+    dense=np.zeros((5,768),np.int64); dense[np.repeat(np.arange(5),32),idx]=w
+    assert np.array_equal(dense,q['w1'])
+
+
+def test_lif_threshold_table_is_exact():
+    from model import lif_thresholds, lif_count, Q
+    t=lif_thresholds(12)
+    assert t==[161,233,310,388,489,547,660,728,818,906,988,1024]
+    d=np.arange(-2**20,2**20,dtype=np.int64)
+    v=np.zeros_like(d); n=np.zeros_like(d)
+    for _ in range(12):   # the oracle's recurrence, for every drive at once
+        v=trunc_div(v*7,8)+d; spk=v>=Q; v-=spk*Q; n+=spk
+    assert np.array_equal(n,(d[:,None]>=np.array(t)[None,:]).sum(1))
+    assert [lif_count(x,12) for x in (160,161,1023,1024)]==[0,1,11,12]

@@ -26,18 +26,55 @@ def fake_trunc(x):
     return x + (torch.trunc(x * Q) / Q - x).detach()
 
 
+def pow2_shift(max_abs_q, bits):
+    """Smallest s >= 0 with max|w*Q| / 2**s <= 2**(bits-1) - 1: one power-of-two scale per layer, chosen
+    from the largest weight so that nothing is clipped when it is fixed (Mark's rule, in Q10 units)."""
+    s = 0
+    while max_abs_q / 2 ** s > 2 ** (bits - 1) - 1:
+        s += 1
+    return s
+
+
+def fake_quant(x, shift, bits):
+    """Straight-through rounding to the n-bit grid c * 2**shift / Q, c in [-2**(bits-1), 2**(bits-1) - 1]."""
+    step = 2 ** shift / Q
+    c = torch.clamp(torch.round(x / step), -2 ** (bits - 1), 2 ** (bits - 1) - 1)
+    return x + (c * step - x).detach()
+
+
 class SpikeMLP(nn.Module):
-    def __init__(self, hidden=64, steps=12, encoding='current'):
+    def __init__(self, hidden=64, steps=12, encoding='current', w1_bits=16, fan_in=0):
         super().__init__()
         self.fc1 = nn.Linear(N_INPUT, hidden)
         self.fc2 = nn.Linear(hidden, 2)
         self.hidden, self.steps, self.encoding = hidden, steps, encoding
         self.qat = False
+        # Research options (synapse precision and count). Off by default; then no buffer is registered,
+        # so the release model, its state_dict and its training are unchanged.
+        self.w1_bits, self.fan_in, self.w1_shift = w1_bits, fan_in, None
+        if fan_in:
+            self.register_buffer('w1_mask', torch.ones_like(self.fc1.weight))
+
+    def fix_w1_shift(self):
+        """Fix the n-bit scale of w1 from the current weights (called once, at the first QAT epoch)."""
+        w = self.fc1.weight.detach() * (self.w1_mask if self.fan_in else 1)
+        self.w1_shift = pow2_shift(float(w.abs().max()) * Q, self.w1_bits)
+
+    @torch.no_grad()
+    def prune_to(self, keep):
+        """Keep the `keep` largest-magnitude input weights of every hidden neuron (fixed fan-in)."""
+        w = self.fc1.weight * self.w1_mask
+        idx = w.abs().topk(keep, dim=1).indices
+        self.w1_mask.zero_().scatter_(1, idx, 1.0)
+        self.fc1.weight.mul_(self.w1_mask)
 
     def forward(self, x):
         w1, b1, w2, b2 = self.fc1.weight, self.fc1.bias, self.fc2.weight, self.fc2.bias
+        if self.fan_in:
+            w1 = w1 * self.w1_mask
         if self.qat:
-            w1, b1, w2, b2 = map(fake_round, (w1, b1, w2, b2))
+            b1, w2, b2 = map(fake_round, (b1, w2, b2))
+            w1 = fake_quant(w1, self.w1_shift, self.w1_bits) if self.w1_bits < 16 else fake_round(w1)
         mem = x.new_zeros((len(x), self.hidden))
         counts = torch.zeros_like(mem)
         phase = torch.zeros_like(x)
@@ -65,6 +102,25 @@ def quantize(model):
     q = {name: np.rint(value.detach().cpu().numpy() * Q).astype(np.int32)
          for name, value in [('w1', model.fc1.weight), ('b1', model.fc1.bias),
                              ('w2', model.fc2.weight), ('b2', model.fc2.bias)]}
+    extra = {}
+    if model.fan_in:
+        mask = model.w1_mask.detach().cpu().numpy().astype(np.uint8)
+        if not (mask.sum(1) == model.fan_in).all():
+            raise ValueError('every hidden neuron must keep exactly fan_in input weights')
+        q['w1'] = q['w1'] * mask
+        extra.update(fan_in=model.fan_in, w1_mask=mask)
+    if model.w1_bits < 16:
+        # n-bit synapses: c * 2**shift with c in n bits. The model file keeps the full-scale values
+        # (int16, Q10), so integer_forward, kdot and the plain loop need no change; export_model.py
+        # packs c for the packed firmware loop.
+        w = model.fc1.weight.detach().cpu().numpy() * Q
+        if model.fan_in:
+            w = w * extra['w1_mask']
+        lo, hi = -2 ** (model.w1_bits - 1), 2 ** (model.w1_bits - 1) - 1
+        c = np.rint(w / 2 ** model.w1_shift)
+        clipped = int(((c < lo) | (c > hi)).sum())
+        q['w1'] = (np.clip(c, lo, hi) * 2 ** model.w1_shift).astype(np.int32)
+        extra.update(w1_bits=model.w1_bits, w1_shift=model.w1_shift, w1_clipped=clipped)
     for name in ['w1', 'w2']:
         if np.abs(q[name]).max() > 32767:
             raise ValueError('Weights exceed int16 range')
@@ -74,7 +130,33 @@ def quantize(model):
            (np.abs(q['w2'].astype(np.int64)).sum(1) + np.abs(q['b2'])).max() * model.steps) >= 2**31:
         raise ValueError('Model could overflow a signed 32-bit accumulator')
     q.update(steps=model.steps, encoding=0 if model.encoding == 'current' else 1, q=Q)
+    q.update(extra)
     return q
+
+
+def lif_count(drive, steps):
+    """Spikes of one hidden neuron in `steps` steps of the integer LIF update for a constant drive."""
+    v = count = 0
+    for _ in range(steps):
+        v = int(trunc_div(np.int64(v * 7), 8)) + drive
+        if v >= Q:
+            v -= Q
+            count += 1
+    return count
+
+
+def lif_thresholds(steps):
+    """Smallest drive that gives at least k spikes, k = 1..steps.
+
+    With current encoding the drive is constant, so the spike count is a staircase function of the
+    drive: 0 spikes for drive <= 0 (the membrane never becomes positive) and `steps` spikes for
+    drive >= Q (every step crosses the threshold). In between the count never decreases as the drive
+    grows (checked exhaustively in tests/test_pipeline.py). Counting the thresholds a drive reaches is
+    therefore bit-exact with the loop (firmware USE_LIF_TABLE)."""
+    counts = [lif_count(d, steps) for d in range(0, Q + 1)]
+    if any(a > b for a, b in zip(counts, counts[1:])) or counts[0] or counts[Q] != steps:
+        raise ValueError('spike count is not a monotone staircase')
+    return [next(d for d, c in enumerate(counts) if c >= k) for k in range(1, steps + 1)]
 
 
 def keyword_of(npz):

@@ -32,7 +32,12 @@ from build_firmware import build, shown
 from check_board import Client, check_stream, check_vectors
 from model import keyword_of
 
-IMAGES = {'base': 'keyword', 'kdot': 'keyword_kdot'}
+IMAGES = {'base': 'keyword', 'kdot': 'keyword_kdot'}   # release images; also the deploy/ bitstream names
+# variant -> (fabric = start_board.sh variant, which picks the bitstream; firmware image).
+# The research images (research/PLAN_SYNAPSE.md) run on the release bitstreams.
+VARIANTS = {'base': ('base', 'keyword'), 'kdot': ('kdot', 'keyword_kdot'),
+            'packed': ('base', 'keyword_packed'), 'sparse': ('base', 'keyword_sparse'),
+            'lut': ('base', 'keyword_lut'), 'kdot_lut': ('kdot', 'keyword_kdot_lut')}
 
 
 def call(*args):
@@ -51,7 +56,8 @@ def milliseconds(seconds):
 
 def measure(a, variant, x, q):
     """Restart the board server with this variant's image, then run the check_board.py checks."""
-    started = call('ssh', a.board, 'bash', 'snn_keyword/start_board.sh', variant, f'bench/{IMAGES[variant]}.bin')
+    fabric, image = VARIANTS[variant]
+    started = call('ssh', a.board, 'bash', 'snn_keyword/start_board.sh', fabric, f'bench/{image}.bin')
     if 'Listening' not in started:
         raise SystemExit(f'Board server did not start:\n{started}')
     board = Client(a.host, a.port)
@@ -67,7 +73,8 @@ def measure(a, variant, x, q):
     if not single['bit_exact']:   # no bit-exact result, no reported cycles
         for k in ('cycles_min', 'cycles_mean', 'cycles_max', 'milliseconds_max_at_100mhz'):
             single.pop(k)
-    return {'server': started.strip().splitlines(), 'bit_exact': single['bit_exact'], 'single_window': single,
+    return {'fabric': fabric, 'image': image,
+            'server': started.strip().splitlines(), 'bit_exact': single['bit_exact'], 'single_window': single,
             'round_trip_ms': milliseconds(round_trips), 'stream': stream,
             'stream_pass': all(r['pass'] for r in stream) if stream[0]['pass'] is not None else None}
 
@@ -75,29 +82,32 @@ def measure(a, variant, x, q):
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('model', type=Path, help='integer model .npz (with stream_threshold)')
-    p.add_argument('--variant', choices=['base', 'kdot', 'both'], default='both')
+    p.add_argument('--variant', nargs='+', choices=[*VARIANTS, 'both'], default=['both'],
+                   help='firmware variants to measure (both = base kdot)')
     p.add_argument('--board', default='pynq', help='ssh host: ~/.ssh/config alias or user@ip')
     p.add_argument('--host', default='10.43.0.1', help='board address for the demo protocol')
     p.add_argument('--port', type=int, default=5556)
     p.add_argument('--vectors', type=Path, default=VECTORS, help='input vectors (key x)')
     p.add_argument('--repeat', type=int, default=3)
     p.add_argument('--out', type=Path, help='write the report as JSON')
+    p.add_argument('--build-name', help='firmware folder under build/bench (default: the model file name)')
     a = p.parse_args()
     q = dict(np.load(a.model))
     x = np.load(a.vectors)['x']
-    variants = ['base', 'kdot'] if a.variant == 'both' else [a.variant]
-    folder = KWS / 'build/bench' / a.model.stem
-    firmware = build(a.model, folder)
+    variants = list(dict.fromkeys(v for x in a.variant for v in (['base', 'kdot'] if x == 'both' else [x])))
+    images = [VARIANTS[v][1] for v in variants]
+    folder = KWS / 'build/bench' / (a.build_name or a.model.stem)
+    firmware = build(a.model, folder, images)
     rel = os.path.relpath(folder, KWS).replace('\\', '/')
     call('ssh', a.board, 'mkdir', '-p', 'snn_keyword/bench')
     call('scp', '-q', 'start_board.sh', f'{a.board}:snn_keyword/')
-    call('scp', '-q', *[f'{rel}/{IMAGES[v]}.bin' for v in variants], f'{a.board}:snn_keyword/bench/')
-    listing = call('ssh', a.board, 'sha256sum', *[f'snn_keyword/bench/{IMAGES[v]}.bin' for v in variants],
+    call('scp', '-q', *[f'{rel}/{n}.bin' for n in images], f'{a.board}:snn_keyword/bench/')
+    listing = call('ssh', a.board, 'sha256sum', *[f'snn_keyword/bench/{n}.bin' for n in images],
                    'snn_keyword/deploy/keyword.bit', 'snn_keyword/deploy/keyword_kdot.bit')
     on_board = {Path(line.split()[1]).name: line.split()[0] for line in listing.splitlines()}
-    for v in variants:
-        if on_board[f'{IMAGES[v]}.bin'] != firmware['images'][IMAGES[v]]['sha256']:
-            raise SystemExit(f'{IMAGES[v]}.bin on the board differs from the build')
+    for n in images:
+        if on_board[f'{n}.bin'] != firmware['images'][n]['sha256']:
+            raise SystemExit(f'{n}.bin on the board differs from the build')
     bench = describe(keyword_of(q))
     report = {'benchmark': bench['fingerprint'], 'date': time.strftime('%Y-%m-%d %H:%M'), 'board': a.host,
               'model': shown(a.model), 'model_sha256': hashlib.sha256(a.model.read_bytes()).hexdigest(),

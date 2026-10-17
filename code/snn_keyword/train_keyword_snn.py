@@ -10,6 +10,7 @@ import numpy as np
 os.environ.setdefault('CUBLAS_WORKSPACE_CONFIG', ':4096:8')
 import torch
 from torch import nn
+from features import N_INPUT
 from model import SpikeMLP, integer_forward, quantize, metrics, choose_threshold, keyword_of
 
 ROOT = Path(__file__).resolve().parent
@@ -48,7 +49,7 @@ def run(args, seed, encoding):
         yt = torch.cat([yt, torch.tensor(aug['y'][tr], device=device, dtype=torch.long)])
         xv_np = np.concatenate([xv_np, aug['x'][va]]); yv = np.concatenate([yv, aug['y'][va]])
     xv = torch.tensor(xv_np, device=device, dtype=torch.float32) / 255
-    model = SpikeMLP(args.hidden, args.steps, encoding).to(device)
+    model = SpikeMLP(args.hidden, args.steps, encoding, w1_bits=args.w1_bits, fan_in=args.fan_in).to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-3)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(opt, args.epochs, eta_min=args.lr / 10)
     original = torch.arange(len(yt), device=device) < n_orig
@@ -60,7 +61,14 @@ def run(args, seed, encoding):
     start = time.perf_counter()
     for epoch in range(args.epochs):
         model.train()
+        if args.fan_in and args.prune_start <= epoch < args.prune_end:
+            # Gradual magnitude pruning to a fixed fan-in: the pruned share grows along a cubic
+            # schedule and reaches 1 - fan_in/N_INPUT at the last pruning epoch; the mask is then frozen.
+            frac = (epoch - args.prune_start + 1) / (args.prune_end - args.prune_start)
+            model.prune_to(round(N_INPUT - (N_INPUT - args.fan_in) * (1 - (1 - frac) ** 3)))
         model.qat = epoch >= args.epochs - args.qat_epochs
+        if model.qat and args.w1_bits < 16 and model.w1_shift is None:
+            model.fix_w1_shift()
         total = 0.
         for _ in range(args.samples_per_epoch // args.batch):
             # Each class fills half the batch; aug_fraction of that half is augmented.
@@ -77,6 +85,8 @@ def run(args, seed, encoding):
             loss.backward()
             nn.utils.clip_grad_norm_(model.parameters(), 5)
             opt.step()
+            if args.fan_in:   # AdamW's momentum and weight decay would revive pruned weights
+                model.fc1.weight.data.mul_(model.w1_mask)
             total += loss.item()
         scheduler.step()
         logits = evaluate(model, xv)
@@ -105,6 +115,10 @@ def run(args, seed, encoding):
                'gpu': torch.cuda.get_device_name() if device.type == 'cuda' else None,
                'torch': torch.__version__, 'validation': metrics(yv, margin >= q['decision_threshold']),
                'decision_threshold': q['decision_threshold'], 'history': history}
+    if args.w1_bits < 16:
+        summary.update(w1_bits=args.w1_bits, w1_shift=int(q['w1_shift']), w1_clipped=int(q['w1_clipped']))
+    if args.fan_in:
+        summary.update(fan_in=args.fan_in, prune_start=args.prune_start, prune_end=args.prune_end)
     (out / 'training.json').write_text(json.dumps(summary, indent=2))
     return summary
 
@@ -127,9 +141,20 @@ def main():
                    help='Share of each class half-batch drawn from data/augment.npz (augment.py); '
                         '0 = release training, 0.3 = augmented trial model')
     p.add_argument('--aug-kinds', nargs='+', help='augment.py variants to train on (default: all in augment.npz)')
+    # Synapse research options (research/PLAN_SYNAPSE.md); the defaults give the release recipe unchanged.
+    p.add_argument('--w1-bits', type=int, default=16,
+                   help='bits per input-layer weight in QAT (16 = release Q10; 2-8 = power-of-two scaled n-bit)')
+    p.add_argument('--fan-in', type=int, default=0,
+                   help='prune every hidden neuron to this many input weights (0 = dense, the release)')
+    p.add_argument('--prune-start', type=int, default=3, help='first pruning epoch (0-based)')
+    p.add_argument('--prune-end', type=int, default=20, help='pruning ends before this epoch; the mask is then frozen')
     a = p.parse_args()
     if not 0 < a.qat_epochs <= a.epochs or a.batch % 2 or a.samples_per_epoch < a.batch or not 0 <= a.aug_fraction < 1:
         p.error('Require 0 < qat_epochs <= epochs, even batch, samples >= batch, 0 <= aug_fraction < 1')
+    if not 2 <= a.w1_bits <= 16 or not 0 <= a.fan_in < N_INPUT:
+        p.error('Require 2 <= w1_bits <= 16 and 0 <= fan_in < N_INPUT')
+    if a.fan_in and not 0 <= a.prune_start < a.prune_end <= a.epochs - a.qat_epochs:
+        p.error('Pruning must end before the QAT epochs: 0 <= prune_start < prune_end <= epochs - qat_epochs')
     torch.set_num_threads(8)
     torch.use_deterministic_algorithms(True)
     for encoding in a.encodings:
