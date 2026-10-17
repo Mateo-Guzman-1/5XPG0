@@ -10,7 +10,7 @@
 //   0x1000_1000  TIMER          0x00 TIME   (32-bit free-running counter)
 //   0x1000_2000  LED            0x00 OUT    ([9:0] PYNQ-Z2 board LEDs)
 //   0x1000_3000  POISSON        hardware spike generator (see rtl/poisson.v)
-//   PCPI custom-0               kdot/klen dot-product coprocessor (rtl/kdot_pcpi.v)
+//   PCPI custom-0               kdot/klen dense and kxload/ksdot sparse dot products (rtl/kdot_pcpi.v)
 //
 // The BRAM has two ports: port A belongs to the PS (via ps_if, used to load
 // the program and read the console / spike log), port B belongs to the CPU.
@@ -184,7 +184,7 @@ module spike_soc #(
                     case (cpu_mem_addr[15:12])
                     4'h0: case (cpu_mem_addr[3:2])                  // SYSCTRL
                           2'd0: peri_rdata_r <= 32'h534B_454C;     // "SKEL"
-                          2'd1: peri_rdata_r <= 32'h0002_0001;     // v2.0 + bit0: kdot coprocessor
+                          2'd1: peri_rdata_r <= 32'h0002_0003;     // v2.0 + bit0: kdot, bit1: kxload/ksdot
                           2'd2: peri_rdata_r <= sys_scratch;
                           2'd3: peri_rdata_r <= {31'b0, core_trap};
                           endcase

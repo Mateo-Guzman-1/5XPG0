@@ -28,6 +28,17 @@ void keyword_infer(const uint8_t *input, int32_t *scores, uint32_t *spikes)
             }
         drive[h] = sum * (1 << MODEL_W1_SHIFT) / 255 + model_b1[h];
     }
+#elif defined(USE_KSDOT)
+    /* Research S6 (sparse kdot, rtl/kdot_pcpi.v, ABI bit1): kxload copies the input into the
+     * coprocessor's local buffer once; ksdot then streams each neuron's MODEL_W1_FANIN synapse
+     * words ((int16 weight << 16) | input index), one per cycle. Bit-exact with USE_SPARSE. */
+    __asm__ volatile (".insn r 0x0b, 2, 0, x0, %0, %1" :: "r"(input), "r"(MODEL_INPUT) : "memory");
+    for (unsigned h = 0; h < MODEL_HIDDEN; ++h) {
+        int32_t sum;
+        __asm__ volatile (".insn r 0x0b, 3, 0, %0, %1, %2"
+                          : "=r"(sum) : "r"(&model_w1s[h * MODEL_W1_FANIN]), "r"(MODEL_W1_FANIN) : "memory");
+        drive[h] = sum / 255 + model_b1[h];
+    }
 #elif defined(USE_SPARSE)
     /* Research S3 (synapse count): MODEL_W1_FANIN kept synapses per neuron, one word each:
      * (int16 Q10 weight << 16) | input index. */

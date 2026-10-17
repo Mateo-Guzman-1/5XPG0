@@ -106,6 +106,29 @@ of [PLAN.md](PLAN.md); those are deferred until after the report. Progress is tr
   - figures and tables;
   - the research record `reports/S_energy_synapse.md` and the LaTeX section `reports/latex/size_synapse/`.
 
+## S6 — Sparse kdot (added 2026-10-17, written before building)
+- **Why.** S3 and S5 showed that pruning only pays off on plain RV32IM: kdot streams every weight,
+  zeros included.
+- **Design.** Two new instructions in the kdot unit:
+  - `kxload` copies the input once into a local buffer;
+  - `ksdot` streams only the kept synapses (S3 format, `(int16 w << 16) | index`), one per cycle.
+- **ABI** 0x0002_0003; experimental bitstream only.
+- **Hypothesis H6.** For the same model, only the dot-product time changes:
+  C_ksdot − C_kdot_lut ≈ −H·(576 − K) + ~200 cycles (± H·15).
+
+  | Model | Predicted cycles | Predicted energy |
+  |---|---|---|
+  | H48 K64 | ≈ 34.4k | ≈ 98 µJ (−41 % vs the deployed 58.7k) |
+  | H48 K128 | ≈ 37.4k | |
+  | H48 K256 | ≈ 43.6k | |
+  | H95 K64 | ≈ 66k | |
+
+  Floor ≈ 31k (non-dot-product work).
+- **The selection rule is unchanged.** Expected: sparse kdot moves the Pareto front and the
+  pooled-sd sensitivity choice; the strict choice stays the deployed model unless a pruned 8-bit
+  model reaches 0.7405.
+- **Models:** the S3 models, plus new `h48_b8_k{64,128,256}` (the deployed recipe + pruning).
+
 ## Rules (as in PLAN.md part B)
 - 3 seeds; validation for choices, test only for reporting.
 - Cycles only from bit-exact board runs.

@@ -34,7 +34,9 @@ IMAGES = {'keyword': [], 'keyword_kdot': ['-DUSE_KDOT']}
 EXTRA_IMAGES = {'keyword_packed': ['-DUSE_PACKED'],         # n-bit packed input weights (RV32IM)
                 'keyword_sparse': ['-DUSE_SPARSE'],         # fixed fan-in synapse list (RV32IM)
                 'keyword_lut': ['-DUSE_LIF_TABLE'],         # exact LIF threshold count (RV32IM)
-                'keyword_kdot_lut': ['-DUSE_KDOT', '-DUSE_LIF_TABLE']}
+                'keyword_kdot_lut': ['-DUSE_KDOT', '-DUSE_LIF_TABLE'],
+                # S6: sparse kdot (kxload/ksdot); needs the experimental ksdot bitstream (ABI bit1)
+                'keyword_ksdot_lut': ['-DUSE_KSDOT', '-DUSE_LIF_TABLE']}
 MODEL_LIMIT = 144 * 1024
 
 
@@ -61,7 +63,8 @@ def build(model, out, images=tuple(IMAGES)):
     flags = {**IMAGES, **EXTRA_IMAGES}
     # The research arrays are only written when an image needs them, so the release headers (and
     # binaries) stay byte-identical; GCC drops arrays that an image does not reference.
-    export(model, out, packed='keyword_packed' in images, sparse='keyword_sparse' in images,
+    export(model, out, packed='keyword_packed' in images,
+           sparse=any(name in ('keyword_sparse', 'keyword_ksdot_lut') for name in images),
            lif_table=any(name.endswith('_lut') for name in images))
     rel = os.path.relpath(out, FIRMWARE).replace('\\', '/')
     report = {'model': shown(model), 'out': shown(out),
