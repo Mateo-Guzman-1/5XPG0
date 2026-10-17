@@ -453,6 +453,34 @@ With only two voices, they indicate trends, not accuracy.
   - Not deployed (needs the user's approval). The report section is `research/reports/latex/size_synapse/`.
 - **Board:** restored to the release demo afterwards (`check_board.py`: 120/120, PASS).
 
+### 14. The study's choice deployed: 48 neurons, 8-bit weights, exact LIF table
+
+- **Decision (user, 2026-10-17):** put the design chosen in entry 13 on the board.
+- **Model:** `research/results/S2/models/h48_b8_seed1.npz`, seed 1 of three (best validation F1,
+  0.7503). Thresholds: decision 2349, stream 803.
+- **Change in `deploy/`:**
+  - `model.npz`;
+  - `keyword.bin` = RV32IM + LIF-table image;
+  - `keyword_kdot.bin` = kdot + LIF-table image;
+  - built with `build_firmware.py ... --images keyword_lut keyword_kdot_lut` (identity check:
+    `--compare deploy`, which now maps those images to the release names).
+  - Bitstreams, RTL, board server and protocol are unchanged.
+  - The manifest names the evidence folder `results/sheila_h48_b8/`. Its verification vectors are
+    the same 40 inputs as before, with this model's expected outputs.
+- **Checks:**
+  - **From `deploy/` on the board:** 40 vectors ×3 bit-exact on both fabrics. Max 4,344,674
+    cycles (RV32IM, 43.45 ms) and 59,040 (kdot, 0.59 ms); "2 of 3" patterns as specified; round
+    trip 1.65 ms (kdot).
+  - **Firmware:** the kdot image is byte-identical to the one benchmarked in S2.
+  - **Tests:** pytest 24 passed.
+- **Against the previous model:**
+  - test F1 0.791 vs 0.782;
+  - live "Sheila" 2 of 3: 66.0 vs 60.9 %, other words 0.33 % for both;
+  - kdot energy per inference 0.165 vs 1.10 mJ;
+  - model 74,112 vs 146,680 bytes.
+  - "shee" + another word still passes about a third of the time (34.9 % of windows).
+- **Still to do:** a live microphone test by the user.
+
 ## Open items
 
 1. ~~Reflash the SD card and test the standard Ethernet path~~: done on a

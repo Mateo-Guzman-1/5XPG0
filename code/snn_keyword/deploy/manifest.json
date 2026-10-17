@@ -4,30 +4,30 @@
     "keyword_kdot.bit": "0x00020001"
   },
   "keyword": "sheila",
-  "evidence": "results/sheila_hardneg",
-  "model": "768-95-2 LIF, current encoding, trained with Sheila hard negatives (augment.py, fraction 0.3), seed 2; JOURNAL.md entries 10-11",
-  "previous_release": "Sheila, 64 hidden neurons without hard negatives (JOURNAL.md entry 9), until 2026-10-04 (git commit 3dbfdb6), evidence in results/sheila/; before that keyword \"yes\" until 2026-09-30 (git commit 05ad009), evidence in results/",
+  "evidence": "results/sheila_h48_b8",
+  "model": "768-48-2 LIF, current encoding, Sheila hard negatives (fraction 0.3), input weights trained as 8-bit (QAT, w1 = c * 2^shift, stored as int16 Q10), seed 1 (best validation F1 of 3 seeds); firmware with the exact LIF threshold table (USE_LIF_TABLE). Chosen by the pre-registered rule of research/PLAN_SYNAPSE.md (S5); JOURNAL.md entry 14",
+  "previous_release": "Sheila, 95 hidden neurons with hard negatives, plain 12-step LIF loop (JOURNAL.md entries 10-11), until 2026-10-17 (git commit f527f74), evidence in results/sheila_hardneg/; before that Sheila 64 hidden (git 3dbfdb6, results/sheila/) and \"yes\" (git 05ad009, results/)",
   "board_tested": {
     "method": "PYNQ Linux 3.0.1 over Ethernet (run_board.ps1, board_server.py, check_board.py)",
-    "date": "2026-10-01 (staged in build/sheila_hardneg), re-checked from deploy/ on 2026-10-04",
-    "result": "40 verification vectors x3 bit-exact for keyword.bin (max 8,877,865 cycles) and keyword_kdot.bin (max 395,945 cycles), identical on both dates; \"2 of 3\" stream patterns as specified; synthesized clips streamed at the 250 ms hop, every window bit-exact (results/sheila_hardneg/board_base.json, board_kdot.json); live microphone test by the user on 2026-10-04"
+    "date": "2026-10-17, from deploy/",
+    "result": "40 verification vectors x3 bit-exact for keyword.bin (max 4,344,674 cycles, 43.45 ms) and keyword_kdot.bin (max 59,040 cycles, 0.59 ms); \"2 of 3\" stream patterns as specified (results/sheila_h48_b8/board_base.json, board_kdot.json)"
   },
   "files": {
     "keyword.bin": {
-      "sha256": "da5f59588f446a6d6635a889904463d736ccf194aeeadb6125ce7b355029c237",
-      "bytes": 244984
+      "sha256": "52b869b2114d902d6d34acf5bc4aee04b7ed48081ab8e7cd90033bf6386fc60b",
+      "bytes": 172416
     },
     "keyword.bit": {
       "sha256": "d2556a5f885fffa436378c8520c62dd6341e4b22a26754189bb52412fbd8a8b3",
       "bytes": 1292867
     },
     "model.npz": {
-      "sha256": "86154768ba979318b9ea7035f18fdc154789c53a404c0fe6d15eba29ee92da98",
-      "bytes": 89132
+      "sha256": "57e9b1b6445049254ce4b79a693710f0d4ba53970dbafb0bb3c176e5db68af31",
+      "bytes": 36579
     },
     "keyword_kdot.bin": {
-      "sha256": "59f43df53ab40d31c76eacfe3d187edff7ed4be5149ff251f4136107118a5dde",
-      "bytes": 244984
+      "sha256": "8614b4d89f415855065c0f2ecb4a015a58b5036ef64a3d345eda2e0c03d630d3",
+      "bytes": 172416
     },
     "keyword_kdot.bit": {
       "sha256": "29d86aa01a0b73ce6bb8e99f1b98410396b21bb22da662a02b9f2cc1b7c1e5f7",
@@ -45,5 +45,6 @@
     "code/pynqz2_riscv_flow/rtl/ps_if.v": "86d98314afae64a61fdda2ecb509614eabe15b581df94d795b5d336e2c25e3fa",
     "code/pynqz2_riscv_flow/rtl/spike_soc.v": "c6dfeb5862762fb50dbb62b336122ff120a9043022d001541ec15d5a3cea638d",
     "code/pynqz2_riscv_flow/rtl/spike_top.v": "149f7a2fc18ab707eca3e7528b808031b8c06f67e979e06e2ecb0a8a245d0df6"
-  }
+  },
+  "firmware_build": "research/tools/build_firmware.py research/results/S2/models/h48_b8_seed1.npz --out <dir> --images keyword_lut keyword_kdot_lut; keyword.bin = keyword_lut.bin (RV32IM), keyword_kdot.bin = keyword_kdot_lut.bin (kdot). Bitstreams unchanged."
 }

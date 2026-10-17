@@ -1,0 +1,21 @@
+{
+  "model": "code/snn_keyword/research/results/S2/models/h48_b8_seed1.npz",
+  "out": "code/snn_keyword/build/deploy_h48_b8_seed1",
+  "compiler": "riscv32-xilinx-elf-gcc.exe (GCC) 13.4.0",
+  "images": {
+    "keyword_lut": {
+      "bin_bytes": 172416,
+      "sha256": "52b869b2114d902d6d34acf5bc4aee04b7ed48081ab8e7cd90033bf6386fc60b",
+      "text_bytes": 1340,
+      "model_bytes": 74112,
+      "model_limit_bytes": 147456
+    },
+    "keyword_kdot_lut": {
+      "bin_bytes": 172416,
+      "sha256": "8614b4d89f415855065c0f2ecb4a015a58b5036ef64a3d345eda2e0c03d630d3",
+      "text_bytes": 1308,
+      "model_bytes": 74112,
+      "model_limit_bytes": 147456
+    }
+  }
+}

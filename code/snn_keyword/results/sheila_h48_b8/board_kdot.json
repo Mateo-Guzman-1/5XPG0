@@ -1,0 +1,80 @@
+{
+  "board": "10.43.0.1",
+  "label": "kdot",
+  "date": "2026-10-17",
+  "model": "code/snn_keyword/deploy/model.npz",
+  "model_sha256": "57e9b1b6445049254ce4b79a693710f0d4ba53970dbafb0bb3c176e5db68af31",
+  "keyword": "sheila",
+  "decision_threshold": 2349,
+  "stream_threshold": 803,
+  "vectors": "code/snn_keyword/results/sheila_h48_b8/verification_vectors.npz",
+  "single_window": {
+    "requests": 120,
+    "mismatches": [],
+    "bit_exact": true,
+    "cycles_min": 58299,
+    "cycles_mean": 58670.8,
+    "cycles_max": 59040,
+    "milliseconds_max_at_100mhz": 0.5904
+  },
+  "stream": [
+    {
+      "pattern": "+",
+      "expected": [
+        2
+      ],
+      "board": [
+        2
+      ],
+      "pass": true
+    },
+    {
+      "pattern": "--+",
+      "expected": [
+        0,
+        0,
+        2
+      ],
+      "board": [
+        0,
+        0,
+        2
+      ],
+      "pass": true
+    },
+    {
+      "pattern": "++-+",
+      "expected": [
+        2,
+        3,
+        0,
+        3
+      ],
+      "board": [
+        2,
+        3,
+        0,
+        3
+      ],
+      "pass": true
+    },
+    {
+      "pattern": "-+-+",
+      "expected": [
+        0,
+        2,
+        0,
+        3
+      ],
+      "board": [
+        0,
+        2,
+        0,
+        3
+      ],
+      "pass": true
+    }
+  ],
+  "round_trip_ms_mean": 1.65,
+  "pass": true
+}

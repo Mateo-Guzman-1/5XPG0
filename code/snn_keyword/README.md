@@ -11,13 +11,51 @@ README documents the original **"yes"** release.
 ## Current keyword: "Sheila" (since 2026-09-30)
 
 The keyword changed from "yes" to "Sheila" ([JOURNAL.md](JOURNAL.md) entry 9).
-Firmware C code, RTL, bitstreams, board server and protocol are unchanged; only
-the weights and the two thresholds in `deploy/` are new. Since 2026-10-04 the
-deployed model is the **hard-negative model** of entry 10 (95 hidden neurons),
-chosen after the user's live microphone test (entry 11). Its evidence is in
-[`results/sheila_hardneg/`](results/sheila_hardneg/). The first Sheila model
-(64 hidden neurons, entry 9) is in [`results/sheila/`](results/sheila/); the
-files directly in `results/` belong to the "yes" release.
+
+### Deployed since 2026-10-17: 48 neurons, 8-bit weights, exact LIF table (entry 14)
+**How it was chosen.** This model won the energy-aware size and synapse study
+([research/PLAN_SYNAPSE.md](research/PLAN_SYNAPSE.md),
+[report](research/reports/S_energy_synapse.md)). A rule fixed before the experiments picked the
+lowest-energy design whose validation F1 is within one sd of the best of 42 measured designs.
+
+**Network.** 768–48–2 LIF, current encoding, Sheila hard negatives (fraction 0.3), input weights
+trained as 8-bit codes (QAT, power-of-two scale, stored as int16 Q10). Seed 1 has the best
+validation F1 of 3 seeds (0.7503). Thresholds: decision 2349, stream 803.
+
+**Firmware.**
+- Both images use `-DUSE_LIF_TABLE`. With a constant drive, the 12-step spike count is a staircase
+  of the drive, so it is read from 12 thresholds instead of being simulated.
+- The table is bit-exact with the loop.
+- Bitstreams, RTL, board server and protocol are unchanged.
+
+**Evidence:** [`results/sheila_h48_b8/`](results/sheila_h48_b8/).
+
+| Sheila model | Deployed (48 hidden, 8-bit, seed 1) | Previous (95 hidden, seed 2) |
+|---|---|---|
+| Test precision / recall / F1 | 83.68% / 75.00% / 0.791 | 81.22% / 75.47% / 0.7824 |
+| Negative-clip false-positive rate | 0.29% | 0.343% |
+| Live windows, "Sheila" detected: single / 2 of 3 | 73.1% / 66.0% | 73.6% / 60.9% |
+| Live windows, other words accepted: single / 2 of 3 | 0.97% / 0.33% | 1.47% / 0.33% |
+| "sh" / "shee" + word / onset + "eila" windows passing | 0.6% / 34.9% / 36.4% | 1.2% / 33.1% / 35.2% |
+| Synthesized "she-" words detected (2 of 3) | 37% | 31% |
+| Background-noise windows with a detection | 0 of 398 | 0 of 398 |
+| Board max cycles, RV32IM / `kdot` (40 vectors ×3, bit-exact) | 4,344,674 (43.45 ms) / 59,040 (0.59 ms) | 8,877,865 / 395,945 |
+| Energy per inference, `kdot` (Vivado power × cycles, [ENERGY.md](research/ENERGY.md)) | 0.165 mJ | 1.10 mJ |
+| Model bytes (of 147,456) | 74,112 | 146,680 |
+
+Rebuild and check (repository root):
+```powershell
+.venv/Scripts/python.exe code/snn_keyword/research/tools/build_firmware.py code/snn_keyword/deploy/model.npz --out code/snn_keyword/build/release_check --images keyword_lut keyword_kdot_lut --compare code/snn_keyword/deploy
+code/snn_keyword/run_board.ps1; .venv/Scripts/python.exe code/snn_keyword/check_board.py 10.43.0.1
+```
+
+### Previous model: 95 hidden neurons with hard negatives (2026-10-04 to 2026-10-17)
+Firmware C code, RTL, bitstreams, board server and protocol were unchanged; only the weights and
+the two thresholds in `deploy/` were new. The **hard-negative model** of entry 10 (95 hidden
+neurons) was chosen after the user's live microphone test (entry 11). Its evidence is in
+[`results/sheila_hardneg/`](results/sheila_hardneg/). The first Sheila model (64 hidden neurons,
+entry 9) is in [`results/sheila/`](results/sheila/); the files directly in `results/` belong to
+the "yes" release.
 
 **Data.** "sheila" is one of the 35 words of Speech Commands v0.02: 2,022
 clips with the official speaker-disjoint split, 1,606 / 204 / 212 positives in

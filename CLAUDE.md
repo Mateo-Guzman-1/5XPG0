@@ -14,10 +14,12 @@ turns each 1 s window (every 250 ms) into a 24×32 mel spectrogram (768 bytes,
 - Keyword data: the `sheila` clips of Speech Commands v0.02 (official split).
   `prepare_data.py --keyword <word>` labels the cache; features, models and results store
   their keyword, and the tools refuse to mix a model with data prepared for another word.
-- Deployed model (since 2026-10-04, `JOURNAL.md` entry 11): 95 hidden neurons trained with
-  Sheila hard negatives; evidence in `code/snn_keyword/results/sheila_hardneg/`. The first
-  Sheila model (64 hidden) is in `results/sheila/`; the files directly in `results/` are the
-  historical "yes" release.
+- Deployed model (since 2026-10-17, `JOURNAL.md` entry 14): 48 hidden neurons, 8-bit QAT
+  input weights (stored int16), firmware with the exact LIF threshold table
+  (`-DUSE_LIF_TABLE`); evidence in `code/snn_keyword/results/sheila_h48_b8/`, chosen by the
+  synapse study (`research/PLAN_SYNAPSE.md`). Previous: 95 hidden neurons
+  (`results/sheila_hardneg/`, 2026-10-04 to 10-17); first Sheila model (64 hidden) in
+  `results/sheila/`; the files directly in `results/` are the historical "yes" release.
 
 ## Research programme (the current work)
 Goal: how input encoding and network size trade off against detection quality and
@@ -47,7 +49,8 @@ latency on the RISC-V core. The plan is split into experiments E0–E8, one per 
   `C:/AMDDesignTools/2026.1/gnu/riscv/nt/bin/riscv64-unknown-elf-gcc.exe`
   (+ `-objcopy`, `-size`, `-objdump`). There is **no `make`, no WSL, no Verilator**; build
   with `code/snn_keyword/research/tools/build_firmware.py <model.npz> --out <folder>`
-  (the flags of `code/snn_keyword/firmware/Makefile`; `--compare deploy` checks identity).
+  (the flags of `code/snn_keyword/firmware/Makefile`). The release since 2026-10-17 is built with
+  `--images keyword_lut keyword_kdot_lut`; add `--compare code/snn_keyword/deploy` to check identity.
 - Vivado/xsdb 2026.1: `C:/AMDDesignTools/2026.1/Vivado/bin/` (RTL changes, the JTAG
   fallback, and power reports: `research/tools/power/vivado_power.tcl`, which builds a
   `git archive` copy under `build/vivado_power/` and works around the space in the repo path).

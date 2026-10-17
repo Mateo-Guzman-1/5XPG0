@@ -73,7 +73,8 @@ kdot + LIF table.
 - **Quality:** test F1 0.789 ± 0.010, live 65.6 %.
 - **Against the deployed model:** 6.7× less energy per inference, half the memory, equal quality.
 - **Average PL power barely changes:** 93.6 vs 97.3 mW clock-gated, because of the static floor.
-- **Not deployed.** E8-style promotion needs Pedro's approval.
+- **Deployed 2026-10-17** at Pedro's request: seed 1 (best validation F1). Evidence in
+  `results/sheila_h48_b8/`, JOURNAL entry 14. Bit-exact on the board from `deploy/`, both fabrics.
 
 ## Keyword change to "Sheila" (2026-09-30, before E0)
 
@@ -220,7 +221,6 @@ For reference, the previous "yes" release: test F1 0.8761 (seeds 0.867 ± 0.022)
 The experiments of part 2 are complete. Open:
 - Pedro reviews the LaTeX section `reports/latex/size_synapse/section.tex`: wording, which figures to
   keep, and the meter details for the method text.
-- Optional:
-  - deploy the chosen design (needs approval; kdot + LIF-table firmware and its own bit-exact check);
-  - stretch items in PLAN_SYNAPSE.md (BRAM-size what-if, clock-scaling demo with the USB meter).
+- Live microphone test of the newly deployed model (`pc_keyword_demo.py 10.43.0.1`).
+- Optional: stretch items in PLAN_SYNAPSE.md (BRAM-size what-if, clock-scaling demo with the USB meter).
 - Part 1's E1 (recordings) is deferred until after the report.

@@ -95,8 +95,12 @@ def main():
     a = p.parse_args()
     report = build(a.model, a.out, a.images)
     if a.compare:
-        report['identical_to'] = {name: (a.compare / f'{name}.bin').read_bytes() == (a.out / f'{name}.bin').read_bytes()
-                                  for name in a.images if name in IMAGES}
+        # The release since 2026-10-17 ships the LIF-table images under the release names
+        # (deploy/manifest.json "firmware_build"); compare each built image with its release name.
+        release = {'keyword': 'keyword', 'keyword_kdot': 'keyword_kdot', 'keyword_lut': 'keyword',
+                   'keyword_kdot_lut': 'keyword_kdot'}
+        report['identical_to'] = {name: (a.compare / f'{release[name]}.bin').read_bytes() == (a.out / f'{name}.bin').read_bytes()
+                                  for name in a.images if name in release}
     print(json.dumps(report, indent=2))
     if a.compare and not all(report['identical_to'].values()):
         raise SystemExit('Images differ from ' + str(a.compare))
