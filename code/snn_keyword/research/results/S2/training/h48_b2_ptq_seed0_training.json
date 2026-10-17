@@ -1,0 +1,21 @@
+{
+  "method": "post-training rounding of an E2 checkpoint",
+  "checkpoint": "C:\\Users\\pedro\\Desktop\\Projects\\Semiconductor Technology\\5XPG0\\code\\snn_keyword\\runs_e2\\h48\\current_seed0\\checkpoint.pt",
+  "w1_bits": 2,
+  "w1_shift": 9,
+  "w1_clipped": 0,
+  "hidden": 48,
+  "decision_threshold": -6238,
+  "validation": {
+    "tp": 164,
+    "fp": 3741,
+    "fn": 195,
+    "tn": 7425,
+    "accuracy": 0.6584815618221258,
+    "precision": 0.04199743918053777,
+    "recall": 0.4568245125348189,
+    "fpr": 0.3350349274583557,
+    "f1": 0.07692307692307693,
+    "balanced_accuracy": 0.5608947925382316
+  }
+}

@@ -174,8 +174,9 @@ def fig_precision_cost(models, designs, out):
         rest = 4 * h + 4 * h + 8
         a.plot(n, (h * 768 * n / 8 + rest) / 1024, label=f'$H$ = {h}, packed', **ps.series_style(i))
     a.plot([16], [(95 * 768 * 2 + 95 * 8 + 8) / 1024], ls='none', marker='x', color='black', label='Deployed ($H$ = 95, int16)')
-    ps.limit_line(a, 144, '144 KiB model memory', where=0.97)
+    ps.limit_line(a, 144, '144 KiB model memory', where=0.97, va='bottom')
     a.set_yscale('log')
+    a.set_ylim(0.3, 600)   # room below the lines for the legend
     a.set_ylabel('Model memory (KiB)')
     bits_axis(a)
     a.legend(loc='lower right')
@@ -193,7 +194,7 @@ def fig_precision_cost(models, designs, out):
           error_kw=dict(lw=0.6, capsize=2))
     b.set_xticks(x)
     b.set_xticklabels(labels)
-    b.set_xlabel('Input-layer loop and bits per weight ($H$ = 48, RV32IM)')
+    b.set_xlabel('Input-layer loop, bits per weight ($H$ = 48)')
     b.set_ylabel('Energy per inference (mJ)')
     b.set_ylim(0, max(means) * 1.15 if means else 1)
     ps.panel_label(b, '(b)')

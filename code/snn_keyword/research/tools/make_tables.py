@@ -140,13 +140,57 @@ def table_size(latex):
     return render(header, rows, latex, head=head)
 
 
+def _rows(path):
+    with open(path, newline='') as f:
+        return list(csv.DictReader(f))
+
+
+def _ms(rows, key):
+    import numpy as np
+    v = np.array([float(r[key]) for r in rows])
+    return v.mean(), (v.std(ddof=1) if len(v) > 1 else 0.0)
+
+
+def table_precision(latex):
+    """S2: quality, zeros, memory and RV32IM energy per bit width."""
+    models = _rows(ROOT / 'results/S5/models.csv')
+    designs = _rows(ROOT / 'results/S5/designs.csv')
+    pm = r' $\pm$ ' if latex else ' ± '
+    rows = []
+    for n in (16, 8, 6, 4, 3, 2):
+        def sel(h, method):
+            return [r for r in models if int(r['hidden']) == h and int(r['bits']) == n and int(r['fan_in']) == 768
+                    and (r['exp'] == 'E2' if n == 16 else r['method'] == method)]
+        cells = [n]
+        for h, method in ((16, 'qat'), (48, 'qat'), (48, 'ptq')):
+            s = sel(h, method)
+            if s:
+                m, sd = _ms(s, 'val_f1')
+                cells.append(fmt(m, 3) + pm + fmt(sd, 3))
+            else:
+                cells.append('n/a' if n != 16 else '--')
+        s = sel(48, 'qat')
+        cells.append(fmt(100 * _ms(s, 'w1_zero_fraction')[0], 0))
+        cells.append(fmt((48 * 768 * n / 8 + 4 * 48 + 4 * 48 + 8) / 1024, 1))
+        d = [r for r in designs if int(r['hidden']) == 48 and int(r['bits']) == n and r['variant'] == 'packed'
+             and int(r['fan_in']) == 768 and r['method'] == 'qat']
+        cells.append(fmt(_ms(d, 'e_inf_uJ')[0] / 1e3, 1) if d else '--')
+        rows.append(cells)
+    header = ['Bits', 'Val F1, H=16', 'Val F1, H=48', 'Val F1, H=48, rounding only', 'Zero weights H=48 (%)',
+              'Memory H=48 (KiB)', 'E_inf packed RV32IM H=48 (mJ)']
+    if latex:
+        header = ['$n$', r'$H=16$', r'$H=48$', r'$H=48$, rounding only', r'Zeros (\%)', 'Memory (KiB)',
+                  r'$E_\mathrm{inf}$ (mJ)']
+    return render(header, rows, latex)
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument('table', choices=['power', 'worked', 'size'])
+    p.add_argument('table', choices=['power', 'worked', 'size', 'precision'])
     p.add_argument('--latex', action='store_true')
     p.add_argument('--out', type=Path, help='write the table to this file (UTF-8) instead of printing it')
     a = p.parse_args()
-    text = {'power': table_power, 'worked': table_worked, 'size': table_size}[a.table](a.latex)
+    text = {'power': table_power, 'worked': table_worked, 'size': table_size, 'precision': table_precision}[a.table](a.latex)
     if a.out:
         a.out.parent.mkdir(parents=True, exist_ok=True)
         a.out.write_text(text + '\n', encoding='utf-8')

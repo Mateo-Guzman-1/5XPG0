@@ -126,14 +126,38 @@ Hand check of the kdot line: 0.282 W × 390,992 cycles / 100 MHz = 0.282 × 3.91
 
 ## 3. Validation against a USB power meter
 
-The group measured the board with a USB power meter and found Vivado's estimates close. The
-numbers still have to be added here (**to be filled in by Pedro**):
+The group measured the board's input power with a USB power meter (whole board: ARM, DDR, Ethernet,
+regulators, LEDs). The design was Alex's dual-core SoC, commit `8ed0b32`: two independent PicoRV32
+cores, 132 BRAM36, each core with a 16-neuron `snn_layer`.
 
-| What was measured | Board state | Meter (W) | Vivado (W) | Difference |
-|---|---|---|---|---|
-| … | … | … | … | … |
+| State | Meter, board input (W) |
+|---|---|
+| P0 base case | 1.436 |
+| P1 `8ed0b32` loaded, both cores in reset | 2.269 |
+| P2 core 1 running `spike.bin`, LEDs off | 2.289 |
+| P3 both cores running; core 0 lights LED0 and flashes all LEDs on every spike | 3.061 |
 
-Date, design and meter model: …
+To compare like with like, the same commit was built with the same flow
+(`research/tools/power/vivado_power.tcl`) and estimated by Vivado 2026.1.
+- **Raw reports:** `results/S0/vivado_validation/dual_8ed0b32/`, parsed in
+  `results/S0/power_validation.json`.
+- **Estimate:** total on-chip 2.098 W, of which PS7 1.258 W, PL dynamic 0.669 W (BRAM 0.505 W) and
+  PL static 0.104 W; confidence "Medium".
+
+| Comparison | Meter | Vivado | Difference |
+|---|---|---|---|
+| Loading the design: P1 − P0 vs PL dynamic + PL static | 0.833 W | 0.773 W | Vivado 0.060 W (7 %) lower |
+| One core leaves reset: P2 − P1 vs one PicoRV32 (`u_cpu`) | 0.020 W | 0.018 W | same order |
+
+Notes:
+- **Different measurement points.** The meter sees the board input, Vivado the chip. Losses in the
+  board's voltage regulators are not in Vivado's number. A regulator efficiency around 93 % would
+  explain the 7 %; this is a plausible reason, not a measured one.
+- **The second comparison is only indicative.** Vivado's vectorless estimate has no reset state:
+  clocks and BRAM still run while a core is held in reset.
+- **P3 is dominated by the LEDs** and has no Vivado counterpart.
+- **What this supports.** Within about 10 %, Vivado's PL estimate matches what the board draws when
+  the design is loaded, which is the use made of it in this notebook.
 
 ## 4. Results so far
 

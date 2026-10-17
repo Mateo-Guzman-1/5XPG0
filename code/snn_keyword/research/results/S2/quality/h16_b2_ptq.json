@@ -1,0 +1,506 @@
+{
+  "benchmark": "c11137528abcc8fe",
+  "keyword": "sheila",
+  "test_clips": 11005,
+  "tts_utterances": 672,
+  "models": {
+    "h16_b2_ptq_seed0": {
+      "file": "code/snn_keyword/research/results/S2/models/h16_b2_ptq_seed0.npz",
+      "sha256": "0527c25beb81fa9310709a045c0be241b26106295f43c6b42e6d8ca4d0343a65",
+      "hidden": 16,
+      "parameters": 12338,
+      "parameter_bytes": 24712,
+      "decision_threshold": -5518,
+      "stream_threshold": -3722,
+      "test": {
+        "clips": {
+          "tp": 30,
+          "fp": 1695,
+          "fn": 182,
+          "tn": 9098,
+          "accuracy": 0.8294,
+          "precision": 0.0174,
+          "recall": 0.1415,
+          "fpr": 0.157,
+          "f1": 0.031,
+          "balanced_accuracy": 0.4922
+        },
+        "live": {
+          "single_window": {
+            "sheila_detected": 0.6226,
+            "other_accepted": 0.652
+          },
+          "two_of_three": {
+            "sheila_detected": 0.0,
+            "other_accepted": 0.0
+          }
+        },
+        "augmented_detected": {
+          "decision_threshold": {
+            "sh": 0.2035,
+            "shee": 0.2733,
+            "sheet": 0.2791,
+            "swap": 0.3372,
+            "ending": 0.3372,
+            "onset": 0.3951,
+            "head": 0.5581,
+            "noise": 0.5465,
+            "shift": 0.3953
+          },
+          "stream_threshold": {
+            "sh": 0.0,
+            "shee": 0.0058,
+            "sheet": 0.0,
+            "swap": 0.0029,
+            "ending": 0.0,
+            "onset": 0.0,
+            "head": 0.0,
+            "noise": 0.0116,
+            "shift": 0.0
+          }
+        },
+        "tts": {
+          "single_window": {
+            "sheila": 0.8385,
+            "sh sound": 0.7448,
+            "she- words": 0.6312,
+            "other sh- words": 0.7969,
+            "-eila words": 0.75,
+            "-eeler words": 0.7951,
+            "similar": 0.724,
+            "other words": 0.7646
+          },
+          "two_of_three": {
+            "sheila": 0.0,
+            "sh sound": 0.0,
+            "she- words": 0.0,
+            "other sh- words": 0.0,
+            "-eila words": 0.0,
+            "-eeler words": 0.0,
+            "similar": 0.0,
+            "other words": 0.0
+          }
+        },
+        "hidden_spikes_mean": 6.28,
+        "background_noise": {
+          "purpose": "out-of-training background probes, nonoverlapping 1 s clips; not continuous-speech FAR",
+          "recordings": [
+            {
+              "recording": "doing_the_dishes.wav",
+              "windows": 95,
+              "false_detections": 78
+            },
+            {
+              "recording": "dude_miaowing.wav",
+              "windows": 61,
+              "false_detections": 0
+            },
+            {
+              "recording": "exercise_bike.wav",
+              "windows": 61,
+              "false_detections": 61
+            },
+            {
+              "recording": "pink_noise.wav",
+              "windows": 60,
+              "false_detections": 60
+            },
+            {
+              "recording": "running_tap.wav",
+              "windows": 61,
+              "false_detections": 61
+            },
+            {
+              "recording": "white_noise.wav",
+              "windows": 60,
+              "false_detections": 60
+            }
+          ],
+          "windows": 398,
+          "false_detections": 320
+        }
+      },
+      "validation": {
+        "clips": {
+          "tp": 31,
+          "fp": 1318,
+          "fn": 173,
+          "tn": 8459,
+          "accuracy": 0.8506,
+          "precision": 0.023,
+          "recall": 0.152,
+          "fpr": 0.1348,
+          "f1": 0.0399,
+          "balanced_accuracy": 0.5086
+        },
+        "live": {
+          "single_window": {
+            "sheila_detected": 0.6176,
+            "other_accepted": 0.647
+          },
+          "two_of_three": {
+            "sheila_detected": 0.0,
+            "other_accepted": 0.0007
+          }
+        },
+        "augmented_detected": {
+          "decision_threshold": {
+            "sh": 0.2452,
+            "shee": 0.2323,
+            "sheet": 0.2645,
+            "swap": 0.4032,
+            "ending": 0.3871,
+            "onset": 0.3356,
+            "head": 0.4968,
+            "noise": 0.6194,
+            "shift": 0.3613
+          },
+          "stream_threshold": {
+            "sh": 0.0,
+            "shee": 0.0,
+            "sheet": 0.0129,
+            "swap": 0.0032,
+            "ending": 0.0129,
+            "onset": 0.0,
+            "head": 0.0065,
+            "noise": 0.0065,
+            "shift": 0.0
+          }
+        },
+        "hidden_spikes_mean": 6.26
+      }
+    },
+    "h16_b2_ptq_seed1": {
+      "file": "code/snn_keyword/research/results/S2/models/h16_b2_ptq_seed1.npz",
+      "sha256": "0129fb98ea3ae1ebdf10879f25117e93838dc7dc0f9782f99d3778ee71d47767",
+      "hidden": 16,
+      "parameters": 12338,
+      "parameter_bytes": 24712,
+      "decision_threshold": -8995,
+      "stream_threshold": -5067,
+      "test": {
+        "clips": {
+          "tp": 212,
+          "fp": 10750,
+          "fn": 0,
+          "tn": 43,
+          "accuracy": 0.0232,
+          "precision": 0.0193,
+          "recall": 1.0,
+          "fpr": 0.996,
+          "f1": 0.0379,
+          "balanced_accuracy": 0.502
+        },
+        "live": {
+          "single_window": {
+            "sheila_detected": 0.9764,
+            "other_accepted": 0.973
+          },
+          "two_of_three": {
+            "sheila_detected": 0.0,
+            "other_accepted": 0.0007
+          }
+        },
+        "augmented_detected": {
+          "decision_threshold": {
+            "sh": 0.9419,
+            "shee": 0.9826,
+            "sheet": 0.9651,
+            "swap": 0.9535,
+            "ending": 0.9651,
+            "onset": 0.963,
+            "head": 0.9767,
+            "noise": 0.8081,
+            "shift": 0.9767
+          },
+          "stream_threshold": {
+            "sh": 0.0,
+            "shee": 0.0,
+            "sheet": 0.0,
+            "swap": 0.0,
+            "ending": 0.0,
+            "onset": 0.0,
+            "head": 0.0,
+            "noise": 0.0,
+            "shift": 0.0
+          }
+        },
+        "tts": {
+          "single_window": {
+            "sheila": 1.0,
+            "sh sound": 1.0,
+            "she- words": 1.0,
+            "other sh- words": 1.0,
+            "-eila words": 1.0,
+            "-eeler words": 1.0,
+            "similar": 1.0,
+            "other words": 1.0
+          },
+          "two_of_three": {
+            "sheila": 0.0,
+            "sh sound": 0.0,
+            "she- words": 0.0,
+            "other sh- words": 0.0017,
+            "-eila words": 0.0,
+            "-eeler words": 0.0035,
+            "similar": 0.0052,
+            "other words": 0.0
+          }
+        },
+        "hidden_spikes_mean": 7.37,
+        "background_noise": {
+          "purpose": "out-of-training background probes, nonoverlapping 1 s clips; not continuous-speech FAR",
+          "recordings": [
+            {
+              "recording": "doing_the_dishes.wav",
+              "windows": 95,
+              "false_detections": 94
+            },
+            {
+              "recording": "dude_miaowing.wav",
+              "windows": 61,
+              "false_detections": 61
+            },
+            {
+              "recording": "exercise_bike.wav",
+              "windows": 61,
+              "false_detections": 61
+            },
+            {
+              "recording": "pink_noise.wav",
+              "windows": 60,
+              "false_detections": 0
+            },
+            {
+              "recording": "running_tap.wav",
+              "windows": 61,
+              "false_detections": 0
+            },
+            {
+              "recording": "white_noise.wav",
+              "windows": 60,
+              "false_detections": 0
+            }
+          ],
+          "windows": 398,
+          "false_detections": 216
+        }
+      },
+      "validation": {
+        "clips": {
+          "tp": 202,
+          "fp": 9693,
+          "fn": 2,
+          "tn": 84,
+          "accuracy": 0.0287,
+          "precision": 0.0204,
+          "recall": 0.9902,
+          "fpr": 0.9914,
+          "f1": 0.04,
+          "balanced_accuracy": 0.4994
+        },
+        "live": {
+          "single_window": {
+            "sheila_detected": 0.9657,
+            "other_accepted": 0.9717
+          },
+          "two_of_three": {
+            "sheila_detected": 0.0,
+            "other_accepted": 0.0013
+          }
+        },
+        "augmented_detected": {
+          "decision_threshold": {
+            "sh": 0.9677,
+            "shee": 0.9806,
+            "sheet": 0.9677,
+            "swap": 0.9677,
+            "ending": 0.9484,
+            "onset": 0.9732,
+            "head": 0.9548,
+            "noise": 0.7871,
+            "shift": 0.9871
+          },
+          "stream_threshold": {
+            "sh": 0.0,
+            "shee": 0.0,
+            "sheet": 0.0,
+            "swap": 0.0,
+            "ending": 0.0,
+            "onset": 0.0,
+            "head": 0.0,
+            "noise": 0.0,
+            "shift": 0.0
+          }
+        },
+        "hidden_spikes_mean": 7.39
+      }
+    },
+    "h16_b2_ptq_seed2": {
+      "file": "code/snn_keyword/research/results/S2/models/h16_b2_ptq_seed2.npz",
+      "sha256": "45bc2fcb866a7a3f880a025150c8ab26555f1947ae5c689ecae407847cb218ef",
+      "hidden": 16,
+      "parameters": 12338,
+      "parameter_bytes": 24712,
+      "decision_threshold": -4483,
+      "stream_threshold": -1703,
+      "test": {
+        "clips": {
+          "tp": 106,
+          "fp": 2541,
+          "fn": 106,
+          "tn": 8252,
+          "accuracy": 0.7595,
+          "precision": 0.04,
+          "recall": 0.5,
+          "fpr": 0.2354,
+          "f1": 0.0742,
+          "balanced_accuracy": 0.6323
+        },
+        "live": {
+          "single_window": {
+            "sheila_detected": 0.8868,
+            "other_accepted": 0.828
+          },
+          "two_of_three": {
+            "sheila_detected": 0.0,
+            "other_accepted": 0.0017
+          }
+        },
+        "augmented_detected": {
+          "decision_threshold": {
+            "sh": 0.1686,
+            "shee": 0.3488,
+            "sheet": 0.2674,
+            "swap": 0.3314,
+            "ending": 0.4012,
+            "onset": 0.3519,
+            "head": 0.3256,
+            "noise": 0.6163,
+            "shift": 0.3488
+          },
+          "stream_threshold": {
+            "sh": 0.0,
+            "shee": 0.0,
+            "sheet": 0.0,
+            "swap": 0.0029,
+            "ending": 0.0,
+            "onset": 0.0,
+            "head": 0.0,
+            "noise": 0.0,
+            "shift": 0.0
+          }
+        },
+        "tts": {
+          "single_window": {
+            "sheila": 0.7865,
+            "sh sound": 0.4062,
+            "she- words": 0.7146,
+            "other sh- words": 0.7274,
+            "-eila words": 0.8194,
+            "-eeler words": 0.7326,
+            "similar": 0.7917,
+            "other words": 0.775
+          },
+          "two_of_three": {
+            "sheila": 0.0052,
+            "sh sound": 0.0,
+            "she- words": 0.0,
+            "other sh- words": 0.0,
+            "-eila words": 0.0903,
+            "-eeler words": 0.0,
+            "similar": 0.0,
+            "other words": 0.0333
+          }
+        },
+        "hidden_spikes_mean": 7.62,
+        "background_noise": {
+          "purpose": "out-of-training background probes, nonoverlapping 1 s clips; not continuous-speech FAR",
+          "recordings": [
+            {
+              "recording": "doing_the_dishes.wav",
+              "windows": 95,
+              "false_detections": 95
+            },
+            {
+              "recording": "dude_miaowing.wav",
+              "windows": 61,
+              "false_detections": 2
+            },
+            {
+              "recording": "exercise_bike.wav",
+              "windows": 61,
+              "false_detections": 59
+            },
+            {
+              "recording": "pink_noise.wav",
+              "windows": 60,
+              "false_detections": 60
+            },
+            {
+              "recording": "running_tap.wav",
+              "windows": 61,
+              "false_detections": 55
+            },
+            {
+              "recording": "white_noise.wav",
+              "windows": 60,
+              "false_detections": 60
+            }
+          ],
+          "windows": 398,
+          "false_detections": 331
+        }
+      },
+      "validation": {
+        "clips": {
+          "tp": 85,
+          "fp": 2287,
+          "fn": 119,
+          "tn": 7490,
+          "accuracy": 0.7589,
+          "precision": 0.0358,
+          "recall": 0.4167,
+          "fpr": 0.2339,
+          "f1": 0.066,
+          "balanced_accuracy": 0.5914
+        },
+        "live": {
+          "single_window": {
+            "sheila_detected": 0.9118,
+            "other_accepted": 0.82
+          },
+          "two_of_three": {
+            "sheila_detected": 0.0,
+            "other_accepted": 0.003
+          }
+        },
+        "augmented_detected": {
+          "decision_threshold": {
+            "sh": 0.2194,
+            "shee": 0.3032,
+            "sheet": 0.2323,
+            "swap": 0.3806,
+            "ending": 0.3806,
+            "onset": 0.3423,
+            "head": 0.2387,
+            "noise": 0.6387,
+            "shift": 0.4065
+          },
+          "stream_threshold": {
+            "sh": 0.0,
+            "shee": 0.0,
+            "sheet": 0.0,
+            "swap": 0.0,
+            "ending": 0.0065,
+            "onset": 0.0,
+            "head": 0.0,
+            "noise": 0.0,
+            "shift": 0.0
+          }
+        },
+        "hidden_spikes_mean": 7.62
+      }
+    }
+  }
+}
