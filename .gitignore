@@ -59,6 +59,7 @@ dist/
 runs/
 runs_*/
 data/
+data_verifier/
 checkpoints/
 *.pt
 *.pth

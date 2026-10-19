@@ -1,0 +1,6 @@
+design,live_recall,fa_per_hour,live_other,latency_ms,t_max_ms,memory_kib,p_avg_busy_W,all
+stage1_R1,False,False,True,True,True,True,True,False
+stage1_cascade_rule,False,False,True,True,True,True,True,False
+cascade_A,True,True,True,True,True,True,True,True
+mateo_stage1,False,True,True,True,True,,True,False
+mateo_cascade,True,True,True,True,True,,True,False

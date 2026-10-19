@@ -1,0 +1,46 @@
+{
+ "features": {
+  "test": {
+   "windows": 16061,
+   "clips": 3212,
+   "mateo_equals_cache": true,
+   "pedro_equals_cache": true
+  },
+  "validation": {
+   "windows": 16020,
+   "clips": 3204,
+   "mateo_equals_cache": true,
+   "pedro_equals_cache": true
+  }
+ },
+ "integer_forward": {
+  "h48_k64_seed0": {
+   "windows": 16061,
+   "scores_equal": true,
+   "spikes_equal": true,
+   "margin_range": [
+    -21667,
+    14059
+   ]
+  },
+  "h48_k64_seed1": {
+   "windows": 16061,
+   "scores_equal": true,
+   "spikes_equal": true,
+   "margin_range": [
+    -25849,
+    11104
+   ]
+  },
+  "h48_k64_seed2": {
+   "windows": 16061,
+   "scores_equal": true,
+   "spikes_equal": true,
+   "margin_range": [
+    -18392,
+    11778
+   ]
+  }
+ },
+ "gate_G_A1": "pass"
+}

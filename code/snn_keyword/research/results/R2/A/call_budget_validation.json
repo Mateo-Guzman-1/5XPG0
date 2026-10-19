@@ -1,0 +1,549 @@
+{
+ "note": "extra analysis on validation only, not part of the pre-registered selection",
+ "max_fa_hour": 1.6,
+ "budgets": [
+  50,
+  120,
+  250,
+  500,
+  1000,
+  2150,
+  4000,
+  8000,
+  14400
+ ],
+ "configs": {
+  "mateo": {
+   "best_per_budget": {
+    "50": {
+     "t1": 14462,
+     "t2": -427,
+     "live_recall": 0.8137,
+     "live_other": 0.0,
+     "fa_per_hour": 1.381,
+     "calls_per_hour": 39.1
+    },
+    "120": {
+     "t1": 11583,
+     "t2": 412,
+     "live_recall": 0.8627,
+     "live_other": 0.0003,
+     "fa_per_hour": 1.491,
+     "calls_per_hour": 111.8
+    },
+    "250": {
+     "t1": 11583,
+     "t2": 412,
+     "live_recall": 0.8627,
+     "live_other": 0.0003,
+     "fa_per_hour": 1.491,
+     "calls_per_hour": 111.8
+    },
+    "500": {
+     "t1": 11583,
+     "t2": 412,
+     "live_recall": 0.8627,
+     "live_other": 0.0003,
+     "fa_per_hour": 1.491,
+     "calls_per_hour": 111.8
+    },
+    "1000": {
+     "t1": 11583,
+     "t2": 412,
+     "live_recall": 0.8627,
+     "live_other": 0.0003,
+     "fa_per_hour": 1.491,
+     "calls_per_hour": 111.8
+    },
+    "2150": {
+     "t1": 3785,
+     "t2": 1524,
+     "live_recall": 0.8775,
+     "live_other": 0.0007,
+     "fa_per_hour": 1.16,
+     "calls_per_hour": 2149.6
+    },
+    "4000": {
+     "t1": 3785,
+     "t2": 1524,
+     "live_recall": 0.8775,
+     "live_other": 0.0007,
+     "fa_per_hour": 1.16,
+     "calls_per_hour": 2149.6
+    },
+    "8000": {
+     "t1": 3785,
+     "t2": 1524,
+     "live_recall": 0.8775,
+     "live_other": 0.0007,
+     "fa_per_hour": 1.16,
+     "calls_per_hour": 2149.6
+    },
+    "14400": {
+     "t1": 3785,
+     "t2": 1524,
+     "live_recall": 0.8775,
+     "live_other": 0.0007,
+     "fa_per_hour": 1.16,
+     "calls_per_hour": 2149.6
+    }
+   }
+  },
+  "r2_seed0_m": {
+   "best_per_budget": {
+    "50": {
+     "t1": 3323,
+     "t2": -2415,
+     "live_recall": 0.5588,
+     "live_other": 0.0013,
+     "fa_per_hour": 1.325,
+     "calls_per_hour": 49.5
+    },
+    "120": {
+     "t1": 2502,
+     "t2": -427,
+     "live_recall": 0.6765,
+     "live_other": 0.0,
+     "fa_per_hour": 0.663,
+     "calls_per_hour": 109.1
+    },
+    "250": {
+     "t1": 1752,
+     "t2": -841,
+     "live_recall": 0.7598,
+     "live_other": 0.0013,
+     "fa_per_hour": 1.215,
+     "calls_per_hour": 215.4
+    },
+    "500": {
+     "t1": 1328,
+     "t2": -841,
+     "live_recall": 0.7843,
+     "live_other": 0.0017,
+     "fa_per_hour": 1.491,
+     "calls_per_hour": 312.2
+    },
+    "1000": {
+     "t1": 2,
+     "t2": 1524,
+     "live_recall": 0.8088,
+     "live_other": 0.0,
+     "fa_per_hour": 0.552,
+     "calls_per_hour": 981.4
+    },
+    "2150": {
+     "t1": -1041,
+     "t2": 1524,
+     "live_recall": 0.8627,
+     "live_other": 0.0003,
+     "fa_per_hour": 0.828,
+     "calls_per_hour": 2083.4
+    },
+    "4000": {
+     "t1": -1041,
+     "t2": 1524,
+     "live_recall": 0.8627,
+     "live_other": 0.0003,
+     "fa_per_hour": 0.828,
+     "calls_per_hour": 2083.4
+    },
+    "8000": {
+     "t1": -1041,
+     "t2": 1524,
+     "live_recall": 0.8627,
+     "live_other": 0.0003,
+     "fa_per_hour": 0.828,
+     "calls_per_hour": 2083.4
+    },
+    "14400": {
+     "t1": -3306,
+     "t2": 1524,
+     "live_recall": 0.8775,
+     "live_other": 0.0007,
+     "fa_per_hour": 1.16,
+     "calls_per_hour": 8230.7
+    }
+   }
+  },
+  "r2_seed1_m": {
+   "best_per_budget": {
+    "50": {
+     "t1": 3177,
+     "t2": -1843,
+     "live_recall": 0.549,
+     "live_other": 0.0007,
+     "fa_per_hour": 0.773,
+     "calls_per_hour": 48.3
+    },
+    "120": {
+     "t1": 2248,
+     "t2": -427,
+     "live_recall": 0.652,
+     "live_other": 0.0,
+     "fa_per_hour": 0.773,
+     "calls_per_hour": 118.2
+    },
+    "250": {
+     "t1": 1498,
+     "t2": -427,
+     "live_recall": 0.7206,
+     "live_other": 0.0,
+     "fa_per_hour": 1.436,
+     "calls_per_hour": 240.3
+    },
+    "500": {
+     "t1": 752,
+     "t2": 412,
+     "live_recall": 0.7745,
+     "live_other": 0.0003,
+     "fa_per_hour": 1.049,
+     "calls_per_hour": 480.5
+    },
+    "1000": {
+     "t1": 82,
+     "t2": 1524,
+     "live_recall": 0.8088,
+     "live_other": 0.0003,
+     "fa_per_hour": 0.497,
+     "calls_per_hour": 895.8
+    },
+    "2150": {
+     "t1": -849,
+     "t2": 1524,
+     "live_recall": 0.8529,
+     "live_other": 0.0003,
+     "fa_per_hour": 0.718,
+     "calls_per_hour": 1990.9
+    },
+    "4000": {
+     "t1": -849,
+     "t2": 1524,
+     "live_recall": 0.8529,
+     "live_other": 0.0003,
+     "fa_per_hour": 0.718,
+     "calls_per_hour": 1990.9
+    },
+    "8000": {
+     "t1": -1740,
+     "t2": 1524,
+     "live_recall": 0.8627,
+     "live_other": 0.0007,
+     "fa_per_hour": 0.828,
+     "calls_per_hour": 4080.0
+    },
+    "14400": {
+     "t1": -5729,
+     "t2": 1524,
+     "live_recall": 0.8775,
+     "live_other": 0.0007,
+     "fa_per_hour": 1.436,
+     "calls_per_hour": 12271.1
+    }
+   }
+  },
+  "r2_seed2_m": {
+   "best_per_budget": {
+    "50": {
+     "t1": 3348,
+     "t2": 412,
+     "live_recall": 0.4951,
+     "live_other": 0.0,
+     "fa_per_hour": 0.166,
+     "calls_per_hour": 48.7
+    },
+    "120": {
+     "t1": 2503,
+     "t2": 412,
+     "live_recall": 0.5833,
+     "live_other": 0.0,
+     "fa_per_hour": 0.221,
+     "calls_per_hour": 114.3
+    },
+    "250": {
+     "t1": 1775,
+     "t2": -427,
+     "live_recall": 0.7206,
+     "live_other": 0.0003,
+     "fa_per_hour": 0.994,
+     "calls_per_hour": 247.2
+    },
+    "500": {
+     "t1": 1199,
+     "t2": -427,
+     "live_recall": 0.7794,
+     "live_other": 0.0003,
+     "fa_per_hour": 1.546,
+     "calls_per_hour": 435.7
+    },
+    "1000": {
+     "t1": 375,
+     "t2": 412,
+     "live_recall": 0.8039,
+     "live_other": 0.0003,
+     "fa_per_hour": 1.27,
+     "calls_per_hour": 923.1
+    },
+    "2150": {
+     "t1": -485,
+     "t2": 1524,
+     "live_recall": 0.8431,
+     "live_other": 0.0003,
+     "fa_per_hour": 0.663,
+     "calls_per_hour": 1926.1
+    },
+    "4000": {
+     "t1": -770,
+     "t2": 1524,
+     "live_recall": 0.8529,
+     "live_other": 0.0007,
+     "fa_per_hour": 0.663,
+     "calls_per_hour": 2420.9
+    },
+    "8000": {
+     "t1": -1581,
+     "t2": 1524,
+     "live_recall": 0.8627,
+     "live_other": 0.0007,
+     "fa_per_hour": 0.939,
+     "calls_per_hour": 5215.9
+    },
+    "14400": {
+     "t1": -3432,
+     "t2": 1524,
+     "live_recall": 0.8775,
+     "live_other": 0.0007,
+     "fa_per_hour": 1.381,
+     "calls_per_hour": 10347.3
+    }
+   }
+  },
+  "r2_seed0_c": {
+   "best_per_budget": {
+    "50": {
+     "t1": 1126,
+     "t2": -1843,
+     "live_recall": 0.6225,
+     "live_other": 0.0003,
+     "fa_per_hour": 1.104,
+     "calls_per_hour": 43.4
+    },
+    "120": {
+     "t1": 434,
+     "t2": -841,
+     "live_recall": 0.6765,
+     "live_other": 0.0,
+     "fa_per_hour": 1.436,
+     "calls_per_hour": 107.9
+    },
+    "250": {
+     "t1": -173,
+     "t2": -427,
+     "live_recall": 0.7108,
+     "live_other": 0.0,
+     "fa_per_hour": 1.381,
+     "calls_per_hour": 238.3
+    },
+    "500": {
+     "t1": -843,
+     "t2": 412,
+     "live_recall": 0.7402,
+     "live_other": 0.0007,
+     "fa_per_hour": 1.16,
+     "calls_per_hour": 485.7
+    },
+    "1000": {
+     "t1": -1283,
+     "t2": 412,
+     "live_recall": 0.7696,
+     "live_other": 0.001,
+     "fa_per_hour": 1.491,
+     "calls_per_hour": 761.4
+    },
+    "2150": {
+     "t1": -1887,
+     "t2": 1524,
+     "live_recall": 0.7745,
+     "live_other": 0.0003,
+     "fa_per_hour": 0.663,
+     "calls_per_hour": 1787.1
+    },
+    "4000": {
+     "t1": -2668,
+     "t2": 1524,
+     "live_recall": 0.8186,
+     "live_other": 0.0003,
+     "fa_per_hour": 0.939,
+     "calls_per_hour": 3751.1
+    },
+    "8000": {
+     "t1": -3558,
+     "t2": 1524,
+     "live_recall": 0.8431,
+     "live_other": 0.0007,
+     "fa_per_hour": 1.215,
+     "calls_per_hour": 6501.5
+    },
+    "14400": {
+     "t1": -7127,
+     "t2": 1524,
+     "live_recall": 0.8775,
+     "live_other": 0.001,
+     "fa_per_hour": 1.491,
+     "calls_per_hour": 12837.3
+    }
+   }
+  },
+  "r2_seed1_c": {
+   "best_per_budget": {
+    "50": {
+     "t1": 909,
+     "t2": -427,
+     "live_recall": 0.5735,
+     "live_other": 0.0,
+     "fa_per_hour": 0.663,
+     "calls_per_hour": 47.2
+    },
+    "120": {
+     "t1": 379,
+     "t2": -841,
+     "live_recall": 0.6569,
+     "live_other": 0.0003,
+     "fa_per_hour": 1.436,
+     "calls_per_hour": 92.7
+    },
+    "250": {
+     "t1": -280,
+     "t2": 412,
+     "live_recall": 0.7255,
+     "live_other": 0.0003,
+     "fa_per_hour": 1.049,
+     "calls_per_hour": 247.0
+    },
+    "500": {
+     "t1": -606,
+     "t2": 412,
+     "live_recall": 0.7402,
+     "live_other": 0.0003,
+     "fa_per_hour": 1.325,
+     "calls_per_hour": 384.9
+    },
+    "1000": {
+     "t1": -1208,
+     "t2": 1524,
+     "live_recall": 0.7647,
+     "live_other": 0.0003,
+     "fa_per_hour": 0.607,
+     "calls_per_hour": 801.3
+    },
+    "2150": {
+     "t1": -1770,
+     "t2": 1524,
+     "live_recall": 0.7892,
+     "live_other": 0.0003,
+     "fa_per_hour": 0.828,
+     "calls_per_hour": 1692.6
+    },
+    "4000": {
+     "t1": -2297,
+     "t2": 1524,
+     "live_recall": 0.8088,
+     "live_other": 0.0003,
+     "fa_per_hour": 0.884,
+     "calls_per_hour": 3336.2
+    },
+    "8000": {
+     "t1": -3748,
+     "t2": 1524,
+     "live_recall": 0.8431,
+     "live_other": 0.0003,
+     "fa_per_hour": 1.16,
+     "calls_per_hour": 7187.1
+    },
+    "14400": {
+     "t1": -10735,
+     "t2": 1524,
+     "live_recall": 0.8775,
+     "live_other": 0.001,
+     "fa_per_hour": 1.546,
+     "calls_per_hour": 14175.0
+    }
+   }
+  },
+  "r2_seed2_c": {
+   "best_per_budget": {
+    "50": {
+     "t1": 1298,
+     "t2": -2415,
+     "live_recall": 0.5588,
+     "live_other": 0.0017,
+     "fa_per_hour": 1.381,
+     "calls_per_hour": 47.4
+    },
+    "120": {
+     "t1": 614,
+     "t2": -841,
+     "live_recall": 0.6569,
+     "live_other": 0.0,
+     "fa_per_hour": 0.828,
+     "calls_per_hour": 120.0
+    },
+    "250": {
+     "t1": 206,
+     "t2": -841,
+     "live_recall": 0.701,
+     "live_other": 0.0007,
+     "fa_per_hour": 1.16,
+     "calls_per_hour": 212.6
+    },
+    "500": {
+     "t1": -327,
+     "t2": 412,
+     "live_recall": 0.7402,
+     "live_other": 0.0007,
+     "fa_per_hour": 0.939,
+     "calls_per_hour": 420.4
+    },
+    "1000": {
+     "t1": -881,
+     "t2": 412,
+     "live_recall": 0.7598,
+     "live_other": 0.0007,
+     "fa_per_hour": 1.491,
+     "calls_per_hour": 836.5
+    },
+    "2150": {
+     "t1": -881,
+     "t2": 412,
+     "live_recall": 0.7598,
+     "live_other": 0.0007,
+     "fa_per_hour": 1.491,
+     "calls_per_hour": 836.5
+    },
+    "4000": {
+     "t1": -1903,
+     "t2": 1524,
+     "live_recall": 0.8088,
+     "live_other": 0.0003,
+     "fa_per_hour": 0.884,
+     "calls_per_hour": 3640.8
+    },
+    "8000": {
+     "t1": -3143,
+     "t2": 1524,
+     "live_recall": 0.8431,
+     "live_other": 0.0003,
+     "fa_per_hour": 1.215,
+     "calls_per_hour": 7505.2
+    },
+    "14400": {
+     "t1": -7552,
+     "t2": 1524,
+     "live_recall": 0.8775,
+     "live_other": 0.001,
+     "fa_per_hour": 1.491,
+     "calls_per_hour": 13900.8
+    }
+   }
+  }
+ }
+}

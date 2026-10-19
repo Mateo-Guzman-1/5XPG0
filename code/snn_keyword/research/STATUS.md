@@ -18,7 +18,13 @@ size and synapse study for the report). All energy numbers are in [ENERGY.md](EN
 | S5 | Synthesis, choice, report section (LaTeX) | **done** 2026-10-17 (draft for review) | `results/S5/`, `reports/latex/size_synapse/` |
 | S6 | Sparse kdot (kxload/ksdot hardware) vs the deployed dense-kdot model | **done** 2026-10-17 | `results/S6/`, [S_energy_synapse.md](reports/S_energy_synapse.md) §S6 |
 | R1 | The S designs against the group requirements, with Mateo's test harness ([PLAN_R1.md](PLAN_R1.md)) | **done** 2026-10-19 | `results/R1/`, [R1_requirements.md](reports/R1_requirements.md), `reports/latex/requirements_eval/` |
-| R2 | Cascade: pruned H48 K64 first stage + Mateo's GRU verifier, then the verifier fine-tuned on our false proposals ([PLAN_R2_GRU.md](PLAN_R2_GRU.md)) | **planned** 2026-10-19 (run in a new session) | `results/R2/`, `reports/latex/cascade_gru/` |
+| R2 | Cascade: pruned H48 K64 first stage + Mateo's GRU verifier, then the verifier fine-tuned on our false proposals ([PLAN_R2_GRU.md](PLAN_R2_GRU.md)) | **Phase A done** 2026-10-19; gate G1 waiting for Pedro | `results/R2/`, `reports/latex/cascade_gru/` |
+
+## R2 Phase A (2026-10-19, interim; gate G1 open)
+- **Gates:** G-A1 pass (`results/R2/gate_A1.json`). G-A2 pass: Mateo's cascade reproduced exactly on test (86.79 %, 1.424 FA/h, 0.07 %, stream 0.8786, 175 ms) and on validation (`results/R2/A/mateo_*.json`). Our caches have the same frames as his (`A/cache_check_*.json`).
+- **Selection** (`A/selection.json`): Mateo's rule (maximize live recall, ≤ 1.6 FA/h) drives t1 below zero. Our stage 1 then passes 57–85 % of all requests, and the cascade reaches the verifier's own ceiling (87.75 % on validation, the same as Mateo's cascade). Variants m and c tie on recall; m is chosen because it makes fewer calls.
+- **Test** (`A/h48_k64_seed*.json`, `designs.csv`): live 87.6 ± 0.3 %, 1.83 ± 0.17 FA/h, 0.10 % other words, latency 162 ms, worst compute 107.6 ms, memory 64.5 KiB. Every requirement passes. Cost: 10,244 ± 2,065 verifier calls per hour (Mateo: 2,222).
+- **Extra, validation only** (`A/call_budget_validation.json`): with ≤ 2,150 calls/h our stage 1 allows 84.3–86.3 %; with ≤ 120 calls/h it allows 58–68 % (Mateo's stage 1: 86.3 %).
 
 ## R1 result: group requirements (2026-10-19)
 **Requirements (Pedro):**

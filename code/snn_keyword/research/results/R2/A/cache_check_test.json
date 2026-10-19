@@ -1,0 +1,45 @@
+{
+ "split": "test",
+ "items": {
+  "live": 3212,
+  "mswc": 3634,
+  "stream": 1,
+  "neg": 115,
+  "prefixed_libri": 0,
+  "prefixed_clips": 0
+ },
+ "frames_equal_mateo_cache": true,
+ "arrays_compared": {
+  "keyword": true,
+  "live_clipped": true,
+  "live_frames": true,
+  "live_off": true,
+  "live_y": true,
+  "mswc_clipped": true,
+  "mswc_frames": true,
+  "mswc_off": true,
+  "mswc_words": true,
+  "neg_frames": true,
+  "neg_off": true,
+  "neg_seconds": true,
+  "neg_segments": true,
+  "prefixed_clip_words": true,
+  "prefixed_clips_frames": true,
+  "prefixed_clips_off": true,
+  "prefixed_libri_frames": true,
+  "prefixed_libri_off": true,
+  "prefixed_libri_text": true,
+  "split": true,
+  "stream_frames": true,
+  "stream_marks": true,
+  "stream_off": true,
+  "stream_seconds": true
+ },
+ "fast_margin_equals_integer_forward": {
+  "windows": 20001,
+  "seed0": true,
+  "seed1": true,
+  "seed2": true
+ },
+ "seconds": 247
+}
