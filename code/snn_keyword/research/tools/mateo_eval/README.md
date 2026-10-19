@@ -12,10 +12,19 @@ These are copies of Mateo's requirement tests from branch `origin/ALIF-Layer1`, 
 | `verifier_model.py`, `verifier_export.py`, `verifier_data.py` | GRU verifier, its integer model and int8 export; phoneme tables | R2 |
 | `memguard.py` | memory guard used by the cascade tools (needs `psutil`) | R2 |
 | `features.py`, `model.py` | Mateo's versions: they add the 10 ms frame front end (`frame_features`) and his streaming ALIF SNN (`integer_forward_stream`, `decision_scores`) | R2 |
+| `train_verifier.py`, `augment_online.py` | verifier training and fine-tuning with online augmentation | R2 Phase B |
+| `prepare_multicorpus.py`, `make_tts_negatives.py` | the multi-corpus clips (Speech Commands, MSWC, Piper TTS) and the noise for training | R2 Phase B |
+| `mine_verifier_negatives.py` | Mateo's mining with his stage 1 (reference only; R2 mines with `research/tools/r2_mine.py`) | R2 Phase B |
 
 **Changes to Mateo's files:**
-1. `ROOT` points to `code/snn_keyword/` (`parents[3]`) instead of the file's own folder, so data is read from `code/snn_keyword/data/` and the cascade caches go to `code/snn_keyword/data_verifier/` (git-ignored). Applied to `robust_eval.py`, `final_eval.py`, `stream_select.py`, `keyword_config.py`, `channels.py`, `fetch_corpora.py`, `verifier_cascade.py`, `verifier_data.py`, `verifier_export.py`.
+1. `ROOT` points to `code/snn_keyword/` (`parents[3]`) instead of the file's own folder, so data is read from `code/snn_keyword/data/` and the cascade caches go to `code/snn_keyword/data_verifier/` (git-ignored). Applied to every file here that has a `ROOT` (all except `augment_online.py`, `features.py`, `model.py`, `memguard.py`, `verifier_model.py`).
 2. `verifier_cascade.prefixed_extras` (R2): when `data/multi_sheila/manifest.csv` does not exist (no multi-corpus build), the keyword-prefixed clips are an empty set. The LibriSpeech part is still searched. For "sheila" both sets are empty anyway ("0/0" in Mateo's results).
+3. `make_tts_negatives.py` (R2 Phase B): by default only the train and validation negatives (32,000 + 4,000 clips) and only the voice model they use. The seeded plan is computed in full first, so the kept clips are the same as Mateo's. `--all` gives his full set.
+4. `train_verifier.py` (R2 Phase B):
+   - `--device` (default: cuda if available, else cpu); the CUDA-only calls are guarded;
+   - on AMD ROCm, MIOpen is switched off (`torch.backends.cudnn.enabled = False`): its run-time kernel build fails on Windows, so the GRU uses PyTorch's own kernels;
+   - the noise is read from `K.MULTI/noise_train.npy` instead of `data/multi/` (the "yes" build).
+5. Phase B runs in `.venv-rocm` (PyTorch 2.14.0+rocm10.1.0, gfx1101, plus `piper-tts`, numpy, scipy, soundfile, psutil); `.venv` is unchanged. GPU check: `research/tools/r2_gpu_smoke.py`.
 
 **Which `features` / `model` is used:**
 - R1's `req_eval.py` puts `code/snn_keyword/` first on `sys.path`, so it uses Pedro's `features.py` and `model.py` (board-exact `integer_forward`, LIF table, n-bit and pruned models).

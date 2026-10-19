@@ -1,0 +1,18 @@
+{
+ "torch": "2.14.0+rocm10.1.0",
+ "hip": "7.16.26385",
+ "cuda_available": true,
+ "miopen_enabled": false,
+ "device": "AMD  Radeon RX 7800 XT",
+ "matmul_ok": true,
+ "rfft_ok": true,
+ "gru_ctc_loss_ok": true,
+ "gru_ctc_grad_ok": true,
+ "loss_cpu_gpu": [
+  19.192241668701172,
+  19.19223976135254
+ ],
+ "step_s_cuda": 0.0382,
+ "step_s_cpu": 0.4447,
+ "ok": true
+}

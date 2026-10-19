@@ -40,6 +40,7 @@ htmlcov/
 
 # Local Python environments and environment-specific configuration
 .venv/
+.venv-rocm/
 venv/
 env/
 ENV/
