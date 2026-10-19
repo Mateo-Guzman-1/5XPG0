@@ -165,6 +165,23 @@ This is Mateo's `Cascade` logic, unchanged.
 
 **Gate G1: stop and report to Pedro.** Show a table: stage 1 alone vs cascade (unchanged verifier) vs Mateo's cascade, with ✓/✗ for every requirement and the cost. Pedro decides on Phase B, which brings about 25 GB of downloads. Suggested rule: continue if the cascade's test live recall is ≥ 60 %, or ≥ 15 points above stage 1 alone. If it already meets every requirement, Phase B is still useful (fewer calls, robustness) but optional.
 
+### A5. Call-limited rule (added 2026-10-19 after G1, Pedro's choice; written before any A5 result)
+**Why:** at G1, Mateo's rule (highest live recall) set t1 below zero. Our stage 1 then passed 57–85 % of all requests, giving 10,244 ± 2,065 verifier calls per hour against Mateo's 2,222.
+
+**Rule:**
+- Mateo's `operating` rule unchanged (live other words ≤ 0.2 %, ≤ 1.6 FA/h on the validation negatives, t2 on `select`'s grid, best by live recall then stream recall), plus **≤ 2,150 verifier calls per hour on the validation negatives**. 2,150 is Mateo's validation value (2,149.6).
+- Policy a, verify-ms 107.3.
+- The variant (m or c) is chosen by mean validation live recall (tie: fewer calls).
+- The test is run once per seed → `results/R2/A/budget2150/`.
+
+**Hypothesis R2-H5:**
+- Test live recall falls to 83–86 % (validation hint: 84.3–86.3 % from `A/call_budget_validation.json`), so 85 % may be missed.
+- Test calls stay near 2,150 per hour.
+- FA/h stays ≤ 2.
+- The dynamic energy per hour falls about 5× (from 307 J/h to about 65 J/h).
+
+**Then:** Pedro decides on Phase B. Under this rule, Phase B could raise recall at the same number of calls.
+
 ## 5. Phase B: fine-tune the verifier on our false proposals
 **Data choice (Pedro, 2026-10-19):** Mateo's recipe, with the parts his fine-tune never reads skipped.
 

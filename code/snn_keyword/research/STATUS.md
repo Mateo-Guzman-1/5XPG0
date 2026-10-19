@@ -25,6 +25,11 @@ size and synapse study for the report). All energy numbers are in [ENERGY.md](EN
 - **Selection** (`A/selection.json`): Mateo's rule (maximize live recall, ≤ 1.6 FA/h) drives t1 below zero. Our stage 1 then passes 57–85 % of all requests, and the cascade reaches the verifier's own ceiling (87.75 % on validation, the same as Mateo's cascade). Variants m and c tie on recall; m is chosen because it makes fewer calls.
 - **Test** (`A/h48_k64_seed*.json`, `designs.csv`): live 87.6 ± 0.3 %, 1.83 ± 0.17 FA/h, 0.10 % other words, latency 162 ms, worst compute 107.6 ms, memory 64.5 KiB. Every requirement passes. Cost: 10,244 ± 2,065 verifier calls per hour (Mateo: 2,222).
 - **Extra, validation only** (`A/call_budget_validation.json`): with ≤ 2,150 calls/h our stage 1 allows 84.3–86.3 %; with ≤ 120 calls/h it allows 58–68 % (Mateo's stage 1: 86.3 %).
+- **A5, call-limited rule** (Pedro's choice at G1; PLAN_R2_GRU.md A5; `A/budget2150/`). Same rule plus ≤ 2,150 verifier calls per hour on validation; variant m.
+  - Test: live 84.4 ± 0.9 % (85.4 / 83.5 / 84.4), so it misses 85 % by 0.6 points (complete recordings 90.2 %); 1.09 ± 0.08 FA/h; 0.03 % other words.
+  - Cost: 1,937 ± 170 calls per hour (−81 %); dynamic energy 59 J/h (Mateo: 278 J/h); 0.110 W clock-gated.
+  - R2-H5 confirmed.
+  - Next: Pedro decides on Phase B (could raise recall at the same number of calls).
 
 ## R1 result: group requirements (2026-10-19)
 **Requirements (Pedro):**

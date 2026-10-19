@@ -107,14 +107,19 @@ def main():
                       fa_per_hour=float(s1['fa_per_hour']), stream_recall=float(s1['stream_recall']),
                       latency_stream_ms=float(s1['latency_stream_ms']), mswc_recall=None, mswc_other_fa=None,
                       calls_per_hour=0.)
-        for design, det, ver in (('stage1_R1', r1_det, False),
-                                 ('stage1_cascade_rule', detection(rep['stage1_frame']), False),
-                                 ('cascade_A', detection(rep['cascade']), True)):
-            row = dict(name=f'h48_k64_seed{s}', design=design, seed=s, variant=rep.get('r2_variant', ''), **det,
-                       **cost(det, s1, p, ver))
-            if design == 'cascade_A':
-                row['paired_only_cascade'] = rep['cascade']['paired_vs_stage1_frame']['only_cascade']
-                row['paired_only_stage1'] = rep['cascade']['paired_vs_stage1_frame']['only_stage1']
+        blocks = [('stage1_R1', r1_det, False, None),
+                  ('stage1_cascade_rule', detection(rep['stage1_frame']), False, None),
+                  ('cascade_A', detection(rep['cascade']), True, rep['cascade'])]
+        for budget in sorted((OUT / 'A').glob('budget*')):     # A5: the call-limited rule
+            path_b = budget / f'h48_k64_seed{s}.json'
+            if path_b.exists():
+                cb = json.loads(path_b.read_text())['cascade']
+                blocks.append((f'cascade_A_calls{budget.name[6:]}', detection(cb), True, cb))
+        for design, det, ver, block in blocks:
+            row = dict(name=f'h48_k64_seed{s}', design=design, seed=s, **det, **cost(det, s1, p, ver))
+            if block:
+                row['paired_only_cascade'] = block['paired_vs_stage1_frame']['only_cascade']
+                row['paired_only_stage1'] = block['paired_vs_stage1_frame']['only_stage1']
             rows.append(row)
     keys = list(dict.fromkeys(k for r in rows for k in r))
     with open(OUT / 'models.csv', 'w', newline='', encoding='utf-8') as f:
@@ -142,7 +147,8 @@ def main():
         c = {'design': d['design']}
         for k in REQ:
             c[k] = ok(k, d.get(k)) if d.get(k) is not None else None
-        c['all'] = all(c[k] for k in REQ)
+        c['all'] = all(c[k] for k in REQ if c[k] is not None)     # over the known requirements
+        c['unknown'] = ' '.join(k for k in REQ if c[k] is None)
         comp.append(c)
     with open(OUT / 'compliance.csv', 'w', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, list(comp[0])); w.writeheader(); w.writerows(comp)

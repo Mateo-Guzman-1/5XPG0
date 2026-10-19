@@ -231,6 +231,82 @@ def budget(a):
     (VC.DV / 'call_budget_points_validation.json').write_text(json.dumps(all_points))   # every grid point (git-ignored)
 
 
+def proposals(cas):
+    """Sorted per-request proposal scores on the negatives: the verifier runs at request k when this is >= t1
+    (verifier_cascade.metrics' verifier_calls_per_hour)."""
+    return np.sort(np.concatenate([np.maximum(hm, np.r_[VC.NEG, hm[:-1]]) for hm in (VC.hop_max(d) for d in cas.d1['neg'])]))
+
+
+def operating_budget(cas, t2, max_fa_hour, max_calls, prop, max_live_fa=.002):
+    """verifier_cascade.operating ('cascade', policy a) plus verifier calls per hour <= max_calls on the negatives."""
+    c = cas.c
+    y = c['live_y']
+    hours = float(c['neg_seconds']) / 3600
+    live = np.array([s.max() for _, s in cas.traces('live', 'cascade', t2)])
+    neg = cas.traces('neg', 'cascade', t2)
+    lo = np.unique(live[y == 1])
+    lo = lo[lo > VC.NEG]
+    if not len(lo):
+        return None
+    neg = [(t[s >= lo[0]], s[s >= lo[0]]) for t, s in neg]
+    best = None
+    for t1 in lo[::-1]:
+        if (len(prop) - np.searchsorted(prop, t1)) / hours > max_calls:
+            break                    # calls only grow as t1 falls
+        if (live[y == 0] >= t1).mean() > max_live_fa:
+            break
+        fph = VC.fa_hour(neg, hours, t1)
+        if fph > max_fa_hour:
+            if fph > 5 * max_fa_hour:
+                break
+            continue
+        rec = (live[y == 1] >= t1).mean()
+        if best is None or rec > best[1]:
+            best = (int(t1), rec)
+    if best is None:
+        return None
+    r = VC.metrics(cas, 'cascade', best[0], t2, 'a')
+    r.pop('_live_hits', None)
+    return r
+
+
+def select_budget(a):
+    """A5: thresholds with the call limit for every seed x variant (validation), the variant choice, and the same
+    rule on Mateo's cascade for reference. Writes results/R2/A/budget<calls>/selection.json."""
+    v = dict(np.load(a.scores))
+    out_dir = KWS / f'research/results/R2/A/budget{a.max_calls:g}'
+    out_dir.mkdir(parents=True, exist_ok=True)
+    report = {'rule': f'policy a; live other words <= 0.2 %, <= {a.max_fa_hour} FA/h and <= {a.max_calls:g} verifier '
+                      'calls per hour on the validation negatives; t2 on select\'s grid; best by live recall, then '
+                      'stream recall; variant by mean live recall (tie: fewer calls)', 'configs': {}}
+    configs = [('mateo', VC.DV / 'cache_validation_sheila.npz')] + \
+        [(f'{vr}_seed{s}', r2_file('validation', s, vr)) for vr in VARIANTS for s in SEEDS]
+    for name, path in configs:
+        cas = VC.Cascade(dict(np.load(path)), v, 1, a.verify_ms)
+        y = cas.c['live_y']
+        vv, voff = v['live_va'], v['live_voff']
+        vmax = np.array([vv[voff[i]:voff[i + 1]].max() for i in range(len(voff) - 1)])
+        grid = np.unique(np.quantile(vmax[y == 1], np.linspace(0, .6, 31)).astype(np.int64))
+        prop = proposals(cas)
+        cands = [r for t2 in grid[grid > VC.NEG // 2]
+                 if (r := operating_budget(cas, int(t2), a.max_fa_hour, a.max_calls, prop))]
+        best = max(cands, key=lambda r: (r['live_recall'], r['stream_recall'])) if cands else None
+        report['configs'][name] = {'cascade': best, 'grid': [{k: r[k] for k in ('t1', 't2', 'live_recall', 'live_fa',
+                                   'fa_per_hour', 'verifier_calls_per_hour')} for r in cands]}
+        print(name, best and {k: best[k] for k in ('t1', 't2', 'live_recall', 'live_fa', 'fa_per_hour',
+                                                   'stream_recall', 'verifier_calls_per_hour')}, flush=True)
+    rec = lambda vr, k: float(np.mean([report['configs'][f'{vr}_seed{s}']['cascade'][k] for s in SEEDS]))
+    variant = max(VARIANTS, key=lambda vr: (rec(vr, 'live_recall'), -rec(vr, 'verifier_calls_per_hour')))
+    sel = json.loads((KWS / 'research/results/R2/A/selection.json').read_text())['chosen']['thresholds']
+    report['mean_live_recall'] = {vr: rec(vr, 'live_recall') for vr in VARIANTS}
+    report['chosen'] = {'variant': variant, 'thresholds': {
+        f'seed{s}': {'t1': report['configs'][f'{variant}_seed{s}']['cascade']['t1'],
+                     't2': report['configs'][f'{variant}_seed{s}']['cascade']['t2'],
+                     'stage1_threshold': sel[f'seed{s}']['stage1_threshold']} for s in SEEDS}}
+    (out_dir / 'selection.json').write_text(json.dumps(report, indent=1))
+    print(json.dumps({k: report[k] for k in ('mean_live_recall', 'chosen')}, indent=1))
+
+
 def main():
     import argparse
     sys.stdout.reconfigure(encoding='utf-8')
@@ -264,6 +340,11 @@ def main():
     g.add_argument('--verify-ms', type=float, default=107.3)
     g.add_argument('--max-fa-hour', type=float, default=1.6)
     g.add_argument('--out', type=Path, required=True)
+    sb = sub.add_parser('select-budget')
+    sb.add_argument('scores', type=Path)
+    sb.add_argument('--max-calls', type=float, default=2150.)
+    sb.add_argument('--verify-ms', type=float, default=107.3)
+    sb.add_argument('--max-fa-hour', type=float, default=1.6)
     a = p.parse_args()
     if a.cmd == 'cache':
         return cache(a)
@@ -271,6 +352,8 @@ def main():
         return choose(a)
     if a.cmd == 'budget':
         return budget(a)
+    if a.cmd == 'select-budget':
+        return select_budget(a)
     VC.cache_file = lambda split: r2_file(split, a.seed, a.variant)
     a.out.parent.mkdir(parents=True, exist_ok=True)
     {'select': VC.select, 'final': VC.final}[a.cmd](a)
