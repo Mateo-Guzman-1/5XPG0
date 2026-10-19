@@ -18,6 +18,7 @@ size and synapse study for the report). All energy numbers are in [ENERGY.md](EN
 | S5 | Synthesis, choice, report section (LaTeX) | **done** 2026-10-17 (draft for review) | `results/S5/`, `reports/latex/size_synapse/` |
 | S6 | Sparse kdot (kxload/ksdot hardware) vs the deployed dense-kdot model | **done** 2026-10-17 | `results/S6/`, [S_energy_synapse.md](reports/S_energy_synapse.md) §S6 |
 | R1 | The S designs against the group requirements, with Mateo's test harness ([PLAN_R1.md](PLAN_R1.md)) | **done** 2026-10-19 | `results/R1/`, [R1_requirements.md](reports/R1_requirements.md), `reports/latex/requirements_eval/` |
+| R2 | Cascade: pruned H48 K64 first stage + Mateo's GRU verifier, then the verifier fine-tuned on our false proposals ([PLAN_R2_GRU.md](PLAN_R2_GRU.md)) | **planned** 2026-10-19 (run in a new session) | `results/R2/`, `reports/latex/cascade_gru/` |
 
 ## R1 result: group requirements (2026-10-19)
 **Requirements (Pedro):**

@@ -25,10 +25,11 @@ turns each 1 s window (every 250 ms) into a 24×32 mel spectrogram (768 bytes,
 Goal: how input encoding and network size trade off against detection quality and
 latency on the RISC-V core. The plan is split into experiments E0–E8, one per session:
 
-1. Read `code/snn_keyword/research/PLAN.md` — Parts A–B (primer, method rules). Since
-   2026-10-17 the current work is part 2, `research/PLAN_SYNAPSE.md` (experiments S0–S5:
-   energy-aware size and synapse study for Pedro's report section); every energy number lives
-   in `research/ENERGY.md`.
+1. **Since 2026-10-19 the current work is `code/snn_keyword/research/PLAN_R2_GRU.md`** (R2: our
+   pruned first stage + Mateo's GRU verifier). It is self-contained: start there, it says what
+   else to read. Earlier: `research/PLAN.md` Parts A–B (primer, method rules), part 2
+   `research/PLAN_SYNAPSE.md` (S0–S6), `research/PLAN_R1.md` (R1: group requirements); every
+   energy number lives in `research/ENERGY.md`.
 2. Read `code/snn_keyword/research/STATUS.md` — what is done, key numbers, open issues.
 3. Do that experiment only. Finish with its report in `research/reports/`, raw data in
    `research/results/E<n>/`, an updated `STATUS.md`, and a local commit.
