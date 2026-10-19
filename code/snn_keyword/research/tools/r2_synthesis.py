@@ -74,6 +74,9 @@ def cost(det, s1, p, verifier):
                p_avg_gated_W=p['pl_static'] + p['infra_dyn'] +
                (REQUESTS_H * e_core_s1 + calls * p['core_dyn'] * T_V_MEAN) / 3600)
     out['e_h_dynamic_J'] = out['e_h_stage1_J'] + out['e_h_verifier_J']
+    # Like for like with Alex's figures (PL power incl. static x compute time) and with busy-polling.
+    out['e_h_work_J'] = REQUESTS_H * float(s1['e_inf_all_uJ']) * 1e-6 + calls * (p['pl_dyn'] + p['pl_static']) * T_V_MEAN
+    out['e_h_busy_J'] = out['p_avg_busy_W'] * 3600
     out['verifier_busy_share'] = calls * T_V_MEAN / 3600
     return out
 
@@ -137,6 +140,8 @@ def main():
                             latency_ms=det['latency_stream_ms'] + OVERHEAD_MS,
                             memory_kib=None, e_h_stage1_J=REQUESTS_H * e_req_mJ / 1000,
                             e_h_verifier_J=calls * e_v_mJ / 1000, e_v_mJ=e_v_mJ, p_avg_busy_W=P_PL_ALEX,
+                            e_h_work_J=REQUESTS_H * e_req_mJ / 1000 + calls * e_v_mJ / 1000,
+                            e_h_busy_J=P_PL_ALEX * 3600,
                             source='reproduced final (G-A2); cost: FINAL REPORT Parallel section (stage 1 10.17 ms mean, '
                                    '11.42 ms max, 7.40 mJ per request; verifier 105.83 ms, 76.9 mJ per call; PL 0.727 W)'))
     dkeys = list(dict.fromkeys(k for d in designs for k in d))
