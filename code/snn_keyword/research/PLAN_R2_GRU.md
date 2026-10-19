@@ -185,6 +185,12 @@ This is Mateo's `Cascade` logic, unchanged.
 ## 5. Phase B: fine-tune the verifier on our false proposals
 **Data choice (Pedro, 2026-10-19):** Mateo's recipe, with the parts his fine-tune never reads skipped.
 
+**Decision after G1 and A5 (Pedro, 2026-10-19; before any Phase B result):**
+- Phase B is judged **mainly under the A5 call-limited rule** (≤ 2,150 verifier calls per hour on validation), against cascade A5 (test live 84.4 ± 0.9 %).
+- The highest-recall rule (A2) is reported as a second comparison, against cascade A.
+- The question is whether the fine-tuned verifier lifts live recall above 85 % at the same number of calls (R2-H2, first branch).
+- After R2, the next step is clock gating (section 7b): fewer calls save energy only when the chip can idle.
+
 ### B0. GPU (time-box 1.5 h)
 1. Check AMD's current official support list for PyTorch on Windows (ROCm) for the RX 7800 XT, with a web search of AMD's documentation.
 2. If it is supported: create a **separate** venv `.venv-rocm` (never change `.venv`) and install as AMD documents.
@@ -237,7 +243,7 @@ Keep `last.pt` of each run (as Mateo did) in `research/results/R2/verifier/` (ab
 
 ### B5. Evaluate
 - Score each new verifier on the A1 caches for validation and test.
-- Re-select with the A2 rule, then run the test once with `final`.
+- Re-select with the A5 rule (`r2_cascade.py select-budget --max-calls 2150`, main) and with the A2 rule (second), then run the test once per rule with `final`.
 - Compute cost as in A4.
 - 3 verifier seeds × 3 stage-1 seeds = 9 cascades. Report mean ± sd, with a paired comparison against Phase A (McNemar per clip, as `verifier_cascade` does).
 
@@ -282,6 +288,21 @@ Keep `last.pt` of each run (as Mateo did) in `research/results/R2/verifier/` (ab
 - `research/reports/R2_cascade_gru.md`, with hypotheses and outcomes and threats to validity;
 - an update to `STATUS.md`;
 - a local commit. PDFs only: the root `.gitignore` excludes `*.tex`, so the sources stay local.
+
+## 7b. Next step after R2: clock gating (R3, outline only; Pedro, 2026-10-19)
+**Why:**
+- With today's busy-polling firmware the core never idles. Every design draws its full PL power: 0.367 W for ours, 0.727 W for Mateo's.
+- Fewer verifier calls (A5, Phase B) only save energy when the chip can stop between requests. Clock-gated, the cascade estimates are 0.177 W (A) and 0.110 W (A5), but that is only a calculation (ENERGY.md §5).
+
+**Outline** (to be planned in detail in its own file):
+1. **Quick first number, no RTL change:** clock scaling. Set FCLK0 from Python on PYNQ, and relax the server's 100 MHz check. Measure our stage 1 alone, busy vs scaled, with the USB meter (ENERGY.md §3).
+2. **Clock gating in RTL:**
+   - stop the core clock (BUFGCE) and the BRAM enables between requests;
+   - wake on the ARM's mailbox write;
+   - the firmware sleeps after it answers.
+   Rebuild in Vivado and check timing.
+3. **Board check:** bit-exact results (`check_board.py`), then the meter: busy vs gated, stage 1 alone.
+4. **The cascade, gated:** after the hardware merge below (verifier firmware, 10 ms frames). Compare A vs A5 vs Phase B by measured energy per hour.
 
 ## 7. Later work, not part of R2: the hardware merge
 - **Alex's verifier instructions:** the KX unit lives only on `origin/dual-core-alif`.
