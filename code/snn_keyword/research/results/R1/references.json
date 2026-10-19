@@ -1,0 +1,41 @@
+{
+  "harness": "same test sets (robust_eval / final_eval)",
+  "designs": [
+    {
+      "name": "Mateo: ALIF streaming SNN (stage 1)",
+      "live_recall": 0.6368,
+      "live_other": 0.0,
+      "fa_per_hour": 1.582,
+      "latency_ms": 44.0,
+      "t_max_ms": 10.3,
+      "source": "final_sheila_head_near_cascade_test.json stage1_frame; compute: README (RTL, 10.3 ms)"
+    },
+    {
+      "name": "Mateo: ALIF SNN + GRU verifier (cascade)",
+      "live_recall": 0.8679,
+      "live_other": 0.0007,
+      "fa_per_hour": 1.424,
+      "latency_ms": 175.0,
+      "t_max_ms": 117.0,
+      "source": "final_sheila_head_near_cascade_test.json cascade; worst compute: README (117 ms)"
+    },
+    {
+      "name": "Damien: 8x16 clip SNN, Mateo's rule",
+      "live_recall": 0.0708,
+      "live_other": 0.0,
+      "fa_per_hour": 2.109,
+      "latency_ms": 245.0,
+      "t_max_ms": 10.4,
+      "source": "final_sheila_test.json damien_ourrule; compute: FINAL REPORT Table \"Final Sheila detector results\""
+    },
+    {
+      "name": "Damien: 8x16 clip SNN, own margin",
+      "live_recall": 0.8019,
+      "live_other": 0.03533,
+      "fa_per_hour": 366.304,
+      "latency_ms": -246.0,
+      "t_max_ms": 10.4,
+      "source": "final_sheila_test.json damien_own; compute: FINAL REPORT Table \"Final Sheila detector results\""
+    }
+  ]
+}

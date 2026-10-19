@@ -1,0 +1,59 @@
+{
+  "live_validation": {
+    "keyword": 204,
+    "other": 3000
+  },
+  "live_test": {
+    "keyword": 212,
+    "other": 3000,
+    "keyword_complete": 174
+  },
+  "negatives_hours": {
+    "validation": 18.109,
+    "test": 18.965
+  },
+  "negatives_windows": {
+    "validation": 260407,
+    "test": 272708
+  },
+  "stream_test": {
+    "seconds": 3600,
+    "clips": {
+      "yes": 140,
+      "word": 455,
+      "libri": 284
+    },
+    "speech_seconds": {
+      "yes": 137.6,
+      "word": 446.9,
+      "libri": 2004.7
+    },
+    "libri_subset": "test-clean",
+    "seed": 7,
+    "keyword_inserted": 140
+  },
+  "damien_subset_clips": {
+    "train": [
+      9606,
+      1606
+    ],
+    "validation": [
+      2704,
+      204
+    ],
+    "test": [
+      3212,
+      212
+    ]
+  },
+  "full_test_clips": [
+    11005,
+    212
+  ],
+  "rule": {
+    "max_live_other": 0.002,
+    "max_fa_per_hour": 2.0,
+    "source": "mateo_eval/stream_select.py"
+  },
+  "harness": "origin/ALIF-Layer1 a856a03 (research/tools/mateo_eval)"
+}

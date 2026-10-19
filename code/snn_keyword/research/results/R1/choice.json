@@ -1,0 +1,169 @@
+{
+  "rule": "PLAN_R1.md: two champions (dense, pruned); live recall at the validation threshold",
+  "main": {
+    "metric": "live_recall",
+    "sd": "own",
+    "pooled_sd": 0.07322280364994893,
+    "meets_all_requirements": [],
+    "dense": {
+      "champion": "h48_b8/kdot_lut",
+      "value": 0.4292666666666667,
+      "sd": 0.06852272129252703,
+      "e_inf_uJ": 165.39215400000003,
+      "best": "h48_b8/packed",
+      "best_value": 0.4292666666666667,
+      "bar": 0.3607439453741397,
+      "tied": [
+        "h32/base",
+        "h32/kdot",
+        "h48/base",
+        "h48/kdot",
+        "h48/kdot_lut",
+        "h48_b4/packed",
+        "h48_b4/kdot_lut",
+        "h48_b8/packed",
+        "h48_b8/kdot_lut",
+        "h95/base",
+        "h95/kdot",
+        "h95/kdot_lut"
+      ]
+    },
+    "pruned": {
+      "champion": "h48_k64/ksdot_lut",
+      "value": 0.36319999999999997,
+      "sd": 0.06127307728521557,
+      "e_inf_uJ": 96.50303200000002,
+      "best": "h48_k512/sparse",
+      "best_value": 0.38996666666666674,
+      "bar": 0.32321246580010454,
+      "tied": [
+        "h48_b8_k128/ksdot_lut",
+        "h48_b8_k256/ksdot_lut",
+        "h48_b8_k64/ksdot_lut",
+        "h48_k128/sparse",
+        "h48_k128/ksdot_lut",
+        "h48_k256/sparse",
+        "h48_k256/ksdot_lut",
+        "h48_k512/sparse",
+        "h48_k512/ksdot_lut",
+        "h48_k64/sparse",
+        "h48_k64/ksdot_lut"
+      ]
+    },
+    "pruned_not_worse": true,
+    "verdict": "pruned champion alone",
+    "tradeoff": {
+      "points": 6.606666666666672,
+      "energy_saving_pct": 41.65198912640076
+    }
+  },
+  "sensitivity_pooled_sd": {
+    "metric": "live_recall",
+    "sd": "pooled",
+    "pooled_sd": 0.07322280364994893,
+    "meets_all_requirements": [],
+    "dense": {
+      "champion": "h48_b8/kdot_lut",
+      "value": 0.4292666666666667,
+      "sd": 0.06852272129252703,
+      "e_inf_uJ": 165.39215400000003,
+      "best": "h48_b8/packed",
+      "best_value": 0.4292666666666667,
+      "bar": 0.35604386301671775,
+      "tied": [
+        "h32/base",
+        "h32/kdot",
+        "h48/base",
+        "h48/kdot",
+        "h48/kdot_lut",
+        "h48_b4/packed",
+        "h48_b4/kdot_lut",
+        "h48_b8/packed",
+        "h48_b8/kdot_lut",
+        "h95/base",
+        "h95/kdot",
+        "h95/kdot_lut"
+      ]
+    },
+    "pruned": {
+      "champion": "h48_k64/ksdot_lut",
+      "value": 0.36319999999999997,
+      "sd": 0.06127307728521557,
+      "e_inf_uJ": 96.50303200000002,
+      "best": "h48_k512/sparse",
+      "best_value": 0.38996666666666674,
+      "bar": 0.3167438630167178,
+      "tied": [
+        "h48_b8_k128/ksdot_lut",
+        "h48_b8_k256/ksdot_lut",
+        "h48_b8_k64/ksdot_lut",
+        "h48_k128/sparse",
+        "h48_k128/ksdot_lut",
+        "h48_k256/sparse",
+        "h48_k256/ksdot_lut",
+        "h48_k512/sparse",
+        "h48_k512/ksdot_lut",
+        "h48_k64/sparse",
+        "h48_k64/ksdot_lut"
+      ]
+    },
+    "pruned_not_worse": true,
+    "verdict": "pruned champion alone",
+    "tradeoff": {
+      "points": 6.606666666666672,
+      "energy_saving_pct": 41.65198912640076
+    }
+  },
+  "sensitivity_test_f1": {
+    "metric": "test_f1",
+    "sd": "own",
+    "pooled_sd": 0.017916923954461077,
+    "meets_all_requirements": [],
+    "dense": {
+      "champion": "h48_b8/kdot_lut",
+      "value": 0.7889255060305179,
+      "sd": 0.01025368733000649,
+      "e_inf_uJ": 165.39215400000003,
+      "best": "h48/base",
+      "best_value": 0.7898123815212029,
+      "bar": 0.7839837444850034,
+      "tied": [
+        "h48/base",
+        "h48/kdot",
+        "h48/kdot_lut",
+        "h48_b4/packed",
+        "h48_b4/kdot_lut",
+        "h48_b8/packed",
+        "h48_b8/kdot_lut"
+      ]
+    },
+    "pruned": {
+      "champion": "h48_k64/ksdot_lut",
+      "value": 0.7816029739739244,
+      "sd": 0.008333756708688725,
+      "e_inf_uJ": 96.50303200000002,
+      "best": "h48_k128/sparse",
+      "best_value": 0.7837695823152656,
+      "bar": 0.7653254204022508,
+      "tied": [
+        "h48_b8_k128/ksdot_lut",
+        "h48_b8_k256/ksdot_lut",
+        "h48_b8_k64/ksdot_lut",
+        "h48_k128/sparse",
+        "h48_k128/ksdot_lut",
+        "h48_k256/sparse",
+        "h48_k256/ksdot_lut",
+        "h48_k512/sparse",
+        "h48_k512/ksdot_lut",
+        "h48_k64/sparse",
+        "h48_k64/ksdot_lut"
+      ]
+    },
+    "pruned_not_worse": true,
+    "verdict": "pruned champion alone",
+    "tradeoff": {
+      "points": 0.0073225320565935,
+      "energy_saving_pct": 41.65198912640076
+    }
+  }
+}

@@ -1,0 +1,1370 @@
+{
+  "config": "h48_b8_k128",
+  "experiment": "S6",
+  "sets": "sets.json",
+  "models": {
+    "h48_b8_k128_seed0": {
+      "file": "code/snn_keyword/research/results/S6/models/h48_b8_k128_seed0.npz",
+      "sha256": "cc17a25998f3d1cade4129aeed36e41a1f38a8e1c6cde0fbcb4088b704a01e21",
+      "decision_threshold": 2793,
+      "validation": {
+        "selection": {
+          "threshold": 3174,
+          "live_recall": 0.3627450980392157,
+          "live_other": 0.0006666666666666666,
+          "fa_per_hour": 1.988
+        },
+        "s_rule_threshold": 1430,
+        "at_s_rule": {
+          "live_recall": 0.5784,
+          "live_other": 0.003,
+          "fa_per_hour": 14.081
+        }
+      },
+      "test": {
+        "threshold": 3174,
+        "live_recall": 0.3726,
+        "live_recall_complete": 0.4483,
+        "live_other": 0.00033,
+        "fa_per_hour": 2.004,
+        "fa_by_source": {
+          "librispeech": 31,
+          "speech commands word": 7
+        },
+        "stream": {
+          "false_accepts_by_source": {},
+          "recall": 0.4786,
+          "false_accepts": 0,
+          "fa_per_hour": 0.0,
+          "latency_median_s": 0.164,
+          "latency_p90_s": 0.388
+        }
+      },
+      "test_at_s_rule": {
+        "threshold": 1430,
+        "live_recall": 0.5896,
+        "live_recall_complete": 0.6609,
+        "live_other": 0.004,
+        "fa_per_hour": 15.239,
+        "fa_by_source": {
+          "librispeech": 234,
+          "speech commands word": 55
+        },
+        "stream": {
+          "false_accepts_by_source": {
+            "librispeech": 8,
+            "speech commands word": 2
+          },
+          "recall": 0.6429,
+          "false_accepts": 10,
+          "fa_per_hour": 10.0,
+          "latency_median_s": 0.076,
+          "latency_p90_s": 0.328
+        }
+      },
+      "test_curve": [
+        {
+          "threshold": -386,
+          "live_recall": 0.75,
+          "live_other": 0.02,
+          "fa_per_hour": 91.484
+        },
+        {
+          "threshold": -189,
+          "live_recall": 0.7358,
+          "live_other": 0.01567,
+          "fa_per_hour": 75.454
+        },
+        {
+          "threshold": -116,
+          "live_recall": 0.7264,
+          "live_other": 0.01433,
+          "fa_per_hour": 70.445
+        },
+        {
+          "threshold": 84,
+          "live_recall": 0.7123,
+          "live_other": 0.01267,
+          "fa_per_hour": 58.95
+        },
+        {
+          "threshold": 245,
+          "live_recall": 0.6981,
+          "live_other": 0.00867,
+          "fa_per_hour": 50.145
+        },
+        {
+          "threshold": 349,
+          "live_recall": 0.6887,
+          "live_other": 0.00767,
+          "fa_per_hour": 44.766
+        },
+        {
+          "threshold": 435,
+          "live_recall": 0.6745,
+          "live_other": 0.00733,
+          "fa_per_hour": 41.392
+        },
+        {
+          "threshold": 603,
+          "live_recall": 0.6604,
+          "live_other": 0.007,
+          "fa_per_hour": 34.379
+        },
+        {
+          "threshold": 811,
+          "live_recall": 0.6509,
+          "live_other": 0.00533,
+          "fa_per_hour": 28.315
+        },
+        {
+          "threshold": 947,
+          "live_recall": 0.6368,
+          "live_other": 0.00533,
+          "fa_per_hour": 24.835
+        },
+        {
+          "threshold": 1290,
+          "live_recall": 0.6179,
+          "live_other": 0.005,
+          "fa_per_hour": 17.717
+        },
+        {
+          "threshold": 1314,
+          "live_recall": 0.6085,
+          "live_other": 0.005,
+          "fa_per_hour": 17.137
+        },
+        {
+          "threshold": 1378,
+          "live_recall": 0.5943,
+          "live_other": 0.00467,
+          "fa_per_hour": 15.977
+        },
+        {
+          "threshold": 1594,
+          "live_recall": 0.5802,
+          "live_other": 0.003,
+          "fa_per_hour": 13.235
+        },
+        {
+          "threshold": 1642,
+          "live_recall": 0.5708,
+          "live_other": 0.003,
+          "fa_per_hour": 12.602
+        },
+        {
+          "threshold": 1688,
+          "live_recall": 0.5566,
+          "live_other": 0.00233,
+          "fa_per_hour": 12.338
+        },
+        {
+          "threshold": 1788,
+          "live_recall": 0.5425,
+          "live_other": 0.00233,
+          "fa_per_hour": 11.126
+        },
+        {
+          "threshold": 1888,
+          "live_recall": 0.533,
+          "live_other": 0.00167,
+          "fa_per_hour": 10.071
+        },
+        {
+          "threshold": 1972,
+          "live_recall": 0.5189,
+          "live_other": 0.00133,
+          "fa_per_hour": 9.386
+        },
+        {
+          "threshold": 2049,
+          "live_recall": 0.5047,
+          "live_other": 0.00133,
+          "fa_per_hour": 8.806
+        },
+        {
+          "threshold": 2126,
+          "live_recall": 0.4953,
+          "live_other": 0.001,
+          "fa_per_hour": 7.804
+        },
+        {
+          "threshold": 2159,
+          "live_recall": 0.4811,
+          "live_other": 0.001,
+          "fa_per_hour": 7.54
+        },
+        {
+          "threshold": 2219,
+          "live_recall": 0.467,
+          "live_other": 0.001,
+          "fa_per_hour": 7.066
+        },
+        {
+          "threshold": 2373,
+          "live_recall": 0.4575,
+          "live_other": 0.001,
+          "fa_per_hour": 5.484
+        },
+        {
+          "threshold": 2494,
+          "live_recall": 0.4434,
+          "live_other": 0.001,
+          "fa_per_hour": 4.482
+        },
+        {
+          "threshold": 2668,
+          "live_recall": 0.4292,
+          "live_other": 0.00067,
+          "fa_per_hour": 3.638
+        },
+        {
+          "threshold": 2803,
+          "live_recall": 0.4198,
+          "live_other": 0.00033,
+          "fa_per_hour": 2.953
+        },
+        {
+          "threshold": 2849,
+          "live_recall": 0.4057,
+          "live_other": 0.00033,
+          "fa_per_hour": 2.689
+        },
+        {
+          "threshold": 2879,
+          "live_recall": 0.3915,
+          "live_other": 0.00033,
+          "fa_per_hour": 2.689
+        },
+        {
+          "threshold": 3116,
+          "live_recall": 0.3821,
+          "live_other": 0.00033,
+          "fa_per_hour": 2.109
+        },
+        {
+          "threshold": 3201,
+          "live_recall": 0.3679,
+          "live_other": 0.0,
+          "fa_per_hour": 2.004
+        },
+        {
+          "threshold": 3283,
+          "live_recall": 0.3585,
+          "live_other": 0.0,
+          "fa_per_hour": 1.74
+        },
+        {
+          "threshold": 3455,
+          "live_recall": 0.3443,
+          "live_other": 0.0,
+          "fa_per_hour": 1.529
+        },
+        {
+          "threshold": 3484,
+          "live_recall": 0.3302,
+          "live_other": 0.0,
+          "fa_per_hour": 1.476
+        },
+        {
+          "threshold": 3493,
+          "live_recall": 0.3208,
+          "live_other": 0.0,
+          "fa_per_hour": 1.476
+        },
+        {
+          "threshold": 3748,
+          "live_recall": 0.3066,
+          "live_other": 0.0,
+          "fa_per_hour": 1.265
+        },
+        {
+          "threshold": 3896,
+          "live_recall": 0.2925,
+          "live_other": 0.0,
+          "fa_per_hour": 1.107
+        },
+        {
+          "threshold": 3972,
+          "live_recall": 0.283,
+          "live_other": 0.0,
+          "fa_per_hour": 1.002
+        },
+        {
+          "threshold": 4070,
+          "live_recall": 0.2689,
+          "live_other": 0.0,
+          "fa_per_hour": 0.896
+        },
+        {
+          "threshold": 4346,
+          "live_recall": 0.2547,
+          "live_other": 0.0,
+          "fa_per_hour": 0.685
+        },
+        {
+          "threshold": 4485,
+          "live_recall": 0.2453,
+          "live_other": 0.0,
+          "fa_per_hour": 0.633
+        },
+        {
+          "threshold": 4596,
+          "live_recall": 0.2311,
+          "live_other": 0.0,
+          "fa_per_hour": 0.633
+        },
+        {
+          "threshold": 4839,
+          "live_recall": 0.217,
+          "live_other": 0.0,
+          "fa_per_hour": 0.58
+        },
+        {
+          "threshold": 4890,
+          "live_recall": 0.2075,
+          "live_other": 0.0,
+          "fa_per_hour": 0.527
+        },
+        {
+          "threshold": 4936,
+          "live_recall": 0.1934,
+          "live_other": 0.0,
+          "fa_per_hour": 0.527
+        },
+        {
+          "threshold": 5287,
+          "live_recall": 0.1792,
+          "live_other": 0.0,
+          "fa_per_hour": 0.369
+        },
+        {
+          "threshold": 5508,
+          "live_recall": 0.1698,
+          "live_other": 0.0,
+          "fa_per_hour": 0.211
+        },
+        {
+          "threshold": 5737,
+          "live_recall": 0.1557,
+          "live_other": 0.0,
+          "fa_per_hour": 0.211
+        },
+        {
+          "threshold": 5891,
+          "live_recall": 0.1415,
+          "live_other": 0.0,
+          "fa_per_hour": 0.211
+        },
+        {
+          "threshold": 5900,
+          "live_recall": 0.1321,
+          "live_other": 0.0,
+          "fa_per_hour": 0.211
+        },
+        {
+          "threshold": 6014,
+          "live_recall": 0.1179,
+          "live_other": 0.0,
+          "fa_per_hour": 0.211
+        },
+        {
+          "threshold": 6210,
+          "live_recall": 0.1038,
+          "live_other": 0.0,
+          "fa_per_hour": 0.053
+        },
+        {
+          "threshold": 6275,
+          "live_recall": 0.0943,
+          "live_other": 0.0,
+          "fa_per_hour": 0.053
+        },
+        {
+          "threshold": 6721,
+          "live_recall": 0.0802,
+          "live_other": 0.0,
+          "fa_per_hour": 0.053
+        },
+        {
+          "threshold": 7107,
+          "live_recall": 0.066,
+          "live_other": 0.0,
+          "fa_per_hour": 0.053
+        },
+        {
+          "threshold": 7525,
+          "live_recall": 0.0566,
+          "live_other": 0.0,
+          "fa_per_hour": 0.0
+        },
+        {
+          "threshold": 7797,
+          "live_recall": 0.0425,
+          "live_other": 0.0,
+          "fa_per_hour": 0.0
+        },
+        {
+          "threshold": 7930,
+          "live_recall": 0.0283,
+          "live_other": 0.0,
+          "fa_per_hour": 0.0
+        },
+        {
+          "threshold": 8309,
+          "live_recall": 0.0189,
+          "live_other": 0.0,
+          "fa_per_hour": 0.0
+        },
+        {
+          "threshold": 9213,
+          "live_recall": 0.0047,
+          "live_other": 0.0,
+          "fa_per_hour": 0.0
+        }
+      ],
+      "clips_full": {
+        "tp": 152,
+        "fp": 26,
+        "fn": 60,
+        "tn": 10767,
+        "accuracy": 0.9921853702862335,
+        "precision": 0.8539325842696629,
+        "recall": 0.7169811320754716,
+        "fpr": 0.0024089687760585564,
+        "f1": 0.7794871794871795,
+        "balanced_accuracy": 0.8572860816497065
+      },
+      "clips_damien_subset": {
+        "tp": 152,
+        "fp": 6,
+        "fn": 60,
+        "tn": 2994,
+        "accuracy": 0.9794520547945206,
+        "precision": 0.9620253164556962,
+        "recall": 0.7169811320754716,
+        "fpr": 0.002,
+        "f1": 0.8216216216216217,
+        "balanced_accuracy": 0.8574905660377359
+      },
+      "gates": {
+        "fast_forward": "equal",
+        "live_at_s_rule": {
+          "sheila_detected": 0.5896,
+          "other_accepted": 0.004
+        }
+      }
+    },
+    "h48_b8_k128_seed1": {
+      "file": "code/snn_keyword/research/results/S6/models/h48_b8_k128_seed1.npz",
+      "sha256": "dfce825b27040d70b492e21552fcf7c231d5ccc5dc6afc0d8f5bccd4281195e0",
+      "decision_threshold": 2447,
+      "validation": {
+        "selection": {
+          "threshold": 2762,
+          "live_recall": 0.39705882352941174,
+          "live_other": 0.0006666666666666666,
+          "fa_per_hour": 1.988
+        },
+        "s_rule_threshold": 1802,
+        "at_s_rule": {
+          "live_recall": 0.5245,
+          "live_other": 0.003,
+          "fa_per_hour": 5.522
+        }
+      },
+      "test": {
+        "threshold": 2762,
+        "live_recall": 0.3774,
+        "live_recall_complete": 0.431,
+        "live_other": 0.00067,
+        "fa_per_hour": 2.478,
+        "fa_by_source": {
+          "speech commands word": 14,
+          "librispeech": 33
+        },
+        "stream": {
+          "false_accepts_by_source": {
+            "librispeech": 1
+          },
+          "recall": 0.4857,
+          "false_accepts": 1,
+          "fa_per_hour": 1.0,
+          "latency_median_s": 0.128,
+          "latency_p90_s": 0.331
+        }
+      },
+      "test_at_s_rule": {
+        "threshold": 1802,
+        "live_recall": 0.4858,
+        "live_recall_complete": 0.5402,
+        "live_other": 0.00267,
+        "fa_per_hour": 7.962,
+        "fa_by_source": {
+          "librispeech": 113,
+          "speech commands word": 38
+        },
+        "stream": {
+          "false_accepts_by_source": {
+            "librispeech": 3,
+            "speech commands word": 1
+          },
+          "recall": 0.6071,
+          "false_accepts": 4,
+          "fa_per_hour": 4.0,
+          "latency_median_s": 0.122,
+          "latency_p90_s": 0.313
+        }
+      },
+      "test_curve": [
+        {
+          "threshold": -128,
+          "live_recall": 0.7358,
+          "live_other": 0.01933,
+          "fa_per_hour": 64.329
+        },
+        {
+          "threshold": 63,
+          "live_recall": 0.7217,
+          "live_other": 0.015,
+          "fa_per_hour": 51.199
+        },
+        {
+          "threshold": 167,
+          "live_recall": 0.7123,
+          "live_other": 0.01267,
+          "fa_per_hour": 44.239
+        },
+        {
+          "threshold": 359,
+          "live_recall": 0.6934,
+          "live_other": 0.01133,
+          "fa_per_hour": 35.803
+        },
+        {
+          "threshold": 379,
+          "live_recall": 0.684,
+          "live_other": 0.011,
+          "fa_per_hour": 35.223
+        },
+        {
+          "threshold": 519,
+          "live_recall": 0.6698,
+          "live_other": 0.009,
+          "fa_per_hour": 30.477
+        },
+        {
+          "threshold": 670,
+          "live_recall": 0.6557,
+          "live_other": 0.00667,
+          "fa_per_hour": 25.626
+        },
+        {
+          "threshold": 741,
+          "live_recall": 0.6462,
+          "live_other": 0.005,
+          "fa_per_hour": 23.991
+        },
+        {
+          "threshold": 810,
+          "live_recall": 0.6321,
+          "live_other": 0.005,
+          "fa_per_hour": 22.304
+        },
+        {
+          "threshold": 901,
+          "live_recall": 0.6226,
+          "live_other": 0.00467,
+          "fa_per_hour": 19.826
+        },
+        {
+          "threshold": 934,
+          "live_recall": 0.6085,
+          "live_other": 0.00467,
+          "fa_per_hour": 18.93
+        },
+        {
+          "threshold": 1086,
+          "live_recall": 0.5943,
+          "live_other": 0.00367,
+          "fa_per_hour": 16.873
+        },
+        {
+          "threshold": 1122,
+          "live_recall": 0.5849,
+          "live_other": 0.00367,
+          "fa_per_hour": 15.66
+        },
+        {
+          "threshold": 1220,
+          "live_recall": 0.5708,
+          "live_other": 0.00333,
+          "fa_per_hour": 14.078
+        },
+        {
+          "threshold": 1293,
+          "live_recall": 0.5613,
+          "live_other": 0.00333,
+          "fa_per_hour": 13.288
+        },
+        {
+          "threshold": 1376,
+          "live_recall": 0.5472,
+          "live_other": 0.00333,
+          "fa_per_hour": 12.286
+        },
+        {
+          "threshold": 1450,
+          "live_recall": 0.5377,
+          "live_other": 0.00333,
+          "fa_per_hour": 11.442
+        },
+        {
+          "threshold": 1501,
+          "live_recall": 0.5236,
+          "live_other": 0.003,
+          "fa_per_hour": 10.809
+        },
+        {
+          "threshold": 1692,
+          "live_recall": 0.5094,
+          "live_other": 0.003,
+          "fa_per_hour": 9.017
+        },
+        {
+          "threshold": 1772,
+          "live_recall": 0.5,
+          "live_other": 0.003,
+          "fa_per_hour": 8.278
+        },
+        {
+          "threshold": 1922,
+          "live_recall": 0.4858,
+          "live_other": 0.00267,
+          "fa_per_hour": 7.171
+        },
+        {
+          "threshold": 2118,
+          "live_recall": 0.4764,
+          "live_other": 0.002,
+          "fa_per_hour": 5.589
+        },
+        {
+          "threshold": 2262,
+          "live_recall": 0.4623,
+          "live_other": 0.002,
+          "fa_per_hour": 4.798
+        },
+        {
+          "threshold": 2384,
+          "live_recall": 0.4481,
+          "live_other": 0.00133,
+          "fa_per_hour": 4.113
+        },
+        {
+          "threshold": 2404,
+          "live_recall": 0.4387,
+          "live_other": 0.001,
+          "fa_per_hour": 3.902
+        },
+        {
+          "threshold": 2538,
+          "live_recall": 0.4245,
+          "live_other": 0.00067,
+          "fa_per_hour": 3.164
+        },
+        {
+          "threshold": 2652,
+          "live_recall": 0.4151,
+          "live_other": 0.00067,
+          "fa_per_hour": 2.742
+        },
+        {
+          "threshold": 2699,
+          "live_recall": 0.4009,
+          "live_other": 0.00067,
+          "fa_per_hour": 2.636
+        },
+        {
+          "threshold": 2758,
+          "live_recall": 0.3821,
+          "live_other": 0.00067,
+          "fa_per_hour": 2.531
+        },
+        {
+          "threshold": 3009,
+          "live_recall": 0.3726,
+          "live_other": 0.00033,
+          "fa_per_hour": 1.951
+        },
+        {
+          "threshold": 3140,
+          "live_recall": 0.3585,
+          "live_other": 0.0,
+          "fa_per_hour": 1.74
+        },
+        {
+          "threshold": 3284,
+          "live_recall": 0.3491,
+          "live_other": 0.0,
+          "fa_per_hour": 1.476
+        },
+        {
+          "threshold": 3401,
+          "live_recall": 0.3349,
+          "live_other": 0.0,
+          "fa_per_hour": 1.265
+        },
+        {
+          "threshold": 3543,
+          "live_recall": 0.3208,
+          "live_other": 0.0,
+          "fa_per_hour": 0.949
+        },
+        {
+          "threshold": 3650,
+          "live_recall": 0.3113,
+          "live_other": 0.0,
+          "fa_per_hour": 0.791
+        },
+        {
+          "threshold": 3732,
+          "live_recall": 0.2972,
+          "live_other": 0.0,
+          "fa_per_hour": 0.685
+        },
+        {
+          "threshold": 3760,
+          "live_recall": 0.2877,
+          "live_other": 0.0,
+          "fa_per_hour": 0.58
+        },
+        {
+          "threshold": 3810,
+          "live_recall": 0.2736,
+          "live_other": 0.0,
+          "fa_per_hour": 0.58
+        },
+        {
+          "threshold": 3942,
+          "live_recall": 0.2594,
+          "live_other": 0.0,
+          "fa_per_hour": 0.58
+        },
+        {
+          "threshold": 4011,
+          "live_recall": 0.25,
+          "live_other": 0.0,
+          "fa_per_hour": 0.475
+        },
+        {
+          "threshold": 4138,
+          "live_recall": 0.2358,
+          "live_other": 0.0,
+          "fa_per_hour": 0.475
+        },
+        {
+          "threshold": 4170,
+          "live_recall": 0.2264,
+          "live_other": 0.0,
+          "fa_per_hour": 0.475
+        },
+        {
+          "threshold": 4256,
+          "live_recall": 0.2123,
+          "live_other": 0.0,
+          "fa_per_hour": 0.422
+        },
+        {
+          "threshold": 4416,
+          "live_recall": 0.1981,
+          "live_other": 0.0,
+          "fa_per_hour": 0.369
+        },
+        {
+          "threshold": 4507,
+          "live_recall": 0.1887,
+          "live_other": 0.0,
+          "fa_per_hour": 0.264
+        },
+        {
+          "threshold": 4722,
+          "live_recall": 0.1745,
+          "live_other": 0.0,
+          "fa_per_hour": 0.105
+        },
+        {
+          "threshold": 5242,
+          "live_recall": 0.1651,
+          "live_other": 0.0,
+          "fa_per_hour": 0.053
+        },
+        {
+          "threshold": 5367,
+          "live_recall": 0.1509,
+          "live_other": 0.0,
+          "fa_per_hour": 0.053
+        },
+        {
+          "threshold": 5416,
+          "live_recall": 0.1415,
+          "live_other": 0.0,
+          "fa_per_hour": 0.053
+        },
+        {
+          "threshold": 5577,
+          "live_recall": 0.1274,
+          "live_other": 0.0,
+          "fa_per_hour": 0.053
+        },
+        {
+          "threshold": 5761,
+          "live_recall": 0.1132,
+          "live_other": 0.0,
+          "fa_per_hour": 0.053
+        },
+        {
+          "threshold": 5886,
+          "live_recall": 0.1038,
+          "live_other": 0.0,
+          "fa_per_hour": 0.053
+        },
+        {
+          "threshold": 6140,
+          "live_recall": 0.0896,
+          "live_other": 0.0,
+          "fa_per_hour": 0.053
+        },
+        {
+          "threshold": 6583,
+          "live_recall": 0.0802,
+          "live_other": 0.0,
+          "fa_per_hour": 0.053
+        },
+        {
+          "threshold": 6955,
+          "live_recall": 0.066,
+          "live_other": 0.0,
+          "fa_per_hour": 0.053
+        },
+        {
+          "threshold": 7188,
+          "live_recall": 0.0519,
+          "live_other": 0.0,
+          "fa_per_hour": 0.0
+        },
+        {
+          "threshold": 7444,
+          "live_recall": 0.0425,
+          "live_other": 0.0,
+          "fa_per_hour": 0.0
+        },
+        {
+          "threshold": 8116,
+          "live_recall": 0.0283,
+          "live_other": 0.0,
+          "fa_per_hour": 0.0
+        },
+        {
+          "threshold": 8506,
+          "live_recall": 0.0189,
+          "live_other": 0.0,
+          "fa_per_hour": 0.0
+        },
+        {
+          "threshold": 9675,
+          "live_recall": 0.0047,
+          "live_other": 0.0,
+          "fa_per_hour": 0.0
+        }
+      ],
+      "clips_full": {
+        "tp": 153,
+        "fp": 25,
+        "fn": 59,
+        "tn": 10768,
+        "accuracy": 0.9923671058609723,
+        "precision": 0.8595505617977528,
+        "recall": 0.7216981132075472,
+        "fpr": 0.002316316130825535,
+        "f1": 0.7846153846153846,
+        "balanced_accuracy": 0.8596908985383609
+      },
+      "clips_damien_subset": {
+        "tp": 153,
+        "fp": 6,
+        "fn": 59,
+        "tn": 2994,
+        "accuracy": 0.9797633872976339,
+        "precision": 0.9622641509433962,
+        "recall": 0.7216981132075472,
+        "fpr": 0.002,
+        "f1": 0.8247978436657682,
+        "balanced_accuracy": 0.8598490566037735
+      },
+      "gates": {
+        "fast_forward": "equal",
+        "live_at_s_rule": {
+          "sheila_detected": 0.4858,
+          "other_accepted": 0.0027
+        }
+      }
+    },
+    "h48_b8_k128_seed2": {
+      "file": "code/snn_keyword/research/results/S6/models/h48_b8_k128_seed2.npz",
+      "sha256": "6ecd1edc01e07678f7917f01ad816744b93c6a5eba335f45be10db09c16deb7c",
+      "decision_threshold": 2220,
+      "validation": {
+        "selection": {
+          "threshold": 3269,
+          "live_recall": 0.37745098039215685,
+          "live_other": 0.0003333333333333333,
+          "fa_per_hour": 1.878
+        },
+        "s_rule_threshold": 1474,
+        "at_s_rule": {
+          "live_recall": 0.5931,
+          "live_other": 0.003,
+          "fa_per_hour": 18.665
+        }
+      },
+      "test": {
+        "threshold": 3269,
+        "live_recall": 0.3443,
+        "live_recall_complete": 0.408,
+        "live_other": 0.0,
+        "fa_per_hour": 2.9,
+        "fa_by_source": {
+          "librispeech": 52,
+          "speech commands word": 3
+        },
+        "stream": {
+          "false_accepts_by_source": {
+            "librispeech": 1
+          },
+          "recall": 0.5,
+          "false_accepts": 1,
+          "fa_per_hour": 1.0,
+          "latency_median_s": 0.188,
+          "latency_p90_s": 0.38
+        }
+      },
+      "test_at_s_rule": {
+        "threshold": 1474,
+        "live_recall": 0.5802,
+        "live_recall_complete": 0.6264,
+        "live_other": 0.00267,
+        "fa_per_hour": 20.828,
+        "fa_by_source": {
+          "librispeech": 344,
+          "speech commands word": 51
+        },
+        "stream": {
+          "false_accepts_by_source": {
+            "librispeech": 12,
+            "speech commands word": 1
+          },
+          "recall": 0.6571,
+          "false_accepts": 13,
+          "fa_per_hour": 13.0,
+          "latency_median_s": 0.096,
+          "latency_p90_s": 0.317
+        }
+      },
+      "test_curve": [
+        {
+          "threshold": -232,
+          "live_recall": 0.7925,
+          "live_other": 0.018,
+          "fa_per_hour": 138.201
+        },
+        {
+          "threshold": -60,
+          "live_recall": 0.7783,
+          "live_other": 0.01433,
+          "fa_per_hour": 114.104
+        },
+        {
+          "threshold": 112,
+          "live_recall": 0.7594,
+          "live_other": 0.01067,
+          "fa_per_hour": 94.542
+        },
+        {
+          "threshold": 246,
+          "live_recall": 0.75,
+          "live_other": 0.00833,
+          "fa_per_hour": 81.624
+        },
+        {
+          "threshold": 383,
+          "live_recall": 0.7358,
+          "live_other": 0.00667,
+          "fa_per_hour": 70.551
+        },
+        {
+          "threshold": 516,
+          "live_recall": 0.7217,
+          "live_other": 0.00567,
+          "fa_per_hour": 61.64
+        },
+        {
+          "threshold": 630,
+          "live_recall": 0.7075,
+          "live_other": 0.00533,
+          "fa_per_hour": 54.574
+        },
+        {
+          "threshold": 762,
+          "live_recall": 0.6981,
+          "live_other": 0.004,
+          "fa_per_hour": 46.717
+        },
+        {
+          "threshold": 945,
+          "live_recall": 0.684,
+          "live_other": 0.00367,
+          "fa_per_hour": 37.384
+        },
+        {
+          "threshold": 1001,
+          "live_recall": 0.6698,
+          "live_other": 0.00367,
+          "fa_per_hour": 35.433
+        },
+        {
+          "threshold": 1083,
+          "live_recall": 0.6557,
+          "live_other": 0.00333,
+          "fa_per_hour": 31.848
+        },
+        {
+          "threshold": 1174,
+          "live_recall": 0.6415,
+          "live_other": 0.00333,
+          "fa_per_hour": 29.264
+        },
+        {
+          "threshold": 1204,
+          "live_recall": 0.6274,
+          "live_other": 0.00333,
+          "fa_per_hour": 28.21
+        },
+        {
+          "threshold": 1326,
+          "live_recall": 0.6132,
+          "live_other": 0.003,
+          "fa_per_hour": 24.413
+        },
+        {
+          "threshold": 1393,
+          "live_recall": 0.5991,
+          "live_other": 0.00267,
+          "fa_per_hour": 22.99
+        },
+        {
+          "threshold": 1439,
+          "live_recall": 0.5849,
+          "live_other": 0.00267,
+          "fa_per_hour": 21.777
+        },
+        {
+          "threshold": 1520,
+          "live_recall": 0.5755,
+          "live_other": 0.00267,
+          "fa_per_hour": 20.09
+        },
+        {
+          "threshold": 1561,
+          "live_recall": 0.5613,
+          "live_other": 0.00267,
+          "fa_per_hour": 19.51
+        },
+        {
+          "threshold": 1747,
+          "live_recall": 0.5472,
+          "live_other": 0.00233,
+          "fa_per_hour": 15.713
+        },
+        {
+          "threshold": 1848,
+          "live_recall": 0.533,
+          "live_other": 0.002,
+          "fa_per_hour": 13.815
+        },
+        {
+          "threshold": 1923,
+          "live_recall": 0.5142,
+          "live_other": 0.001,
+          "fa_per_hour": 12.549
+        },
+        {
+          "threshold": 1951,
+          "live_recall": 0.5047,
+          "live_other": 0.001,
+          "fa_per_hour": 12.338
+        },
+        {
+          "threshold": 2047,
+          "live_recall": 0.4906,
+          "live_other": 0.00067,
+          "fa_per_hour": 10.968
+        },
+        {
+          "threshold": 2232,
+          "live_recall": 0.4764,
+          "live_other": 0.00033,
+          "fa_per_hour": 8.964
+        },
+        {
+          "threshold": 2470,
+          "live_recall": 0.4623,
+          "live_other": 0.00033,
+          "fa_per_hour": 7.435
+        },
+        {
+          "threshold": 2494,
+          "live_recall": 0.4528,
+          "live_other": 0.00033,
+          "fa_per_hour": 7.277
+        },
+        {
+          "threshold": 2596,
+          "live_recall": 0.4387,
+          "live_other": 0.0,
+          "fa_per_hour": 6.749
+        },
+        {
+          "threshold": 2716,
+          "live_recall": 0.4245,
+          "live_other": 0.0,
+          "fa_per_hour": 5.695
+        },
+        {
+          "threshold": 2881,
+          "live_recall": 0.4104,
+          "live_other": 0.0,
+          "fa_per_hour": 4.587
+        },
+        {
+          "threshold": 3017,
+          "live_recall": 0.3962,
+          "live_other": 0.0,
+          "fa_per_hour": 3.902
+        },
+        {
+          "threshold": 3065,
+          "live_recall": 0.3868,
+          "live_other": 0.0,
+          "fa_per_hour": 3.849
+        },
+        {
+          "threshold": 3163,
+          "live_recall": 0.3726,
+          "live_other": 0.0,
+          "fa_per_hour": 3.586
+        },
+        {
+          "threshold": 3235,
+          "live_recall": 0.3585,
+          "live_other": 0.0,
+          "fa_per_hour": 3.216
+        },
+        {
+          "threshold": 3361,
+          "live_recall": 0.3443,
+          "live_other": 0.0,
+          "fa_per_hour": 2.795
+        },
+        {
+          "threshold": 3512,
+          "live_recall": 0.3302,
+          "live_other": 0.0,
+          "fa_per_hour": 2.531
+        },
+        {
+          "threshold": 3578,
+          "live_recall": 0.3208,
+          "live_other": 0.0,
+          "fa_per_hour": 2.426
+        },
+        {
+          "threshold": 3631,
+          "live_recall": 0.3066,
+          "live_other": 0.0,
+          "fa_per_hour": 2.267
+        },
+        {
+          "threshold": 3723,
+          "live_recall": 0.2925,
+          "live_other": 0.0,
+          "fa_per_hour": 2.109
+        },
+        {
+          "threshold": 3746,
+          "live_recall": 0.2783,
+          "live_other": 0.0,
+          "fa_per_hour": 2.004
+        },
+        {
+          "threshold": 3861,
+          "live_recall": 0.2689,
+          "live_other": 0.0,
+          "fa_per_hour": 1.635
+        },
+        {
+          "threshold": 3928,
+          "live_recall": 0.2547,
+          "live_other": 0.0,
+          "fa_per_hour": 1.582
+        },
+        {
+          "threshold": 4088,
+          "live_recall": 0.2406,
+          "live_other": 0.0,
+          "fa_per_hour": 1.371
+        },
+        {
+          "threshold": 4265,
+          "live_recall": 0.2264,
+          "live_other": 0.0,
+          "fa_per_hour": 0.896
+        },
+        {
+          "threshold": 4390,
+          "live_recall": 0.2123,
+          "live_other": 0.0,
+          "fa_per_hour": 0.738
+        },
+        {
+          "threshold": 4427,
+          "live_recall": 0.2028,
+          "live_other": 0.0,
+          "fa_per_hour": 0.685
+        },
+        {
+          "threshold": 4508,
+          "live_recall": 0.1887,
+          "live_other": 0.0,
+          "fa_per_hour": 0.685
+        },
+        {
+          "threshold": 4719,
+          "live_recall": 0.1745,
+          "live_other": 0.0,
+          "fa_per_hour": 0.527
+        },
+        {
+          "threshold": 4906,
+          "live_recall": 0.1604,
+          "live_other": 0.0,
+          "fa_per_hour": 0.422
+        },
+        {
+          "threshold": 4980,
+          "live_recall": 0.1509,
+          "live_other": 0.0,
+          "fa_per_hour": 0.422
+        },
+        {
+          "threshold": 5157,
+          "live_recall": 0.1368,
+          "live_other": 0.0,
+          "fa_per_hour": 0.316
+        },
+        {
+          "threshold": 5280,
+          "live_recall": 0.1226,
+          "live_other": 0.0,
+          "fa_per_hour": 0.264
+        },
+        {
+          "threshold": 5383,
+          "live_recall": 0.1085,
+          "live_other": 0.0,
+          "fa_per_hour": 0.211
+        },
+        {
+          "threshold": 5580,
+          "live_recall": 0.0943,
+          "live_other": 0.0,
+          "fa_per_hour": 0.158
+        },
+        {
+          "threshold": 5827,
+          "live_recall": 0.0849,
+          "live_other": 0.0,
+          "fa_per_hour": 0.053
+        },
+        {
+          "threshold": 6014,
+          "live_recall": 0.0708,
+          "live_other": 0.0,
+          "fa_per_hour": 0.053
+        },
+        {
+          "threshold": 6198,
+          "live_recall": 0.0566,
+          "live_other": 0.0,
+          "fa_per_hour": 0.0
+        },
+        {
+          "threshold": 6662,
+          "live_recall": 0.0425,
+          "live_other": 0.0,
+          "fa_per_hour": 0.0
+        },
+        {
+          "threshold": 6916,
+          "live_recall": 0.033,
+          "live_other": 0.0,
+          "fa_per_hour": 0.0
+        },
+        {
+          "threshold": 7332,
+          "live_recall": 0.0189,
+          "live_other": 0.0,
+          "fa_per_hour": 0.0
+        },
+        {
+          "threshold": 8875,
+          "live_recall": 0.0047,
+          "live_other": 0.0,
+          "fa_per_hour": 0.0
+        }
+      ],
+      "clips_full": {
+        "tp": 161,
+        "fp": 42,
+        "fn": 51,
+        "tn": 10751,
+        "accuracy": 0.9915492957746479,
+        "precision": 0.7931034482758621,
+        "recall": 0.7594339622641509,
+        "fpr": 0.003891411099786899,
+        "f1": 0.7759036144578313,
+        "balanced_accuracy": 0.877771275582182
+      },
+      "clips_damien_subset": {
+        "tp": 161,
+        "fp": 11,
+        "fn": 51,
+        "tn": 2989,
+        "accuracy": 0.9806973848069739,
+        "precision": 0.936046511627907,
+        "recall": 0.7594339622641509,
+        "fpr": 0.0036666666666666666,
+        "f1": 0.8385416666666666,
+        "balanced_accuracy": 0.8778836477987422
+      },
+      "gates": {
+        "fast_forward": "equal",
+        "live_at_s_rule": {
+          "sheila_detected": 0.5802,
+          "other_accepted": 0.0027
+        }
+      }
+    }
+  }
+}

@@ -17,6 +17,29 @@ size and synapse study for the report). All energy numbers are in [ENERGY.md](EN
 | S4 | Exact LIF lookup (neuron side) | **done** 2026-10-17 | `results/S4/`, same |
 | S5 | Synthesis, choice, report section (LaTeX) | **done** 2026-10-17 (draft for review) | `results/S5/`, `reports/latex/size_synapse/` |
 | S6 | Sparse kdot (kxload/ksdot hardware) vs the deployed dense-kdot model | **done** 2026-10-17 | `results/S6/`, [S_energy_synapse.md](reports/S_energy_synapse.md) §S6 |
+| R1 | The S designs against the group requirements, with Mateo's test harness ([PLAN_R1.md](PLAN_R1.md)) | **done** 2026-10-19 | `results/R1/`, [R1_requirements.md](reports/R1_requirements.md), `reports/latex/requirements_eval/` |
+
+## R1 result: group requirements (2026-10-19)
+**Requirements (Pedro):**
+- ≥ 85 % live "Sheila" detected;
+- ≤ 2 false accepts per hour;
+- ≤ 0.2 % other words accepted;
+- ≤ 500 ms median from word end to decision;
+- ≤ 200 ms worst compute per request;
+- ≤ 144 KiB memory;
+- ≤ 1 W average PL power.
+
+**How it was measured:**
+- Mateo's harness (`tools/mateo_eval/`, from `origin/ALIF-Layer1` a856a03).
+- The threshold is chosen on validation with his rule; then the test is run once.
+- 13 configs × 3 seeds, the same models as in S2–S6 (retraining is bit-identical).
+
+**Results:**
+- **Detection:** no design meets it. The best mean is 42.9 ± 6.9 % (H48 8-bit). FA/h is 1.6–4.1 on test (mean 2.8); 86 % of the false accepts are LibriSpeech running speech. Other words are ≤ 0.07 %.
+- **Cost:** every design meets compute, memory, latency (134–258 ms) and power (0.37 W busy-polling).
+- **Choice (two-champion rule):** the pruned H48 K64 on ksdot + table, 36.3 % live, 96.5 µJ, 12.4 KiB. The dense champion is H48 8-bit kdot + table (deployed), 42.9 %, 165 µJ, 72.4 KiB. The 6.6-point difference is within the seed spread.
+- **Comparison:** Mateo's ALIF + GRU cascade meets all detection requirements on the same tests (86.8 %, 1.42 FA/h, 0.07 %).
+- **Next:** retrain on Mateo's full training data (MSWC, Piper TTS, LibriSpeech negatives, rooms, microphones). This is the deferred follow-up, Pedro's choice.
 
 Part 1 ([PLAN.md](PLAN.md)):
 
@@ -235,7 +258,11 @@ For reference, the previous "yes" release: test F1 0.8761 (seeds 0.867 ± 0.022)
   three seeds it may be chance.
 
 ## Next step
-The experiments of part 2 are complete. Open:
+The experiments of part 2 and R1 are complete. Open:
+- Pedro reviews the R1 report `reports/latex/requirements_eval/main.pdf`. Its figures and tables can be `\input`
+  into the group report; it needs `\input{figures/r1_style}` in the preamble.
+- Follow-up: retrain the two champions on Mateo's full training data (`origin/ALIF-Layer1`
+  `prepare_multicorpus.py`, `train_dense_online.py`; needs a CPU port of its CUDA-only augmenter).
 - Pedro reviews the LaTeX section `reports/latex/size_synapse/section.tex`: wording, which figures to
   keep, and the meter details for the method text.
 - Live microphone test of the newly deployed model (`pc_keyword_demo.py 10.43.0.1`).
