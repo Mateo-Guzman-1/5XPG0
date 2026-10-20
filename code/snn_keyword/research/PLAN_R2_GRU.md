@@ -250,6 +250,12 @@ Keep `last.pt` of each run (as Mateo did) in `research/results/R2/verifier/` (ab
 **Gate G2: stop and report to Pedro before writing the report.**
 
 ## 6. Phase C: mini report and record
+**Decision at G2 (Pedro, 2026-10-20):** the report shows **both Phase B results side by side**, as a trade-off between recall and verifier calls, with no single recommendation:
+- B under the call limit: 85.8 % live (mean 85.85 %), 1,908 calls/h;
+- B under the highest-recall rule: 87.8 % live, 3,044 calls/h.
+
+Phase A, A5 and Mateo's cascade are the comparison points. Energy is labelled by scenario: busy-polling (today's board) is the main number, and clock-gated is marked as a calculation.
+
 **Data and tools:**
 - Results in `results/R2/{A,B}/` and `results/R2/{designs,compliance}.csv`, produced by `r2_synthesis.py`.
 - Teammates' reference points: reuse `results/R1/references.json`.

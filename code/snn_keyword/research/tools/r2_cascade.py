@@ -326,6 +326,94 @@ def paired(a):
     print(json.dumps(out), flush=True)
 
 
+def sweep(cas, mode, t2, extra=()):
+    """Test operating curve at a fixed t2 (figures only): every t1 on 101 quantiles of the live keyword scores
+    (plus `extra`): live recall, other words, FA/h on the negatives and, for the cascade, verifier calls/h."""
+    c = cas.c
+    y = c['live_y']
+    hours = float(c['neg_seconds']) / 3600
+    live = np.array([s.max() for _, s in cas.traces('live', mode, t2)])
+    pos = live[y == 1]
+    cands = np.unique(np.r_[np.quantile(pos[pos > VC.NEG], np.linspace(0, 1, 101)).astype(np.int64), list(extra)])
+    neg = [(t[s >= cands[0]], s[s >= cands[0]]) for t, s in cas.traces('neg', mode, t2)]
+    prop = proposals(cas) if mode == 'cascade' else None
+    out = []
+    for t1 in cands:
+        other = float((live[y == 0] >= t1).mean())
+        if other > .02:
+            continue
+        out.append(dict(t1=int(t1), live_recall=round(float((pos >= t1).mean()), 4), live_other=round(other, 5),
+                        fa_per_hour=round(VC.fa_hour(neg, hours, t1), 3),
+                        calls_per_hour=round(float((len(prop) - np.searchsorted(prop, t1)) / hours), 1)
+                        if prop is not None else 0.))
+    return out
+
+
+def fa_sources(cas, mode, t1, t2):
+    """False accepts per hour on the negatives by source (robust_eval.source_of: Speech Commands word,
+    LibriSpeech, noise only) at fixed thresholds."""
+    import collections
+    hours = float(cas.c['neg_seconds']) / 3600
+    segs = [json.loads(s) for s in cas.c['neg_segments']]
+    counts = collections.Counter()
+    for (t, s), seg in zip(cas.traces('neg', mode, t2), segs):
+        for tt in VC.R.detections(t, s, t1):
+            counts[VC.R.source_of(tt, seg)] += 1
+    return {k: round(v / hours, 3) for k, v in counts.items()}
+
+
+def figdata(a):
+    """Figure data on test (thresholds all fixed on validation): operating curves of one representative
+    configuration per design, and false accepts by source for every cascade. -> results/R2/figdata_test.json"""
+    R2 = KWS / 'research/results/R2'
+    mscores = VC.DV / 'vscores_mateo_head_near_test.npz'
+    vs = lambda v: VC.DV / f'vscores_r2_s{v}_test.npz'
+    load = lambda p: json.loads(p.read_text())['cascade']
+    out = {'note': 'test split; curves are for figures only, every reported operating point was fixed on '
+                   'validation', 'curves': {}, 'fa_sources': {}}
+    # Curves: stage-1 seed 2 and fine-tuned verifier 1 sit at the design means (A5 84.4 %, B 85.9 / 87.3 %).
+    s, v = a.curve_seed, a.curve_verifier
+    c2 = {vr: dict(np.load(r2_file('test', s, vr))) for vr in VARIANTS}
+    r1 = {r['name']: r for r in __import__('csv').DictReader(open(R2.parent / 'R1/models.csv', encoding='utf-8'))
+          if r['config'] == 'h48_k64' and r['variant'] == 'ksdot_lut'}
+    s1 = int(r1[f'h48_k64_seed{a.stage1_seed}']['threshold'])
+    cas = VC.Cascade(dict(np.load(r2_file('test', a.stage1_seed, 'c'))), dict(np.load(mscores)), 1, a.verify_ms)
+    out['curves']['stage1_alone'] = {'stage1_seed': a.stage1_seed, 'variant': 'c (2 of 3, as R1)', 'chosen_t1': s1,
+                                     'points': sweep(cas, 'frame', None, [s1])}
+    a_t = load(R2 / f'A/h48_k64_seed{s}.json'); a5_t = load(R2 / f'A/budget2150/h48_k64_seed{s}.json')
+    cas = VC.Cascade(c2['m'], dict(np.load(mscores)), 1, a.verify_ms)
+    out['curves']['cascade_A'] = {'stage1_seed': s, 'verifier': 'Mateo (unchanged)', 't2': a_t['t2'],
+                                  'chosen': {'A': a_t['t1'], 'A5': a5_t['t1']},
+                                  'points': sweep(cas, 'cascade', a_t['t2'], [a_t['t1'], a5_t['t1']])}
+    b_t = load(R2 / f'B/v{v}/h48_k64_seed{s}.json'); bb_t = load(R2 / f'B/v{v}/budget2150/h48_k64_seed{s}.json')
+    assert b_t['t2'] == bb_t['t2'], 'both B points must share t2 to lie on one curve'
+    cas = VC.Cascade(c2['m'], dict(np.load(vs(v))), 1, a.verify_ms)
+    out['curves']['cascade_B'] = {'stage1_seed': s, 'verifier': f'fine-tuned seed {v}', 't2': b_t['t2'],
+                                  'chosen': {'B_recall': b_t['t1'], 'B_calls': bb_t['t1']},
+                                  'points': sweep(cas, 'cascade', b_t['t2'], [b_t['t1'], bb_t['t1']])}
+    cm = dict(np.load(VC.DV / 'cache_test_sheila.npz'))
+    cas = VC.Cascade(cm, dict(np.load(mscores)), 1, a.verify_ms)
+    out['curves']['mateo_cascade'] = {'verifier': 'Mateo', 't2': 1524, 'chosen': {'mateo': 3785},
+                                      'points': sweep(cas, 'cascade', 1524, [3785])}
+    print('curves', {k: len(x['points']) for k, x in out['curves'].items()}, flush=True)
+    out['fa_sources']['mateo_cascade'] = [dict(fa_sources(cas, 'cascade', 3785, 1524))]
+    del cm, cas
+    # False accepts by source for every cascade at its own validation thresholds.
+    for s in SEEDS:
+        c = dict(np.load(r2_file('test', s, 'm')))
+        configs = [('cascade_A', mscores, R2 / f'A/h48_k64_seed{s}.json'),
+                   ('cascade_A_calls2150', mscores, R2 / f'A/budget2150/h48_k64_seed{s}.json')] + \
+            [(d, vs(v), R2 / f'B/v{v}/{sub}h48_k64_seed{s}.json')
+             for v in SEEDS for d, sub in (('cascade_B', ''), ('cascade_B_calls2150', 'budget2150/'))]
+        for design, scores, path in configs:
+            blk = load(path)
+            src = fa_sources(VC.Cascade(c, dict(np.load(scores)), 1, a.verify_ms), 'cascade', blk['t1'], blk['t2'])
+            assert abs(sum(src.values()) - blk['fa_per_hour']) < 0.01, (design, s, src, blk['fa_per_hour'])
+            out['fa_sources'].setdefault(design, []).append(dict(src, stage1_seed=s))
+        print('fa sources, stage-1 seed', s, flush=True)
+    (R2 / 'figdata_test.json').write_text(json.dumps(out, indent=1))
+
+
 def main():
     import argparse
     sys.stdout.reconfigure(encoding='utf-8')
@@ -375,7 +463,14 @@ def main():
         pr.add_argument(f'--scores-{x}', type=Path, required=True)
         pr.add_argument(f'--t1-{x}', type=int, required=True)
         pr.add_argument(f'--t2-{x}', type=int, required=True)
+    fd = sub.add_parser('figdata')
+    fd.add_argument('--curve-seed', type=int, default=2, help='stage-1 seed of the cascade curves')
+    fd.add_argument('--curve-verifier', type=int, default=1, help='fine-tuned verifier of the B curve')
+    fd.add_argument('--stage1-seed', type=int, default=1, help='stage-1-alone curve (seed nearest the R1 mean)')
+    fd.add_argument('--verify-ms', type=float, default=107.3)
     a = p.parse_args()
+    if a.cmd == 'figdata':
+        return figdata(a)
     if a.cmd == 'paired':
         return paired(a)
     if a.cmd == 'cache':

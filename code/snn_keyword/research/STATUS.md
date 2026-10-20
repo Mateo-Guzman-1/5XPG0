@@ -18,9 +18,18 @@ size and synapse study for the report). All energy numbers are in [ENERGY.md](EN
 | S5 | Synthesis, choice, report section (LaTeX) | **done** 2026-10-17 (draft for review) | `results/S5/`, `reports/latex/size_synapse/` |
 | S6 | Sparse kdot (kxload/ksdot hardware) vs the deployed dense-kdot model | **done** 2026-10-17 | `results/S6/`, [S_energy_synapse.md](reports/S_energy_synapse.md) §S6 |
 | R1 | The S designs against the group requirements, with Mateo's test harness ([PLAN_R1.md](PLAN_R1.md)) | **done** 2026-10-19 | `results/R1/`, [R1_requirements.md](reports/R1_requirements.md), `reports/latex/requirements_eval/` |
-| R2 | Cascade: pruned H48 K64 first stage + Mateo's GRU verifier, then the verifier fine-tuned on our false proposals ([PLAN_R2_GRU.md](PLAN_R2_GRU.md)) | **Phase A done** 2026-10-19; gate G1 waiting for Pedro | `results/R2/`, `reports/latex/cascade_gru/` |
+| R2 | Cascade: pruned H48 K64 first stage + Mateo's GRU verifier, then the verifier fine-tuned on our false proposals ([PLAN_R2_GRU.md](PLAN_R2_GRU.md)) | **done** 2026-10-20 | `results/R2/`, [R2_cascade_gru.md](reports/R2_cascade_gru.md), `reports/latex/cascade_gru/` |
+| R3 | Clock gating: measured idle savings (clock scaling with the USB meter first, then BUFGCE gating) ([PLAN_R2_GRU.md](PLAN_R2_GRU.md) §7b) | **next**, to be planned in its own file | — |
 
-## R2 Phase A (2026-10-19, interim; gate G1 open)
+## R2 result: cascade with Mateo's GRU verifier (2026-10-19 to 2026-10-20)
+Full record: [reports/R2_cascade_gru.md](reports/R2_cascade_gru.md); LaTeX: `reports/latex/cascade_gru/main.pdf`.
+- **Both Phase B results meet all seven requirements** (Pedro's choice: shown side by side, no single recommendation):
+  - call limit (≤ 2,150 calls/h): 85.8 ± 0.8 % live, 1,908 calls/h;
+  - highest recall: 87.8 ± 1.0 % live, 3,044 calls/h.
+- **Cost:** 107.6 ms, 64.5 KiB, 162–178 ms latency, 0.367 W as built (Mateo 0.727 W); 0.110–0.119 W clock-gated (a calculation).
+- **Key finding:** the verifier does the detecting. Our stage 1 is a weak proposer: on test, Mateo's reaches 84 % with ≤ 120 verifier calls per hour, ours needs about 2,100. Fewer calls save energy only with an idle mode (R3).
+
+## R2 Phase A (2026-10-19)
 - **Gates:** G-A1 pass (`results/R2/gate_A1.json`). G-A2 pass: Mateo's cascade reproduced exactly on test (86.79 %, 1.424 FA/h, 0.07 %, stream 0.8786, 175 ms) and on validation (`results/R2/A/mateo_*.json`). Our caches have the same frames as his (`A/cache_check_*.json`).
 - **Selection** (`A/selection.json`): Mateo's rule (maximize live recall, ≤ 1.6 FA/h) drives t1 below zero. Our stage 1 then passes 57–85 % of all requests, and the cascade reaches the verifier's own ceiling (87.75 % on validation, the same as Mateo's cascade). Variants m and c tie on recall; m is chosen because it makes fewer calls.
 - **Test** (`A/h48_k64_seed*.json`, `designs.csv`): live 87.6 ± 0.3 %, 1.83 ± 0.17 FA/h, 0.10 % other words, latency 162 ms, worst compute 107.6 ms, memory 64.5 KiB. Every requirement passes. Cost: 10,244 ± 2,065 verifier calls per hour (Mateo: 2,222).
@@ -31,14 +40,14 @@ size and synapse study for the report). All energy numbers are in [ENERGY.md](EN
   - R2-H5 confirmed.
   - Next: Pedro decides on Phase B (could raise recall at the same number of calls).
 
-## R2 Phase B (2026-10-20, interim; gate G2 open)
+## R2 Phase B (2026-10-20)
 **Setup:**
 - Mateo's verifier fine-tuned with his recipe on our false proposals: 17,725 LibriSpeech windows mined by our 3 seeds (`B/mining.json`); 3 verifier seeds (`results/R2/verifier/`).
 - GPU: `.venv-rocm`, PyTorch 2.14.0+rocm10.1.0, MIOpen off (`B/gpu_smoke.json`); about 3 h for the 3 runs in parallel.
 - Note: Mateo's code keeps only the 4,218 TTS training clips whose words are in cmudict (out of 32,000).
 
 **Test, once** (9 cascades = 3 verifiers × 3 stage-1 seeds; thresholds from validation):
-- **Call limit (main rule):** live 85.9 ± 0.9 % (7 of 9 ≥ 85 %; A5: 84.4 %); 1.21 FA/h; 0.15 % other words (A5: 0.03 %); 1,908 calls/h.
+- **Call limit (main rule):** live 85.8 ± 0.8 % (mean 85.85 %; 7 of 9 ≥ 85 %; A5: 84.4 %); 1.21 FA/h; 0.15 % other words (A5: 0.03 %); 1,908 calls/h.
 - **Highest recall:** live 87.8 ± 1.0 %; 1.48 FA/h; 3,044 ± 984 calls/h (A: 10,244, −70 %).
 
 **Paired with Phase A** (`B/paired_vs_A.txt`): under the call limit, B gains 32 clips and loses 5 over the 9 cascades; no single cascade is significant (p ≥ 0.06).
@@ -284,7 +293,15 @@ For reference, the previous "yes" release: test F1 0.8761 (seeds 0.867 ± 0.022)
   three seeds it may be chance.
 
 ## Next step
-The experiments of part 2 and R1 are complete. Open:
+R2 is complete (2026-10-20). Next:
+- **R3, clock gating** (PLAN_R2_GRU.md §7b): write its plan file first. Start with clock scaling from Python and the
+  USB meter (no RTL change), then BUFGCE gating of the core and BRAM clocks.
+- Pedro reviews the R2 report `reports/latex/cascade_gru/main.pdf`. Its figures and tables can be `\input` into the
+  group report (needs `\input{figures/r1_style}`; checked inside a copy of the group preamble).
+- Later: the hardware merge (PLAN_R2_GRU.md §7: verifier firmware, 10 ms frames, Alex's KX opcodes clash with
+  `ksdot`), then the first board run of a cascade.
+
+Still open from before R2:
 - Pedro reviews the R1 report `reports/latex/requirements_eval/main.pdf`. Its figures and tables can be `\input`
   into the group report; it needs `\input{figures/r1_style}` in the preamble.
 - Follow-up: retrain the two champions on Mateo's full training data (`origin/ALIF-Layer1`
