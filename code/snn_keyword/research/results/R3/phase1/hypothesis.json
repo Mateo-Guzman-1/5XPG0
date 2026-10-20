@@ -1,0 +1,285 @@
+{
+  "experiment": "R3",
+  "plan": "research/PLAN_R3_GATING.md",
+  "written_before_any_r3_measurement": true,
+  "base_tag": "r3-base",
+  "inputs": {
+    "designs_csv": "results/R2/designs.csv",
+    "r1_models": "results/R1/models.csv",
+    "power": "results/S6/power.json (energy_model.load_power()[\"ksdot\"])",
+    "fabric": "results/S6/fabric.json",
+    "anchor": "results/S6/board/h48_k64_seed2.json"
+  },
+  "power_terms_W": {
+    "pl_dyn": 0.282,
+    "pl_static": 0.085,
+    "core_dyn": 0.273,
+    "infra_dyn": 0.009,
+    "bram": 0.25,
+    "clocks": 0.011,
+    "signals": 0.009,
+    "slice_logic": 0.006,
+    "dsp": 0.005,
+    "u_cpu": 0.01,
+    "u_kdot": 0.006,
+    "u_poisson": 0.005
+  },
+  "p_idle_W": 0.094,
+  "p_busy_W": 0.367,
+  "designs": {
+    "B1": {
+      "design": "cascade_B",
+      "calls_h": 3044.1555555555556,
+      "calls_h_sd": 984.22136243722,
+      "busy_share_r2": 0.089489717345679,
+      "p_gated_r2": 0.11880438542737037,
+      "latency_ms_r2": 170.5792866666667,
+      "t_max_ms_r2": 107.64595333333334,
+      "memory_kib": 64.453125,
+      "live_recall": 0.878388888888889,
+      "rep": {
+        "file": "results/R2/B/v1/h48_k64_seed2.json",
+        "t1": -914,
+        "t2": 1402,
+        "calls_h": 2752.5,
+        "live_recall": 0.8726,
+        "latency_median_s": 0.172
+      }
+    },
+    "B2": {
+      "design": "cascade_B_calls2150",
+      "calls_h": 1908.1666666666667,
+      "calls_h_sd": 200.16800443627355,
+      "busy_share_r2": 0.056094799537037034,
+      "p_gated_r2": 0.10968757286561111,
+      "latency_ms_r2": 177.91262,
+      "t_max_ms_r2": 107.64595333333334,
+      "memory_kib": 64.453125,
+      "live_recall": 0.8584888888888887,
+      "rep": {
+        "file": "results/R2/B/v1/budget2150/h48_k64_seed2.json",
+        "t1": -596,
+        "t2": 1402,
+        "calls_h": 2128.8,
+        "live_recall": 0.8585,
+        "latency_median_s": 0.174
+      }
+    }
+  },
+  "stage1": {
+    "model": "results/S3/models/h48_k64_seed2.npz",
+    "cycles_mean": 34165.6,
+    "t_max_ms": 0.34617
+  },
+  "model": "E_h = 3600 P_idle + 14400 (P_S1 - P_idle) C_S1/f + N_V (P_V - P_idle) C_V/f; P_avg = E_h/3600; saving = 1 - P_avg/0.367",
+  "hypotheses": {
+    "H1": {
+      "prediction": "T_V about 21.9 M cycles (19-25 M) = 190-250 ms at READ_WAIT 8; 10.3-11.2 M at READ_WAIT 1; worst compute about 219 ms > 200 ms (predicted fail), < 250 ms",
+      "derivation": {
+        "c_v_read_wait1": 10730000.0,
+        "cpu_reads_per_call_estimate": 1600000.0,
+        "extra_cycles_per_read": 7,
+        "c_v_read_wait8": 21930000.0,
+        "t_v_read_wait8_ms": 219.3,
+        "stage1_t_max_ms": 0.34617,
+        "worst_compute_ms": 219.65
+      },
+      "accept": {
+        "c_v_read_wait8": [
+          19000000.0,
+          25000000.0
+        ],
+        "c_v_read_wait1": [
+          10300000.0,
+          11200000.0
+        ]
+      },
+      "requirement_ms": 200,
+      "hop_ms": 250,
+      "test": "MB[21] in xsim (opcode 6)"
+    },
+    "H2": {
+      "prediction": "100 % bit-exact on both fabrics; the F2 anchor equals the board cycles; compute cycles identical with POWER_OPT 0 and 1",
+      "anchor": {
+        "image": "keyword_ksdot_lut.bin",
+        "sha256": "d06c685c117cbca97955cf85c31b4c77ad5d865b24e3943b2394bc3665d0a2a2",
+        "cycles_min": 33785,
+        "cycles_mean": 34165.6,
+        "cycles_max": 34617,
+        "vectors": 40,
+        "repeats": 3
+      },
+      "test": "xsim"
+    },
+    "H3": {
+      "prediction": "P_idle (gated clock + read enables) about 0.094 W",
+      "accept_W": [
+        0.085,
+        0.105
+      ],
+      "derivation": {
+        "p_pl_static": 0.08499999999999999,
+        "p_infra_dyn": 0.009000000000000008,
+        "p_idle": 0.094
+      },
+      "test": "Vivado state idle"
+    },
+    "H4": {
+      "prediction": "(a) R2 model B1 0.119 W (-67.6 %, 428 J/h), B2 0.110 W (-70.1 %, 395 J/h); (b) R3 central prior B1 0.109 W (-70 %), B2 0.103 W (-72 %); (c) pessimistic B1 0.145 W, B2 0.126 W",
+      "rule": "confirmed if B1 <= 0.150 W and B2 <= 0.130 W; refuted if either saving < 50 %",
+      "confirm_W": {
+        "B1": 0.15,
+        "B2": 0.13
+      },
+      "refute_saving_below": 0.5,
+      "busy_W": 0.367,
+      "central_prior": {
+        "dp_v_W": 0.079,
+        "source": "plan prior (PLAN_R3_GATING.md 1.6/2), not a fit",
+        "cross_check": {
+          "note": "clocks + signals + slice logic + DSP of the S6 report, plus BRAM x port-B duty (kdot cycles + one enabled cycle per CPU read)",
+          "kdot": {
+            "macs": 3652800,
+            "kdot_cycles": 2739600,
+            "kdot_instructions": 41475
+          },
+          "port_b_duty": 0.1979,
+          "dp_v_W": 0.0805
+        },
+        "c_s1_awake_cycles": 60000.0,
+        "c_v_cycles": 21930000.0
+      },
+      "designs": {
+        "B1": {
+          "a": {
+            "p_avg_W": 0.1188,
+            "saving": 0.6763,
+            "e_h_J": 427.7,
+            "awake_share": 0.0909,
+            "r2_designs_csv_p_avg_gated_W": 0.1188
+          },
+          "b": {
+            "p_avg_W": 0.1088,
+            "saving": 0.7034,
+            "e_h_J": 391.8,
+            "awake_share": 0.1878
+          },
+          "c": {
+            "p_avg_W": 0.1453,
+            "saving": 0.6041,
+            "e_h_J": 523.0,
+            "awake_share": 0.1878
+          },
+          "calls_h": 3044.1555555555556,
+          "calls_h_sd": 984.22136243722
+        },
+        "B2": {
+          "a": {
+            "p_avg_W": 0.1097,
+            "saving": 0.7011,
+            "e_h_J": 394.9,
+            "awake_share": 0.0575,
+            "r2_designs_csv_p_avg_gated_W": 0.1097
+          },
+          "b": {
+            "p_avg_W": 0.1034,
+            "saving": 0.7183,
+            "e_h_J": 372.1,
+            "awake_share": 0.1186
+          },
+          "c": {
+            "p_avg_W": 0.1264,
+            "saving": 0.6556,
+            "e_h_J": 455.0,
+            "awake_share": 0.1186
+          },
+          "calls_h": 1908.1666666666667,
+          "calls_h_sd": 200.16800443627355
+        }
+      }
+    },
+    "H5": {
+      "prediction": "gating the CPU clock alone saves <= 0.03 W (<= 8 %); the read enables give >= 85 % of the saving",
+      "derivation": {
+        "gated_instances_W": 0.021,
+        "bound_W": 0.03,
+        "bound_share_of_busy": 0.0817,
+        "total_saving_W": 0.273,
+        "read_enable_share_at_bound": 0.8901
+      },
+      "test": "Vivado idle_gate_only vs idle"
+    },
+    "H6": {
+      "prediction": "awake cycles per request without a verifier call 40-80 k; CPU asleep >= 79 % (B1), >= 86 % (B2)",
+      "accept": {
+        "awake_cycles": [
+          40000.0,
+          80000.0
+        ],
+        "asleep_min": {
+          "B1": 0.79,
+          "B2": 0.86
+        }
+      },
+      "derivation": {
+        "note": "bound: T_V 250 ms (top of H1) and 80 k cycles per request, mean calls/h; B1 0.785 is rounded to 79 % in the plan",
+        "asleep": {
+          "B1": {
+            "bound": 0.7854,
+            "central": 0.8122
+          },
+          "B2": {
+            "bound": 0.8643,
+            "central": 0.8814
+          }
+        },
+        "stage1_cycles_mean": 34165.6
+      },
+      "test": "xsim counters"
+    },
+    "H7": {
+      "prediction": "cost <= +150 LUT, <= +120 FF, BUFGCTRL 1 -> 2, 64 BRAM, 8 DSP, WNS >= 0",
+      "baseline_S6": {
+        "luts": 3243,
+        "registers": 2831,
+        "bram36": 64,
+        "dsp": 8,
+        "bufgctrl": 1,
+        "wns_ns": 0.545
+      },
+      "limits": {
+        "luts": 3393,
+        "registers": 2951,
+        "bufgctrl": 2,
+        "bram36": 64,
+        "dsp": 8,
+        "wns_ns_min": 0.0
+      },
+      "test": "Vivado reports"
+    },
+    "H8": {
+      "prediction": "POWER_OPT = 0 is equivalent to r3-base; the release firmware runs bit-exact with identical cycles on the R3 fabric; --compare deploy identical; POWER_OPT = 0 utilization equal to S6",
+      "test": "tb_r3_equiv.sv, release regression, Vivado POWER_OPT = 0 build"
+    },
+    "H9": {
+      "prediction": "only if the ram_decomp variant is built: verifier-state BRAM power -80 % or more; about +1,000 LUT",
+      "test": "Vivado"
+    }
+  },
+  "latency": {
+    "prediction": "word end to decision about 275-290 ms, passes 500 ms",
+    "formula": "R2 latency - 107.3 ms + T_V,max",
+    "designs": {
+      "B1": {
+        "r2_latency_ms": 170.6,
+        "r3_latency_ms": 282.6,
+        "r3_latency_rep_ms": 286.2
+      },
+      "B2": {
+        "r2_latency_ms": 177.9,
+        "r3_latency_ms": 289.9,
+        "r3_latency_rep_ms": 288.2
+      }
+    }
+  }
+}

@@ -19,7 +19,7 @@ size and synapse study for the report). All energy numbers are in [ENERGY.md](EN
 | S6 | Sparse kdot (kxload/ksdot hardware) vs the deployed dense-kdot model | **done** 2026-10-17 | `results/S6/`, [S_energy_synapse.md](reports/S_energy_synapse.md) §S6 |
 | R1 | The S designs against the group requirements, with Mateo's test harness ([PLAN_R1.md](PLAN_R1.md)) | **done** 2026-10-19 | `results/R1/`, [R1_requirements.md](reports/R1_requirements.md), `reports/latex/requirements_eval/` |
 | R2 | Cascade: pruned H48 K64 first stage + Mateo's GRU verifier, then the verifier fine-tuned on our false proposals ([PLAN_R2_GRU.md](PLAN_R2_GRU.md)) | **done** 2026-10-20 | `results/R2/`, [R2_cascade_gru.md](reports/R2_cascade_gru.md), `reports/latex/cascade_gru/` |
-| R3 | Clock gating + BRAM read enables for the B1/B2 cascades on our fabric (cascade firmware, xsim bit-exact, bitstream, per-state Vivado power; board test later) ([PLAN_R3_GATING.md](PLAN_R3_GATING.md)) | **planned** 2026-10-20 (run in a new session) | `results/R3/`, `reports/latex/clock_gating_plan/`, `reports/latex/clock_gating_results/` |
+| R3 | Clock gating + BRAM read enables for the B1/B2 cascades on our fabric (cascade firmware, xsim bit-exact, bitstream, per-state Vivado power; board test later) ([PLAN_R3_GATING.md](PLAN_R3_GATING.md)) | **in progress** since 2026-10-20 (Phase 1; hypotheses pre-registered in `results/R3/phase1/hypothesis.json`, tag `r3-base`) | `results/R3/`, `reports/latex/clock_gating_plan/`, `reports/latex/clock_gating_results/` |
 
 ## R2 result: cascade with Mateo's GRU verifier (2026-10-19 to 2026-10-20)
 Full record: [reports/R2_cascade_gru.md](reports/R2_cascade_gru.md); LaTeX: `reports/latex/cascade_gru/main.pdf`.
