@@ -21,7 +21,8 @@
 // LED register is read-only from the PS (the RISC-V firmware owns the LEDs).
 
 module ps_if #(
-    parameter [31:0] CLK_HZ = 32'd100_000_000
+    parameter [31:0] CLK_HZ = 32'd100_000_000,
+    parameter [31:0] ABI    = 32'h0002_0003   // syscon 0x1C; spike_top gives 0x0002_0007 with POWER_OPT = 1
 ) (
     input  wire        aclk,
     input  wire        aresetn,
@@ -47,6 +48,7 @@ module ps_if #(
 
     // BRAM port A (word address) — driven only by this module
     output reg         bram_we,
+    output wire        bram_re,      // 1 in the cycle the BRAM must read bram_addr (read enable, POWER_OPT = 1)
     output reg  [15:0] bram_addr,
     output reg  [31:0] bram_wdata,
     output reg  [3:0]  bram_be,
@@ -94,6 +96,9 @@ module ps_if #(
     // Read channel accept (blocked for one cycle while a write fires, so the
     // write and the read never fight over bram_addr in the same cycle)
     reg [1:0] rstate;         // 0 idle, 1 bram reading, 2 capture, 3 present
+    // Port A must read only in state 1 (bram_addr holds the read address there); the BRAM output
+    // register keeps the word, which is captured in state 2.
+    assign bram_re = (rstate == 2'd1);
     assign s_axil_arready = (rstate == 2'd0) && !s_axil_rvalid && !wr_fire;
     wire ar_accept = s_axil_arvalid && s_axil_arready;
 
@@ -193,7 +198,7 @@ module ps_if #(
                 5'd4:  rd_sys_q <= CLK_HZ;                             // CLK_HZ
                 5'd5:  rd_sys_q <= 32'h534B_454C;                      // MAGIC "SKEL"
                 5'd6:  rd_sys_q <= {22'h0, led};                       // LED
-                5'd7:  rd_sys_q <= 32'h0002_0003;                    // keyword pulse ABI + bit0 kdot, bit1 sparse kdot
+                5'd7:  rd_sys_q <= ABI;                              // keyword pulse ABI + bit0 kdot, bit1 sparse kdot, bit2 sleep/gating
                 default: rd_sys_q <= 32'h0;
                 endcase
                 s_axil_rresp <= (sel_bram_addr(s_axil_araddr) ||

@@ -1,0 +1,27 @@
+
+****** xsim v2026.1 (64-bit)
+  **** SW Build 6511674 on Tue Jun 16 11:02:23 MDT 2026
+  **** IP Build 6504888 on Tue Jun 09 09:05:25 MDT 2026
+  **** SharedData Build 6501428 on Mon Jun 08 17:34:18 MDT 2026
+  **** Start of session at: Tue Oct 20 20:01:50 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source xsim.dir/snap/xsim_script.tcl
+# xsim {snap} -testplusarg fw=fw.hex -testplusarg req=req.req -testplusarg dump=40:42 -autoloadwcfg -runall
+Time resolution is 1 ps
+run -all
+CONFIG POWER_OPT=1 READ_WAIT=1
+READY magic=4b574331 after 118000 cycles
+DUMP MB[40]=00000000
+DUMP MB[41]=00000000
+DUMP MB[42]=00000000
+REQ n=0 op=6 len=3600 flags=0 seq=1 svc=10853273 pb_re=4582149 pb_we=54882 pa_re=10810 pa_we=0 clk_on=10853271 sleep=1 tb_asleep=3933 tb_sleeps=1 race=3932 mb=00000000,00000000,00000000,00a3d0dd,00000000,00000000,4b574331,fffffc6e,00000300,00000018,00000096,00000019,00000000,00000000,00000000,00a3d0dd,00000000,00000000,00000000,0000057a,ffffd67c,0000004a,ffff6516,0000003c,a64ec772,00000001,0000095d,0000004a,00000f5d,00000001
+SUM requests=1 cyc=10979496 pb_re=4602705 pb_we=60023 pa_re=10962 pa_we=903 clk_on=10971484 sleep=8012 sleeps=2
+ERRORS=0
+DONE
+$finish called at time : 109795365 ns : File "C:/Users/pedro/AppData/Local/Temp/5xpg0_r3__xv61ett/tb_r3_soc.sv" Line 342
+run: Time (s): cpu = 00:00:00 ; elapsed = 00:03:20 . Memory (MB): peak = 227.355 ; gain = 0.000
+exit
+INFO: xsimkernel Simulation Memory Usage: 22952 KB (Peak: 22952 KB), Simulation CPU Usage: 112155 ms
+INFO: [Common 17-206] Exiting xsim at Tue Oct 20 20:05:12 2026...

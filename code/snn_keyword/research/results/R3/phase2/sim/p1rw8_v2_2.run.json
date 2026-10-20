@@ -1,0 +1,20 @@
+{
+  "name": "p1rw8_v2_2",
+  "firmware": "code/snn_keyword/build/r3_fw/b1/cascade.bin",
+  "requests": "code/snn_keyword/build/r3_sim/phase2/v2_2.req",
+  "generics": [
+    "POWER_OPT=1",
+    "READ_WAIT=8"
+  ],
+  "equiv": false,
+  "plusargs": [],
+  "work": null,
+  "seconds": {
+    "xvlog": 4.7,
+    "xelab": 5.6,
+    "xsim": 199.2
+  },
+  "simulated_cycles": 21801597,
+  "done": true,
+  "cycles_per_second": 109469
+}

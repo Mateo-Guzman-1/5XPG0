@@ -97,11 +97,26 @@ def build(design, q, out_root=OUT_ROOT):
     return report
 
 
+def build_sleep_test(out_root=OUT_ROOT):
+    """firmware/r3_sleep_test.c (no model) -> <out-root>/sleep_test/sleep_test.{elf,bin,map}."""
+    out = Path(out_root).resolve() / 'sleep_test'
+    out.mkdir(parents=True, exist_ok=True)
+    rel = os.path.relpath(out, FIRMWARE).replace('\\', '/')
+    run(CROSS + 'gcc', *FLAGS, '-I.', '-T', 'linker.ld', f'-Wl,--build-id=none,--no-warn-rwx-segments,-Map={rel}/sleep_test.map',
+        '../../pynqz2_riscv_flow/firmware/start.S', 'r3_sleep_test.c', 'runtime.c', '-o', f'{rel}/sleep_test.elf', '-lgcc')
+    run(CROSS + 'objcopy', '-O', 'binary', f'{rel}/sleep_test.elf', f'{rel}/sleep_test.bin')
+    return dict(out=shown(out), sha256=sha256(out / 'sleep_test.bin'))
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--designs', nargs='+', choices=sorted(DESIGNS), default=sorted(DESIGNS))
     p.add_argument('--out-root', type=Path, default=OUT_ROOT)
+    p.add_argument('--sleep-test', action='store_true', help='build firmware/r3_sleep_test.c only')
     a = p.parse_args()
+    if a.sleep_test:
+        print(json.dumps(build_sleep_test(a.out_root), indent=1))
+        return
     q = verifier_export.load_quantized(VERIFIER)
     reports = [build(d, q, a.out_root) for d in a.designs]
     print(json.dumps([{k: r[k] for k in ('design', 't1', 't2', 'sha256', 'bin_bytes', 'text_bytes', 'f1_memory')}

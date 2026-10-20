@@ -1,0 +1,22 @@
+{
+  "name": "sleep_p1rw8",
+  "firmware": "code/snn_keyword/build/r3_fw/sleep_test/sleep_test.bin",
+  "requests": "code/snn_keyword/build/r3_sim/phase2/sleep.req",
+  "generics": [
+    "POWER_OPT=1",
+    "READ_WAIT=8"
+  ],
+  "equiv": false,
+  "plusargs": [
+    "dump=40:42"
+  ],
+  "work": null,
+  "seconds": {
+    "xvlog": 1.3,
+    "xelab": 1.8,
+    "xsim": 2.4
+  },
+  "simulated_cycles": 54001,
+  "done": true,
+  "cycles_per_second": 22533
+}

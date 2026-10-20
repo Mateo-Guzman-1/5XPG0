@@ -1,0 +1,20 @@
+{
+  "name": "eq_rel",
+  "firmware": "code/snn_keyword/deploy/keyword_kdot.bin",
+  "requests": "code/snn_keyword/build/r3_sim/phase2/rel.req",
+  "generics": [
+    "POWER_OPT=0",
+    "READ_WAIT=8"
+  ],
+  "equiv": true,
+  "plusargs": [],
+  "work": null,
+  "seconds": {
+    "xvlog": 4.7,
+    "xelab": 5.7,
+    "xsim": 55.3
+  },
+  "simulated_cycles": 2549696,
+  "done": true,
+  "cycles_per_second": 46145
+}

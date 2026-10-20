@@ -1,0 +1,20 @@
+{
+  "name": "aw_p1rw1_v3b",
+  "firmware": "code/snn_keyword/build/r3_fw/b1/cascade.bin",
+  "requests": "code/snn_keyword/build/r3_sim/phase2/v3b.req",
+  "generics": [
+    "POWER_OPT=1",
+    "READ_WAIT=1"
+  ],
+  "equiv": false,
+  "plusargs": [],
+  "work": null,
+  "seconds": {
+    "xvlog": 1.5,
+    "xelab": 2.2,
+    "xsim": 175.1
+  },
+  "simulated_cycles": 22694005,
+  "done": true,
+  "cycles_per_second": 129597
+}

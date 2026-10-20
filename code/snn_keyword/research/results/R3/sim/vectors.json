@@ -1,0 +1,75 @@
+{
+  "v3a": {
+    "set": "v3a",
+    "design": "B1",
+    "selection": {
+      "group": "live",
+      "item": 3,
+      "rule": "B1: reach in 2 consecutive requests, k-1 run, 2 head hits < 100 frames, partial last request (fewest verifier runs)",
+      "frames": 220
+    },
+    "verifier_runs": 3,
+    "detections": 1,
+    "requests": 10
+  },
+  "v3b": {
+    "set": "v3b",
+    "design": "B1",
+    "selection": {
+      "group": "stream",
+      "first_request": 3,
+      "requests": 40,
+      "seconds": [
+        0.75,
+        10.75
+      ],
+      "rule": "B1: 40 requests > 3 s from every keyword mark, exactly one reach (not first or last)"
+    },
+    "verifier_runs": 2,
+    "detections": 0,
+    "requests": 41
+  },
+  "v4b1": {
+    "set": "v4b1",
+    "design": "B1",
+    "selection": {
+      "group": "live",
+      "item": 43,
+      "rule": "a margin in [t1(B1), t1(B2)) so that B1 runs a request B2 does not; B2 detects once (fewest B1 verifier runs)",
+      "frames": 219
+    },
+    "verifier_runs": 3,
+    "detections": 1,
+    "requests": 10
+  },
+  "v4b2": {
+    "set": "v4b2",
+    "design": "B2",
+    "selection": {
+      "group": "live",
+      "item": 43,
+      "rule": "a margin in [t1(B1), t1(B2)) so that B1 runs a request B2 does not; B2 detects once (fewest B1 verifier runs)",
+      "frames": 219
+    },
+    "verifier_runs": 2,
+    "detections": 1,
+    "requests": 10
+  },
+  "v5s1": {
+    "set": "v5s1",
+    "design": "B1",
+    "selection": {
+      "group": "stream",
+      "first_request": 3,
+      "requests": 40,
+      "seconds": [
+        0.75,
+        10.75
+      ],
+      "rule": "B1: 40 requests > 3 s from every keyword mark, exactly one reach (not first or last)"
+    },
+    "verifier_runs": 0,
+    "detections": 0,
+    "requests": 13
+  }
+}

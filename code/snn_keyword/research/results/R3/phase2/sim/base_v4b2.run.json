@@ -1,0 +1,15 @@
+{
+  "name": "base_v4b2",
+  "firmware": "code/snn_keyword/build/r3_fw/b2/cascade.bin",
+  "requests": "code/snn_keyword/build/r3_sim/phase2/v4b2.req",
+  "generics": [],
+  "work": null,
+  "seconds": {
+    "xvlog": 2.5,
+    "xelab": 3.7,
+    "xsim": 273.8
+  },
+  "simulated_cycles": 43019942,
+  "done": true,
+  "cycles_per_second": 157106
+}

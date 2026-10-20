@@ -1,0 +1,20 @@
+{
+  "name": "p1rw8_rel",
+  "firmware": "code/snn_keyword/deploy/keyword_kdot.bin",
+  "requests": "code/snn_keyword/build/r3_sim/phase2/rel.req",
+  "generics": [
+    "POWER_OPT=1",
+    "READ_WAIT=8"
+  ],
+  "equiv": false,
+  "plusargs": [],
+  "work": null,
+  "seconds": {
+    "xvlog": 6.1,
+    "xelab": 10.5,
+    "xsim": 60.2
+  },
+  "simulated_cycles": 2551704,
+  "done": true,
+  "cycles_per_second": 42382
+}

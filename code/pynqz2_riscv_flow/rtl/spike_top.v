@@ -8,7 +8,13 @@
 // Power-on reset: por_cnt is released 16 clocks after configuration, so the
 // CPU stays in reset until the PS loads the firmware and clears CTRL bit0.
 
-module spike_top (
+// Parameters (research R3, code/snn_keyword/research/PLAN_R3_GATING.md; set as Vivado generics, default =
+// the design as before): POWER_OPT = 1 adds CPU sleep, the gated CPU clock and BRAM read enables (ABI
+// 0x0002_0007); READ_WAIT = CPU read latency in clocks (spike_soc.v).
+module spike_top #(
+    parameter integer POWER_OPT = 0,
+    parameter integer READ_WAIT = 8
+) (
     inout wire [14:0] DDR_addr,
     inout wire [2:0] DDR_ba,
     inout wire DDR_cas_n, DDR_ck_n, DDR_ck_p, DDR_cke, DDR_cs_n,
@@ -87,6 +93,7 @@ module spike_top (
     // ------------------------------------------------------------------
     wire        core_rst;        // 1 = CPU held in reset
     wire        bram_we;
+    wire        bram_re;
     wire [15:0] bram_addr;
     wire [31:0] bram_wdata;
     wire [3:0]  bram_be;
@@ -97,7 +104,8 @@ module spike_top (
     wire [9:0]  led_o;
 
     ps_if #(
-        .CLK_HZ (32'd100_000_000)
+        .CLK_HZ (32'd100_000_000),
+        .ABI    (POWER_OPT != 0 ? 32'h0002_0007 : 32'h0002_0003)
     ) u_ps_if (
         .aclk            (fclk),
         .aresetn         (aresetn),
@@ -119,6 +127,7 @@ module spike_top (
         .s_axil_rvalid   (m00_rvalid),
         .s_axil_rready   (m00_rready),
         .bram_we         (bram_we),
+        .bram_re         (bram_re),
         .bram_addr       (bram_addr),
         .bram_wdata      (bram_wdata),
         .bram_be         (bram_be),
@@ -135,11 +144,14 @@ module spike_top (
     // RISC-V subsystem
     // ------------------------------------------------------------------
     spike_soc #(
-        .MEM_WORDS (65536)     // 256 KB
+        .MEM_WORDS (65536),    // 256 KB
+        .POWER_OPT (POWER_OPT),
+        .READ_WAIT (READ_WAIT)
     ) u_soc (
         .clk         (fclk),
         .core_rst_n  (~core_rst),
         .pa_we       (bram_we),
+        .pa_re       (bram_re),
         .pa_addr     (bram_addr),
         .pa_wdata    (bram_wdata),
         .pa_be       (bram_be),

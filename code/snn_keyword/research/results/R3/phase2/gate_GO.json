@@ -1,0 +1,25 @@
+{
+  "cache": "cache_test_sheila_r2_2_m.npz",
+  "vscores": "vscores_r2_s1_test.npz",
+  "designs": {
+    "B1": {
+      "t1": -914,
+      "t2": 1402,
+      "live_recall": 0.8726,
+      "live_recall_r2": 0.8726,
+      "calls_per_hour": 2752.5,
+      "calls_per_hour_r2": 2752.5,
+      "equal": true
+    },
+    "B2": {
+      "t1": -596,
+      "t2": 1402,
+      "live_recall": 0.8585,
+      "live_recall_r2": 0.8585,
+      "calls_per_hour": 2128.8,
+      "calls_per_hour_r2": 2128.8,
+      "equal": true
+    }
+  },
+  "passed": true
+}
