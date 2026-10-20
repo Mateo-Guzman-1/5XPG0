@@ -6,6 +6,19 @@
 *Data:* `results/R2/`
 *LaTeX report:* `reports/latex/cascade_gru/` (`main.pdf`; every figure and table is its own `.tex` file for the group report)
 
+## Design codes (used in the LaTeX report, which names no people)
+| Code | Design | Names used in this record and in the result files |
+|---|---|---|
+| W0 | window SNN alone (our pruned H48 K64) | "stage 1 alone (R1)", `stage1_R1` |
+| S0 | streaming SNN alone | "Mateo's stage 1", `mateo_stage1` |
+| S1 | streaming SNN + original GRU verifier | "Mateo's cascade", `mateo_cascade` |
+| A1 | window SNN + original verifier, highest-recall rule | "A", `cascade_A` |
+| A2 | window SNN + original verifier, ≤ 2,150 calls/h | "A5", `cascade_A_calls2150` |
+| B1 | window SNN + fine-tuned verifier, highest-recall rule | "B, highest recall", `cascade_B` |
+| B2 | window SNN + fine-tuned verifier, ≤ 2,150 calls/h | "B, call limit", `cascade_B_calls2150` |
+
+The number gives the threshold rule: 0 no verifier, 1 highest live recall, 2 at most 2,150 verifier calls per hour. In the report, Alex's work appears as "the parallel-processing design" and Mateo's as "the streaming design".
+
 ## Summary
 | | |
 |---|---|
