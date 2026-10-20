@@ -1,0 +1,11 @@
+== synth: 64 blocks
+  mem_reg_0_0_0 LOWER ENARDEN <- VCC INIT= inputs: 
+  mem_reg_0_0_0 LOWER ENBWREN <- VCC INIT= inputs: 
+  mem_reg_0_1_0 UPPER ENARDEN <- VCC INIT= inputs: 
+  mem_reg_0_1_0 UPPER ENBWREN <- VCC INIT= inputs: 
+== opt: 64 blocks
+  mem_reg_0_0_0 LOWER ENARDEN <- LUT1 INIT=2'h1 inputs: u_kdot_n_89
+  mem_reg_0_0_0 LOWER ENBWREN <- LUT1 INIT=2'h1 inputs: {pa_addr[15]}
+  mem_reg_0_1_0 UPPER ENARDEN <- VCC INIT= inputs: 
+  mem_reg_0_1_0 UPPER ENBWREN <- VCC INIT= inputs: 
+utilization: 3118 LUTs

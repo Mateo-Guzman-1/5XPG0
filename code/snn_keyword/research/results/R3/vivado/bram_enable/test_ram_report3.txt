@@ -1,0 +1,4 @@
+== ram_be2: 64 blocks FFs 66 LUTs 94
+  mem_reg_0_0_0 LOWER RA=1 WMODE=READ_FIRST
+  ENARDEN net <const1> <- VCC  
+  ENBWREN net <const1> <- VCC  

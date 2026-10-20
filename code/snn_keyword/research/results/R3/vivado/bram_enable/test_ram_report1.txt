@@ -1,0 +1,12 @@
+== AW=16: 64 blocks, LOWER RA=1
+  mem_reg_0_0 LOWER ENARDEN <- LUT2 4'hE b_we b_re
+  mem_reg_0_0 LOWER ENBWREN <- LUT2 4'hE a_we a_re
+  mem_reg_0_1 LOWER ENARDEN <- LUT2 4'hE b_we b_re
+  mem_reg_0_1 LOWER ENBWREN <- LUT2 4'hE a_we a_re
+  FFs: 0 LUTs: 6
+== AW=14: 16 blocks, NONE RA=2
+  mem_reg_0 NONE ENARDEN <- LUT2 4'hE b_we b_re
+  mem_reg_0 NONE ENBWREN <- LUT2 4'hE a_we a_re
+  mem_reg_1 NONE ENARDEN <- LUT2 4'hE b_we b_re
+  mem_reg_1 NONE ENBWREN <- LUT2 4'hE a_we a_re
+  FFs: 0 LUTs: 2

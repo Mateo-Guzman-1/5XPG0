@@ -1,0 +1,7 @@
+== ram_be2_dec: 64 blocks FFs 94 LUTs 1944
+  mem_reg_bram_0 EXT=NONE RA=36 WA=36
+  ENARDEN net mem_reg_bram_0_i_1_n_0 <- LUT6 64'h0000000000000001 {b_addr[11]} {b_addr[10]} {b_addr[14]} {b_addr[15]} {b_addr[12]} {b_addr[13]}
+  ENBWREN net mem_reg_bram_0_i_2_n_0 <- LUT6 64'h0000000000000001 {a_addr[11]} {a_addr[10]} {a_addr[14]} {a_addr[15]} {a_addr[12]} {a_addr[13]}
+  mem_reg_bram_1 EXT=NONE RA=36 WA=36
+  ENARDEN net mem_reg_bram_1_i_1_n_0 <- LUT6 64'h0000000000000002 {b_addr[10]} {b_addr[11]} {b_addr[14]} {b_addr[15]} {b_addr[12]} {b_addr[13]}
+  ENBWREN net mem_reg_bram_1_i_2_n_0 <- LUT6 64'h0000000000000002 {a_addr[10]} {a_addr[11]} {a_addr[14]} {a_addr[15]} {a_addr[12]} {a_addr[13]}

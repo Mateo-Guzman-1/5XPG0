@@ -1,0 +1,3 @@
+== ram_be: 64 blocks LOWER RA=1 FFs 66 LUTs 108
+  ENARDEN net <const1> <- VCC  
+  ENBWREN net <const1> <- VCC  

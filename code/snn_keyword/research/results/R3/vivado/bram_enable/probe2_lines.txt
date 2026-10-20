@@ -1,0 +1,8 @@
+PROBE2 idle_still: | Clocks                   |     0.007 |        4 |       --- |             --- |
+PROBE2 idle_still: | Block RAM                |     0.125 |       64 |       140 |           45.71 |
+PROBE2 cpu_port_clock_off: | Clocks                   |     0.007 |        5 |       --- |             --- |
+PROBE2 cpu_port_clock_off: | Block RAM                |     0.125 |       64 |       140 |           45.71 |
+PROBE2 both_port_clocks_off: | Clocks                   |     0.007 |        6 |       --- |             --- |
+PROBE2 both_port_clocks_off: | Block RAM                |     0.125 |       64 |       140 |           45.71 |
+PROBE2 cpu_en1_clock_on: | Clocks                   |     0.007 |        6 |       --- |             --- |
+PROBE2 cpu_en1_clock_on: | Block RAM                |     0.188 |       64 |       140 |           45.71 |

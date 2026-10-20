@@ -1,0 +1,12 @@
+blocks 64, UPPER 32
+u_soc/mem_reg_0_0_0 LOWER RA=1
+  ENARDEN <- LUT3 u_soc/mem_reg_0_0_0_ENARDEN_cooolgate_en_gate_1_LOPT_REMAP INIT=8'h47
+    I0 <- u_soc/pwropt_1 (from u_soc/u_kdot/mem_addr_reg[15]/Q)
+    I1 <- u_soc/kd_busy (from u_soc/u_kdot/mem_busy_reg/Q)
+    I2 <- u_soc/cpu_mem_addr[17] (from u_soc/u_cpu/mem_addr_reg[17]/Q)
+  ENBWREN <- LUT2 u_soc/mem_reg_0_0_0_ENBWREN_cooolgate_en_gate_65_LOPT_REMAP INIT=4'hB
+    I0 <- u_soc/pwropt_2 (from por_cnt_reg[4]/Q)
+    I1 <- u_soc/ADDRBWRADDR[15] (from u_ps_if/bram_addr_reg[15]_rep/Q)
+u_soc/mem_reg_0_1_0 UPPER RA=1
+  ENARDEN <- VCC u_soc/VCC INIT=
+  ENBWREN <- VCC u_soc/VCC INIT=

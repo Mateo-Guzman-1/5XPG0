@@ -163,7 +163,55 @@ def activity(rw):
     return out
 
 
+LAYOUTS = {   # BRAM enable probability per block, from the routed netlists (results/R3/vivado/bram_enable/)
+    'asbuilt': dict(en=1.0, we_scale=1.0,
+                    note='width-sliced 32K x 1 cascade pairs: synthesis ties EN to 1 (byte writes), opt_design gates the '
+                         'lower blocks by the address MSB, upper blocks always on; asleep the frozen addresses keep all on'),
+    'decomp': dict(en=1 / 64, we_scale=1 / 64,
+                   note='ram_decomp = "power": 64 address-decoded 1K x 36 blocks, EN = 6-bit address decode: one block '
+                        'per port per cycle (also asleep, at the frozen address)')}
+VARIANTS = {'asbuilt_rw8': ('asbuilt', 8), 'asbuilt_rw1': ('asbuilt', 1), 'decomp_rw1': ('decomp', 1)}
+
+
 def duties():
+    """Per-variant power states for r3_power_states.tcl (values are per-block probabilities): the CPU clock duty from
+    xsim (activity.json), BRAM enables from the layout (LAYOUTS), write enables from the simulated write duty."""
+    import csv
+    act = {rw: activity(rw) for rw in (8, 1)}
+    calls = {}
+    for r in csv.DictReader(open(S.RES / 'R2/designs.csv', encoding='utf-8')):
+        if r['design'] in ('cascade_B', 'cascade_B_calls2150'):
+            calls['B1' if r['design'] == 'cascade_B' else 'B2'] = float(r['calls_per_hour'])
+    rep = {}
+    for name, (layout, rw) in VARIANTS.items():
+        a, L = act[rw], LAYOUTS[layout]
+        en = L['en']
+        we_awake = (a['pb_we_s1'] * a['awake_s1_cycles'] + a['pb_we_v'] * a['verifier_cycles']['mean']) / \
+            (a['awake_s1_cycles'] + a['verifier_cycles']['mean'])
+        states = [('busy', 1.0, en, we_awake * L['we_scale'], en, 0.0),     # CPU clock always on (= awake)
+                  ('idle', 1e-9, en, 0.0, en, 0.0)]
+        days = {}
+        for code, n_v in calls.items():
+            awake = (14400 * a['awake_s1_cycles'] + n_v * a['verifier_cycles']['mean']) / (3600 * F)
+            pb_we = (14400 * a['awake_s1_cycles'] * a['pb_we_s1'] + n_v * a['verifier_cycles']['mean'] * a['pb_we_v']) / (3600 * F)
+            pa_we = 14400 * (a['payload_words_s1'] + 3) / (3600 * F)
+            days[code] = dict(calls_per_hour=n_v, awake_share=awake, pb_we=pb_we, pa_we=pa_we)
+            states.append((f'day_{code}', awake, en, pb_we * L['we_scale'], en, pa_we * L['we_scale']))
+        rep[name] = dict(layout=layout, layout_note=L['note'], read_wait=rw, activity=a, days=days,
+                         states={s[0]: s[1:] for s in states})
+        lines = ['# R3 power states (r3_verify.py duties): name cpu_clock_duty pb_en pb_we pa_en pa_we (per-block probabilities)',
+                 f'# {name}: {L["note"]}', 'set states {']
+        lines += [f'  {n} ' + ' '.join(f'{x:.9g}' for x in v) for n, *v in states]
+        lines.append('}')
+        (OUT / f'duties_{name}.tcl').write_text('\n'.join(lines) + '\n')
+    for old in ('duties_rw8.tcl', 'duties_rw1.tcl'):      # the withdrawn read-duty states
+        (OUT / old).unlink(missing_ok=True)
+    (OUT / 'activity.json').write_text(json.dumps(rep, indent=2) + '\n')
+    return rep
+
+
+def duties_read_enable_model():
+    """Withdrawn (G2): BRAM enables = simulated read duties. The built netlist does not have these enables."""
     import r3_oracle  # noqa: F401  (thresholds only)
     designs = {}
     import csv
@@ -206,7 +254,8 @@ def duties():
 
 BUILDS = {'rw1': dict(power_opt=1, read_wait=1, bit='r3_gated_rw1.bit'),     # main design
           'rw8': dict(power_opt=1, read_wait=8, bit='r3_gated_rw8.bit'),     # gating alone
-          'p0': dict(power_opt=0, read_wait=8, bit=None)}                    # regression: must equal S6
+          'p0': dict(power_opt=0, read_wait=8, bit=None),                    # regression: must equal S6
+          'dec': dict(power_opt=1, read_wait=1, bit='r3_gated_rw1_decomp.bit')}   # option B: + R3_RAM_DECOMP
 
 
 def util(path):
@@ -222,8 +271,15 @@ def util(path):
 def wns(path):
     lines = Path(path).read_text().splitlines()
     i = next(k for k, l in enumerate(lines) if 'Design Timing Summary' in l)
-    vals = next(l for l in lines[i + 3:] if l.strip() and not l.strip().startswith('-') and 'WNS' not in l).split()
-    return dict(wns_ns=float(vals[0]), tns_ns=float(vals[1]), whs_ns=float(vals[4]))
+
+    def numeric(l):
+        try:
+            return [float(x) for x in l.split()[:5]] if len(l.split()) >= 5 else None
+        except ValueError:
+            return None
+    vals = next(v for l in lines[i + 1:] if (v := numeric(l)))          # the first all-number row under the header
+    met = not any('Timing constraints are not met' in l for l in lines)
+    return dict(wns_ns=vals[0], tns_ns=vals[1], whs_ns=vals[4], timing_met=met)
 
 
 def fabric():
@@ -247,10 +303,13 @@ def fabric():
                  **wns(d / 'timing_summary.rpt'))
         cb = (d / 'clock_buffers.txt').read_text().splitlines()
         e['clock_buffers'] = cb
-        if b['bit']:
+        if b['bit'] and (S.RES / 'R3' / b['bit']).exists():
             bit = S.RES / 'R3' / b['bit']
             e['bitstream'] = f'research/results/R3/{b["bit"]}'
             e['bitstream_sha256'] = hashlib.sha256(bit.read_bytes()).hexdigest()
+        elif b['bit']:
+            e['bitstream'] = None
+            e['bitstream_note'] = 'not kept in results/: timing not met' if not e['timing_met'] else 'missing'
         e['delta_vs_s6'] = {k: (e[k] - rep['s6'][k]) if e.get(k) is not None else None
                             for k in ('luts', 'registers', 'bram36', 'dsp', 'bufgctrl')}
         rep['builds'][name] = e

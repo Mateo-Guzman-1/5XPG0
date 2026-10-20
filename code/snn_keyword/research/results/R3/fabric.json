@@ -1,0 +1,180 @@
+{
+  "source_commit": "619cacd",
+  "rtl_sha256_lf_normalized": {
+    "code/pynqz2_riscv_flow/rtl/kdot_pcpi.v": "936fce6320299f99a56ef110095a5f42ef6ed16a21545c5fe2095edc6942c71c",
+    "code/pynqz2_riscv_flow/rtl/picorv32.v": "0836050971b3c6cdd28ac3b1e5719a67fb645161912bef1e472e63995ceb0622",
+    "code/pynqz2_riscv_flow/rtl/poisson.v": "a888ac1a064cd25eb86f0e783c38f29588b091f8302089cc92ea4e63723e890e",
+    "code/pynqz2_riscv_flow/rtl/ps_if.v": "1986ae2b019d9c7f26992516508769daa8e583ecb76becc9fba58876998866f2",
+    "code/pynqz2_riscv_flow/rtl/spike_soc.v": "3af072c4d44ff1b0f4003b7e3fed0b0fce321f5f75998fd6b7fe7bc6da56b16c",
+    "code/pynqz2_riscv_flow/rtl/spike_top.v": "33429b0f941d3d51467c23afe0435035b55fcf9abc9df7676e2c37307e79d7ae"
+  },
+  "vivado": "2026.1",
+  "builds": {
+    "rw1": {
+      "generics": {
+        "POWER_OPT": 1,
+        "READ_WAIT": 1
+      },
+      "abi": "0x00020007",
+      "luts": 3303.0,
+      "lutram": 220.0,
+      "registers": 2915.0,
+      "bram36": 64.0,
+      "dsp": 8.0,
+      "bufgctrl": 2.0,
+      "wns_ns": 0.479,
+      "tns_ns": 0.0,
+      "whs_ns": 0.047,
+      "timing_met": true,
+      "clock_buffers": [
+        "u_bd/ps_bd_i/ps7/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG BUFG",
+        "u_soc/u_cpu_gate/g_gate.u_bufgce BUFGCTRL",
+        "u_cpu_gate buffers: 1"
+      ],
+      "bitstream": "research/results/R3/r3_gated_rw1.bit",
+      "bitstream_sha256": "1f646a86c46ba0595fa02a439f236b5463ac2e6655cf598532a0ec2523f4377c",
+      "delta_vs_s6": {
+        "luts": 60.0,
+        "registers": 84.0,
+        "bram36": 0.0,
+        "dsp": 0.0,
+        "bufgctrl": 1.0
+      }
+    },
+    "rw8": {
+      "generics": {
+        "POWER_OPT": 1,
+        "READ_WAIT": 8
+      },
+      "abi": "0x00020007",
+      "luts": 3302.0,
+      "lutram": 220.0,
+      "registers": 2915.0,
+      "bram36": 64.0,
+      "dsp": 8.0,
+      "bufgctrl": 2.0,
+      "wns_ns": 0.531,
+      "tns_ns": 0.0,
+      "whs_ns": 0.04,
+      "timing_met": true,
+      "clock_buffers": [
+        "u_bd/ps_bd_i/ps7/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG BUFG",
+        "u_soc/u_cpu_gate/g_gate.u_bufgce BUFGCTRL",
+        "u_cpu_gate buffers: 1"
+      ],
+      "bitstream": "research/results/R3/r3_gated_rw8.bit",
+      "bitstream_sha256": "03cd8ff6d8e0ce466ad9d6389a3d8f73cdfe355652af6d5eccb70bde2a4c79b2",
+      "delta_vs_s6": {
+        "luts": 59.0,
+        "registers": 84.0,
+        "bram36": 0.0,
+        "dsp": 0.0,
+        "bufgctrl": 1.0
+      }
+    },
+    "p0": {
+      "generics": {
+        "POWER_OPT": 0,
+        "READ_WAIT": 8
+      },
+      "abi": "0x00020003",
+      "luts": 3254.0,
+      "lutram": 220.0,
+      "registers": 2831.0,
+      "bram36": 64.0,
+      "dsp": 8.0,
+      "bufgctrl": 1.0,
+      "wns_ns": 0.645,
+      "tns_ns": 0.0,
+      "whs_ns": 0.049,
+      "timing_met": true,
+      "clock_buffers": [
+        "u_bd/ps_bd_i/ps7/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG BUFG",
+        "u_cpu_gate buffers: 0"
+      ],
+      "delta_vs_s6": {
+        "luts": 11.0,
+        "registers": 0.0,
+        "bram36": 0.0,
+        "dsp": 0.0,
+        "bufgctrl": 0.0
+      }
+    },
+    "dec": {
+      "generics": {
+        "POWER_OPT": 1,
+        "READ_WAIT": 1
+      },
+      "abi": "0x00020007",
+      "luts": 4846.0,
+      "lutram": 220.0,
+      "registers": 3098.0,
+      "bram36": 64.0,
+      "dsp": 8.0,
+      "bufgctrl": 2.0,
+      "wns_ns": -0.288,
+      "tns_ns": -0.615,
+      "whs_ns": 0.026,
+      "timing_met": false,
+      "clock_buffers": [
+        "u_bd/ps_bd_i/ps7/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG BUFG",
+        "u_soc/u_cpu_gate/g_gate.u_bufgce BUFGCTRL",
+        "u_cpu_gate buffers: 1"
+      ],
+      "bitstream": null,
+      "bitstream_note": "not kept in results/: timing not met",
+      "delta_vs_s6": {
+        "luts": 1603.0,
+        "registers": 267.0,
+        "bram36": 0.0,
+        "dsp": 0.0,
+        "bufgctrl": 1.0
+      }
+    }
+  },
+  "s6": {
+    "luts": 3243,
+    "lutram": 220,
+    "registers": 2831,
+    "bram36": 64,
+    "dsp": 8,
+    "bufgctrl": 1,
+    "wns_ns": 0.545
+  },
+  "outcomes": {
+    "H7_rw8": {
+      "confirmed": true,
+      "delta": {
+        "luts": 59.0,
+        "registers": 84.0,
+        "bram36": 0.0,
+        "dsp": 0.0,
+        "bufgctrl": 1.0
+      },
+      "wns_ns": 0.531
+    },
+    "H7_rw1": {
+      "confirmed": true,
+      "delta": {
+        "luts": 60.0,
+        "registers": 84.0,
+        "bram36": 0.0,
+        "dsp": 0.0,
+        "bufgctrl": 1.0
+      },
+      "wns_ns": 0.479
+    },
+    "H8_utilization": {
+      "equal_to_s6": false,
+      "delta": {
+        "luts": 11.0,
+        "registers": 0.0,
+        "bram36": 0.0,
+        "dsp": 0.0,
+        "bufgctrl": 0.0
+      },
+      "wns_ns": 0.645
+    },
+    "H7_rw1_vs_rw8_luts": 1.0
+  }
+}

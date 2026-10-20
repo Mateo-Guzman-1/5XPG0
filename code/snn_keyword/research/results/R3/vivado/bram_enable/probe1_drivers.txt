@@ -1,0 +1,14 @@
+u_soc/mem_reg_0_0_0 RAM_EXTENSION_A=LOWER RAM_MODE=TDP WRITE_MODE_A=READ_FIRST WRITE_MODE_B=READ_FIRST DOA_REG=0 DOB_REG=0
+  ENARDEN <- net u_soc/mem_reg_0_0_0_ENARDEN_cooolgate_en_sig_1 driver LUT3 u_soc/mem_reg_0_0_0_ENARDEN_cooolgate_en_gate_1_LOPT_REMAP/O
+  ENBWREN <- net u_soc/mem_reg_0_0_0_ENBWREN_cooolgate_en_sig_33 driver LUT2 u_soc/mem_reg_0_0_0_ENBWREN_cooolgate_en_gate_65_LOPT_REMAP/O
+  ADDRARDADDR[15] <- net u_soc/u_kdot_n_21 driver LUT3 u_soc/u_kdot/mem_reg_0_0_0_i_1/O
+  ADDRBWRADDR[15] <- net u_soc/ADDRBWRADDR[15] driver FDRE u_ps_if/bram_addr_reg[15]_rep/Q
+  REGCEAREGCE <- net u_soc/<const0> driver GND u_soc/GND/G
+  REGCEB <- net u_soc/<const0> driver GND u_soc/GND/G
+u_soc/mem_reg_0_0_1 RAM_EXTENSION_A=LOWER RAM_MODE=TDP WRITE_MODE_A=READ_FIRST WRITE_MODE_B=READ_FIRST DOA_REG=0 DOB_REG=0
+  ENARDEN <- net u_soc/mem_reg_0_0_1_ENARDEN_cooolgate_en_sig_2 driver LUT3 u_soc/mem_reg_0_0_1_ENARDEN_cooolgate_en_gate_3_LOPT_REMAP/O
+  ENBWREN <- net u_soc/mem_reg_0_0_1_ENBWREN_cooolgate_en_sig_34 driver LUT2 u_soc/mem_reg_0_0_1_ENBWREN_cooolgate_en_gate_67_LOPT_REMAP/O
+  ADDRARDADDR[15] <- net u_soc/u_kdot_n_21 driver LUT3 u_soc/u_kdot/mem_reg_0_0_0_i_1/O
+  ADDRBWRADDR[15] <- net u_soc/ADDRBWRADDR[15] driver FDRE u_ps_if/bram_addr_reg[15]_rep/Q
+  REGCEAREGCE <- net u_soc/<const0> driver GND u_soc/GND/G
+  REGCEB <- net u_soc/<const0> driver GND u_soc/GND/G

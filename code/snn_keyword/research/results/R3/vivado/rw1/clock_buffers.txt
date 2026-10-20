@@ -1,0 +1,3 @@
+u_bd/ps_bd_i/ps7/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG BUFG
+u_soc/u_cpu_gate/g_gate.u_bufgce BUFGCTRL
+u_cpu_gate buffers: 1

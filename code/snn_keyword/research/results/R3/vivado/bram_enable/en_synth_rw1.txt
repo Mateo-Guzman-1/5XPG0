@@ -1,0 +1,24 @@
+== synth (proj_r3_rw1/rv.runs/synth_1/spike_top.dcp): 64 blocks
+u_soc/mem_reg_0_0_0 EXT_A=LOWER WMODE_A=READ_FIRST WMODE_B=READ_FIRST DOA_REG=0
+  ENARDEN <- VCC u_soc/VCC INIT= inputs: 
+  ENBWREN <- VCC u_soc/VCC INIT= inputs: 
+  REGCEAREGCE <- GND u_soc/GND INIT= inputs: 
+  REGCEB <- GND u_soc/GND INIT= inputs: 
+u_soc/mem_reg_0_0_1 EXT_A=LOWER WMODE_A=READ_FIRST WMODE_B=READ_FIRST DOA_REG=0
+  ENARDEN <- VCC u_soc/VCC INIT= inputs: 
+  ENBWREN <- VCC u_soc/VCC INIT= inputs: 
+  REGCEAREGCE <- GND u_soc/GND INIT= inputs: 
+  REGCEB <- GND u_soc/GND INIT= inputs: 
+pb_rdata / pa_rdata registers: 0
+== opt (proj_r3_rw1/rv.runs/impl_1/spike_top_opt.dcp): 64 blocks
+u_soc/mem_reg_0_0_0 EXT_A=LOWER WMODE_A=READ_FIRST WMODE_B=READ_FIRST DOA_REG=0
+  ENARDEN <- LUT3 u_soc/mem_reg_0_0_0_ENARDEN_cooolgate_en_gate_1_LOPT_REMAP INIT=8'h47 inputs: I0=u_soc/pwropt_1 I1=u_soc/kd_busy {I2=u_soc/cpu_mem_addr[17]}
+  ENBWREN <- LUT2 u_soc/mem_reg_0_0_0_ENBWREN_cooolgate_en_gate_65_LOPT_REMAP INIT=4'hB inputs: I0=u_soc/pwropt_2 {I1=u_soc/ADDRBWRADDR[15]}
+  REGCEAREGCE <- GND u_soc/GND INIT= inputs: 
+  REGCEB <- GND u_soc/GND INIT= inputs: 
+u_soc/mem_reg_0_0_1 EXT_A=LOWER WMODE_A=READ_FIRST WMODE_B=READ_FIRST DOA_REG=0
+  ENARDEN <- LUT3 u_soc/mem_reg_0_0_1_ENARDEN_cooolgate_en_gate_3_LOPT_REMAP INIT=8'h47 inputs: I0=u_soc/pwropt_1 I1=u_soc/kd_busy {I2=u_soc/cpu_mem_addr[17]}
+  ENBWREN <- LUT2 u_soc/mem_reg_0_0_1_ENBWREN_cooolgate_en_gate_67_LOPT_REMAP INIT=4'hB inputs: I0=u_soc/pwropt_2 {I1=u_soc/ADDRBWRADDR[15]}
+  REGCEAREGCE <- GND u_soc/GND INIT= inputs: 
+  REGCEB <- GND u_soc/GND INIT= inputs: 
+pb_rdata / pa_rdata registers: 0

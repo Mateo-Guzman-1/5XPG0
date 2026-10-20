@@ -1,0 +1,12 @@
+PROBE idle: | Clocks                   |     0.007 |        4 |       --- |             --- |
+PROBE idle: | Signals                  |     0.004 |     6103 |       --- |             --- |
+PROBE idle: | Block RAM                |     0.126 |       64 |       140 |           45.71 |
+PROBE idle+inputs_still: | Clocks                   |     0.007 |        4 |       --- |             --- |
+PROBE idle+inputs_still: | Signals                  |     0.003 |     6103 |       --- |             --- |
+PROBE idle+inputs_still: | Block RAM                |     0.125 |       64 |       140 |           45.71 |
+PROBE idle+all_still: | Clocks                   |     0.007 |        4 |       --- |             --- |
+PROBE idle+all_still: | Signals                  |     0.003 |     6103 |       --- |             --- |
+PROBE idle+all_still: | Block RAM                |     0.125 |       64 |       140 |           45.71 |
+PROBE en1+inputs_still: | Clocks                   |     0.007 |        4 |       --- |             --- |
+PROBE en1+inputs_still: | Signals                  |     0.003 |     6103 |       --- |             --- |
+PROBE en1+inputs_still: | Block RAM                |     0.250 |       64 |       140 |           45.71 |
