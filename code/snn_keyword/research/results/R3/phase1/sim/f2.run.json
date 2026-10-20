@@ -1,0 +1,15 @@
+{
+  "name": "f2",
+  "firmware": "code/snn_keyword/build/r3_s6_anchor/keyword_ksdot_lut.bin",
+  "requests": "code/snn_keyword/build/r3_sim/phase1/f2.req",
+  "generics": [],
+  "work": null,
+  "seconds": {
+    "xvlog": 1.5,
+    "xelab": 2.0,
+    "xsim": 11.3
+  },
+  "simulated_cycles": 1564772,
+  "done": true,
+  "cycles_per_second": 138096
+}

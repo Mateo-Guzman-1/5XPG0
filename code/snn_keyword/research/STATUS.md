@@ -19,7 +19,22 @@ size and synapse study for the report). All energy numbers are in [ENERGY.md](EN
 | S6 | Sparse kdot (kxload/ksdot hardware) vs the deployed dense-kdot model | **done** 2026-10-17 | `results/S6/`, [S_energy_synapse.md](reports/S_energy_synapse.md) §S6 |
 | R1 | The S designs against the group requirements, with Mateo's test harness ([PLAN_R1.md](PLAN_R1.md)) | **done** 2026-10-19 | `results/R1/`, [R1_requirements.md](reports/R1_requirements.md), `reports/latex/requirements_eval/` |
 | R2 | Cascade: pruned H48 K64 first stage + Mateo's GRU verifier, then the verifier fine-tuned on our false proposals ([PLAN_R2_GRU.md](PLAN_R2_GRU.md)) | **done** 2026-10-20 | `results/R2/`, [R2_cascade_gru.md](reports/R2_cascade_gru.md), `reports/latex/cascade_gru/` |
-| R3 | Clock gating + BRAM read enables for the B1/B2 cascades on our fabric (cascade firmware, xsim bit-exact, bitstream, per-state Vivado power; board test later) ([PLAN_R3_GATING.md](PLAN_R3_GATING.md)) | **in progress** since 2026-10-20 (Phase 1; hypotheses pre-registered in `results/R3/phase1/hypothesis.json`, tag `r3-base`) | `results/R3/`, `reports/latex/clock_gating_plan/`, `reports/latex/clock_gating_results/` |
+| R3 | Clock gating + BRAM read enables for the B1/B2 cascades on our fabric (cascade firmware, xsim bit-exact, bitstream, per-state Vivado power; board test later) ([PLAN_R3_GATING.md](PLAN_R3_GATING.md)) | **in progress** since 2026-10-20: Phase 1 done, waiting at gate G1 (hypotheses pre-registered in `results/R3/phase1/hypothesis.json`, tag `r3-base`) | `results/R3/`, `reports/latex/clock_gating_plan/`, `reports/latex/clock_gating_results/` |
+
+## R3 Phase 1: feasibility (2026-10-20)
+Plan: [PLAN_R3_GATING.md](PLAN_R3_GATING.md). Data: `results/R3/phase1/` (`hypothesis.json`, `feasibility.json`, xsim logs in `sim/`).
+Plan report: `reports/latex/clock_gating_plan/main.pdf`.
+- **Firmware v0:** `firmware/cascade_main.c` (opcodes 1, 2, 6) + `verifier.c/.h` (unchanged from a856a03), built by
+  `research/tools/r3_build_cascade.py` into `build/r3_fw/<b1|b2>/`. **F1 pass:** `.model` 66,056 B of 147,456; `.bss` ends 0x6720.
+- **Testbench:** `code/pynqz2_riscv_flow/sim/tb_r3_soc.sv` (ps_if + spike_soc, AXI replay, per-request read-enable counters),
+  runner `research/tools/r3_sim.py` (image, vectors, run, check, feasibility). xsim: about 140–170 k cycles/s
+  (a verifier call simulates in about 130 s).
+- **F2 pass:** the S6 image rebuilds byte-identical (`d06c685c…`); 40/40 windows bit-exact with `model.integer_forward`; cycles
+  33,785 / 34,165.6 / 34,617, equal to the board.
+- **F3 pass:** opcode 6 on 3 windows (live keyword, zero-padded start, negative) bit-exact with `verifier_export.oracle()`
+  (scores, ends, logits hash, head = cached R2 head). **T_V = 21.25–21.26 M cycles = 212.5–212.6 ms** (H1 predicted
+  21.9 M, range 19–25 M). Worst compute per request 212.9 ms: **above the 200 ms requirement**, below the 250 ms hop.
+- Would-be port-B read duty (unchanged RTL): 17.5 % during stage 1, 21.3 % during the verifier.
 
 ## R2 result: cascade with Mateo's GRU verifier (2026-10-19 to 2026-10-20)
 Full record: [reports/R2_cascade_gru.md](reports/R2_cascade_gru.md); LaTeX: `reports/latex/cascade_gru/main.pdf`.
@@ -293,6 +308,10 @@ For reference, the previous "yes" release: test F1 0.8761 (seeds 0.867 ± 0.022)
   three seeds it may be chance.
 
 ## Next step
+**R3 is at gate G1 (2026-10-20).** Pedro decides: (1) T_V is 212.5 ms > 200 ms: report the requirement failure as it is,
+or also build and verify a `READ_WAIT = 1` variant; (2) whether to add the `ram_decomp = "power"` BRAM variant (H9);
+(3) the vector budget (xsim is fast enough for the plan's full set). Then Phase 2 (PLAN_R3_GATING.md section 4).
+
 R2 is complete (2026-10-20). Next:
 - **R3, clock gating: follow [PLAN_R3_GATING.md](PLAN_R3_GATING.md) in a new session** (Pedro's scope: B1 and B2 run on
   our fabric as a cascade firmware; clock gating + BRAM read enables ported from the teammate branches

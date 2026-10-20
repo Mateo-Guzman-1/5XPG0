@@ -1,0 +1,22 @@
+
+****** xsim v2026.1 (64-bit)
+  **** SW Build 6511674 on Tue Jun 16 11:02:23 MDT 2026
+  **** IP Build 6504888 on Tue Jun 09 09:05:25 MDT 2026
+  **** SharedData Build 6501428 on Mon Jun 08 17:34:18 MDT 2026
+  **** Start of session at: Tue Oct 20 18:10:45 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source xsim.dir/snap/xsim_script.tcl
+# xsim {snap} -testplusarg fw=fw.hex -testplusarg req=req.req -autoloadwcfg -runall
+Time resolution is 1 ps
+run -all
+READY magic=4b574331 after 261000 cycles
+REQ n=0 op=6 len=3600 flags=0 seq=1 svc=21540441 pb_re=4582134 pb_we=54879 pa_re=21454 pa_we=0 clk_on=21540441 sleep=0 mb=00000000,00000000,00000000,01445d95,00000000,00000000,4b574331,fffffc6e,00000300,00000018,00000096,00000000,00000000,00000000,00000000,01445d95,00000000,00000000,00000000,0000057a,ffffd67c,0000004a,ffff6516,0000003c,a64ec772,00000001,0000095d,0000004a,00000000,00000000
+SUM requests=1 cyc=21809629 pb_re=4603311 pb_we=60012 pa_re=21746 pa_we=903 clk_on=21809629 sleep=0
+DONE
+$finish called at time : 218096695 ns : File "C:/Users/pedro/AppData/Local/Temp/5xpg0_r3_nqq1idpt/tb_r3_soc.sv" Line 201
+run: Time (s): cpu = 00:00:01 ; elapsed = 00:02:08 . Memory (MB): peak = 229.008 ; gain = 0.000
+exit
+INFO: xsimkernel Simulation Memory Usage: 22868 KB (Peak: 22868 KB), Simulation CPU Usage: 127296 ms
+INFO: [Common 17-206] Exiting xsim at Tue Oct 20 18:12:55 2026...

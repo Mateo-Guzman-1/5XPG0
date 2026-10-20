@@ -1,0 +1,15 @@
+{
+  "name": "f3_2",
+  "firmware": "code/snn_keyword/build/r3_fw/b1/cascade.bin",
+  "requests": "code/snn_keyword/build/r3_sim/phase1/f3_2.req",
+  "generics": [],
+  "work": null,
+  "seconds": {
+    "xvlog": 1.5,
+    "xelab": 2.1,
+    "xsim": 130.3
+  },
+  "simulated_cycles": 21801597,
+  "done": true,
+  "cycles_per_second": 167278
+}

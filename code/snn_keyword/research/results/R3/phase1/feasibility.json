@@ -1,0 +1,170 @@
+{
+  "experiment": "R3 Phase 1 feasibility",
+  "rtl": "unchanged (r3-base)",
+  "simulator": "Vivado xsim 2026.1 (tb_r3_soc.sv)",
+  "F1": {
+    "designs": {
+      "B1": {
+        "t1": -914,
+        "t2": 1402,
+        "sha256": "d9493cc1e96f608e1a432ea4d55a78528d245664e17ae2d090d951cf0612edac",
+        "model_bytes": 66056,
+        "model_limit_bytes": 147456,
+        "bss_start": "0x1740",
+        "bss_end": "0x6720",
+        "bss_limit": "0x10000",
+        "bss_bytes": 20448,
+        "pass": true
+      },
+      "B2": {
+        "t1": -596,
+        "t2": 1402,
+        "sha256": "311648a70449d034e7ea3fb2c0f6bf778b3d51bb026ba90a6bb06d41acaf3808",
+        "model_bytes": 66056,
+        "model_limit_bytes": 147456,
+        "bss_start": "0x1740",
+        "bss_end": "0x6720",
+        "bss_limit": "0x10000",
+        "bss_bytes": 20448,
+        "pass": true
+      }
+    },
+    "passed": true
+  },
+  "F2": {
+    "image": "code/snn_keyword/build/r3_s6_anchor/keyword_ksdot_lut.bin",
+    "image_sha256": "d06c685c117cbca97955cf85c31b4c77ad5d865b24e3943b2394bc3665d0a2a2",
+    "image_equals_board": true,
+    "vectors": 40,
+    "bit_exact": true,
+    "mismatches": [],
+    "cycles": {
+      "min": 33785,
+      "mean": 34165.57,
+      "max": 34617
+    },
+    "cycles_all": [
+      34129,
+      34153,
+      34117,
+      34165,
+      34080,
+      34236,
+      34486,
+      34140,
+      33998,
+      34152,
+      34081,
+      34047,
+      34152,
+      34424,
+      34081,
+      34141,
+      33998,
+      34010,
+      34116,
+      34046,
+      34236,
+      34140,
+      34296,
+      34093,
+      34165,
+      34247,
+      34365,
+      34140,
+      34081,
+      34082,
+      34366,
+      33950,
+      34129,
+      34153,
+      33785,
+      34343,
+      33950,
+      34427,
+      34617,
+      34306
+    ],
+    "board": {
+      "min": 33785,
+      "mean": 34165.6,
+      "max": 34617
+    },
+    "anchor_equal": true,
+    "port_b_read_duty": 0.1749
+  },
+  "F3": {
+    "image": "code/snn_keyword/build/r3_fw/b1/cascade.bin",
+    "image_sha256": "d9493cc1e96f608e1a432ea4d55a78528d245664e17ae2d090d951cf0612edac",
+    "windows": 3,
+    "bit_exact": true,
+    "mismatches": [],
+    "items": [
+      {
+        "id": "live item 0, request 4 (highest cached head)",
+        "zero_frames": 25,
+        "head": 2397,
+        "cached_head": 2397,
+        "cached_equals_oracle": true,
+        "t_v_cycles": 21257621,
+        "service_cycles": 21540441,
+        "port_b_read_duty": 0.2127
+      },
+      {
+        "id": "live item 0, request 1 (zero-padded start)",
+        "zero_frames": 100,
+        "head": -6915,
+        "cached_head": -6915,
+        "cached_equals_oracle": true,
+        "t_v_cycles": 21250183,
+        "service_cycles": 21533003,
+        "port_b_read_duty": 0.2128
+      },
+      {
+        "id": "negatives item 0, request 1200",
+        "zero_frames": 0,
+        "head": -6849,
+        "cached_head": -6849,
+        "cached_equals_oracle": true,
+        "t_v_cycles": 21249643,
+        "service_cycles": 21532463,
+        "port_b_read_duty": 0.2128
+      }
+    ],
+    "t_v_cycles": {
+      "min": 21249643,
+      "mean": 21252482.3,
+      "max": 21257621
+    },
+    "t_v_ms": {
+      "min": 212.496,
+      "mean": 212.525,
+      "max": 212.576
+    }
+  },
+  "simulator_speed": {
+    "runs": {
+      "f2": {
+        "cycles": 1564772,
+        "xsim_s": 11.3,
+        "cycles_per_second": 138096
+      },
+      "f3_0": {
+        "cycles": 21809629,
+        "xsim_s": 130.2,
+        "cycles_per_second": 167568
+      },
+      "f3_1": {
+        "cycles": 21802601,
+        "xsim_s": 130.7,
+        "cycles_per_second": 166870
+      },
+      "f3_2": {
+        "cycles": 21801597,
+        "xsim_s": 130.3,
+        "cycles_per_second": 167278
+      }
+    },
+    "note": "xsim wall time includes start-up (snapshot load, $readmemh); 4 jobs ran in parallel"
+  }
+}
