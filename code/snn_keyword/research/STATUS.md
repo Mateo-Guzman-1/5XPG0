@@ -19,7 +19,7 @@ size and synapse study for the report). All energy numbers are in [ENERGY.md](EN
 | S6 | Sparse kdot (kxload/ksdot hardware) vs the deployed dense-kdot model | **done** 2026-10-17 | `results/S6/`, [S_energy_synapse.md](reports/S_energy_synapse.md) §S6 |
 | R1 | The S designs against the group requirements, with Mateo's test harness ([PLAN_R1.md](PLAN_R1.md)) | **done** 2026-10-19 | `results/R1/`, [R1_requirements.md](reports/R1_requirements.md), `reports/latex/requirements_eval/` |
 | R2 | Cascade: pruned H48 K64 first stage + Mateo's GRU verifier, then the verifier fine-tuned on our false proposals ([PLAN_R2_GRU.md](PLAN_R2_GRU.md)) | **done** 2026-10-20 | `results/R2/`, [R2_cascade_gru.md](reports/R2_cascade_gru.md), `reports/latex/cascade_gru/` |
-| R3 | Clock gating: measured idle savings (clock scaling with the USB meter first, then BUFGCE gating) ([PLAN_R2_GRU.md](PLAN_R2_GRU.md) §7b) | **next**, to be planned in its own file | — |
+| R3 | Clock gating + BRAM read enables for the B1/B2 cascades on our fabric (cascade firmware, xsim bit-exact, bitstream, per-state Vivado power; board test later) ([PLAN_R3_GATING.md](PLAN_R3_GATING.md)) | **planned** 2026-10-20 (run in a new session) | `results/R3/`, `reports/latex/clock_gating_plan/`, `reports/latex/clock_gating_results/` |
 
 ## R2 result: cascade with Mateo's GRU verifier (2026-10-19 to 2026-10-20)
 Full record: [reports/R2_cascade_gru.md](reports/R2_cascade_gru.md); LaTeX: `reports/latex/cascade_gru/main.pdf`.
@@ -294,12 +294,16 @@ For reference, the previous "yes" release: test F1 0.8761 (seeds 0.867 ± 0.022)
 
 ## Next step
 R2 is complete (2026-10-20). Next:
-- **R3, clock gating** (PLAN_R2_GRU.md §7b): write its plan file first. Start with clock scaling from Python and the
-  USB meter (no RTL change), then BUFGCE gating of the core and BRAM clocks.
+- **R3, clock gating: follow [PLAN_R3_GATING.md](PLAN_R3_GATING.md) in a new session** (Pedro's scope: B1 and B2 run on
+  our fabric as a cascade firmware; clock gating + BRAM read enables ported from the teammate branches
+  `origin/opt/cpu-sleep` and `origin/opt/bram-power`; verified in xsim; board test after Phase 3). Main risk: the
+  verifier call on our fabric (READ_WAIT = 8) is estimated at about 219 ms, above the 200 ms requirement.
+- (Superseded outline, PLAN_R2_GRU.md §7b: clock scaling from Python and the
+  USB meter (no RTL change), then BUFGCE gating of the core and BRAM clocks.)
 - Pedro reviews the R2 report `reports/latex/cascade_gru/main.pdf`. Its figures and tables can be `\input` into the
   group report (needs `\input{figures/r1_style}`; checked inside a copy of the group preamble).
-- Later: the hardware merge (PLAN_R2_GRU.md §7: verifier firmware, 10 ms frames, Alex's KX opcodes clash with
-  `ksdot`), then the first board run of a cascade.
+- Later, after R3: the first board run of the B1/B2 cascade (R3 builds the cascade firmware, plain kdot verifier,
+  10 ms frames, bitstream, board kit). The KX instructions stay later work (opcodes clash with `ksdot`, PLAN_R2_GRU.md §7).
 
 Still open from before R2:
 - Pedro reviews the R1 report `reports/latex/requirements_eval/main.pdf`. Its figures and tables can be `\input`
