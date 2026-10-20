@@ -7,11 +7,12 @@
 # static probability 0.5.
 # - report_power ignores a BUFGCE's CE (Power 33-324) and clocks the gated domain at 100 MHz. Each state therefore
 #   gives the gated CPU clock its average rate: create_clock on the BUFGCE output with period 10 ns / duty.
-# - BRAM enables: the 64K x 32 memory is 64 width-sliced RAMB36, so every block takes part in every access; each
-#   block's EN pin gets static probability = the simulated enable duty of its port (read or write cycles / all
-#   cycles) and toggle rate min(99, 199 p) % (single-clock pulses); the WE pins likewise with the write duty.
-#   The physical port driven from the PS read/write logic (fan-in from u_ps_if) is the PS port.
-# duties.tcl (written by r3_sim.py duties) sets:
+# - BRAM enables: each block's EN pin gets the static probability given in duties.tcl (per block: 1 for the
+#   width-sliced memory as built, whose enables synthesis ties to 1; 1/64 for the address-decoded ram_decomp layout,
+#   one block per port per cycle) and toggle rate min(99, 199 min(p, 1 - p)) %; the WE pins likewise with the
+#   simulated write duty. The physical port driven from the PS read/write logic (fan-in from u_ps_if) is the PS port.
+#   (G2: an earlier version gave EN the simulated read duties; the built netlist has no such enables.)
+# duties.tcl (written by r3_verify.py duties) sets:
 #   set states { <name> <cpu_clock_duty> <pb_en> <pb_we> <pa_en> <pa_we> ... }
 # Writes <outdir>/power_<name>_tr<rate>.rpt, clocks_<name>.rpt and bram_ports.txt.
 

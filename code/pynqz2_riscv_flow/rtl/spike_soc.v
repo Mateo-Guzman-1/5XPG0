@@ -100,7 +100,15 @@ module spike_soc #(
     // Main memory: 256 KB true dual-port block RAM (one always block per
     // port, byte-enable writes, 1-cycle registered read).
     // ------------------------------------------------------------------
+    // `define R3_RAM_DECOMP (research R3 option B, set only by research/tools/power/r3_vivado.tcl): Vivado builds
+    // the array from 64 address-decoded 1K x 36 blocks, so one block per port is enabled per cycle instead of the
+    // width-sliced layout's 64 (with byte writes Vivado cannot put the read enables below on the width-sliced
+    // blocks' enable pins; it ties them to 1). Behaviour is unchanged; without the define the array is as before.
+`ifdef R3_RAM_DECOMP
+    (* ram_style = "block", ram_decomp = "power" *) reg [31:0] mem [0:MEM_WORDS-1];
+`else
     (* ram_style = "block" *) reg [31:0] mem [0:MEM_WORDS-1];
+`endif
 
     reg  [31:0] pb_rdata;            // port B read data (CPU)
     reg  [31:0] pa_rdata_i;          // port A read data (PS)

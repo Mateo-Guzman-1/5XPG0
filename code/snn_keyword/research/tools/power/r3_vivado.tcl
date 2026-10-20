@@ -11,10 +11,11 @@
 #     vectorless power reports at 12.5 / 6.25 / 25 % (all clocks running; the per-state reports come from
 #     r3_power_states.tcl on routed.dcp).
 
-if {$argc < 5} { error "usage: -tclargs <projdir> <out.bit> <reportdir> <POWER_OPT> <READ_WAIT>" }
+if {$argc < 5} { error "usage: -tclargs <projdir> <out.bit> <reportdir> <POWER_OPT> <READ_WAIT> \[ram_decomp\]" }
 set report_dir [file normalize [lindex $argv 2]]
 set power_opt [lindex $argv 3]
 set read_wait [lindex $argv 4]
+set decomp [expr {$argc >= 6 && [lindex $argv 5] eq "ram_decomp"}]   ;# option B: verilog_define R3_RAM_DECOMP
 
 set fp [open build.tcl r]
 set build [read $fp]
@@ -31,9 +32,10 @@ if {[string first $line $build] < 0} { error "build.tcl changed: board.repoPaths
 set build [string map [list $line "set_param board.repoPaths \[list {$repo}\]"] $build]
 set top {set_property top spike_top [current_fileset]}
 if {[string first $top $build] < 0} { error "build.tcl changed: set_property top line not found" }
-set build [string map [list $top "$top\nset_property generic {POWER_OPT=$power_opt READ_WAIT=$read_wait} \[current_fileset\]"] $build]
+set extra [expr {$decomp ? "\nset_property verilog_define R3_RAM_DECOMP \[current_fileset\]" : ""}]
+set build [string map [list $top "$top\nset_property generic {POWER_OPT=$power_opt READ_WAIT=$read_wait} \[current_fileset\]$extra"] $build]
 puts "board.repoPaths: $repo"
-puts "R3 GENERICS: POWER_OPT=$power_opt READ_WAIT=$read_wait"
+puts "R3 GENERICS: POWER_OPT=$power_opt READ_WAIT=$read_wait R3_RAM_DECOMP=$decomp"
 
 eval $build   ;# synthesis, implementation, bitstream; leaves the routed impl_1 design open
 
