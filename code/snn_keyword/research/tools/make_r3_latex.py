@@ -230,45 +230,42 @@ def fig_gating(R):
         end = t0 + w + (t_v if k == 1 else 0.0)
         pts += [(t0, 0), (t0, 1), (end, 1), (end, 0)]
     trace = ' '.join(f'({x:.2f},{y})' for x, y in [(0, 0)] + pts + [(1000, 0)])
-    return tpl(r"""% R3 results: clock gating (TikZ + pgfplots). Needs: pgfplots, arrows.meta, figures/r1_style.tex.
+    return tpl(r"""% R3 results: clock gating, plain-language diagram (TikZ + pgfplots). Needs: pgfplots, arrows.meta, r1_style.
 \begin{figure}[!t]
   \centering
-  \begin{tikzpicture}[font=\sffamily\scriptsize,
-      blk/.style={draw,rounded corners=1pt,align=center,inner sep=2pt,minimum height=0.8cm,fill=white},
-      gat/.style={blk,fill=r1prunedbits!15},
-      arr/.style={-{Stealth[length=1.4mm]},thick},
-      al/.style={font=\sffamily\tiny,inner sep=1.5pt,align=center}]
-    \node[blk,minimum width=1.6cm] (ps) at (0,0) {ARM (PS)\\new request,\\MB[0] last};
-    \node[blk,minimum width=1.45cm] (db) at (2.75,0) {doorbell\\(sticky)};
-    \node[blk,minimum width=1.45cm] (fsm) at (5.6,0) {sleep\\FSM};
-    \node[blk,minimum width=1.6cm] (fclk) at (0,-1.7) {FCLK0\\100\,MHz};
-    \node[blk,minimum width=1.45cm] (bg) at (2.75,-1.7) {BUFGCE};
-    \node[gat,minimum width=1.6cm] (cpu) at (5.6,-1.7) {PicoRV32\\+ \texttt{kdot}};
-    \draw[arr] (ps) -- node[al,above]{AXI write} (db);
-    \draw[arr] (db) -- node[al,above]{wake} (fsm);
-    \draw[arr] ([xshift=0.3cm]cpu.north) -- node[al,right]{SLEEP store\\after reply} ([xshift=0.3cm]fsm.south);
-    \draw[arr] ([xshift=-0.3cm]fsm.south) |- ++(0,-0.42) -| node[al,above,pos=0.25]{clock enable} (bg.north);
-    \draw[arr] (fclk) -- (bg);
-    \draw[arr] (bg) -- node[al,above]{gated clock} (cpu);
-    \node[al,anchor=north,text=black!65] at (2.75,-2.35) {free-running clock: timer, LED, bus logic, AXI interface, BRAM};
-    \node[font=\sffamily\scriptsize\bfseries,anchor=north west] at (-1.05,0.85) {(a)};
+  \begin{tikzpicture}[font=\sffamily\footnotesize,
+      box/.style={draw,rounded corners=2pt,align=center,inner sep=3pt,minimum height=0.95cm,fill=white},
+      new/.style={box,fill=r1prunedbits!18,draw=r1prunedbits!70!black},
+      arr/.style={-{Stealth[length=1.8mm]},thick},
+      lab/.style={font=\sffamily\scriptsize,inner sep=2pt,align=center}]
+    \node[box,minimum width=1.7cm] (clk) at (0,0) {Clock\\100\,MHz};
+    \node[new,minimum width=1.9cm] (sw) at (3.05,0) {Clock switch};
+    \node[box,minimum width=1.9cm] (cpu) at (6.1,0) {RISC-V\\processor};
+    \node[new,minimum width=1.9cm] (ctl) at (3.05,1.75) {Sleep control};
+    \draw[arr] (clk) -- (sw);
+    \draw[arr] (sw) -- node[lab,above]{clock} (cpu);
+    \draw[arr] (ctl) -- node[lab,right]{on / off} (sw);
+    \draw[arr] (cpu.north) |- node[lab,above,pos=0.75]{``done''} (ctl.east);
+    \draw[arr] (-0.85,1.75) node[lab,left,align=right]{new\\request} -- (ctl.west);
+    \node[lab,text=black!60,anchor=north] at (3.05,-0.65) {memory, timer and LED keep the normal clock};
+    \node[font=\sffamily\footnotesize\bfseries,anchor=north west] at (-1.75,2.55) {(a)};
   \end{tikzpicture}
 
-  \vspace{2mm}
+  \vspace{1mm}
   \begin{tikzpicture}
-    \begin{axis}[r1axis, width=0.97\columnwidth, height=2.9cm, xmin=0, xmax=1000, ymin=-0.15, ymax=1.75, xlabel={time (ms)},
-        ytick={0,1}, yticklabels={asleep, awake}, xtick={0,250,500,750,1000}, ylabel={CPU clock}]
+    \begin{axis}[r1axis, width=0.97\columnwidth, height=2.9cm, xmin=0, xmax=1000, ymin=-0.15, ymax=1.75,
+        xlabel={time (ms)}, ytick={0,1}, yticklabels={asleep, awake}, xtick={0,250,500,750,1000}, ylabel={Processor}]
       \addplot[const plot, draw=r1prunedbits, fill=r1prunedbits!30, thick] coordinates {<<TRACE>>} \closedcycle;
-      \node[font=\scriptsize, anchor=south] at (axis cs:<<VX>>,1.02) {verifier, <<TV>>\,ms};
+      \node[font=\scriptsize, anchor=south] at (axis cs:<<VX>>,1.02) {GRU check, <<TV>>\,ms};
       \node[font=\scriptsize, anchor=south west, inner sep=1pt] at (axis cs:508,1.02) {stage 1, <<TS1>>\,ms};
-      \node[font=\sffamily\scriptsize\bfseries, anchor=north west] at (rel axis cs:0.005,0.98) {(b)};
+      \node[font=\sffamily\footnotesize\bfseries, anchor=north west] at (rel axis cs:0.005,0.98) {(b)};
     \end{axis}
   \end{tikzpicture}
-  \caption{Clock gating. (a) After each reply the core stores to a power register and stalls; the sleep FSM then
-  stops its clock (one BUFGCE). The ARM writes the mailbox word MB[0] last; this rings a sticky doorbell that
-  wakes the core, also if it rang just before the core went to sleep. (b) The CPU clock of step~2 over
-  1\,s with one verifier call: awake <<TS1>>\,ms per request (drawn <<W>>\,ms wide) and <<TV>>\,ms per verifier
-  call; asleep <<SLB1>>\,\% (B1) and <<SLB2>>\,\% (B2) of the time.}
+  \caption{Step 1, clock gating. (a) When a request is done, the processor tells the sleep control, which switches its
+  clock off. A new request from the ARM switches it on again; the request is remembered even if it arrives just before
+  the processor falls asleep, so none is lost. (b) The processor over 1\,s with one GRU check: awake <<TS1>>\,ms per
+  request (drawn <<W>>\,ms wide) and <<TV>>\,ms per check; asleep <<SLB1>>\,\% (B1) and <<SLB2>>\,\% (B2) of the time.
+  Green: added in R3.}
   \label{fig:r3-gating}
 \end{figure}
 """, TRACE=trace, VX=f'{250 + (w + t_v) / 2:.1f}', TV=f'{t_v:.0f}', TS1=f'{t_s1:.2f}', W=f'{w:.0f}',
@@ -278,112 +275,98 @@ def fig_gating(R):
 def fig_memory(R):
     V = R['V']
     b_built = V['asbuilt_rw1']['components']['busy']['bram']
-    b_dec = V['decomp_rw1']['components']['busy']['bram']
-    cw, ch = 0.17, 0.4                                       # (a) 32 bit columns x 2 stacked blocks
-    cells_a = [rf'\draw[fill=r1pruned!75, draw=white, line width=0.4pt] ({c * cw:.3f},{r * ch:.3f}) rectangle ++({cw},{ch});'
-               for c in range(32) for r in range(2)]
-    bw, bh, x0, y0 = 0.4, 0.27, 1.5, -3.75                   # (b) 8 x 8 address-decoded blocks; block 21 addressed
-    on_r, on_c = 2, 5
-    cells_b = [rf'\draw[fill={"r1prunedbits" if (r, c) == (on_r, on_c) else "black!7"}, draw=black!40, line width=0.3pt] '
-               rf'({x0 + c * bw:.3f},{y0 + (7 - r) * bh:.3f}) rectangle ++({bw},{bh});' for r in range(8) for c in range(8)]
-    yon = y0 + (7 - on_r) * bh + bh / 2
-    return tpl(r"""% R3 results: BRAM layouts (TikZ). Needs: arrows.meta, figures/r1_style.tex.
+    b_dec = V['decomp_rw1']['components']['idle']['bram']
+    cw, ch = 0.43, 0.3
+
+    def grid(x0, on):
+        return '\n    '.join(rf'\draw[fill={"r1pruned!75" if on(r, c) else "black!8"}, draw=white, line width=0.6pt] '
+                               rf'({x0 + c * cw:.3f},{-r * ch:.3f}) rectangle ++({cw},{ch});'
+                               for r in range(8) for c in range(8))
+    xa, xb = 0.0, 4.35
+    mid = lambda x0: x0 + 4 * cw
+    return tpl(r"""% R3 results: the two memory layouts, plain-language diagram (TikZ). Needs: r1_style.
 \begin{figure}[!t]
   \centering
-  \begin{tikzpicture}[font=\sffamily\scriptsize, arr/.style={-{Stealth[length=1.4mm]},thick},
-      al/.style={font=\sffamily\tiny,inner sep=1.5pt,align=center},
-      big/.style={font=\sffamily\footnotesize\bfseries,align=center}]
-    \node[font=\sffamily\scriptsize\bfseries,anchor=south west] at (-1.25,1.05) {(a) as built: bit-sliced};
-    <<CELLSA>>
-    \node[al,anchor=east] at (-0.05,0.2) {words 0--32K};
-    \node[al,anchor=east] at (-0.05,0.6) {32K--64K};
-    \node[al,anchor=south] at (0.09,0.8) {bit 0};
-    \node[al,anchor=south] at (5.35,0.8) {bit 31};
-    \node[big,anchor=west,text=r1pruned] at (5.6,0.4) {64 on\\<<BA>>\,W};
-    \node[font=\sffamily\scriptsize\bfseries,anchor=south west] at (-1.25,-1.4) {(b) address-decoded};
-    <<CELLSB>>
-    \node[draw,rounded corners=1pt,align=center,fill=white,inner sep=2pt] (dec) at (0.25,<<YON>>) {decoder\\(address)};
-    \draw[arr] (dec.east) -- (<<X0>>,<<YON>>);
-    \node[draw,rounded corners=1pt,align=center,fill=white,inner sep=2pt] (mux) at (5.4,<<YON>>) {64-way\\selector};
-    \draw[arr] (<<X1>>,<<YON>>) -- (mux.west);
-    \draw[arr] (mux.east) -- ++(0.3,0) node[right,al]{data};
-    \node[al,anchor=north] at (<<XM>>,<<YB>>) {64 blocks of 1,024 words};
-    \node[big,anchor=west,text=r1prunedbits] at (5.0,<<YLB>>) {1 on\\<<BD>>\,W};
+  \begin{tikzpicture}[font=\sffamily\footnotesize,
+      lab/.style={font=\sffamily\scriptsize,inner sep=2pt,align=center},
+      big/.style={font=\sffamily\small\bfseries}]
+    \node[font=\sffamily\footnotesize\bfseries] at (<<MA>>,0.6) {(a) Before: as built};
+    \node[font=\sffamily\footnotesize\bfseries] at (<<MB>>,0.6) {(b) After: address-decoded};
+    <<GA>>
+    <<GB>>
+    \node[lab,anchor=north] at (<<MA>>,-2.5) {a word is spread over 32 blocks:\\all 64 blocks read every cycle};
+    \node[lab,anchor=north] at (<<MB>>,-2.5) {a word sits in one block:\\only that block is read};
+    \node[big,text=r1pruned] at (<<MA>>,-3.55) {<<BA>>\,W};
+    \node[big,text=r1pruned] at (<<MB>>,-3.55) {<<BD>>\,W};
+    \node[lab,anchor=west] at (0.4,-4.15) {\tikz\fill[r1pruned!75] (0,0) rectangle (2.2mm,2.2mm); reading \quad
+      \tikz\fill[black!8] (0,0) rectangle (2.2mm,2.2mm); off \quad (memory power while the processor sleeps)};
   \end{tikzpicture}
-  \caption{The 256\,KiB memory: 64 blocks of 36\,Kbit, power while the CPU sleeps. (a) As built, each block holds one
-  bit of every word, and with byte writes Vivado ties every enable to 1: all blocks read in every cycle. (b) Address-decoded,
-  each block holds 1,024 whole words; only the block that holds the address is enabled, one per port.}
+  \caption{Step 2, the memory. The 256\,KiB memory is built from 64 blocks. (a) As built, each block holds one bit of
+  every word; with byte writes Vivado keeps every block reading, also while the processor sleeps. (b) Address-decoded,
+  each block holds 1,024 whole words, and only the block that holds the address is read (one per port). The price is
+  extra logic that picks the right block.}
   \label{fig:r3-memory}
 \end{figure}
-""", CELLSA='\n    '.join(cells_a), CELLSB='\n    '.join(cells_b), BA=f'{b_built:.3f}', BD=f'{b_dec:.3f}',
-               YON=f'{yon:.3f}', X0=f'{x0:.3f}', X1=f'{x0 + 8 * bw:.3f}', XM=f'{x0 + 4 * bw:.3f}',
-               YB=f'{y0 - 0.05:.3f}', YLB=f'{y0 + 0.45:.3f}')
+""", GA=grid(xa, lambda r, c: True), GB=grid(xb, lambda r, c: (r, c) == (3, 5)), MA=f'{mid(xa):.3f}', MB=f'{mid(xb):.3f}',
+               BA=f'{b_built:.3f}', BD=f'{b_dec:.3f}')
 
 
 def fig_system(R):
     a1 = R['act']['asbuilt_rw1']['activity']
     s1 = R['ver']['sets']['rw1']['stage1_cycles']['mean'] / 1e5
     t_v = a1['verifier_cycles']['mean'] / 1e5
-    model_kb = 66056 / 1000
-    return tpl(r"""% R3 results: architecture of the final design (TikZ). Needs: arrows.meta, fit, figures/r1_style.tex.
+    return tpl(r"""% R3 results: the final design, plain-language diagram (TikZ). Needs: arrows.meta, fit, r1_style.
 \begin{figure*}[!t]
   \centering
-  \resizebox{\textwidth}{!}{\begin{tikzpicture}[font=\sffamily\scriptsize,
-      blk/.style={draw,rounded corners=1pt,align=center,minimum height=0.95cm,inner sep=2.5pt,fill=white},
-      gat/.style={blk,fill=r1prunedbits!15},
-      mem/.style={blk,fill=r1dense!10},
-      dec/.style={draw,rounded corners=6pt,align=center,inner sep=2.5pt,minimum height=0.8cm,fill=black!5,font=\sffamily\tiny},
-      grp/.style={draw,dashed,rounded corners=2pt,inner sep=5pt},
-      lab/.style={font=\sffamily\scriptsize\bfseries,anchor=south west,inner sep=1.5pt},
-      arr/.style={-{Stealth[length=1.6mm]},thick},
-      al/.style={above,font=\sffamily\tiny,inner sep=2pt,align=center},
-      note/.style={font=\sffamily\tiny,align=center,text=black!70}]
-    % PC
-    \node[blk,minimum width=1.5cm] (mic) at (-0.6,0) {Microphone\\16\,kHz};
-    \node[blk,minimum width=2.3cm] (fr) at (1.95,0.7) {25 new 10\,ms frames\\(600\,B)};
-    \node[blk,minimum width=2.3cm] (win) at (1.95,-0.7) {1\,s window 24\,$\times$\,32\\(768\,B)};
-    \node[grp,fit=(mic)(fr)(win)] (pc) {};
-    \node[lab] at (pc.north west) {PC, every 250\,ms};
-    \draw[arr] (mic) -- (fr.west); \draw[arr] (mic) -- (win.west);
-    % PS
-    \node[blk,minimum width=2.0cm,minimum height=2.3cm] (arm) at (5.9,0) {ARM Cortex-A9\\writes the\\request, then\\MB[0]};
-    \node[grp,fit=(arm)] (ps) {};
-    \node[lab] at (ps.north west) {PS};
-    \draw[arr] (fr.east) -- (fr.east -| ps.west); \draw[arr] (win.east) -- (win.east -| ps.west);
-    \node[note,anchor=north] at (4.35,-1.25) {TCP};
-    % PL hardware
-    \node[blk,minimum width=2.0cm] (psif) at (9.4,1.15) {AXI slave\\mailbox, doorbell};
-    \node[gat,minimum width=2.0cm] (gate) at (9.4,-0.35) {sleep FSM\\+ BUFGCE};
-    \node[gat,minimum width=2.9cm,minimum height=1.25cm] (cpu) at (12.9,-0.35) {PicoRV32 RV32IM, 100\,MHz\\\texttt{kdot}/\texttt{ksdot}, READ\_WAIT 1\\(gated clock)};
-    \node[mem,minimum width=2.9cm,minimum height=1.25cm] (ram) at (12.9,1.45) {BRAM 256\,KiB, 64 blocks,\\address-decoded: firmware,\\models <<MODEL>>\,KB, 1.5\,s frames};
-    \draw[arr] (ps.east |- psif) -- (psif.west);
-    \draw[arr] (psif) -- (gate);
-    \draw[arr] (gate) -- node[al]{clock} (cpu);
-    \draw[arr,{Stealth[length=1.6mm]}-{Stealth[length=1.6mm]}] (psif.east) -- (ram.west |- psif.east);
-    \draw[arr,{Stealth[length=1.6mm]}-{Stealth[length=1.6mm]}] (cpu) -- (ram);
-    % firmware flow per request
-    \node[blk,minimum width=1.7cm] (push) at (9.0,-2.45) {push frames\\into buffer};
-    \node[blk,minimum width=2.2cm] (s1) at (11.35,-2.45) {stage 1: pruned SNN\\48 LIF, <<S1>>\,ms};
-    \node[dec] (t1) at (13.75,-2.45) {margin $\geq t_1$\\in $k$ or $k{-}1$?};
-    \node[blk,minimum width=2.2cm] (gru) at (16.3,-2.45) {stage 2: GRU verifier\\<<TV>>\,ms};
-    \node[dec] (t2) at (18.6,-2.45) {head $\geq t_2$?};
-    \node[blk,minimum width=1.2cm] (led) at (20.4,-2.45) {LED0\\1\,s};
-    \draw[arr] (push) -- (s1); \draw[arr] (s1) -- (t1); \draw[arr] (t1) -- node[al]{yes} (gru);
-    \draw[arr] (gru) -- (t2); \draw[arr] (t2) -- node[al]{yes} (led);
-    \draw[arr] (t1.south) -- ++(0,-0.45) node[below,note,inner sep=1pt] (nosl) {no: reply, sleep};
-    \node[grp,fit=(push)(led)(nosl)] (fw) {};
-    \node[lab] at (fw.north west) {firmware, per request};
-    \draw[arr,dashed,black!60] (cpu.south) -- (cpu.south |- fw.north);
-    \node[grp,fit=(psif)(ram)(cpu)(gate)(fw)] (pl) {};
-    \node[lab] at (pl.north west) {PL (FPGA fabric)};
+  \resizebox{\textwidth}{!}{\begin{tikzpicture}[font=\sffamily\small,
+      box/.style={draw,rounded corners=2pt,align=center,minimum height=1.15cm,inner sep=4pt,fill=white},
+      new/.style={box,fill=r1prunedbits!18,draw=r1prunedbits!70!black},
+      ask/.style={draw,rounded corners=9pt,align=center,inner sep=4pt,minimum height=1.0cm,fill=black!5},
+      area/.style={draw=black!45,rounded corners=3pt,inner sep=7pt},
+      head/.style={font=\sffamily\small\bfseries,anchor=south west,inner sep=2pt},
+      arr/.style={-{Stealth[length=2.2mm]},thick},
+      lab/.style={font=\sffamily\footnotesize,inner sep=2pt,align=center}]
+    % ---- hardware row
+    \node[box,minimum width=2.6cm] (mic) at (0,0) {Microphone};
+    \node[box,minimum width=3.6cm] (feat) at (4.0,0) {sound features\\every 250\,ms};
+    \draw[arr] (mic) -- (feat);
+    \node[area,fit=(mic)(feat)] (pc) {};
+    \node[head] at (pc.north west) {1.\ PC};
+    \node[box,minimum width=3.0cm] (arm) at (9.0,0) {passes each\\request on};
+    \node[area,fit=(arm)] (ps) {};
+    \node[head] at (ps.north west) {2.\ Board: ARM processor};
+    \draw[arr] (pc.east) -- (ps.west);
+    \node[new,minimum width=3.9cm] (cpu) at (14.2,0) {RISC-V processor,\\sleeps between requests};
+    \node[new,minimum width=3.9cm] (mem) at (19.0,0) {memory 256\,KiB,\\1 of 64 blocks on};
+    \draw[arr,{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]}] (cpu) -- (mem);
+    \node[area,fit=(cpu)(mem)] (pl) {};
+    \node[head] at (pl.north west) {3.\ Board: FPGA (our design)};
+    \draw[arr] (ps.east) -- (pl.west);
+    % ---- per-request row
+    \node[box,minimum width=3.6cm] (s1) at (2.2,-2.9) {Stage 1: small spiking\\network, <<S1>>\,ms};
+    \node[ask] (q1) at (6.4,-2.9) {maybe\\``Sheila''?};
+    \node[box,minimum width=4.2cm] (gru) at (10.9,-2.9) {Stage 2: GRU network checks\\the last 1.5\,s, <<TV>>\,ms};
+    \node[ask] (q2) at (15.3,-2.9) {``Sheila''?};
+    \node[box,minimum width=2.4cm] (led) at (18.6,-2.9) {LED on\\for 1\,s};
+    \draw[arr] (s1) -- (q1);
+    \draw[arr] (q1) -- node[lab,above]{yes} (gru);
+    \draw[arr] (gru) -- (q2);
+    \draw[arr] (q2) -- node[lab,above]{yes} (led);
+    \draw[arr] (q1.south) -- ++(0,-0.5) node[lab,below] (n1) {no: sleep};
+    \draw[arr] (q2.south) -- ++(0,-0.5) node[lab,below] (n2) {no: sleep};
+    \node[area,fit=(s1)(led)(n1)(n2)] (fw) {};
+    \node[head] at (fw.north west) {What the processor does for each request};
+    \draw[arr,dashed,black!55] (cpu.south) -- (cpu.south |- fw.north);
+    % ---- legend
+    \node[lab,anchor=south east] at (pl.north east) {\tikz\filldraw[fill=r1prunedbits!18,draw=r1prunedbits!70!black] (0,0) rectangle (3mm,3mm); added in R3};
   \end{tikzpicture}}
-  \caption{The final design (B1 and B2 differ only in $t_1$). Every 250\,ms the PC sends the newest 1\,s window and
-  the 25 new 10\,ms frames. The core wakes, pushes the frames into a 1.5\,s buffer and runs stage~1; if its margin
-  reached $t_1$ in this request or the previous one, the GRU verifier scores the buffer, and a head score of at least
-  $t_2$ (1\,s hold-off) lights LED0. Then the core replies and sleeps (Fig.~\ref{fig:r3-gating}).}
+  \caption{The final design (B1 and B2 differ only in the stage-1 threshold). Every 250\,ms the PC sends the last
+  1\,s of sound features and the newest 0.25\,s; the processor wakes and runs stage~1. If stage~1 reports a possible
+  ``Sheila'' (now or 250\,ms earlier), the GRU network checks the last 1.5\,s, and a positive check lights the LED.
+  After each request the processor sleeps (Fig.~\ref{fig:r3-gating}).}
   \label{fig:r3-system}
 \end{figure*}
-""", MODEL=f'{model_kb:.0f}', S1=f'{s1:.2f}', TV=f'{t_v:.0f}')
+""", S1=f'{s1:.2f}', TV=f'{t_v:.0f}')
 
 
 def stacked(x, parts, width=0.6):
@@ -667,25 +650,27 @@ def body_results(R):
     d_idle = V['decomp_rw1']['states']['idle']['12.5']['p_pl']
     return tpl(r"""% R3 results report body (generated by make_r3_latex.py results). Design codes only, no names.
 \section{What}
-The cascades B1 and B2 of R2 (Fig.~\ref{fig:r3-system}) meet all seven group requirements, but their cost was
-estimated: the verifier time came from another SoC, and the PL draws 0.367\,W whatever it computes, because the core
-busy-polls its mailbox and the 256\,KiB BRAM reads on every cycle. R3 runs B1 and B2 on our fabric as one firmware and
-adds an idle mode in two steps. Step~1, clock gating, saves only <<SG8B1>>\,\% (B1) and <<SG8B2>>\,\% (B2). Step~2,
+Our earlier designs are W0, a small spiking network alone (R1), and the two-stage designs B1 and B2 (R2,
+Fig.~\ref{fig:r3-system}): W0 proposes, and a GRU network checks the proposals; B1 is tuned for the highest
+detection rate, B2 for at most 2,150 checks per hour. B1 and B2 meet all seven group requirements, but their cost
+was estimated: the GRU time came from another SoC, and the FPGA (PL) draws 0.367\,W whatever it computes, because the
+processor keeps polling for work and the 256\,KiB memory reads on every cycle. R3 runs B1 and B2 on our FPGA design and
+adds a sleep mode in two steps. Step~1, clock gating, saves only <<SG8B1>>\,\% (B1) and <<SG8B2>>\,\% (B2). Step~2,
 an address-decoded memory, brings the PL power to <<PB1>>\,W and <<PB2>>\,W, $-$<<SB1>>\,\% and $-$<<SB2>>\,\%; every
 requirement still holds.
 
 \input{figures/fig_r3_system}
 
 \section{How}
-\textbf{Step 1: clock gating} (Fig.~\ref{fig:r3-gating}). Between requests the core stops on a store to a power
-register, and a BUFGCE stops its clock until the ARM's next request rings a doorbell. The logic is adapted from the
-streaming design's sleep branch; it needs no interrupts, and on an older bitstream the store simply returns.
+\textbf{Step 1: clock gating} (Fig.~\ref{fig:r3-gating}). After each request the processor tells a sleep control to
+switch its clock off (a clock switch, BUFGCE); the next request switches it on again. The logic is adapted from the
+streaming design's sleep branch; it needs no interrupts, and on an older bitstream the processor simply keeps polling.
 
-\textbf{Step 2: address-decoded memory} (Fig.~\ref{fig:r3-memory}). Step~1 saves only <<GSAVE>>\,W, because the BRAM,
-0.25 of the 0.28\,W dynamic power, keeps reading. Read enables in the RTL cannot stop it: with byte writes, Vivado ties
-every enable of the bit-sliced layout to 1. In the address-decoded layout only the block that holds the address is on.
-Step~2 also reads the memory in 1 cycle instead of 8 (READ\_WAIT 1): a verifier call takes <<TV1>>\,ms instead of
-<<TV8>>\,ms, which meets the 200\,ms requirement.
+\textbf{Step 2: address-decoded memory} (Fig.~\ref{fig:r3-memory}). Step~1 saves only <<GSAVE>>\,W, because the memory,
+0.25 of the 0.28\,W dynamic power, keeps reading. Telling it in the RTL to read only when needed does not help: with
+byte writes, Vivado keeps every block of the as-built layout reading. In the address-decoded layout each word sits in
+one block, and only that block is read. Step~2 also reads the memory in 1 cycle instead of 8 (READ\_WAIT 1): a GRU
+check takes <<TV1>>\,ms instead of <<TV8>>\,ms, which meets the 200\,ms requirement.
 
 \textbf{Checks.} Firmware and RTL were simulated (xsim) against the integer models: 117 requests with 13 verifier
 calls, bit-exact with and without gating and with identical cycle counts; with gating off, the RTL equals the previous
