@@ -1,0 +1,104 @@
+{
+  "experiment": "R3 addendum: READ_WAIT = 1",
+  "decided": "G1, 2026-10-20 (Pedro): main design POWER_OPT 1 + READ_WAIT 1; READ_WAIT 8 shows the effect of gating alone",
+  "written_before_any_read_wait_1_measurement": true,
+  "inputs": {
+    "phase1": "results/R3/phase1/hypothesis.json, feasibility.json",
+    "reads_per_call": 4581652,
+    "t_v_read_wait8_measured": 21252482.3,
+    "other_awake_W": 0.031,
+    "bram_W": 0.25,
+    "p_idle_W": 0.094
+  },
+  "hypotheses": {
+    "H1_rw1": {
+      "prediction": "T_V 10.3-11.2 M cycles (H1); worst compute <= 200 ms (pass)",
+      "accept": [
+        10300000.0,
+        11200000.0
+      ],
+      "worst_compute_ms": 112.3
+    },
+    "H2_rw1": {
+      "prediction": "100 % bit-exact at READ_WAIT 1 (same outputs as READ_WAIT 8); compute cycles identical with POWER_OPT 0 and 1 at READ_WAIT 1"
+    },
+    "S1_rw1": {
+      "prediction": "stage-1 cycles about 14 k (11-18 k) at READ_WAIT 1 (34.2 k at 8)",
+      "accept": [
+        11000.0,
+        18000.0
+      ]
+    },
+    "H4_rw1": {
+      "prediction": "central: B1 0.106 W, B2 0.102 W; pessimistic B1 0.119 W, B2 0.110 W; same rule as H4 (B1 <= 0.150 W and B2 <= 0.130 W)",
+      "designs": {
+        "B1": {
+          "rw8": {
+            "c_v": 21252482.3,
+            "e_call_mJ": 18.04,
+            "p_avg_central_W": 0.1093,
+            "saving_central": 0.7022,
+            "p_avg_pessimistic_W": 0.1433
+          },
+          "rw1": {
+            "c_v": 10730000.0,
+            "e_call_mJ": 14.78,
+            "p_avg_central_W": 0.1065,
+            "saving_central": 0.7097,
+            "p_avg_pessimistic_W": 0.119
+          },
+          "rw1_minus_rw8_W": -0.0028,
+          "asleep_bound_rw1": 0.9037,
+          "latency_ms_rw1": 170.6
+        },
+        "B2": {
+          "rw8": {
+            "c_v": 21252482.3,
+            "e_call_mJ": 18.04,
+            "p_avg_central_W": 0.1036,
+            "saving_central": 0.7177,
+            "p_avg_pessimistic_W": 0.125
+          },
+          "rw1": {
+            "c_v": 10730000.0,
+            "e_call_mJ": 14.78,
+            "p_avg_central_W": 0.1019,
+            "saving_central": 0.7225,
+            "p_avg_pessimistic_W": 0.1097
+          },
+          "rw1_minus_rw8_W": -0.0017,
+          "asleep_bound_rw1": 0.939,
+          "latency_ms_rw1": 177.9
+        }
+      }
+    },
+    "H10": {
+      "prediction": "READ_WAIT 1 lowers the gated average power only a little: by 1-5 mW for B1 and B2, since the BRAM energy per call is set by the read count, not the time",
+      "accept_W": [
+        0.001,
+        0.005
+      ]
+    },
+    "H6_rw1": {
+      "prediction": "awake cycles per request without a verifier call 15-40 k; CPU asleep >= 90 % (B1), >= 93 % (B2)",
+      "accept_awake": [
+        15000.0,
+        40000.0
+      ],
+      "asleep": {
+        "B1": 0.9037,
+        "B2": 0.939
+      }
+    },
+    "H7_rw1": {
+      "prediction": "same cost limits as H7; utilization within 10 LUT of the READ_WAIT 8 gated build; WNS >= 0"
+    },
+    "requirements_rw1": {
+      "prediction": "all seven group requirements met by B1 and B2 (detection unchanged, worst compute <= 200 ms, latency about 170-180 ms)",
+      "latency_ms": {
+        "B1": 170.6,
+        "B2": 177.9
+      }
+    }
+  }
+}

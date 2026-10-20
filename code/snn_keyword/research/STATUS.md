@@ -19,7 +19,7 @@ size and synapse study for the report). All energy numbers are in [ENERGY.md](EN
 | S6 | Sparse kdot (kxload/ksdot hardware) vs the deployed dense-kdot model | **done** 2026-10-17 | `results/S6/`, [S_energy_synapse.md](reports/S_energy_synapse.md) §S6 |
 | R1 | The S designs against the group requirements, with Mateo's test harness ([PLAN_R1.md](PLAN_R1.md)) | **done** 2026-10-19 | `results/R1/`, [R1_requirements.md](reports/R1_requirements.md), `reports/latex/requirements_eval/` |
 | R2 | Cascade: pruned H48 K64 first stage + Mateo's GRU verifier, then the verifier fine-tuned on our false proposals ([PLAN_R2_GRU.md](PLAN_R2_GRU.md)) | **done** 2026-10-20 | `results/R2/`, [R2_cascade_gru.md](reports/R2_cascade_gru.md), `reports/latex/cascade_gru/` |
-| R3 | Clock gating + BRAM read enables for the B1/B2 cascades on our fabric (cascade firmware, xsim bit-exact, bitstream, per-state Vivado power; board test later) ([PLAN_R3_GATING.md](PLAN_R3_GATING.md)) | **in progress** since 2026-10-20: Phase 1 done, waiting at gate G1 (hypotheses pre-registered in `results/R3/phase1/hypothesis.json`, tag `r3-base`) | `results/R3/`, `reports/latex/clock_gating_plan/`, `reports/latex/clock_gating_results/` |
+| R3 | Clock gating + BRAM read enables for the B1/B2 cascades on our fabric (cascade firmware, xsim bit-exact, bitstream, per-state Vivado power; board test later) ([PLAN_R3_GATING.md](PLAN_R3_GATING.md)) | **in progress** since 2026-10-20: Phase 1 done, G1 passed (main design `READ_WAIT = 1`), Phase 2 running (hypotheses pre-registered in `results/R3/phase1/hypothesis.json` and `phase2/hypothesis_rw1.json`, tag `r3-base`) | `results/R3/`, `reports/latex/clock_gating_plan/`, `reports/latex/clock_gating_results/` |
 
 ## R3 Phase 1: feasibility (2026-10-20)
 Plan: [PLAN_R3_GATING.md](PLAN_R3_GATING.md). Data: `results/R3/phase1/` (`hypothesis.json`, `feasibility.json`, xsim logs in `sim/`).
@@ -308,9 +308,10 @@ For reference, the previous "yes" release: test F1 0.8761 (seeds 0.867 ± 0.022)
   three seeds it may be chance.
 
 ## Next step
-**R3 is at gate G1 (2026-10-20).** Pedro decides: (1) T_V is 212.5 ms > 200 ms: report the requirement failure as it is,
-or also build and verify a `READ_WAIT = 1` variant; (2) whether to add the `ram_decomp = "power"` BRAM variant (H9);
-(3) the vector budget (xsim is fast enough for the plan's full set). Then Phase 2 (PLAN_R3_GATING.md section 4).
+**R3 Phase 2 in progress.** G1 decisions (Pedro, 2026-10-20): (1) the main design is POWER_OPT = 1 with
+`READ_WAIT = 1` (meets 200 ms); the `READ_WAIT = 8` gated build is kept only to show the effect of gating alone;
+predictions for `READ_WAIT = 1` were added before any such run (`results/R3/phase2/hypothesis_rw1.json`);
+(2) no `ram_decomp` variant; (3) the plan's full vector set. Any deviation from the plan is decided with Pedro.
 
 R2 is complete (2026-10-20). Next:
 - **R3, clock gating: follow [PLAN_R3_GATING.md](PLAN_R3_GATING.md) in a new session** (Pedro's scope: B1 and B2 run on

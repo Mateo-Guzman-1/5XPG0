@@ -97,7 +97,72 @@ def verifier_kdot_cycles():
     return dict(macs=per_step * steps, kdot_cycles=per_step * steps * 3 // 4, kdot_instructions=calls)
 
 
+def addendum_rw1():
+    """G1 decision (2026-10-20): the main design is POWER_OPT = 1 with READ_WAIT = 1; READ_WAIT = 8 shows gating alone.
+    Predictions for READ_WAIT = 1, written after Phase 1 (READ_WAIT = 8 measured) and before any READ_WAIT = 1 run.
+    Basis: the BRAM reads of one call (kdot cycles + CPU read accepts) do not depend on READ_WAIT, so the measured
+    port-B read count of F3 carries over; only the awake time shrinks."""
+    base = json.loads(OUT.read_text(encoding='utf-8'))
+    feas = json.loads((OUT.parent / 'feasibility.json').read_text(encoding='utf-8'))
+    P, D = power_terms(), design_rows()
+    p_idle = P['pl_static'] + P['infra_dyn']
+    other = P['clocks'] + P['signals'] + P['slice_logic'] + P['dsp']     # awake, time-proportional (S6 report)
+    f3 = feas['F3']['items'][0]
+    reads_v = f3['port_b_read_duty'] * f3['service_cycles']             # port-B reads per call (opcode 6, measured)
+    c_v8 = feas['F3']['t_v_cycles']['mean']
+    c_v1, c_v1_lo, c_v1_hi = 10.73e6, 10.3e6, 11.2e6                     # H1 (Phase 1 pre-registration)
+    c_s1_1, c_s1_awake_1 = 14e3, 20e3      # stage 1 about 3x faster on CPU code (JOURNAL entry 3); awake incl. push/poll
+    e_call = lambda c: other * c / F_CLK + P['bram'] * reads_v / F_CLK   # J per call, central
+    designs = {}
+    for code, d in D.items():
+        out = {}
+        for rw, c_v in (('rw8', c_v8), ('rw1', c_v1)):
+            e_h = 3600 * p_idle + d['calls_h'] * e_call(c_v) + REQUESTS_H * other * c_s1_awake_1 / F_CLK
+            pess = p_avg(p_idle, d['calls_h'], P['core_dyn'], c_s1_awake_1, P['core_dyn'], c_v)[0]
+            out[rw] = dict(c_v=c_v, e_call_mJ=rnd(1000 * e_call(c_v), 2), p_avg_central_W=rnd(e_h / 3600),
+                           saving_central=rnd(1 - e_h / 3600 / P_BUSY), p_avg_pessimistic_W=rnd(pess))
+        out['rw1_minus_rw8_W'] = rnd(out['rw1']['p_avg_central_W'] - out['rw8']['p_avg_central_W'], 5)
+        out['asleep_bound_rw1'] = rnd(1 - (REQUESTS_H * 40e3 + d['calls_h'] * c_v1_hi) / F_CLK / 3600)
+        out['latency_ms_rw1'] = rnd(d['latency_ms_r2'] - 1000 * T_V_R2_MAX + 1000 * c_v1 / F_CLK, 1)
+        designs[code] = out
+    t_s1 = base['stage1']['t_max_ms']
+    rep = dict(
+        experiment='R3 addendum: READ_WAIT = 1', decided='G1, 2026-10-20 (Pedro): main design POWER_OPT 1 + READ_WAIT 1; '
+        'READ_WAIT 8 shows the effect of gating alone', written_before_any_read_wait_1_measurement=True,
+        inputs=dict(phase1='results/R3/phase1/hypothesis.json, feasibility.json', reads_per_call=round(reads_v),
+                    t_v_read_wait8_measured=c_v8, other_awake_W=rnd(other), bram_W=P['bram'], p_idle_W=rnd(p_idle)),
+        hypotheses=dict(
+            H1_rw1=dict(prediction='T_V 10.3-11.2 M cycles (H1); worst compute <= 200 ms (pass)',
+                        accept=[c_v1_lo, c_v1_hi], worst_compute_ms=rnd(c_v1_hi / 1e5 + t_s1, 1)),
+            H2_rw1=dict(prediction='100 % bit-exact at READ_WAIT 1 (same outputs as READ_WAIT 8); compute cycles identical '
+                                   'with POWER_OPT 0 and 1 at READ_WAIT 1'),
+            S1_rw1=dict(prediction='stage-1 cycles about 14 k (11-18 k) at READ_WAIT 1 (34.2 k at 8)',
+                        accept=[11e3, 18e3]),
+            H4_rw1=dict(prediction='central: B1 %.3f W, B2 %.3f W; pessimistic B1 %.3f W, B2 %.3f W; same rule as H4 '
+                                   '(B1 <= 0.150 W and B2 <= 0.130 W)' % (
+                                       designs['B1']['rw1']['p_avg_central_W'], designs['B2']['rw1']['p_avg_central_W'],
+                                       designs['B1']['rw1']['p_avg_pessimistic_W'], designs['B2']['rw1']['p_avg_pessimistic_W']),
+                        designs=designs),
+            H10=dict(prediction='READ_WAIT 1 lowers the gated average power only a little: by 1-5 mW for B1 and B2, since '
+                                'the BRAM energy per call is set by the read count, not the time',
+                     accept_W=[0.001, 0.005]),
+            H6_rw1=dict(prediction='awake cycles per request without a verifier call 15-40 k; CPU asleep >= 90 % (B1), '
+                                   '>= 93 % (B2)', accept_awake=[15e3, 40e3],
+                        asleep=dict(B1=designs['B1']['asleep_bound_rw1'], B2=designs['B2']['asleep_bound_rw1'])),
+            H7_rw1=dict(prediction='same cost limits as H7; utilization within 10 LUT of the READ_WAIT 8 gated build; WNS >= 0'),
+            requirements_rw1=dict(prediction='all seven group requirements met by B1 and B2 (detection unchanged, worst compute '
+                                             '<= 200 ms, latency about 170-180 ms)',
+                                  latency_ms={c: designs[c]['latency_ms_rw1'] for c in designs})))
+    out_file = RES / 'R3/phase2/hypothesis_rw1.json'
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+    out_file.write_text(json.dumps(rep, indent=2) + '\n', encoding='utf-8')
+    print(json.dumps({c: {k: v for k, v in d.items()} for c, d in designs.items()}, indent=1))
+    print('wrote', out_file)
+
+
 def main():
+    if '--addendum-rw1' in sys.argv:
+        return addendum_rw1()
     P = power_terms()
     D = design_rows()
     s1 = stage1_row()
