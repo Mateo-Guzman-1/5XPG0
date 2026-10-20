@@ -1,0 +1,22 @@
+{
+  "experiment": "R3 addendum: address-decoded BRAM (ram_decomp = \"power\", option B)",
+  "decided": "2026-10-20 (Pedro), after the G2 finding below; B+ (64 explicit banks with read enables on EN) deferred",
+  "written_before_the_decomp_build": true,
+  "finding_that_led_here": [
+    "Synthesis ties every BRAM enable of the 64K x 32 width-sliced memory to VCC: with byte-write enables in the 32K x 1 cascaded layout, Vivado cannot map a read enable onto EN, for either coding style (results/R3/vivado/bram_enable/). opt_design then gates the lower block of each cascade pair by the address MSB; the upper blocks stay on.",
+    "So the built POWER_OPT 1 design reads the BRAM every cycle, also while the CPU sleeps: the gated design as built saves only the clock gate, B1 0.352 W (-4.0 %), B2 0.351 W (-4.3 %) at READ_WAIT 1 (idle 0.350 W).",
+    "The earlier per-state reports that set the BRAM enables to the simulated read duties (idle 0.222 W, -38 %) do not describe the built netlist and are withdrawn.",
+    "Test RAMs: with ram_decomp = \"power\" the memory becomes 64 address-decoded 1K x 36 blocks; each enable is a 6-bit address decode (one block per port per cycle, also while asleep); the read hold is built in fabric (about +1,950 LUT, +94 FF in a 64K x 32 test RAM)."
+  ],
+  "method": "Same per-state flow (r3_power_states.tcl): gated CPU clock at the simulated duty; BRAM enable static probability per block = blocks enabled per access / 64 (as built: 1; decomposed: 1/64), write enables likewise with the simulated write duty.",
+  "predictions": {
+    "H9": "verifier-state BRAM power at least 80 % below the as-built design (plan PLAN_R3_GATING.md section 2)",
+    "H9_cost": {"luts_vs_as_built_rw1": [1000, 2200], "registers_vs_as_built_rw1": [0, 150], "bram36": 64, "wns_ns_min": 0.0,
+                "note": "the 64-way output selector sits on the one-cycle READ_WAIT 1 read path; WNS < 0 is a stop (fallback READ_WAIT 2)"},
+    "H9_idle": {"p_idle_W": [0.10, 0.14], "central_W": 0.12,
+                "derivation": "PL static 0.085 + clocks, signals and interface about 0.013 + BRAM: 2 block-ports always enabled at 1K x 36 (1-bit blocks cost about 0.25 W / 128 = 2 mW per block-port; a 36-bit block costs more per access, assumed 3-8x) + fabric hold/selector a few mW = 0.01-0.04 W"},
+    "H9_designs": {"B1_W": [0.10, 0.15], "B2_W": [0.10, 0.15], "savings_vs_0.367_W": [0.59, 0.73],
+                   "note": "awake share 9.1 % (B1) and 5.8 % (B2) at READ_WAIT 1 adds only a few mW to the idle floor"},
+    "H9_layout_alone": "the decomposed layout without sleeping (CPU clock always on) already saves most of the BRAM power: below 0.17 W"
+  }
+}
