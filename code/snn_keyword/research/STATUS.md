@@ -19,7 +19,7 @@ size and synapse study for the report). All energy numbers are in [ENERGY.md](EN
 | S6 | Sparse kdot (kxload/ksdot hardware) vs the deployed dense-kdot model | **done** 2026-10-17 | `results/S6/`, [S_energy_synapse.md](reports/S_energy_synapse.md) §S6 |
 | R1 | The S designs against the group requirements, with Mateo's test harness ([PLAN_R1.md](PLAN_R1.md)) | **done** 2026-10-19 | `results/R1/`, [R1_requirements.md](reports/R1_requirements.md), `reports/latex/requirements_eval/` |
 | R2 | Cascade: pruned H48 K64 first stage + Mateo's GRU verifier, then the verifier fine-tuned on our false proposals ([PLAN_R2_GRU.md](PLAN_R2_GRU.md)) | **done** 2026-10-20 | `results/R2/`, [R2_cascade_gru.md](reports/R2_cascade_gru.md), `reports/latex/cascade_gru/` |
-| R3 | Clock gating + BRAM read enables for the B1/B2 cascades on our fabric (cascade firmware, xsim bit-exact, bitstream, per-state Vivado power; board test later) ([PLAN_R3_GATING.md](PLAN_R3_GATING.md)) | **in progress** since 2026-10-20: Phases 1-2 done, waiting at gate G2 (Phase 3 = results report). Record [R3_clock_gating.md](reports/R3_clock_gating.md); predictions `results/R3/phase1/`, `phase2/hypothesis_*.json`; tag `r3-base` | `results/R3/`, `reports/latex/clock_gating_plan/`, `reports/latex/clock_gating_results/` |
+| R3 | Clock gating + BRAM read enables for the B1/B2 cascades on our fabric (cascade firmware, xsim bit-exact, bitstream, per-state Vivado power; board test later) ([PLAN_R3_GATING.md](PLAN_R3_GATING.md)) | **done** 2026-10-20 (gate G3: board test next). Record [R3_clock_gating.md](reports/R3_clock_gating.md); predictions `results/R3/phase1/`, `phase2/hypothesis_*.json`; tag `r3-base` | `results/R3/`, `reports/latex/clock_gating_plan/`, `reports/latex/clock_gating_results/` |
 
 ## R3 Phase 2: clock gating built, verified, estimated (2026-10-20)
 Full record: [reports/R3_clock_gating.md](reports/R3_clock_gating.md); energy: [ENERGY.md](ENERGY.md) section "R3".
@@ -327,11 +327,17 @@ For reference, the previous "yes" release: test F1 0.8761 (seeds 0.867 ± 0.022)
   three seeds it may be chance.
 
 ## Next step
-**R3 is at gate G2 (2026-10-20).** Phase 2 is done (section "R3 Phase 2" above). Next, after Pedro's go:
-- Phase 3 (PLAN_R3_GATING.md section 5): the results mini report `reports/latex/clock_gating_results/`, told as
-  (1) clock gating alone, -4 %, then (2) the address-decoded BRAM, -71 % (Pedro's structure). The plan report
-  `reports/latex/clock_gating_plan/` predates the BRAM finding (its figure assumes working read enables).
-- Later: the board run of G1-D (`r3_board_cascade.py`, USB meter busy vs gated); B+ if there is time.
+**R3 is done (2026-10-20, gate G3).** Results report `reports/latex/clock_gating_results/main.pdf` (3 pages: steps
+(1) clock gating alone, -3 to -4 %, (2) + READ_WAIT 1 + address-decoded BRAM, -71 %; requirements compared with our
+own iterations R1/R2 only, Pedro's choice). The plan report `reports/latex/clock_gating_plan/` stays as written.
+Next (Pedro): run the final design on the PYNQ and test it live with the microphone. That needs:
+- the gated bitstream `results/R3/r3_gated_rw1_decomp.bit` and the cascade firmware (`build/r3_fw/b1|b2/cascade.bin`);
+- first a replay check on the board with `research/tools/r3_board_cascade.py` (bit-exact against the oracle);
+- a live path: the PC must send the 1 s window **and** the 25 new 10 ms frames per hop (command 7) — the current
+  `board_server.py` / `pc_keyword_demo.py` only send windows, so a cascade server/client is needed (new files;
+  `deploy/` and the release demo stay unchanged);
+- optionally the USB meter: busy demo vs gated idle.
+B+ (explicit banks) remains optional.
 
 R2 is complete (2026-10-20). Next:
 - **R3, clock gating: follow [PLAN_R3_GATING.md](PLAN_R3_GATING.md) in a new session** (Pedro's scope: B1 and B2 run on

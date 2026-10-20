@@ -6,7 +6,9 @@
 `results/R3/phase2/hypothesis_rw1.json` (READ_WAIT 1, written at G1), `results/R3/phase2/hypothesis_decomp.json`
 (address-decoded BRAM, written before its build)
 *Data:* `results/R3/`
-*LaTeX:* plan report `reports/latex/clock_gating_plan/main.pdf`; results report: Phase 3
+*LaTeX:* plan report `reports/latex/clock_gating_plan/main.pdf` (written before the BRAM finding, left as is); results
+report `reports/latex/clock_gating_results/main.pdf` (Phase 3, `make_r3_latex.py results`; every figure and table is its
+own `.tex` file for the group report)
 
 ## Design codes
 | Code | Design |
