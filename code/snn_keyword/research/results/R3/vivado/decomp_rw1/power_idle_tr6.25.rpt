@@ -1,16 +1,16 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version     : Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026
-| Date             : Tue Oct 20 22:23:36 2026
+| Date             : Tue Oct 20 23:10:16 2026
 | Host             : Pedro running 64-bit major release  (build 9200)
-| Command          : report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1/power_idle_tr6.25.rpt}
+| Command          : report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1_B/power_idle_tr6.25.rpt}
 | Design           : spike_top
 | Device           : xc7z020clg400-1
 | Design State     : routed
 | Grade            : commercial
 | Process          : typical
 | Characterization : Production
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Power Report
 
@@ -52,16 +52,16 @@ Table of Contents
 +--------------------------+-----------+----------+-----------+-----------------+
 | On-Chip                  | Power (W) | Used     | Available | Utilization (%) |
 +--------------------------+-----------+----------+-----------+-----------------+
-| Clocks                   |     0.008 |        4 |       --- |             --- |
-| Slice Logic              |     0.003 |    10043 |       --- |             --- |
-|   LUT as Logic           |     0.003 |     4566 |     53200 |            8.58 |
+| Clocks                   |     0.007 |        4 |       --- |             --- |
+| Slice Logic              |     0.003 |    10139 |       --- |             --- |
+|   LUT as Logic           |     0.003 |     4668 |     53200 |            8.77 |
 |   CARRY4                 |    <0.001 |      248 |     13300 |            1.86 |
 |   Register               |    <0.001 |     3098 |    106400 |            2.91 |
 |   F7/F8 Muxes            |    <0.001 |      795 |     53200 |            1.49 |
 |   LUT as Shift Register  |    <0.001 |       60 |     17400 |            0.34 |
 |   LUT as Distributed RAM |    <0.001 |      220 |     17400 |            1.26 |
 |   Others                 |     0.000 |      194 |       --- |             --- |
-| Signals                  |     0.006 |    11164 |       --- |             --- |
+| Signals                  |     0.006 |    11268 |       --- |             --- |
 | Block RAM                |     0.004 |       64 |       140 |           45.71 |
 | DSPs                     |    <0.001 |        8 |       220 |            3.64 |
 | I/O                      |     0.000 |       10 |       125 |            8.00 |

@@ -228,6 +228,40 @@ Full record: [reports/S_energy_synapse.md](reports/S_energy_synapse.md); every d
 Average PL power with clock gating barely moves: 94.4 vs 93.6 mW. The ksdot fabric's interface
 power rounds 1 mW higher in the report.
 
+### R3 — clock gating, measured duty, per-state Vivado (2026-10-20)
+Full record: [reports/R3_clock_gating.md](reports/R3_clock_gating.md); data `results/R3/` (`energy.json`, `energy.csv`,
+`power.json`, `fabric.json`). Designs B1 and B2 (R2 cascades) run as one firmware; the CPU sleeps between requests and its
+clock stops (BUFGCE). Codes: G1 = gated, READ_WAIT 1, BRAM as built; G1-D = G1 with the address-decoded BRAM.
+
+**Method.** Per-state `report_power` on the routed design (S0 settings: vectorless 12.5 %, 25 C), with:
+- the gated CPU clock declared at its average rate (`create_clock` on the BUFGCE output, period 10 ns / duty; Vivado
+  ignores a BUFGCE's CE);
+- each BRAM block's enable probability taken from the built netlist: 1 as built (synthesis ties the enables of the
+  width-sliced byte-write memory to 1, `results/R3/vivado/bram_enable/`), 1/64 for the address-decoded layout;
+- the awake and asleep cycles from the RTL simulation: per request without a verifier call 23,767 awake cycles
+  (READ_WAIT 1; 47,633 at 8), per verifier call 10.69 M (21.17 M).
+
+  E_h = 3600 P_idle + (P_awake - P_idle) (14,400 A_S1 + N_V C_V) / f,   P_avg = E_h / 3600.
+
+| Design | P_idle | P_awake | B1 P_avg (J/h) | B2 P_avg (J/h) | Saving vs 0.367 W |
+|---|---|---|---|---|---|
+| busy-polling (S6 fabric) | 0.367 | 0.367 | 0.367 (1,321) | 0.367 (1,321) | — |
+| G8: gated, READ_WAIT 8, BRAM as built | 0.351 | 0.374 | 0.355 (1,279) | 0.354 (1,273) | 3.2 / 3.6 % |
+| G1: gated, READ_WAIT 1, BRAM as built | 0.350 | 0.374 | 0.352 (1,268) | 0.351 (1,265) | 4.0 / 4.3 % |
+| **G1-D: G1 + address-decoded BRAM** | **0.102** | **0.143** | **0.106 (381)** | **0.105 (376)** | **71.1 / 71.5 %** |
+
+- **The BRAM, not the CPU, sets the idle power.** Gating the CPU clock saves 0.017 W. Address decoding cuts the BRAM from
+  0.254 to 0.004 W; G1-D's idle floor is then PL static (0.080 W) plus clocks, signals and the AXI interface.
+- **The pre-registered R3 prediction (B1 0.109 W, B2 0.103 W) holds only with the address-decoded BRAM.** The plan
+  assumed the RTL read enables would reach the BRAM; with byte writes in the width-sliced layout they do not.
+- **READ_WAIT 1 saves energy only through the shorter awake time:** 3.0 mW (B1) as built; the BRAM reads per call are
+  the same.
+- **Robust to Vivado's activity assumption:** 6.25 % and 25 % move every P_avg by <= 2 mW; the time-averaged day reports
+  agree with the model within 2 mW.
+- **Cost:** G1 +60 LUT, +84 FF, one BUFGCE (WNS +0.479 ns); G1-D +1,705 LUT, +267 FF against S6, timing met with a
+  timing-driven implementation strategy (WNS +0.366 ns; default strategies -0.288 ns).
+- **Not yet measured on the board** (the R3 board kit, `research/tools/r3_board_cascade.py`, is written).
+
 ## 5. Limits of these numbers
 - **Estimates, not measurements.** Vectorless estimates at "Medium" confidence. They were validated
   once with a USB meter (section 3), but that meter measures the whole board, ARM included.

@@ -9914,21 +9914,21 @@
       "file": "results\\R3\\vivado\\decomp_rw1\\power_busy_tr12.5.rpt",
       "header": {
         "Tool Version": "Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026",
-        "Date": "Tue Oct 20 22:23:23 2026",
+        "Date": "Tue Oct 20 23:10:06 2026",
         "Design": "spike_top",
         "Device": "xc7z020clg400-1",
         "Design State": "routed",
-        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1/power_busy_tr12.5.rpt}"
+        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1_B/power_busy_tr12.5.rpt}"
       },
       "summary": {
-        "Total On-Chip Power (W)": 1.456,
+        "Total On-Chip Power (W)": 1.461,
         "Design Power Budget (W)": "Unspecified*",
         "Power Budget Margin (W)": "NA",
-        "Dynamic (W)": 1.314,
+        "Dynamic (W)": 1.32,
         "Device Static (W)": 0.141,
         "Effective TJA (C/W)": 11.5,
-        "Max Ambient (C)": 68.2,
-        "Junction Temperature (C)": 41.8,
+        "Max Ambient (C)": 68.1,
+        "Junction Temperature (C)": 41.9,
         "Confidence Level": "Medium",
         "Setting File": "---",
         "Simulation Activity File": "---",
@@ -9937,436 +9937,7 @@
       "on_chip": [
         {
           "On-Chip": "Clocks",
-          "Power (W)": 0.017,
-          "Used": 4.0,
-          "Available": "---",
-          "Utilization (%)": "---",
-          "depth": 0
-        },
-        {
-          "On-Chip": "Slice Logic",
-          "Power (W)": 0.011,
-          "Used": 10043.0,
-          "Available": "---",
-          "Utilization (%)": "---",
-          "depth": 0
-        },
-        {
-          "On-Chip": "LUT as Logic",
-          "Power (W)": 0.009,
-          "Used": 4566.0,
-          "Available": 53200.0,
-          "Utilization (%)": 8.58,
-          "depth": 1
-        },
-        {
-          "On-Chip": "CARRY4",
-          "Power (W)": "<0.001",
-          "Used": 248.0,
-          "Available": 13300.0,
-          "Utilization (%)": 1.86,
-          "depth": 1
-        },
-        {
-          "On-Chip": "F7/F8 Muxes",
-          "Power (W)": "<0.001",
-          "Used": 795.0,
-          "Available": 53200.0,
-          "Utilization (%)": 1.49,
-          "depth": 1
-        },
-        {
-          "On-Chip": "Register",
-          "Power (W)": "<0.001",
-          "Used": 3098.0,
-          "Available": 106400.0,
-          "Utilization (%)": 2.91,
-          "depth": 1
-        },
-        {
-          "On-Chip": "LUT as Shift Register",
-          "Power (W)": "<0.001",
-          "Used": 60.0,
-          "Available": 17400.0,
-          "Utilization (%)": 0.34,
-          "depth": 1
-        },
-        {
-          "On-Chip": "LUT as Distributed RAM",
-          "Power (W)": "<0.001",
-          "Used": 220.0,
-          "Available": 17400.0,
-          "Utilization (%)": 1.26,
-          "depth": 1
-        },
-        {
-          "On-Chip": "Others",
-          "Power (W)": 0.0,
-          "Used": 194.0,
-          "Available": "---",
-          "Utilization (%)": "---",
-          "depth": 1
-        },
-        {
-          "On-Chip": "Signals",
-          "Power (W)": 0.021,
-          "Used": 11164.0,
-          "Available": "---",
-          "Utilization (%)": "---",
-          "depth": 0
-        },
-        {
-          "On-Chip": "Block RAM",
-          "Power (W)": 0.004,
-          "Used": 64.0,
-          "Available": 140.0,
-          "Utilization (%)": 45.71,
-          "depth": 0
-        },
-        {
-          "On-Chip": "DSPs",
-          "Power (W)": 0.004,
-          "Used": 8.0,
-          "Available": 220.0,
-          "Utilization (%)": 3.64,
-          "depth": 0
-        },
-        {
-          "On-Chip": "I/O",
-          "Power (W)": 0.0,
-          "Used": 10.0,
-          "Available": 125.0,
-          "Utilization (%)": 8.0,
-          "depth": 0
-        },
-        {
-          "On-Chip": "PS7",
-          "Power (W)": 1.258,
-          "Used": 1.0,
-          "Available": "---",
-          "Utilization (%)": "---",
-          "depth": 0
-        },
-        {
-          "On-Chip": "Static Power",
-          "Power (W)": 0.141,
-          "Used": "",
-          "Available": "",
-          "Utilization (%)": "",
-          "depth": 0
-        },
-        {
-          "On-Chip": "Total",
-          "Power (W)": 1.456,
-          "Used": "",
-          "Available": "",
-          "Utilization (%)": "",
-          "depth": 0
-        }
-      ],
-      "supplies": [
-        {
-          "Source": "Vccint",
-          "Voltage (V)": 1.0,
-          "Total (A)": 0.072,
-          "Dynamic (A)": 0.056,
-          "Static (A)": 0.015,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "Vccaux",
-          "Voltage (V)": 1.8,
-          "Total (A)": 0.014,
-          "Dynamic (A)": 0.0,
-          "Static (A)": 0.014,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "Vcco33",
-          "Voltage (V)": 3.3,
-          "Total (A)": 0.0,
-          "Dynamic (A)": 0.0,
-          "Static (A)": 0.0,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "Vcco25",
-          "Voltage (V)": 2.5,
-          "Total (A)": 0.0,
-          "Dynamic (A)": 0.0,
-          "Static (A)": 0.0,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "Vcco18",
-          "Voltage (V)": 1.8,
-          "Total (A)": 0.0,
-          "Dynamic (A)": 0.0,
-          "Static (A)": 0.0,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "Vcco15",
-          "Voltage (V)": 1.5,
-          "Total (A)": 0.0,
-          "Dynamic (A)": 0.0,
-          "Static (A)": 0.0,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "Vcco135",
-          "Voltage (V)": 1.35,
-          "Total (A)": 0.0,
-          "Dynamic (A)": 0.0,
-          "Static (A)": 0.0,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "Vcco12",
-          "Voltage (V)": 1.2,
-          "Total (A)": 0.0,
-          "Dynamic (A)": 0.0,
-          "Static (A)": 0.0,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "Vccaux_io",
-          "Voltage (V)": 1.8,
-          "Total (A)": 0.0,
-          "Dynamic (A)": 0.0,
-          "Static (A)": 0.0,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "Vccbram",
-          "Voltage (V)": 1.0,
-          "Total (A)": 0.005,
-          "Dynamic (A)": 0.0,
-          "Static (A)": 0.005,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "MGTAVcc",
-          "Voltage (V)": 1.0,
-          "Total (A)": 0.0,
-          "Dynamic (A)": 0.0,
-          "Static (A)": 0.0,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "MGTAVtt",
-          "Voltage (V)": 1.2,
-          "Total (A)": 0.0,
-          "Dynamic (A)": 0.0,
-          "Static (A)": 0.0,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "MGTVccaux",
-          "Voltage (V)": 1.8,
-          "Total (A)": 0.0,
-          "Dynamic (A)": 0.0,
-          "Static (A)": 0.0,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "Vccpint",
-          "Voltage (V)": 1.0,
-          "Total (A)": 0.676,
-          "Dynamic (A)": 0.649,
-          "Static (A)": 0.027,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "Vccpaux",
-          "Voltage (V)": 1.8,
-          "Total (A)": 0.036,
-          "Dynamic (A)": 0.026,
-          "Static (A)": 0.01,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "Vccpll",
-          "Voltage (V)": 1.8,
-          "Total (A)": 0.017,
-          "Dynamic (A)": 0.014,
-          "Static (A)": 0.003,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "Vcco_ddr",
-          "Voltage (V)": 1.5,
-          "Total (A)": 0.354,
-          "Dynamic (A)": 0.352,
-          "Static (A)": 0.002,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "Vcco_mio0",
-          "Voltage (V)": 3.3,
-          "Total (A)": 0.003,
-          "Dynamic (A)": 0.002,
-          "Static (A)": 0.001,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "Vcco_mio1",
-          "Voltage (V)": 1.8,
-          "Total (A)": 0.003,
-          "Dynamic (A)": 0.002,
-          "Static (A)": 0.001,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        },
-        {
-          "Source": "Vccadc",
-          "Voltage (V)": 1.8,
-          "Total (A)": 0.02,
-          "Dynamic (A)": 0.0,
-          "Static (A)": 0.02,
-          "Powerup (A)": "NA",
-          "Budget (A)": "Unspecified",
-          "Margin (A)": "NA"
-        }
-      ],
-      "environment": {
-        "Ambient Temp (C)": 25.0,
-        "ThetaJA (C/W)": 11.5,
-        "Airflow (LFM)": 250.0,
-        "Heat Sink": "none",
-        "ThetaSA (C/W)": 0.0,
-        "Board Selection": "medium (10\"x10\")",
-        "# of Board Layers": "8to11 (8 to 11 Layers)",
-        "Board Temperature (C)": 25.0
-      },
-      "hierarchy": [
-        {
-          "Name": "spike_top",
-          "Power (W)": 1.314,
-          "depth": 0
-        },
-        {
-          "Name": "u_bd",
-          "Power (W)": 1.265,
-          "depth": 1
-        },
-        {
-          "Name": "ps_bd_i",
-          "Power (W)": 1.265,
-          "depth": 2
-        },
-        {
-          "Name": "pc0",
-          "Power (W)": 0.007,
-          "depth": 3
-        },
-        {
-          "Name": "ps7",
-          "Power (W)": 1.258,
-          "depth": 3
-        },
-        {
-          "Name": "u_ps_if",
-          "Power (W)": 0.005,
-          "depth": 1
-        },
-        {
-          "Name": "u_soc",
-          "Power (W)": 0.043,
-          "depth": 1
-        },
-        {
-          "Name": "u_cpu",
-          "Power (W)": 0.009,
-          "depth": 2
-        },
-        {
-          "Name": "pcpi_div",
-          "Power (W)": 0.001,
-          "depth": 3
-        },
-        {
-          "Name": "pcpi_mul",
-          "Power (W)": 0.003,
-          "depth": 3
-        },
-        {
-          "Name": "u_kdot",
           "Power (W)": 0.016,
-          "depth": 2
-        },
-        {
-          "Name": "u_poisson",
-          "Power (W)": 0.006,
-          "depth": 2
-        }
-      ]
-    },
-    "power_busy_tr25": {
-      "file": "results\\R3\\vivado\\decomp_rw1\\power_busy_tr25.rpt",
-      "header": {
-        "Tool Version": "Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026",
-        "Date": "Tue Oct 20 22:23:30 2026",
-        "Design": "spike_top",
-        "Device": "xc7z020clg400-1",
-        "Design State": "routed",
-        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1/power_busy_tr25.rpt}"
-      },
-      "summary": {
-        "Total On-Chip Power (W)": 1.457,
-        "Design Power Budget (W)": "Unspecified*",
-        "Power Budget Margin (W)": "NA",
-        "Dynamic (W)": 1.316,
-        "Device Static (W)": 0.141,
-        "Effective TJA (C/W)": 11.5,
-        "Max Ambient (C)": 68.2,
-        "Junction Temperature (C)": 41.8,
-        "Confidence Level": "Medium",
-        "Setting File": "---",
-        "Simulation Activity File": "---",
-        "Design Nets Matched": "NA"
-      },
-      "on_chip": [
-        {
-          "On-Chip": "Clocks",
-          "Power (W)": 0.017,
           "Used": 4.0,
           "Available": "---",
           "Utilization (%)": "---",
@@ -10374,18 +9945,18 @@
         },
         {
           "On-Chip": "Slice Logic",
-          "Power (W)": 0.011,
-          "Used": 10043.0,
+          "Power (W)": 0.012,
+          "Used": 10139.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
         },
         {
           "On-Chip": "LUT as Logic",
-          "Power (W)": 0.009,
-          "Used": 4566.0,
+          "Power (W)": 0.01,
+          "Used": 4668.0,
           "Available": 53200.0,
-          "Utilization (%)": 8.58,
+          "Utilization (%)": 8.77,
           "depth": 1
         },
         {
@@ -10438,8 +10009,8 @@
         },
         {
           "On-Chip": "Signals",
-          "Power (W)": 0.022,
-          "Used": 11164.0,
+          "Power (W)": 0.026,
+          "Used": 11268.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -10486,7 +10057,7 @@
         },
         {
           "On-Chip": "Total",
-          "Power (W)": 1.457,
+          "Power (W)": 1.461,
           "Used": "",
           "Available": "",
           "Utilization (%)": "",
@@ -10497,8 +10068,8 @@
         {
           "Source": "Vccint",
           "Voltage (V)": 1.0,
-          "Total (A)": 0.073,
-          "Dynamic (A)": 0.058,
+          "Total (A)": 0.077,
+          "Dynamic (A)": 0.062,
           "Static (A)": 0.015,
           "Powerup (A)": "NA",
           "Budget (A)": "Unspecified",
@@ -10708,22 +10279,22 @@
       "hierarchy": [
         {
           "Name": "spike_top",
-          "Power (W)": 1.316,
+          "Power (W)": 1.32,
           "depth": 0
         },
         {
           "Name": "u_bd",
-          "Power (W)": 1.266,
+          "Power (W)": 1.265,
           "depth": 1
         },
         {
           "Name": "ps_bd_i",
-          "Power (W)": 1.266,
+          "Power (W)": 1.265,
           "depth": 2
         },
         {
           "Name": "pc0",
-          "Power (W)": 0.008,
+          "Power (W)": 0.007,
           "depth": 3
         },
         {
@@ -10738,7 +10309,7 @@
         },
         {
           "Name": "u_soc",
-          "Power (W)": 0.043,
+          "Power (W)": 0.049,
           "depth": 1
         },
         {
@@ -10758,7 +10329,7 @@
         },
         {
           "Name": "u_kdot",
-          "Power (W)": 0.016,
+          "Power (W)": 0.019,
           "depth": 2
         },
         {
@@ -10768,25 +10339,25 @@
         }
       ]
     },
-    "power_busy_tr6.25": {
-      "file": "results\\R3\\vivado\\decomp_rw1\\power_busy_tr6.25.rpt",
+    "power_busy_tr25": {
+      "file": "results\\R3\\vivado\\decomp_rw1\\power_busy_tr25.rpt",
       "header": {
         "Tool Version": "Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026",
-        "Date": "Tue Oct 20 22:23:26 2026",
+        "Date": "Tue Oct 20 23:10:11 2026",
         "Design": "spike_top",
         "Device": "xc7z020clg400-1",
         "Design State": "routed",
-        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1/power_busy_tr6.25.rpt}"
+        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1_B/power_busy_tr25.rpt}"
       },
       "summary": {
-        "Total On-Chip Power (W)": 1.455,
+        "Total On-Chip Power (W)": 1.463,
         "Design Power Budget (W)": "Unspecified*",
         "Power Budget Margin (W)": "NA",
-        "Dynamic (W)": 1.314,
+        "Dynamic (W)": 1.321,
         "Device Static (W)": 0.141,
         "Effective TJA (C/W)": 11.5,
-        "Max Ambient (C)": 68.2,
-        "Junction Temperature (C)": 41.8,
+        "Max Ambient (C)": 68.1,
+        "Junction Temperature (C)": 41.9,
         "Confidence Level": "Medium",
         "Setting File": "---",
         "Simulation Activity File": "---",
@@ -10795,7 +10366,7 @@
       "on_chip": [
         {
           "On-Chip": "Clocks",
-          "Power (W)": 0.017,
+          "Power (W)": 0.016,
           "Used": 4.0,
           "Available": "---",
           "Utilization (%)": "---",
@@ -10803,18 +10374,18 @@
         },
         {
           "On-Chip": "Slice Logic",
-          "Power (W)": 0.01,
-          "Used": 10043.0,
+          "Power (W)": 0.013,
+          "Used": 10139.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
         },
         {
           "On-Chip": "LUT as Logic",
-          "Power (W)": 0.009,
-          "Used": 4566.0,
+          "Power (W)": 0.011,
+          "Used": 4668.0,
           "Available": 53200.0,
-          "Utilization (%)": 8.58,
+          "Utilization (%)": 8.77,
           "depth": 1
         },
         {
@@ -10867,8 +10438,8 @@
         },
         {
           "On-Chip": "Signals",
-          "Power (W)": 0.021,
-          "Used": 11164.0,
+          "Power (W)": 0.027,
+          "Used": 11268.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -10915,7 +10486,7 @@
         },
         {
           "On-Chip": "Total",
-          "Power (W)": 1.455,
+          "Power (W)": 1.463,
           "Used": "",
           "Available": "",
           "Utilization (%)": "",
@@ -10926,8 +10497,8 @@
         {
           "Source": "Vccint",
           "Voltage (V)": 1.0,
-          "Total (A)": 0.071,
-          "Dynamic (A)": 0.056,
+          "Total (A)": 0.079,
+          "Dynamic (A)": 0.063,
           "Static (A)": 0.015,
           "Powerup (A)": "NA",
           "Budget (A)": "Unspecified",
@@ -11058,7 +10629,7 @@
           "Voltage (V)": 1.0,
           "Total (A)": 0.676,
           "Dynamic (A)": 0.649,
-          "Static (A)": 0.027,
+          "Static (A)": 0.028,
           "Powerup (A)": "NA",
           "Budget (A)": "Unspecified",
           "Margin (A)": "NA"
@@ -11137,7 +10708,436 @@
       "hierarchy": [
         {
           "Name": "spike_top",
-          "Power (W)": 1.314,
+          "Power (W)": 1.321,
+          "depth": 0
+        },
+        {
+          "Name": "u_bd",
+          "Power (W)": 1.266,
+          "depth": 1
+        },
+        {
+          "Name": "ps_bd_i",
+          "Power (W)": 1.266,
+          "depth": 2
+        },
+        {
+          "Name": "pc0",
+          "Power (W)": 0.007,
+          "depth": 3
+        },
+        {
+          "Name": "ps7",
+          "Power (W)": 1.258,
+          "depth": 3
+        },
+        {
+          "Name": "u_ps_if",
+          "Power (W)": 0.005,
+          "depth": 1
+        },
+        {
+          "Name": "u_soc",
+          "Power (W)": 0.049,
+          "depth": 1
+        },
+        {
+          "Name": "u_cpu",
+          "Power (W)": 0.009,
+          "depth": 2
+        },
+        {
+          "Name": "pcpi_div",
+          "Power (W)": 0.001,
+          "depth": 3
+        },
+        {
+          "Name": "pcpi_mul",
+          "Power (W)": 0.003,
+          "depth": 3
+        },
+        {
+          "Name": "u_kdot",
+          "Power (W)": 0.019,
+          "depth": 2
+        },
+        {
+          "Name": "u_poisson",
+          "Power (W)": 0.006,
+          "depth": 2
+        }
+      ]
+    },
+    "power_busy_tr6.25": {
+      "file": "results\\R3\\vivado\\decomp_rw1\\power_busy_tr6.25.rpt",
+      "header": {
+        "Tool Version": "Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026",
+        "Date": "Tue Oct 20 23:10:09 2026",
+        "Design": "spike_top",
+        "Device": "xc7z020clg400-1",
+        "Design State": "routed",
+        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1_B/power_busy_tr6.25.rpt}"
+      },
+      "summary": {
+        "Total On-Chip Power (W)": 1.46,
+        "Design Power Budget (W)": "Unspecified*",
+        "Power Budget Margin (W)": "NA",
+        "Dynamic (W)": 1.319,
+        "Device Static (W)": 0.141,
+        "Effective TJA (C/W)": 11.5,
+        "Max Ambient (C)": 68.2,
+        "Junction Temperature (C)": 41.8,
+        "Confidence Level": "Medium",
+        "Setting File": "---",
+        "Simulation Activity File": "---",
+        "Design Nets Matched": "NA"
+      },
+      "on_chip": [
+        {
+          "On-Chip": "Clocks",
+          "Power (W)": 0.016,
+          "Used": 4.0,
+          "Available": "---",
+          "Utilization (%)": "---",
+          "depth": 0
+        },
+        {
+          "On-Chip": "Slice Logic",
+          "Power (W)": 0.012,
+          "Used": 10139.0,
+          "Available": "---",
+          "Utilization (%)": "---",
+          "depth": 0
+        },
+        {
+          "On-Chip": "LUT as Logic",
+          "Power (W)": 0.01,
+          "Used": 4668.0,
+          "Available": 53200.0,
+          "Utilization (%)": 8.77,
+          "depth": 1
+        },
+        {
+          "On-Chip": "CARRY4",
+          "Power (W)": "<0.001",
+          "Used": 248.0,
+          "Available": 13300.0,
+          "Utilization (%)": 1.86,
+          "depth": 1
+        },
+        {
+          "On-Chip": "F7/F8 Muxes",
+          "Power (W)": "<0.001",
+          "Used": 795.0,
+          "Available": 53200.0,
+          "Utilization (%)": 1.49,
+          "depth": 1
+        },
+        {
+          "On-Chip": "Register",
+          "Power (W)": "<0.001",
+          "Used": 3098.0,
+          "Available": 106400.0,
+          "Utilization (%)": 2.91,
+          "depth": 1
+        },
+        {
+          "On-Chip": "LUT as Shift Register",
+          "Power (W)": "<0.001",
+          "Used": 60.0,
+          "Available": 17400.0,
+          "Utilization (%)": 0.34,
+          "depth": 1
+        },
+        {
+          "On-Chip": "LUT as Distributed RAM",
+          "Power (W)": "<0.001",
+          "Used": 220.0,
+          "Available": 17400.0,
+          "Utilization (%)": 1.26,
+          "depth": 1
+        },
+        {
+          "On-Chip": "Others",
+          "Power (W)": 0.0,
+          "Used": 194.0,
+          "Available": "---",
+          "Utilization (%)": "---",
+          "depth": 1
+        },
+        {
+          "On-Chip": "Signals",
+          "Power (W)": 0.026,
+          "Used": 11268.0,
+          "Available": "---",
+          "Utilization (%)": "---",
+          "depth": 0
+        },
+        {
+          "On-Chip": "Block RAM",
+          "Power (W)": 0.004,
+          "Used": 64.0,
+          "Available": 140.0,
+          "Utilization (%)": 45.71,
+          "depth": 0
+        },
+        {
+          "On-Chip": "DSPs",
+          "Power (W)": 0.004,
+          "Used": 8.0,
+          "Available": 220.0,
+          "Utilization (%)": 3.64,
+          "depth": 0
+        },
+        {
+          "On-Chip": "I/O",
+          "Power (W)": 0.0,
+          "Used": 10.0,
+          "Available": 125.0,
+          "Utilization (%)": 8.0,
+          "depth": 0
+        },
+        {
+          "On-Chip": "PS7",
+          "Power (W)": 1.258,
+          "Used": 1.0,
+          "Available": "---",
+          "Utilization (%)": "---",
+          "depth": 0
+        },
+        {
+          "On-Chip": "Static Power",
+          "Power (W)": 0.141,
+          "Used": "",
+          "Available": "",
+          "Utilization (%)": "",
+          "depth": 0
+        },
+        {
+          "On-Chip": "Total",
+          "Power (W)": 1.46,
+          "Used": "",
+          "Available": "",
+          "Utilization (%)": "",
+          "depth": 0
+        }
+      ],
+      "supplies": [
+        {
+          "Source": "Vccint",
+          "Voltage (V)": 1.0,
+          "Total (A)": 0.076,
+          "Dynamic (A)": 0.061,
+          "Static (A)": 0.015,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "Vccaux",
+          "Voltage (V)": 1.8,
+          "Total (A)": 0.014,
+          "Dynamic (A)": 0.0,
+          "Static (A)": 0.014,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "Vcco33",
+          "Voltage (V)": 3.3,
+          "Total (A)": 0.0,
+          "Dynamic (A)": 0.0,
+          "Static (A)": 0.0,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "Vcco25",
+          "Voltage (V)": 2.5,
+          "Total (A)": 0.0,
+          "Dynamic (A)": 0.0,
+          "Static (A)": 0.0,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "Vcco18",
+          "Voltage (V)": 1.8,
+          "Total (A)": 0.0,
+          "Dynamic (A)": 0.0,
+          "Static (A)": 0.0,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "Vcco15",
+          "Voltage (V)": 1.5,
+          "Total (A)": 0.0,
+          "Dynamic (A)": 0.0,
+          "Static (A)": 0.0,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "Vcco135",
+          "Voltage (V)": 1.35,
+          "Total (A)": 0.0,
+          "Dynamic (A)": 0.0,
+          "Static (A)": 0.0,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "Vcco12",
+          "Voltage (V)": 1.2,
+          "Total (A)": 0.0,
+          "Dynamic (A)": 0.0,
+          "Static (A)": 0.0,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "Vccaux_io",
+          "Voltage (V)": 1.8,
+          "Total (A)": 0.0,
+          "Dynamic (A)": 0.0,
+          "Static (A)": 0.0,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "Vccbram",
+          "Voltage (V)": 1.0,
+          "Total (A)": 0.005,
+          "Dynamic (A)": 0.0,
+          "Static (A)": 0.005,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "MGTAVcc",
+          "Voltage (V)": 1.0,
+          "Total (A)": 0.0,
+          "Dynamic (A)": 0.0,
+          "Static (A)": 0.0,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "MGTAVtt",
+          "Voltage (V)": 1.2,
+          "Total (A)": 0.0,
+          "Dynamic (A)": 0.0,
+          "Static (A)": 0.0,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "MGTVccaux",
+          "Voltage (V)": 1.8,
+          "Total (A)": 0.0,
+          "Dynamic (A)": 0.0,
+          "Static (A)": 0.0,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "Vccpint",
+          "Voltage (V)": 1.0,
+          "Total (A)": 0.676,
+          "Dynamic (A)": 0.649,
+          "Static (A)": 0.028,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "Vccpaux",
+          "Voltage (V)": 1.8,
+          "Total (A)": 0.036,
+          "Dynamic (A)": 0.026,
+          "Static (A)": 0.01,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "Vccpll",
+          "Voltage (V)": 1.8,
+          "Total (A)": 0.017,
+          "Dynamic (A)": 0.014,
+          "Static (A)": 0.003,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "Vcco_ddr",
+          "Voltage (V)": 1.5,
+          "Total (A)": 0.354,
+          "Dynamic (A)": 0.352,
+          "Static (A)": 0.002,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "Vcco_mio0",
+          "Voltage (V)": 3.3,
+          "Total (A)": 0.003,
+          "Dynamic (A)": 0.002,
+          "Static (A)": 0.001,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "Vcco_mio1",
+          "Voltage (V)": 1.8,
+          "Total (A)": 0.003,
+          "Dynamic (A)": 0.002,
+          "Static (A)": 0.001,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        },
+        {
+          "Source": "Vccadc",
+          "Voltage (V)": 1.8,
+          "Total (A)": 0.02,
+          "Dynamic (A)": 0.0,
+          "Static (A)": 0.02,
+          "Powerup (A)": "NA",
+          "Budget (A)": "Unspecified",
+          "Margin (A)": "NA"
+        }
+      ],
+      "environment": {
+        "Ambient Temp (C)": 25.0,
+        "ThetaJA (C/W)": 11.5,
+        "Airflow (LFM)": 250.0,
+        "Heat Sink": "none",
+        "ThetaSA (C/W)": 0.0,
+        "Board Selection": "medium (10\"x10\")",
+        "# of Board Layers": "8to11 (8 to 11 Layers)",
+        "Board Temperature (C)": 25.0
+      },
+      "hierarchy": [
+        {
+          "Name": "spike_top",
+          "Power (W)": 1.319,
           "depth": 0
         },
         {
@@ -11167,7 +11167,7 @@
         },
         {
           "Name": "u_soc",
-          "Power (W)": 0.043,
+          "Power (W)": 0.049,
           "depth": 1
         },
         {
@@ -11187,7 +11187,7 @@
         },
         {
           "Name": "u_kdot",
-          "Power (W)": 0.016,
+          "Power (W)": 0.019,
           "depth": 2
         },
         {
@@ -11201,17 +11201,17 @@
       "file": "results\\R3\\vivado\\decomp_rw1\\power_day_B1_tr12.5.rpt",
       "header": {
         "Tool Version": "Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026",
-        "Date": "Tue Oct 20 22:23:53 2026",
+        "Date": "Tue Oct 20 23:10:29 2026",
         "Design": "spike_top",
         "Device": "xc7z020clg400-1",
         "Design State": "routed",
-        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1/power_day_B1_tr12.5.rpt}"
+        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1_B/power_day_B1_tr12.5.rpt}"
       },
       "summary": {
         "Total On-Chip Power (W)": 1.423,
         "Design Power Budget (W)": "Unspecified*",
         "Power Budget Margin (W)": "NA",
-        "Dynamic (W)": 1.283,
+        "Dynamic (W)": 1.282,
         "Device Static (W)": 0.14,
         "Effective TJA (C/W)": 11.5,
         "Max Ambient (C)": 68.6,
@@ -11224,7 +11224,7 @@
       "on_chip": [
         {
           "On-Chip": "Clocks",
-          "Power (W)": 0.009,
+          "Power (W)": 0.008,
           "Used": 4.0,
           "Available": "---",
           "Utilization (%)": "---",
@@ -11233,7 +11233,7 @@
         {
           "On-Chip": "Slice Logic",
           "Power (W)": 0.004,
-          "Used": 10043.0,
+          "Used": 10139.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -11241,9 +11241,9 @@
         {
           "On-Chip": "LUT as Logic",
           "Power (W)": 0.003,
-          "Used": 4566.0,
+          "Used": 4668.0,
           "Available": 53200.0,
-          "Utilization (%)": 8.58,
+          "Utilization (%)": 8.77,
           "depth": 1
         },
         {
@@ -11297,7 +11297,7 @@
         {
           "On-Chip": "Signals",
           "Power (W)": 0.008,
-          "Used": 11164.0,
+          "Used": 11268.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -11566,7 +11566,7 @@
       "hierarchy": [
         {
           "Name": "spike_top",
-          "Power (W)": 1.283,
+          "Power (W)": 1.282,
           "depth": 0
         },
         {
@@ -11576,7 +11576,7 @@
         },
         {
           "Name": "ps_bd_i",
-          "Power (W)": 1.265,
+          "Power (W)": 1.264,
           "depth": 2
         },
         {
@@ -11615,11 +11615,11 @@
       "file": "results\\R3\\vivado\\decomp_rw1\\power_day_B1_tr25.rpt",
       "header": {
         "Tool Version": "Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026",
-        "Date": "Tue Oct 20 22:23:59 2026",
+        "Date": "Tue Oct 20 23:10:34 2026",
         "Design": "spike_top",
         "Device": "xc7z020clg400-1",
         "Design State": "routed",
-        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1/power_day_B1_tr25.rpt}"
+        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1_B/power_day_B1_tr25.rpt}"
       },
       "summary": {
         "Total On-Chip Power (W)": 1.424,
@@ -11638,7 +11638,7 @@
       "on_chip": [
         {
           "On-Chip": "Clocks",
-          "Power (W)": 0.009,
+          "Power (W)": 0.008,
           "Used": 4.0,
           "Available": "---",
           "Utilization (%)": "---",
@@ -11647,7 +11647,7 @@
         {
           "On-Chip": "Slice Logic",
           "Power (W)": 0.004,
-          "Used": 10043.0,
+          "Used": 10139.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -11655,9 +11655,9 @@
         {
           "On-Chip": "LUT as Logic",
           "Power (W)": 0.004,
-          "Used": 4566.0,
+          "Used": 4668.0,
           "Available": 53200.0,
-          "Utilization (%)": 8.58,
+          "Utilization (%)": 8.77,
           "depth": 1
         },
         {
@@ -11711,7 +11711,7 @@
         {
           "On-Chip": "Signals",
           "Power (W)": 0.009,
-          "Used": 11164.0,
+          "Used": 11268.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -12029,11 +12029,11 @@
       "file": "results\\R3\\vivado\\decomp_rw1\\power_day_B1_tr6.25.rpt",
       "header": {
         "Tool Version": "Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026",
-        "Date": "Tue Oct 20 22:23:56 2026",
+        "Date": "Tue Oct 20 23:10:32 2026",
         "Design": "spike_top",
         "Device": "xc7z020clg400-1",
         "Design State": "routed",
-        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1/power_day_B1_tr6.25.rpt}"
+        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1_B/power_day_B1_tr6.25.rpt}"
       },
       "summary": {
         "Total On-Chip Power (W)": 1.422,
@@ -12052,7 +12052,7 @@
       "on_chip": [
         {
           "On-Chip": "Clocks",
-          "Power (W)": 0.009,
+          "Power (W)": 0.008,
           "Used": 4.0,
           "Available": "---",
           "Utilization (%)": "---",
@@ -12061,7 +12061,7 @@
         {
           "On-Chip": "Slice Logic",
           "Power (W)": 0.004,
-          "Used": 10043.0,
+          "Used": 10139.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -12069,9 +12069,9 @@
         {
           "On-Chip": "LUT as Logic",
           "Power (W)": 0.003,
-          "Used": 4566.0,
+          "Used": 4668.0,
           "Available": 53200.0,
-          "Utilization (%)": 8.58,
+          "Utilization (%)": 8.77,
           "depth": 1
         },
         {
@@ -12124,8 +12124,8 @@
         },
         {
           "On-Chip": "Signals",
-          "Power (W)": 0.007,
-          "Used": 11164.0,
+          "Power (W)": 0.008,
+          "Used": 11268.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -12443,11 +12443,11 @@
       "file": "results\\R3\\vivado\\decomp_rw1\\power_day_B2_tr12.5.rpt",
       "header": {
         "Tool Version": "Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026",
-        "Date": "Tue Oct 20 22:23:43 2026",
+        "Date": "Tue Oct 20 23:10:22 2026",
         "Design": "spike_top",
         "Device": "xc7z020clg400-1",
         "Design State": "routed",
-        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1/power_day_B2_tr12.5.rpt}"
+        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1_B/power_day_B2_tr12.5.rpt}"
       },
       "summary": {
         "Total On-Chip Power (W)": 1.422,
@@ -12475,7 +12475,7 @@
         {
           "On-Chip": "Slice Logic",
           "Power (W)": 0.004,
-          "Used": 10043.0,
+          "Used": 10139.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -12483,9 +12483,9 @@
         {
           "On-Chip": "LUT as Logic",
           "Power (W)": 0.003,
-          "Used": 4566.0,
+          "Used": 4668.0,
           "Available": 53200.0,
-          "Utilization (%)": 8.58,
+          "Utilization (%)": 8.77,
           "depth": 1
         },
         {
@@ -12538,8 +12538,8 @@
         },
         {
           "On-Chip": "Signals",
-          "Power (W)": 0.007,
-          "Used": 11164.0,
+          "Power (W)": 0.008,
+          "Used": 11268.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -12818,7 +12818,7 @@
         },
         {
           "Name": "ps_bd_i",
-          "Power (W)": 1.265,
+          "Power (W)": 1.264,
           "depth": 2
         },
         {
@@ -12847,11 +12847,11 @@
       "file": "results\\R3\\vivado\\decomp_rw1\\power_day_B2_tr25.rpt",
       "header": {
         "Tool Version": "Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026",
-        "Date": "Tue Oct 20 22:23:49 2026",
+        "Date": "Tue Oct 20 23:10:27 2026",
         "Design": "spike_top",
         "Device": "xc7z020clg400-1",
         "Design State": "routed",
-        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1/power_day_B2_tr25.rpt}"
+        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1_B/power_day_B2_tr25.rpt}"
       },
       "summary": {
         "Total On-Chip Power (W)": 1.423,
@@ -12879,7 +12879,7 @@
         {
           "On-Chip": "Slice Logic",
           "Power (W)": 0.004,
-          "Used": 10043.0,
+          "Used": 10139.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -12887,9 +12887,9 @@
         {
           "On-Chip": "LUT as Logic",
           "Power (W)": 0.004,
-          "Used": 4566.0,
+          "Used": 4668.0,
           "Available": 53200.0,
-          "Utilization (%)": 8.58,
+          "Utilization (%)": 8.77,
           "depth": 1
         },
         {
@@ -12942,8 +12942,8 @@
         },
         {
           "On-Chip": "Signals",
-          "Power (W)": 0.008,
-          "Used": 11164.0,
+          "Power (W)": 0.009,
+          "Used": 11268.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -13251,11 +13251,11 @@
       "file": "results\\R3\\vivado\\decomp_rw1\\power_day_B2_tr6.25.rpt",
       "header": {
         "Tool Version": "Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026",
-        "Date": "Tue Oct 20 22:23:46 2026",
+        "Date": "Tue Oct 20 23:10:24 2026",
         "Design": "spike_top",
         "Device": "xc7z020clg400-1",
         "Design State": "routed",
-        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1/power_day_B2_tr6.25.rpt}"
+        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1_B/power_day_B2_tr6.25.rpt}"
       },
       "summary": {
         "Total On-Chip Power (W)": 1.421,
@@ -13283,7 +13283,7 @@
         {
           "On-Chip": "Slice Logic",
           "Power (W)": 0.003,
-          "Used": 10043.0,
+          "Used": 10139.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -13291,9 +13291,9 @@
         {
           "On-Chip": "LUT as Logic",
           "Power (W)": 0.003,
-          "Used": 4566.0,
+          "Used": 4668.0,
           "Available": 53200.0,
-          "Utilization (%)": 8.58,
+          "Utilization (%)": 8.77,
           "depth": 1
         },
         {
@@ -13347,7 +13347,7 @@
         {
           "On-Chip": "Signals",
           "Power (W)": 0.007,
-          "Used": 11164.0,
+          "Used": 11268.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -13655,11 +13655,11 @@
       "file": "results\\R3\\vivado\\decomp_rw1\\power_idle_tr12.5.rpt",
       "header": {
         "Tool Version": "Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026",
-        "Date": "Tue Oct 20 22:23:33 2026",
+        "Date": "Tue Oct 20 23:10:14 2026",
         "Design": "spike_top",
         "Device": "xc7z020clg400-1",
         "Design State": "routed",
-        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1/power_idle_tr12.5.rpt}"
+        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1_B/power_idle_tr12.5.rpt}"
       },
       "summary": {
         "Total On-Chip Power (W)": 1.42,
@@ -13678,7 +13678,7 @@
       "on_chip": [
         {
           "On-Chip": "Clocks",
-          "Power (W)": 0.008,
+          "Power (W)": 0.007,
           "Used": 4.0,
           "Available": "---",
           "Utilization (%)": "---",
@@ -13687,7 +13687,7 @@
         {
           "On-Chip": "Slice Logic",
           "Power (W)": 0.003,
-          "Used": 10043.0,
+          "Used": 10139.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -13695,9 +13695,9 @@
         {
           "On-Chip": "LUT as Logic",
           "Power (W)": 0.003,
-          "Used": 4566.0,
+          "Used": 4668.0,
           "Available": 53200.0,
-          "Utilization (%)": 8.58,
+          "Utilization (%)": 8.77,
           "depth": 1
         },
         {
@@ -13751,7 +13751,7 @@
         {
           "On-Chip": "Signals",
           "Power (W)": 0.007,
-          "Used": 11164.0,
+          "Used": 11268.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -13809,8 +13809,8 @@
         {
           "Source": "Vccint",
           "Voltage (V)": 1.0,
-          "Total (A)": 0.037,
-          "Dynamic (A)": 0.022,
+          "Total (A)": 0.036,
+          "Dynamic (A)": 0.021,
           "Static (A)": 0.015,
           "Powerup (A)": "NA",
           "Budget (A)": "Unspecified",
@@ -14030,7 +14030,7 @@
         },
         {
           "Name": "ps_bd_i",
-          "Power (W)": 1.265,
+          "Power (W)": 1.264,
           "depth": 2
         },
         {
@@ -14059,11 +14059,11 @@
       "file": "results\\R3\\vivado\\decomp_rw1\\power_idle_tr25.rpt",
       "header": {
         "Tool Version": "Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026",
-        "Date": "Tue Oct 20 22:23:39 2026",
+        "Date": "Tue Oct 20 23:10:19 2026",
         "Design": "spike_top",
         "Device": "xc7z020clg400-1",
         "Design State": "routed",
-        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1/power_idle_tr25.rpt}"
+        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1_B/power_idle_tr25.rpt}"
       },
       "summary": {
         "Total On-Chip Power (W)": 1.421,
@@ -14082,7 +14082,7 @@
       "on_chip": [
         {
           "On-Chip": "Clocks",
-          "Power (W)": 0.008,
+          "Power (W)": 0.007,
           "Used": 4.0,
           "Available": "---",
           "Utilization (%)": "---",
@@ -14091,7 +14091,7 @@
         {
           "On-Chip": "Slice Logic",
           "Power (W)": 0.004,
-          "Used": 10043.0,
+          "Used": 10139.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -14099,9 +14099,9 @@
         {
           "On-Chip": "LUT as Logic",
           "Power (W)": 0.003,
-          "Used": 4566.0,
+          "Used": 4668.0,
           "Available": 53200.0,
-          "Utilization (%)": 8.58,
+          "Utilization (%)": 8.77,
           "depth": 1
         },
         {
@@ -14155,7 +14155,7 @@
         {
           "On-Chip": "Signals",
           "Power (W)": 0.008,
-          "Used": 11164.0,
+          "Used": 11268.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -14463,11 +14463,11 @@
       "file": "results\\R3\\vivado\\decomp_rw1\\power_idle_tr6.25.rpt",
       "header": {
         "Tool Version": "Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026",
-        "Date": "Tue Oct 20 22:23:36 2026",
+        "Date": "Tue Oct 20 23:10:16 2026",
         "Design": "spike_top",
         "Device": "xc7z020clg400-1",
         "Design State": "routed",
-        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1/power_idle_tr6.25.rpt}"
+        "Command": "report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1_B/power_idle_tr6.25.rpt}"
       },
       "summary": {
         "Total On-Chip Power (W)": 1.419,
@@ -14486,7 +14486,7 @@
       "on_chip": [
         {
           "On-Chip": "Clocks",
-          "Power (W)": 0.008,
+          "Power (W)": 0.007,
           "Used": 4.0,
           "Available": "---",
           "Utilization (%)": "---",
@@ -14495,7 +14495,7 @@
         {
           "On-Chip": "Slice Logic",
           "Power (W)": 0.003,
-          "Used": 10043.0,
+          "Used": 10139.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0
@@ -14503,9 +14503,9 @@
         {
           "On-Chip": "LUT as Logic",
           "Power (W)": 0.003,
-          "Used": 4566.0,
+          "Used": 4668.0,
           "Available": 53200.0,
-          "Utilization (%)": 8.58,
+          "Utilization (%)": 8.77,
           "depth": 1
         },
         {
@@ -14559,7 +14559,7 @@
         {
           "On-Chip": "Signals",
           "Power (W)": 0.006,
-          "Used": 11164.0,
+          "Used": 11268.0,
           "Available": "---",
           "Utilization (%)": "---",
           "depth": 0

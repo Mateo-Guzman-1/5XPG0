@@ -1,0 +1,4 @@
+CPU memory blocks (u_soc/mem_reg*): 64
+gated clock: u_soc/u_cpu_gate/g_gate.u_bufgce -> u_soc/u_cpu_gate/g_gate.u_bufgce/O
+PS port pins: ENBWREN WEBWE*; CPU port pins: ENARDEN WEA* (ENARDEN from PS: 0, ENBWREN from PS: 1)
+64 x RAMB36E1 RA=36 RB=36 CASC=NONE

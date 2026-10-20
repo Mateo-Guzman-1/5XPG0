@@ -172,13 +172,15 @@ def outcomes(out, act, ver, fab, D):
     if 'decomp_rw1' in V:
         dv = V['decomp_rw1']
         bram = lambda var, s: V[var]['components'][s]['bram']
-        e = fab['builds'].get('dec', {})
+        e = fab['builds'].get('dec_B', {})            # the G1-D build (timing met after the strategy fallback)
         rw1 = fab['builds'].get('rw1', {})
         o['H9'] = dict(bram_awake_W=dict(asbuilt=bram('asbuilt_rw1', 'busy'), decomp=bram('decomp_rw1', 'busy')),
                        bram_awake_reduction=rnd(1 - bram('decomp_rw1', 'busy') / bram('asbuilt_rw1', 'busy')),
                        confirmed=bram('decomp_rw1', 'busy') <= 0.2 * bram('asbuilt_rw1', 'busy'))
         dl = dict(luts=e.get('luts', 0) - rw1.get('luts', 0), registers=e.get('registers', 0) - rw1.get('registers', 0))
-        o['H9_cost'] = dict(delta_vs_asbuilt_rw1=dl, wns_ns=e.get('wns_ns'), bram36=e.get('bram36'),
+        d0 = fab['builds'].get('dec', {})
+        o['H9_cost'] = dict(delta_vs_asbuilt_rw1=dl, wns_ns=e.get('wns_ns'), bram36=e.get('bram36'), strategy=e.get('strategy'),
+                            default_strategy_wns_ns=d0.get('wns_ns'),
                             confirmed=1000 <= dl['luts'] <= 2200 and 0 <= dl['registers'] <= 150 and
                             e.get('bram36') == 64 and (e.get('wns_ns') or -1) >= 0)
         o['H9_idle'] = dict(p_idle_W=idle('decomp_rw1'), in_range=0.10 <= idle('decomp_rw1') <= 0.14)

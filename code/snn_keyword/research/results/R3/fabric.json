@@ -1,5 +1,5 @@
 {
-  "source_commit": "619cacd",
+  "source_commit": "7446d18",
   "rtl_sha256_lf_normalized": {
     "code/pynqz2_riscv_flow/rtl/kdot_pcpi.v": "936fce6320299f99a56ef110095a5f42ef6ed16a21545c5fe2095edc6942c71c",
     "code/pynqz2_riscv_flow/rtl/picorv32.v": "0836050971b3c6cdd28ac3b1e5719a67fb645161912bef1e472e63995ceb0622",
@@ -15,6 +15,8 @@
         "POWER_OPT": 1,
         "READ_WAIT": 1
       },
+      "ram_decomp": false,
+      "strategy": "default",
       "abi": "0x00020007",
       "luts": 3303.0,
       "lutram": 220.0,
@@ -46,6 +48,8 @@
         "POWER_OPT": 1,
         "READ_WAIT": 8
       },
+      "ram_decomp": false,
+      "strategy": "default",
       "abi": "0x00020007",
       "luts": 3302.0,
       "lutram": 220.0,
@@ -77,6 +81,8 @@
         "POWER_OPT": 0,
         "READ_WAIT": 8
       },
+      "ram_decomp": false,
+      "strategy": "default",
       "abi": "0x00020003",
       "luts": 3254.0,
       "lutram": 220.0,
@@ -92,6 +98,8 @@
         "u_bd/ps_bd_i/ps7/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG BUFG",
         "u_cpu_gate buffers: 0"
       ],
+      "bitstream": null,
+      "bitstream_note": "not kept in results/: regression build",
       "delta_vs_s6": {
         "luts": 11.0,
         "registers": 0.0,
@@ -105,6 +113,8 @@
         "POWER_OPT": 1,
         "READ_WAIT": 1
       },
+      "ram_decomp": true,
+      "strategy": "default",
       "abi": "0x00020007",
       "luts": 4846.0,
       "lutram": 220.0,
@@ -128,6 +138,105 @@
         "registers": 267.0,
         "bram36": 0.0,
         "dsp": 0.0,
+        "bufgctrl": 1.0
+      }
+    },
+    "dec_A": {
+      "generics": {
+        "POWER_OPT": 1,
+        "READ_WAIT": 1
+      },
+      "ram_decomp": true,
+      "strategy": "impl Performance_ExplorePostRoutePhysOpt",
+      "abi": "0x00020007",
+      "luts": 4849.0,
+      "lutram": 220.0,
+      "registers": 3098.0,
+      "bram36": 64.0,
+      "dsp": 8.0,
+      "bufgctrl": 2.0,
+      "wns_ns": 0.106,
+      "tns_ns": 0.0,
+      "whs_ns": 0.026,
+      "timing_met": true,
+      "clock_buffers": [
+        "u_bd/ps_bd_i/ps7/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG BUFG",
+        "u_soc/u_cpu_gate/g_gate.u_bufgce BUFGCTRL",
+        "u_cpu_gate buffers: 1"
+      ],
+      "bitstream": null,
+      "bitstream_note": "not kept in results/: another strategy build was chosen",
+      "delta_vs_s6": {
+        "luts": 1606.0,
+        "registers": 267.0,
+        "bram36": 0.0,
+        "dsp": 0.0,
+        "bufgctrl": 1.0
+      }
+    },
+    "dec_B": {
+      "generics": {
+        "POWER_OPT": 1,
+        "READ_WAIT": 1
+      },
+      "ram_decomp": true,
+      "strategy": "impl Performance_NetDelay_high",
+      "abi": "0x00020007",
+      "luts": 4948.0,
+      "lutram": 220.0,
+      "registers": 3098.0,
+      "bram36": 64.0,
+      "dsp": 8.0,
+      "bufgctrl": 2.0,
+      "wns_ns": 0.366,
+      "tns_ns": 0.0,
+      "whs_ns": 0.029,
+      "timing_met": true,
+      "clock_buffers": [
+        "u_bd/ps_bd_i/ps7/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG BUFG",
+        "u_soc/u_cpu_gate/g_gate.u_bufgce BUFGCTRL",
+        "u_cpu_gate buffers: 1"
+      ],
+      "bitstream": "research/results/R3/r3_gated_rw1_decomp.bit",
+      "bitstream_sha256": "50dff3c04fc983677aa678b8ff48dbfc2b4c7f1e1d70bc58cf9c5b9628c550b3",
+      "delta_vs_s6": {
+        "luts": 1705.0,
+        "registers": 267.0,
+        "bram36": 0.0,
+        "dsp": 0.0,
+        "bufgctrl": 1.0
+      }
+    },
+    "dec_C": {
+      "generics": {
+        "POWER_OPT": 1,
+        "READ_WAIT": 1
+      },
+      "ram_decomp": true,
+      "strategy": "synth Flow_PerfOptimized_high, impl Performance_ExtraTimingOpt",
+      "abi": "0x00020007",
+      "luts": 4979.0,
+      "lutram": 220.0,
+      "registers": 3123.0,
+      "bram36": 64.0,
+      "dsp": 9.0,
+      "bufgctrl": 2.0,
+      "wns_ns": 0.364,
+      "tns_ns": 0.0,
+      "whs_ns": 0.037,
+      "timing_met": true,
+      "clock_buffers": [
+        "u_bd/ps_bd_i/ps7/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG BUFG",
+        "u_soc/u_cpu_gate/g_gate.u_bufgce BUFGCTRL",
+        "u_cpu_gate buffers: 1"
+      ],
+      "bitstream": null,
+      "bitstream_note": "not kept in results/: another strategy build was chosen",
+      "delta_vs_s6": {
+        "luts": 1736.0,
+        "registers": 292.0,
+        "bram36": 0.0,
+        "dsp": 1.0,
         "bufgctrl": 1.0
       }
     }

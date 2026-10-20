@@ -255,7 +255,13 @@ def duties_read_enable_model():
 BUILDS = {'rw1': dict(power_opt=1, read_wait=1, bit='r3_gated_rw1.bit'),     # main design
           'rw8': dict(power_opt=1, read_wait=8, bit='r3_gated_rw8.bit'),     # gating alone
           'p0': dict(power_opt=0, read_wait=8, bit=None),                    # regression: must equal S6
-          'dec': dict(power_opt=1, read_wait=1, bit='r3_gated_rw1_decomp.bit')}   # option B: + R3_RAM_DECOMP
+          # option B (+ R3_RAM_DECOMP): default strategies miss timing; the G2a fallback (plan section 9 (a)) reran it
+          # with three implementation strategies; dec_B (best WNS, fewer LUT than dec_C) is the G1-D design
+          'dec': dict(power_opt=1, read_wait=1, bit=None, strategy='default'),
+          'dec_A': dict(power_opt=1, read_wait=1, bit=None, strategy='impl Performance_ExplorePostRoutePhysOpt'),
+          'dec_B': dict(power_opt=1, read_wait=1, bit='r3_gated_rw1_decomp.bit', strategy='impl Performance_NetDelay_high'),
+          'dec_C': dict(power_opt=1, read_wait=1, bit=None,
+                        strategy='synth Flow_PerfOptimized_high, impl Performance_ExtraTimingOpt')}
 
 
 def util(path):
@@ -298,7 +304,8 @@ def fabric():
         d = S.RES / f'R3/vivado/{name}'
         if not (d / 'utilization.rpt').exists():
             continue
-        e = dict(generics=dict(POWER_OPT=b['power_opt'], READ_WAIT=b['read_wait']),
+        e = dict(generics=dict(POWER_OPT=b['power_opt'], READ_WAIT=b['read_wait']), ram_decomp=name.startswith('dec'),
+                 strategy=b.get('strategy', 'default'),
                  abi='0x00020007' if b['power_opt'] else '0x00020003', **util(d / 'utilization.rpt'),
                  **wns(d / 'timing_summary.rpt'))
         cb = (d / 'clock_buffers.txt').read_text().splitlines()
@@ -307,9 +314,11 @@ def fabric():
             bit = S.RES / 'R3' / b['bit']
             e['bitstream'] = f'research/results/R3/{b["bit"]}'
             e['bitstream_sha256'] = hashlib.sha256(bit.read_bytes()).hexdigest()
-        elif b['bit']:
+        else:
             e['bitstream'] = None
-            e['bitstream_note'] = 'not kept in results/: timing not met' if not e['timing_met'] else 'missing'
+            e['bitstream_note'] = 'not kept in results/: ' + ('timing not met' if not e['timing_met'] else
+                                                              'another strategy build was chosen' if name.startswith('dec')
+                                                              else 'regression build')
         e['delta_vs_s6'] = {k: (e[k] - rep['s6'][k]) if e.get(k) is not None else None
                             for k in ('luts', 'registers', 'bram36', 'dsp', 'bufgctrl')}
         rep['builds'][name] = e

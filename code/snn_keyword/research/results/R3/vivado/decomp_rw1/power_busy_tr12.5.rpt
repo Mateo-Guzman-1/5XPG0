@@ -1,16 +1,16 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version     : Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026
-| Date             : Tue Oct 20 22:23:23 2026
+| Date             : Tue Oct 20 23:10:06 2026
 | Host             : Pedro running 64-bit major release  (build 9200)
-| Command          : report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1/power_busy_tr12.5.rpt}
+| Command          : report_power -hierarchical_depth 4 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/states_r3/decomp_rw1_B/power_busy_tr12.5.rpt}
 | Design           : spike_top
 | Device           : xc7z020clg400-1
 | Design State     : routed
 | Grade            : commercial
 | Process          : typical
 | Characterization : Production
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Power Report
 
@@ -30,14 +30,14 @@ Table of Contents
 ----------
 
 +--------------------------+--------------+
-| Total On-Chip Power (W)  | 1.456        |
+| Total On-Chip Power (W)  | 1.461        |
 | Design Power Budget (W)  | Unspecified* |
 | Power Budget Margin (W)  | NA           |
-| Dynamic (W)              | 1.314        |
+| Dynamic (W)              | 1.320        |
 | Device Static (W)        | 0.141        |
 | Effective TJA (C/W)      | 11.5         |
-| Max Ambient (C)          | 68.2         |
-| Junction Temperature (C) | 41.8         |
+| Max Ambient (C)          | 68.1         |
+| Junction Temperature (C) | 41.9         |
 | Confidence Level         | Medium       |
 | Setting File             | ---          |
 | Simulation Activity File | ---          |
@@ -52,22 +52,22 @@ Table of Contents
 +--------------------------+-----------+----------+-----------+-----------------+
 | On-Chip                  | Power (W) | Used     | Available | Utilization (%) |
 +--------------------------+-----------+----------+-----------+-----------------+
-| Clocks                   |     0.017 |        4 |       --- |             --- |
-| Slice Logic              |     0.011 |    10043 |       --- |             --- |
-|   LUT as Logic           |     0.009 |     4566 |     53200 |            8.58 |
+| Clocks                   |     0.016 |        4 |       --- |             --- |
+| Slice Logic              |     0.012 |    10139 |       --- |             --- |
+|   LUT as Logic           |     0.010 |     4668 |     53200 |            8.77 |
 |   CARRY4                 |    <0.001 |      248 |     13300 |            1.86 |
 |   F7/F8 Muxes            |    <0.001 |      795 |     53200 |            1.49 |
 |   Register               |    <0.001 |     3098 |    106400 |            2.91 |
 |   LUT as Shift Register  |    <0.001 |       60 |     17400 |            0.34 |
 |   LUT as Distributed RAM |    <0.001 |      220 |     17400 |            1.26 |
 |   Others                 |     0.000 |      194 |       --- |             --- |
-| Signals                  |     0.021 |    11164 |       --- |             --- |
+| Signals                  |     0.026 |    11268 |       --- |             --- |
 | Block RAM                |     0.004 |       64 |       140 |           45.71 |
 | DSPs                     |     0.004 |        8 |       220 |            3.64 |
 | I/O                      |     0.000 |       10 |       125 |            8.00 |
 | PS7                      |     1.258 |        1 |       --- |             --- |
 | Static Power             |     0.141 |          |           |                 |
-| Total                    |     1.456 |          |           |                 |
+| Total                    |     1.461 |          |           |                 |
 +--------------------------+-----------+----------+-----------+-----------------+
 
 
@@ -77,7 +77,7 @@ Table of Contents
 +-----------+-------------+-----------+-------------+------------+-------------+-------------+------------+
 | Source    | Voltage (V) | Total (A) | Dynamic (A) | Static (A) | Powerup (A) | Budget (A)  | Margin (A) |
 +-----------+-------------+-----------+-------------+------------+-------------+-------------+------------+
-| Vccint    |       1.000 |     0.072 |       0.056 |      0.015 |       NA    | Unspecified | NA         |
+| Vccint    |       1.000 |     0.077 |       0.062 |      0.015 |       NA    | Unspecified | NA         |
 | Vccaux    |       1.800 |     0.014 |       0.000 |      0.014 |       NA    | Unspecified | NA         |
 | Vcco33    |       3.300 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
 | Vcco25    |       2.500 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
@@ -90,7 +90,7 @@ Table of Contents
 | MGTAVcc   |       1.000 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
 | MGTAVtt   |       1.200 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
 | MGTVccaux |       1.800 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
-| Vccpint   |       1.000 |     0.676 |       0.649 |      0.027 |       NA    | Unspecified | NA         |
+| Vccpint   |       1.000 |     0.676 |       0.649 |      0.028 |       NA    | Unspecified | NA         |
 | Vccpaux   |       1.800 |     0.036 |       0.026 |      0.010 |       NA    | Unspecified | NA         |
 | Vccpll    |       1.800 |     0.017 |       0.014 |      0.003 |       NA    | Unspecified | NA         |
 | Vcco_ddr  |       1.500 |     0.354 |       0.352 |      0.002 |       NA    | Unspecified | NA         |
@@ -154,17 +154,17 @@ Table of Contents
 +----------------+-----------+
 | Name           | Power (W) |
 +----------------+-----------+
-| spike_top      |     1.314 |
+| spike_top      |     1.320 |
 |   u_bd         |     1.265 |
 |     ps_bd_i    |     1.265 |
 |       pc0      |     0.007 |
 |       ps7      |     1.258 |
 |   u_ps_if      |     0.005 |
-|   u_soc        |     0.043 |
+|   u_soc        |     0.049 |
 |     u_cpu      |     0.009 |
 |       pcpi_div |     0.001 |
 |       pcpi_mul |     0.003 |
-|     u_kdot     |     0.016 |
+|     u_kdot     |     0.019 |
 |     u_poisson  |     0.006 |
 +----------------+-----------+
 

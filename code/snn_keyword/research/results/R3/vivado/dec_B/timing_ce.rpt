@@ -1,0 +1,71 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026
+| Date         : Tue Oct 20 23:09:14 2026
+| Host         : Pedro running 64-bit major release  (build 9200)
+| Command      : report_timing -through [get_pins -of_objects [get_cells -quiet -hier -filter {REF_NAME =~ BUFG* && NAME =~ *u_cpu_gate*}] -filter {REF_PIN_NAME =~ CE*}] -max_paths 5 -file {C:/Users/pedro/Desktop/Projects/Semiconductor Technology/5XPG0/code/snn_keyword/build/vivado_power/reports_r3_dec_B/timing_ce.rpt}
+| Design       : spike_top
+| Device       : 7z020-clg400
+| Speed File   : -1  PRODUCTION 1.12 2019-11-22
+| Design State : Routed
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (MET) :             4.424ns  (required time - arrival time)
+  Source:                 u_ps_if/core_rst_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            u_soc/u_cpu_gate/g_gate.u_bufgce/CE0
+                            (rising edge-triggered cell BUFGCTRL clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        3.742ns  (logic 0.580ns (15.500%)  route 3.162ns (84.500%))
+  Logic Levels:           1  (LUT2=1)
+  Clock Path Skew:        -1.506ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    1.312ns = ( 11.312 - 10.000 ) 
+    Source Clock Delay      (SCD):    2.933ns
+    Clock Pessimism Removal (CPR):    0.115ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  <hidden>
+    PS7_X0Y0             PS7                          0.000     0.000 r  u_bd/ps_bd_i/ps7/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    u_bd/ps_bd_i/ps7/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  u_bd/ps_bd_i/ps7/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=1382, routed)        1.639     2.933    u_ps_if/FCLK_CLK0
+    SLICE_X39Y79         FDRE                                         r  u_ps_if/core_rst_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X39Y79         FDRE (Prop_fdre_C_Q)         0.456     3.389 r  u_ps_if/core_rst_reg/Q
+                         net (fo=186, routed)         1.505     4.894    u_ps_if/core_rst
+    SLICE_X48Y79         LUT2 (Prop_lut2_I0_O)        0.124     5.018 r  u_ps_if/g_gate.u_bufgce_i_1/O
+                         net (fo=1, routed)           1.657     6.675    u_soc/u_cpu_gate/g_gate.u_bufgce_0
+    BUFGCTRL_X0Y17       BUFGCTRL                                     r  u_soc/u_cpu_gate/g_gate.u_bufgce/CE0
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  <hidden>
+    PS7_X0Y0             PS7                          0.000    10.000 r  u_bd/ps_bd_i/ps7/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    u_bd/ps_bd_i/ps7/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  u_bd/ps_bd_i/ps7/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=1382, routed)        0.133    11.312    u_soc/u_cpu_gate/FCLK_CLK0
+    BUFGCTRL_X0Y17       BUFGCTRL                                     r  u_soc/u_cpu_gate/g_gate.u_bufgce/I0
+                         clock pessimism              0.115    11.427    <hidden>
+                         clock uncertainty           -0.154    11.273    <hidden>
+    BUFGCTRL_X0Y17       BUFGCTRL (Setup_bufgctrl_I0_CE0)
+                                                     -0.174    11.099    u_soc/u_cpu_gate/g_gate.u_bufgce
+  -------------------------------------------------------------------
+                         required time                         11.099    <hidden>
+                         arrival time                          -6.675    <hidden>
+  -------------------------------------------------------------------
+                         slack                                  4.424    <hidden>
+
+
+
+

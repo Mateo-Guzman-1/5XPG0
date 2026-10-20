@@ -19,7 +19,26 @@ size and synapse study for the report). All energy numbers are in [ENERGY.md](EN
 | S6 | Sparse kdot (kxload/ksdot hardware) vs the deployed dense-kdot model | **done** 2026-10-17 | `results/S6/`, [S_energy_synapse.md](reports/S_energy_synapse.md) §S6 |
 | R1 | The S designs against the group requirements, with Mateo's test harness ([PLAN_R1.md](PLAN_R1.md)) | **done** 2026-10-19 | `results/R1/`, [R1_requirements.md](reports/R1_requirements.md), `reports/latex/requirements_eval/` |
 | R2 | Cascade: pruned H48 K64 first stage + Mateo's GRU verifier, then the verifier fine-tuned on our false proposals ([PLAN_R2_GRU.md](PLAN_R2_GRU.md)) | **done** 2026-10-20 | `results/R2/`, [R2_cascade_gru.md](reports/R2_cascade_gru.md), `reports/latex/cascade_gru/` |
-| R3 | Clock gating + BRAM read enables for the B1/B2 cascades on our fabric (cascade firmware, xsim bit-exact, bitstream, per-state Vivado power; board test later) ([PLAN_R3_GATING.md](PLAN_R3_GATING.md)) | **in progress** since 2026-10-20: Phase 1 done, G1 passed (main design `READ_WAIT = 1`), Phase 2 running (hypotheses pre-registered in `results/R3/phase1/hypothesis.json` and `phase2/hypothesis_rw1.json`, tag `r3-base`) | `results/R3/`, `reports/latex/clock_gating_plan/`, `reports/latex/clock_gating_results/` |
+| R3 | Clock gating + BRAM read enables for the B1/B2 cascades on our fabric (cascade firmware, xsim bit-exact, bitstream, per-state Vivado power; board test later) ([PLAN_R3_GATING.md](PLAN_R3_GATING.md)) | **in progress** since 2026-10-20: Phases 1-2 done, waiting at gate G2 (Phase 3 = results report). Record [R3_clock_gating.md](reports/R3_clock_gating.md); predictions `results/R3/phase1/`, `phase2/hypothesis_*.json`; tag `r3-base` | `results/R3/`, `reports/latex/clock_gating_plan/`, `reports/latex/clock_gating_results/` |
+
+## R3 Phase 2: clock gating built, verified, estimated (2026-10-20)
+Full record: [reports/R3_clock_gating.md](reports/R3_clock_gating.md); energy: [ENERGY.md](ENERGY.md) section "R3".
+- **G1 decisions (Pedro):** main design POWER_OPT 1 + `READ_WAIT = 1`; READ_WAIT 8 shows gating alone; full vector set.
+- **RTL** (`spike_soc.v`, `ps_if.v`, `spike_top.v`; all default off): CPU sleep (stalled store, sticky doorbell on the PS
+  write of MB[0]), BUFGCE for CPU + kdot + Poisson, BRAM read enables, `READ_WAIT` parameter, `R3_RAM_DECOMP` define.
+- **Verification all pass** (`results/R3/phase2/verification.json`): G-O reproduces R2; 13 verifier calls bit-exact on
+  r3-base, then with POWER_OPT 1 at READ_WAIT 8 and 1 with identical compute cycles; POWER_OPT 0 equivalent to r3-base
+  every clock; sleep race sweep, reset, mask 0, counters; release firmware gives the board's cycles.
+- **Speed:** verifier 211.7 ms (READ_WAIT 8) / 106.9 ms (READ_WAIT 1); worst request 107.2 ms: all seven requirements met.
+- **Finding:** with byte writes, Vivado ties the enables of the width-sliced BRAM to 1, so the RTL read enables are not in
+  the netlist. As built, gating saves only 4 % (B1 0.352 W, B2 0.351 W). A first estimate of -38 % assumed working
+  enables and was withdrawn.
+- **Option B (Pedro):** address-decoded BRAM (`ram_decomp = "power"`, one block per port per cycle): B1 0.106 W, B2
+  0.105 W (**-71 %**), BRAM 0.254 -> 0.004 W; +1,645 LUT, +183 FF against G1; timing met with a timing-driven
+  implementation strategy (+0.366 ns; default -0.288 ns). Bitstream `results/R3/r3_gated_rw1_decomp.bit` (not on a board).
+- **Hypotheses:** H1, H2, H6, H7, H10 confirmed; H3/H4 refuted as built, met with the address-decoded BRAM; H5 first part
+  confirmed, second not met; H8 confirmed except +11 LUT (reworded RTL; accepted); H9 power confirmed, cost refuted.
+- **Deferred:** B+ (explicit banks, zero BRAM blocks while asleep), the board run (kit `research/tools/r3_board_cascade.py`).
 
 ## R3 Phase 1: feasibility (2026-10-20)
 Plan: [PLAN_R3_GATING.md](PLAN_R3_GATING.md). Data: `results/R3/phase1/` (`hypothesis.json`, `feasibility.json`, xsim logs in `sim/`).
@@ -308,10 +327,11 @@ For reference, the previous "yes" release: test F1 0.8761 (seeds 0.867 ± 0.022)
   three seeds it may be chance.
 
 ## Next step
-**R3 Phase 2 in progress.** G1 decisions (Pedro, 2026-10-20): (1) the main design is POWER_OPT = 1 with
-`READ_WAIT = 1` (meets 200 ms); the `READ_WAIT = 8` gated build is kept only to show the effect of gating alone;
-predictions for `READ_WAIT = 1` were added before any such run (`results/R3/phase2/hypothesis_rw1.json`);
-(2) no `ram_decomp` variant; (3) the plan's full vector set. Any deviation from the plan is decided with Pedro.
+**R3 is at gate G2 (2026-10-20).** Phase 2 is done (section "R3 Phase 2" above). Next, after Pedro's go:
+- Phase 3 (PLAN_R3_GATING.md section 5): the results mini report `reports/latex/clock_gating_results/`, told as
+  (1) clock gating alone, -4 %, then (2) the address-decoded BRAM, -71 % (Pedro's structure). The plan report
+  `reports/latex/clock_gating_plan/` predates the BRAM finding (its figure assumes working read enables).
+- Later: the board run of G1-D (`r3_board_cascade.py`, USB meter busy vs gated); B+ if there is time.
 
 R2 is complete (2026-10-20). Next:
 - **R3, clock gating: follow [PLAN_R3_GATING.md](PLAN_R3_GATING.md) in a new session** (Pedro's scope: B1 and B2 run on
