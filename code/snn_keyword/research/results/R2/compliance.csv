@@ -3,5 +3,7 @@ stage1_R1,False,False,True,True,True,True,True,False,
 stage1_cascade_rule,False,False,True,True,True,True,True,False,
 cascade_A,True,True,True,True,True,True,True,True,
 cascade_A_calls2150,False,True,True,True,True,True,True,False,
+cascade_B_calls2150,True,True,True,True,True,True,True,True,
+cascade_B,True,True,True,True,True,True,True,True,
 mateo_stage1,False,True,True,True,True,,True,False,memory_kib
 mateo_cascade,True,True,True,True,True,,True,True,memory_kib

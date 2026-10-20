@@ -274,13 +274,14 @@ def select_budget(a):
     """A5: thresholds with the call limit for every seed x variant (validation), the variant choice, and the same
     rule on Mateo's cascade for reference. Writes results/R2/A/budget<calls>/selection.json."""
     v = dict(np.load(a.scores))
-    out_dir = KWS / f'research/results/R2/A/budget{a.max_calls:g}'
+    out_dir = a.out_dir or KWS / f'research/results/R2/A/budget{a.max_calls:g}'
     out_dir.mkdir(parents=True, exist_ok=True)
+    variants = a.variants or VARIANTS
     report = {'rule': f'policy a; live other words <= 0.2 %, <= {a.max_fa_hour} FA/h and <= {a.max_calls:g} verifier '
                       'calls per hour on the validation negatives; t2 on select\'s grid; best by live recall, then '
                       'stream recall; variant by mean live recall (tie: fewer calls)', 'configs': {}}
     configs = [('mateo', VC.DV / 'cache_validation_sheila.npz')] + \
-        [(f'{vr}_seed{s}', r2_file('validation', s, vr)) for vr in VARIANTS for s in SEEDS]
+        [(f'{vr}_seed{s}', r2_file('validation', s, vr)) for vr in variants for s in SEEDS]
     for name, path in configs:
         cas = VC.Cascade(dict(np.load(path)), v, 1, a.verify_ms)
         y = cas.c['live_y']
@@ -296,15 +297,33 @@ def select_budget(a):
         print(name, best and {k: best[k] for k in ('t1', 't2', 'live_recall', 'live_fa', 'fa_per_hour',
                                                    'stream_recall', 'verifier_calls_per_hour')}, flush=True)
     rec = lambda vr, k: float(np.mean([report['configs'][f'{vr}_seed{s}']['cascade'][k] for s in SEEDS]))
-    variant = max(VARIANTS, key=lambda vr: (rec(vr, 'live_recall'), -rec(vr, 'verifier_calls_per_hour')))
+    variant = max(variants, key=lambda vr: (rec(vr, 'live_recall'), -rec(vr, 'verifier_calls_per_hour')))
     sel = json.loads((KWS / 'research/results/R2/A/selection.json').read_text())['chosen']['thresholds']
-    report['mean_live_recall'] = {vr: rec(vr, 'live_recall') for vr in VARIANTS}
+    report['scores'] = str(a.scores)
+    report['mean_live_recall'] = {vr: rec(vr, 'live_recall') for vr in variants}
     report['chosen'] = {'variant': variant, 'thresholds': {
         f'seed{s}': {'t1': report['configs'][f'{variant}_seed{s}']['cascade']['t1'],
                      't2': report['configs'][f'{variant}_seed{s}']['cascade']['t2'],
                      'stage1_threshold': sel[f'seed{s}']['stage1_threshold']} for s in SEEDS}}
     (out_dir / 'selection.json').write_text(json.dumps(report, indent=1))
     print(json.dumps({k: report[k] for k in ('mean_live_recall', 'chosen')}, indent=1))
+
+
+def paired(a):
+    """B5: per-clip live hits of two cascades on the same stage-1 cache (e.g. Phase B vs Phase A verifier, each at
+    its own validation thresholds) and the exact McNemar test (verifier_cascade.mcnemar). Prints one JSON line."""
+    c = dict(np.load(r2_file(a.split, a.seed, a.variant)))
+    y = c['live_y']
+    hits = []
+    for scores, t1, t2 in ((a.scores_a, a.t1_a, a.t2_a), (a.scores_b, a.t1_b, a.t2_b)):
+        cas = VC.Cascade(c, dict(np.load(scores)), 1, a.verify_ms)
+        live = np.array([s.max() for _, s in cas.traces('live', 'cascade', t2)])
+        hits.append(live[y == 1] >= t1)
+    r = VC.mcnemar(hits[0], hits[1])
+    out = {'split': a.split, 'seed': a.seed, 'variant': a.variant, 'recall_a': round(float(hits[0].mean()), 4),
+           'recall_b': round(float(hits[1].mean()), 4), 'only_b': r['only_cascade'], 'only_a': r['only_stage1'],
+           'p_exact': r['p_exact']}
+    print(json.dumps(out), flush=True)
 
 
 def main():
@@ -345,7 +364,20 @@ def main():
     sb.add_argument('--max-calls', type=float, default=2150.)
     sb.add_argument('--verify-ms', type=float, default=107.3)
     sb.add_argument('--max-fa-hour', type=float, default=1.6)
+    sb.add_argument('--variants', nargs='+', choices=VARIANTS, help='default: both (Phase B: m, chosen in Phase A)')
+    sb.add_argument('--out-dir', type=Path, help='default: results/R2/A/budget<calls>')
+    pr = sub.add_parser('paired')
+    pr.add_argument('--split', choices=['validation', 'test'], default='test')
+    pr.add_argument('--seed', type=int, choices=SEEDS, required=True)
+    pr.add_argument('--variant', choices=VARIANTS, default='m')
+    pr.add_argument('--verify-ms', type=float, default=107.3)
+    for x in ('a', 'b'):
+        pr.add_argument(f'--scores-{x}', type=Path, required=True)
+        pr.add_argument(f'--t1-{x}', type=int, required=True)
+        pr.add_argument(f'--t2-{x}', type=int, required=True)
     a = p.parse_args()
+    if a.cmd == 'paired':
+        return paired(a)
     if a.cmd == 'cache':
         return cache(a)
     if a.cmd == 'choose':

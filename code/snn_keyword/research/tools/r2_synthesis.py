@@ -85,7 +85,7 @@ def mean_sd(rows, design):
     rs = [r for r in rows if r['design'] == design]
     out = {'design': design, 'seeds': len(rs)}
     for k, v in rs[0].items():
-        if k in ('design', 'seed', 'name') or not isinstance(v, (int, float)) or v is None:
+        if k in ('design', 'seed', 'name', 'verifier_seed') or not isinstance(v, (int, float)) or v is None:
             continue
         vals = [r[k] for r in rs if r[k] is not None]
         out[k] = float(np.mean(vals)) if len(vals) == len(rs) else None
@@ -118,8 +118,16 @@ def main():
             if path_b.exists():
                 cb = json.loads(path_b.read_text())['cascade']
                 blocks.append((f'cascade_A_calls{budget.name[6:]}', detection(cb), True, cb))
-        for design, det, ver, block in blocks:
-            row = dict(name=f'h48_k64_seed{s}', design=design, seed=s, **det, **cost(det, s1, p, ver))
+        # Phase B: fine-tuned verifiers (seeds 0-2) on this stage-1 seed, both rules.
+        for v in SEEDS:
+            for design, path_b in ((f'cascade_B_calls2150', OUT / f'B/v{v}/budget2150/h48_k64_seed{s}.json'),
+                                   ('cascade_B', OUT / f'B/v{v}/h48_k64_seed{s}.json')):
+                if path_b.exists():
+                    cb = json.loads(path_b.read_text())['cascade']
+                    blocks.append((design, detection(cb), True, cb, v))
+        for design, det, ver, block, *vseed in blocks:
+            row = dict(name=f'h48_k64_seed{s}' + (f'_v{vseed[0]}' if vseed else ''), design=design, seed=s,
+                       verifier_seed=vseed[0] if vseed else None, **det, **cost(det, s1, p, ver))
             if block:
                 row['paired_only_cascade'] = block['paired_vs_stage1_frame']['only_cascade']
                 row['paired_only_stage1'] = block['paired_vs_stage1_frame']['only_stage1']

@@ -31,6 +31,20 @@ size and synapse study for the report). All energy numbers are in [ENERGY.md](EN
   - R2-H5 confirmed.
   - Next: Pedro decides on Phase B (could raise recall at the same number of calls).
 
+## R2 Phase B (2026-10-20, interim; gate G2 open)
+**Setup:**
+- Mateo's verifier fine-tuned with his recipe on our false proposals: 17,725 LibriSpeech windows mined by our 3 seeds (`B/mining.json`); 3 verifier seeds (`results/R2/verifier/`).
+- GPU: `.venv-rocm`, PyTorch 2.14.0+rocm10.1.0, MIOpen off (`B/gpu_smoke.json`); about 3 h for the 3 runs in parallel.
+- Note: Mateo's code keeps only the 4,218 TTS training clips whose words are in cmudict (out of 32,000).
+
+**Test, once** (9 cascades = 3 verifiers × 3 stage-1 seeds; thresholds from validation):
+- **Call limit (main rule):** live 85.9 ± 0.9 % (7 of 9 ≥ 85 %; A5: 84.4 %); 1.21 FA/h; 0.15 % other words (A5: 0.03 %); 1,908 calls/h.
+- **Highest recall:** live 87.8 ± 1.0 %; 1.48 FA/h; 3,044 ± 984 calls/h (A: 10,244, −70 %).
+
+**Paired with Phase A** (`B/paired_vs_A.txt`): under the call limit, B gains 32 clips and loses 5 over the 9 cascades; no single cascade is significant (p ≥ 0.06).
+
+**R2-H2:** the first branch (≥ 3 points) is not met (+1.4 / +0.3 points); the second branch (≥ 20 % fewer calls) is met under the highest-recall rule (−70 %).
+
 ## R1 result: group requirements (2026-10-19)
 **Requirements (Pedro):**
 - ≥ 85 % live "Sheila" detected;
