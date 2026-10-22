@@ -1,0 +1,462 @@
+[
+  {
+    "file": "negative_test_000.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_001.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_002.npy",
+    "seconds": 594.3403125
+  },
+  {
+    "file": "negative_test_003.npy",
+    "seconds": 599.193875
+  },
+  {
+    "file": "negative_test_004.npy",
+    "seconds": 598.8258125
+  },
+  {
+    "file": "negative_test_005.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_006.npy",
+    "seconds": 592.7815625
+  },
+  {
+    "file": "negative_test_007.npy",
+    "seconds": 596.2945
+  },
+  {
+    "file": "negative_test_008.npy",
+    "seconds": 598.874875
+  },
+  {
+    "file": "negative_test_009.npy",
+    "seconds": 599.027125
+  },
+  {
+    "file": "negative_test_010.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_011.npy",
+    "seconds": 599.3853125
+  },
+  {
+    "file": "negative_test_012.npy",
+    "seconds": 593.9306875
+  },
+  {
+    "file": "negative_test_013.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_014.npy",
+    "seconds": 599.4230625
+  },
+  {
+    "file": "negative_test_015.npy",
+    "seconds": 599.2370625
+  },
+  {
+    "file": "negative_test_016.npy",
+    "seconds": 599.6165
+  },
+  {
+    "file": "negative_test_017.npy",
+    "seconds": 599.3434375
+  },
+  {
+    "file": "negative_test_018.npy",
+    "seconds": 588.6025625
+  },
+  {
+    "file": "negative_test_019.npy",
+    "seconds": 599.267625
+  },
+  {
+    "file": "negative_test_020.npy",
+    "seconds": 583.770375
+  },
+  {
+    "file": "negative_test_021.npy",
+    "seconds": 593.4750625
+  },
+  {
+    "file": "negative_test_022.npy",
+    "seconds": 599.558625
+  },
+  {
+    "file": "negative_test_023.npy",
+    "seconds": 599.8206875
+  },
+  {
+    "file": "negative_test_024.npy",
+    "seconds": 594.5939375
+  },
+  {
+    "file": "negative_test_025.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_026.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_027.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_028.npy",
+    "seconds": 599.1841875
+  },
+  {
+    "file": "negative_test_029.npy",
+    "seconds": 599.5420625
+  },
+  {
+    "file": "negative_test_030.npy",
+    "seconds": 594.01475
+  },
+  {
+    "file": "negative_test_031.npy",
+    "seconds": 599.0681875
+  },
+  {
+    "file": "negative_test_032.npy",
+    "seconds": 599.08325
+  },
+  {
+    "file": "negative_test_033.npy",
+    "seconds": 597.950375
+  },
+  {
+    "file": "negative_test_034.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_035.npy",
+    "seconds": 589.758375
+  },
+  {
+    "file": "negative_test_036.npy",
+    "seconds": 594.7148125
+  },
+  {
+    "file": "negative_test_037.npy",
+    "seconds": 591.8284375
+  },
+  {
+    "file": "negative_test_038.npy",
+    "seconds": 599.448875
+  },
+  {
+    "file": "negative_test_039.npy",
+    "seconds": 595.5454375
+  },
+  {
+    "file": "negative_test_040.npy",
+    "seconds": 599.9864375
+  },
+  {
+    "file": "negative_test_041.npy",
+    "seconds": 586.6585
+  },
+  {
+    "file": "negative_test_042.npy",
+    "seconds": 598.65775
+  },
+  {
+    "file": "negative_test_043.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_044.npy",
+    "seconds": 599.234125
+  },
+  {
+    "file": "negative_test_045.npy",
+    "seconds": 597.7925
+  },
+  {
+    "file": "negative_test_046.npy",
+    "seconds": 597.5983125
+  },
+  {
+    "file": "negative_test_047.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_048.npy",
+    "seconds": 593.384875
+  },
+  {
+    "file": "negative_test_049.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_050.npy",
+    "seconds": 592.8968125
+  },
+  {
+    "file": "negative_test_051.npy",
+    "seconds": 593.0105625
+  },
+  {
+    "file": "negative_test_052.npy",
+    "seconds": 597.2435
+  },
+  {
+    "file": "negative_test_053.npy",
+    "seconds": 597.8665625
+  },
+  {
+    "file": "negative_test_054.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_055.npy",
+    "seconds": 597.29075
+  },
+  {
+    "file": "negative_test_056.npy",
+    "seconds": 599.991375
+  },
+  {
+    "file": "negative_test_057.npy",
+    "seconds": 596.4520625
+  },
+  {
+    "file": "negative_test_058.npy",
+    "seconds": 592.1644375
+  },
+  {
+    "file": "negative_test_059.npy",
+    "seconds": 599.703
+  },
+  {
+    "file": "negative_test_060.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_061.npy",
+    "seconds": 599.8735625
+  },
+  {
+    "file": "negative_test_062.npy",
+    "seconds": 585.8285
+  },
+  {
+    "file": "negative_test_063.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_064.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_065.npy",
+    "seconds": 596.4479375
+  },
+  {
+    "file": "negative_test_066.npy",
+    "seconds": 584.3291875
+  },
+  {
+    "file": "negative_test_067.npy",
+    "seconds": 599.9020625
+  },
+  {
+    "file": "negative_test_068.npy",
+    "seconds": 599.893125
+  },
+  {
+    "file": "negative_test_069.npy",
+    "seconds": 599.8125625
+  },
+  {
+    "file": "negative_test_070.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_071.npy",
+    "seconds": 599.153125
+  },
+  {
+    "file": "negative_test_072.npy",
+    "seconds": 593.038
+  },
+  {
+    "file": "negative_test_073.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_074.npy",
+    "seconds": 596.7758125
+  },
+  {
+    "file": "negative_test_075.npy",
+    "seconds": 592.2068125
+  },
+  {
+    "file": "negative_test_076.npy",
+    "seconds": 586.7450625
+  },
+  {
+    "file": "negative_test_077.npy",
+    "seconds": 596.1878125
+  },
+  {
+    "file": "negative_test_078.npy",
+    "seconds": 596.1203125
+  },
+  {
+    "file": "negative_test_079.npy",
+    "seconds": 597.6763125
+  },
+  {
+    "file": "negative_test_080.npy",
+    "seconds": 599.904875
+  },
+  {
+    "file": "negative_test_081.npy",
+    "seconds": 599.8595
+  },
+  {
+    "file": "negative_test_082.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_083.npy",
+    "seconds": 599.899375
+  },
+  {
+    "file": "negative_test_084.npy",
+    "seconds": 599.790375
+  },
+  {
+    "file": "negative_test_085.npy",
+    "seconds": 595.4841875
+  },
+  {
+    "file": "negative_test_086.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_087.npy",
+    "seconds": 591.246
+  },
+  {
+    "file": "negative_test_088.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_089.npy",
+    "seconds": 596.7696875
+  },
+  {
+    "file": "negative_test_090.npy",
+    "seconds": 599.1781875
+  },
+  {
+    "file": "negative_test_091.npy",
+    "seconds": 593.2925625
+  },
+  {
+    "file": "negative_test_092.npy",
+    "seconds": 599.1306875
+  },
+  {
+    "file": "negative_test_093.npy",
+    "seconds": 599.6181875
+  },
+  {
+    "file": "negative_test_094.npy",
+    "seconds": 596.7620625
+  },
+  {
+    "file": "negative_test_095.npy",
+    "seconds": 598.022875
+  },
+  {
+    "file": "negative_test_096.npy",
+    "seconds": 599.4859375
+  },
+  {
+    "file": "negative_test_097.npy",
+    "seconds": 599.8551875
+  },
+  {
+    "file": "negative_test_098.npy",
+    "seconds": 599.0928125
+  },
+  {
+    "file": "negative_test_099.npy",
+    "seconds": 596.90675
+  },
+  {
+    "file": "negative_test_100.npy",
+    "seconds": 595.116125
+  },
+  {
+    "file": "negative_test_101.npy",
+    "seconds": 594.5775
+  },
+  {
+    "file": "negative_test_102.npy",
+    "seconds": 597.749
+  },
+  {
+    "file": "negative_test_103.npy",
+    "seconds": 598.94
+  },
+  {
+    "file": "negative_test_104.npy",
+    "seconds": 599.9600625
+  },
+  {
+    "file": "negative_test_105.npy",
+    "seconds": 588.82225
+  },
+  {
+    "file": "negative_test_106.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_107.npy",
+    "seconds": 598.778625
+  },
+  {
+    "file": "negative_test_108.npy",
+    "seconds": 599.533
+  },
+  {
+    "file": "negative_test_109.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_110.npy",
+    "seconds": 595.276
+  },
+  {
+    "file": "negative_test_111.npy",
+    "seconds": 600.0
+  },
+  {
+    "file": "negative_test_112.npy",
+    "seconds": 591.8884375
+  },
+  {
+    "file": "negative_test_113.npy",
+    "seconds": 591.4558125
+  },
+  {
+    "file": "negative_test_114.npy",
+    "seconds": 204.559625
+  }
+]

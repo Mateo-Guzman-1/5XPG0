@@ -76,6 +76,13 @@ code/pynqz2_riscv_flow/vivado/build-logs/
 code/pynqz2_riscv_flow/vivado/.Xil/
 code/pynqz2_riscv_flow/.board-ip
 
+# Reproducible encoding evaluation weights and per-window caches
+code/snn_keyword/research/results/pedro_encoding/models/
+code/snn_keyword/research/results/pedro_encoding/board_exports/
+code/snn_keyword/research/results/pedro_encoding/*.npy
+code/snn_keyword/research/results/pedro_encoding/*.npz
+tmp/pdfs/
+
 # OS / editor
 .DS_Store
 Thumbs.db

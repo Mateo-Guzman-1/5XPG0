@@ -1,0 +1,6 @@
+{
+  "backup": "/home/xilinx/encoding-eval-backup.2QnOAy",
+  "original_service": "active",
+  "current_service": "active",
+  "recovery": "Restored with sudo cp after an unprivileged copy encountered root-owned runtime files; systemd service restarted successfully."
+}

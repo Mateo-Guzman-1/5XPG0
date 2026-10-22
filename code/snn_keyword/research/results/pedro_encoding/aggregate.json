@@ -1,0 +1,4836 @@
+{
+  "selected_on_validation": "b8_f8_tb16_hz300-3400_t800_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+  "group_winners": {
+    "time_bins": "b8_f8_tb32_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+    "activity": "b8_f8_tb16_hz300-3400_t1000_g5000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+    "band_mapping": "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+    "fft": "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w15_h10_qlinear_mabsolute",
+    "quantizer": "b4_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlog_mabsolute",
+    "feature_mode": "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute_delta",
+    "bits": "b6_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+    "bands": "b8_f20_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+    "range": "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+    "duration": "b8_f8_tb16_hz300-3400_t800_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute"
+  },
+  "rows": {
+    "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.2728758169934641,
+        "sd": 0.012336330776586179
+      },
+      "clip_accuracy": {
+        "mean": 0.9845371523453715,
+        "sd": 0.0010007939768568901
+      },
+      "clip_f1": {
+        "mean": 0.8785693128972861,
+        "sd": 0.007240063636641992
+      },
+      "full_clip_f1": {
+        "mean": 0.7477633260494546,
+        "sd": 0.023299231982790238
+      },
+      "live_recall": {
+        "mean": 0.32861635220125784,
+        "sd": 0.023741617720977198
+      },
+      "live_accuracy": {
+        "mean": 0.9551681195516811,
+        "sd": 0.0014267047618168923
+      },
+      "live_f1": {
+        "mean": 0.49142984999433664,
+        "sd": 0.025912151421631977
+      },
+      "other_acceptance": {
+        "mean": 0.0005555555555555556,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 3.884326787823127,
+        "sd": 0.6356636220576005
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7091194968553459,
+        "sd": 0.03571640469056775
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 149.8717399084516,
+        "sd": 129.86501239114372
+      },
+      "stream_latency_median_ms": [
+        167.0,
+        129.0,
+        164.0
+      ],
+      "stream_recall": {
+        "mean": 0.43333333333333335,
+        "sd": 0.02886751345948128
+      },
+      "thresholds": [
+        7,
+        9,
+        7
+      ],
+      "fpga_ms": 10.39964525
+    },
+    "b8_f8_tb8_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb8_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 8,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 512,
+      "parameter_bytes": 3368,
+      "validation_recall": {
+        "mean": 0.21241830065359477,
+        "sd": 0.028722869005305466
+      },
+      "clip_accuracy": {
+        "mean": 0.981112494811125,
+        "sd": 0.0011786858334994388
+      },
+      "clip_f1": {
+        "mean": 0.8580577645551587,
+        "sd": 0.007782323497947683
+      },
+      "full_clip_f1": {
+        "mean": 0.6966269047324932,
+        "sd": 0.017863575623968207
+      },
+      "live_recall": {
+        "mean": 0.27358490566037735,
+        "sd": 0.028301886792452824
+      },
+      "live_accuracy": {
+        "mean": 0.9516396845163969,
+        "sd": 0.001876623217105147
+      },
+      "live_f1": {
+        "mean": 0.427005760413286,
+        "sd": 0.03482360066522326
+      },
+      "other_acceptance": {
+        "mean": 0.0004444444444444444,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 5.3255702113593095,
+        "sd": 2.267321971172775
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7515723270440251,
+        "sd": 0.04954701653015326
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 187.01012227347542,
+        "sd": 95.49284386587954
+      },
+      "stream_latency_median_ms": [
+        180.0,
+        191.0,
+        127.0
+      ],
+      "stream_recall": {
+        "mean": 0.3214333333333333,
+        "sd": 0.05577287273696176
+      },
+      "thresholds": [
+        7,
+        7,
+        8
+      ],
+      "fpga_ms": 6.7912825
+    },
+    "b8_f8_tb12_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb12_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 12,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 768,
+      "parameter_bytes": 4904,
+      "validation_recall": {
+        "mean": 0.23692810457516342,
+        "sd": 0.0374393439130379
+      },
+      "clip_accuracy": {
+        "mean": 0.983914487339145,
+        "sd": 0.0011786858334994388
+      },
+      "clip_f1": {
+        "mean": 0.8741084420696071,
+        "sd": 0.008700323637787246
+      },
+      "full_clip_f1": {
+        "mean": 0.7437404626420799,
+        "sd": 0.015015034784576987
+      },
+      "live_recall": {
+        "mean": 0.24842767295597482,
+        "sd": 0.03955894850757585
+      },
+      "live_accuracy": {
+        "mean": 0.9502905770029058,
+        "sd": 0.002535656231396983
+      },
+      "live_f1": {
+        "mean": 0.39636891793754536,
+        "sd": 0.0513280389728694
+      },
+      "other_acceptance": {
+        "mean": 0.0001111111111111111,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 3.6909892553975414,
+        "sd": 1.0532493233236617
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7311320754716982,
+        "sd": 0.03401463467418857
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 102.66222971798591,
+        "sd": 8.450376743660229
+      },
+      "stream_latency_median_ms": [
+        199.0,
+        148.0,
+        54.0
+      ],
+      "stream_recall": {
+        "mean": 0.35000000000000003,
+        "sd": 0.05579847668171595
+      },
+      "thresholds": [
+        8,
+        8,
+        6
+      ],
+      "fpga_ms": 8.59060875
+    },
+    "b8_f8_tb24_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb24_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 24,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1536,
+      "parameter_bytes": 9512,
+      "validation_recall": {
+        "mean": 0.28267973856209155,
+        "sd": 0.019811038648663622
+      },
+      "clip_accuracy": {
+        "mean": 0.9824616023246161,
+        "sd": 0.0011786858334994388
+      },
+      "clip_f1": {
+        "mean": 0.8662145273584727,
+        "sd": 0.0026216073107131186
+      },
+      "full_clip_f1": {
+        "mean": 0.7291551165449995,
+        "sd": 0.051270706783785466
+      },
+      "live_recall": {
+        "mean": 0.29245283018867924,
+        "sd": 0.012479959014455613
+      },
+      "live_accuracy": {
+        "mean": 0.9530925695309257,
+        "sd": 0.0007835029509413429
+      },
+      "live_f1": {
+        "mean": 0.4513575952424873,
+        "sd": 0.014557159167981086
+      },
+      "other_acceptance": {
+        "mean": 0.0002222222222222222,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 3.5328040015947892,
+        "sd": 1.6996226681546438
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7154088050314465,
+        "sd": 0.0756679837453834
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 117.53164357544455,
+        "sd": 66.05898607486132
+      },
+      "stream_latency_median_ms": [
+        167.0,
+        37.0,
+        128.0
+      ],
+      "stream_recall": {
+        "mean": 0.4167,
+        "sd": 0.033761368455677274
+      },
+      "thresholds": [
+        7,
+        8,
+        8
+      ],
+      "fpga_ms": 13.98268875
+    },
+    "b8_f8_tb32_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb32_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 32,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 2048,
+      "parameter_bytes": 12584,
+      "validation_recall": {
+        "mean": 0.3137254901960784,
+        "sd": 0.03214430649167647
+      },
+      "clip_accuracy": {
+        "mean": 0.9855749273557493,
+        "sd": 0.0007835029509412914
+      },
+      "clip_f1": {
+        "mean": 0.8883453353915752,
+        "sd": 0.0062047477786512355
+      },
+      "full_clip_f1": {
+        "mean": 0.7621550485814833,
+        "sd": 0.021397209626488604
+      },
+      "live_recall": {
+        "mean": 0.35062893081761004,
+        "sd": 0.022291583142700976
+      },
+      "live_accuracy": {
+        "mean": 0.9564134495641344,
+        "sd": 0.001733426015825045
+      },
+      "live_f1": {
+        "mean": 0.5147782456480002,
+        "sd": 0.025923540797314355
+      },
+      "other_acceptance": {
+        "mean": 0.0007777777777777777,
+        "sd": 0.00038490017945975053
+      },
+      "fa_per_hour": {
+        "mean": 5.694669136899063,
+        "sd": 2.2562587998546437
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6776729559748428,
+        "sd": 0.021270046003881545
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 75.20830011355275,
+        "sd": 25.92857067534295
+      },
+      "stream_latency_median_ms": [
+        21.0,
+        129.0,
+        -48.0
+      ],
+      "stream_recall": {
+        "mean": 0.46670000000000006,
+        "sd": 0.06862820120038114
+      },
+      "thresholds": [
+        6,
+        7,
+        8
+      ],
+      "fpga_ms": 17.560966750000002
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g1500_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g1500_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 1500,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.22712418300653595,
+        "sd": 0.04958820557350822
+      },
+      "clip_accuracy": {
+        "mean": 0.9849522623495227,
+        "sd": 0.0014713000081732334
+      },
+      "clip_f1": {
+        "mean": 0.8811580007823991,
+        "sd": 0.009667134500771623
+      },
+      "full_clip_f1": {
+        "mean": 0.7507241741102993,
+        "sd": 0.041895305221839575
+      },
+      "live_recall": {
+        "mean": 0.2641509433962264,
+        "sd": 0.05102195201128286
+      },
+      "live_accuracy": {
+        "mean": 0.9512245745122457,
+        "sd": 0.003240451431298476
+      },
+      "live_f1": {
+        "mean": 0.41513878955347394,
+        "sd": 0.06221809479377331
+      },
+      "other_acceptance": {
+        "mean": 0.0002222222222222222,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 3.216433493989286,
+        "sd": 0.6854694331452575
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7028301886792453,
+        "sd": 0.05719035685368939
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 145.79407558820287,
+        "sd": 113.43314192447185
+      },
+      "stream_latency_median_ms": [
+        198.0,
+        129.0,
+        85.0
+      ],
+      "stream_recall": {
+        "mean": 0.3642666666666667,
+        "sd": 0.08692596466725769
+      },
+      "thresholds": [
+        8,
+        9,
+        7
+      ],
+      "fpga_ms": 10.39869625
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g1500_s40000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g1500_s40000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 1500,
+        "rms_full_scale_u6": 40000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.24183006535947715,
+        "sd": 0.015757599282668244
+      },
+      "clip_accuracy": {
+        "mean": 0.9849522623495227,
+        "sd": 0.00047556825393896415
+      },
+      "clip_f1": {
+        "mean": 0.8812515129508594,
+        "sd": 0.0033869127584603468
+      },
+      "full_clip_f1": {
+        "mean": 0.7513027136017726,
+        "sd": 0.022048130055805644
+      },
+      "live_recall": {
+        "mean": 0.28773584905660377,
+        "sd": 0.042452830188679236
+      },
+      "live_accuracy": {
+        "mean": 0.9527812370278124,
+        "sd": 0.0026478519763746627
+      },
+      "live_f1": {
+        "mean": 0.4446315050116861,
+        "sd": 0.05038302427034836
+      },
+      "other_acceptance": {
+        "mean": 0.0002222222222222222,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 3.5679562802176235,
+        "sd": 1.6484132493212238
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6792452830188679,
+        "sd": 0.03093131379387733
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 86.12308262594263,
+        "sd": 11.631885809325288
+      },
+      "stream_latency_median_ms": [
+        241.0,
+        186.0,
+        189.0
+      ],
+      "stream_recall": {
+        "mean": 0.38810000000000006,
+        "sd": 0.021800000000000003
+      },
+      "thresholds": [
+        8,
+        8,
+        8
+      ],
+      "fpga_ms": 10.39555025
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g1500_s80000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g1500_s80000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 1500,
+        "rms_full_scale_u6": 80000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.22222222222222224,
+        "sd": 0.025154909016896484
+      },
+      "clip_accuracy": {
+        "mean": 0.9826691573266916,
+        "sd": 0.00047556825393896415
+      },
+      "clip_f1": {
+        "mean": 0.8649313551752575,
+        "sd": 0.00588725718828937
+      },
+      "full_clip_f1": {
+        "mean": 0.7341175269899131,
+        "sd": 0.010018080310336507
+      },
+      "live_recall": {
+        "mean": 0.27201257861635225,
+        "sd": 0.007205307696471445
+      },
+      "live_accuracy": {
+        "mean": 0.9516396845163969,
+        "sd": 0.0007835029509413429
+      },
+      "live_f1": {
+        "mean": 0.4260944831670539,
+        "sd": 0.010442200961888385
+      },
+      "other_acceptance": {
+        "mean": 0.0003333333333333333,
+        "sd": 0.0003333333333333333
+      },
+      "fa_per_hour": {
+        "mean": 3.58553241952904,
+        "sd": 1.3118677790877136
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7421383647798742,
+        "sd": 0.06507610719048704
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 289.4087099017901,
+        "sd": 253.30866064664946
+      },
+      "stream_latency_median_ms": [
+        247.0,
+        123.0,
+        230.0
+      ],
+      "stream_recall": {
+        "mean": 0.3642666666666667,
+        "sd": 0.012413030787576964
+      },
+      "thresholds": [
+        8,
+        9,
+        8
+      ],
+      "fpga_ms": 10.405799499999999
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g3000_s40000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g3000_s40000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 40000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.2124183006535948,
+        "sd": 0.029547616535988773
+      },
+      "clip_accuracy": {
+        "mean": 0.9820464923204649,
+        "sd": 0.0007835029509413429
+      },
+      "clip_f1": {
+        "mean": 0.8677852862488981,
+        "sd": 0.006546257192748161
+      },
+      "full_clip_f1": {
+        "mean": 0.6889131472199462,
+        "sd": 0.006165091965349325
+      },
+      "live_recall": {
+        "mean": 0.2327044025157233,
+        "sd": 0.04483200449491588
+      },
+      "live_accuracy": {
+        "mean": 0.9491490244914903,
+        "sd": 0.0029590239579458926
+      },
+      "live_f1": {
+        "mean": 0.3751693300705559,
+        "sd": 0.05880960910147572
+      },
+      "other_acceptance": {
+        "mean": 0.0002222222222222222,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 3.7612938126432085,
+        "sd": 0.8474907462293173
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7971698113207548,
+        "sd": 0.02869227608631237
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 366.5328092002873,
+        "sd": 118.78490047159869
+      },
+      "stream_latency_median_ms": [
+        241.0,
+        83.0,
+        188.0
+      ],
+      "stream_recall": {
+        "mean": 0.3238,
+        "sd": 0.06161793570057342
+      },
+      "thresholds": [
+        8,
+        8,
+        9
+      ],
+      "fpga_ms": 10.4059235
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g3000_s80000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g3000_s80000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 80000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.23039215686274508,
+        "sd": 0.030612735286266665
+      },
+      "clip_accuracy": {
+        "mean": 0.9825653798256538,
+        "sd": 0.00112252530369365
+      },
+      "clip_f1": {
+        "mean": 0.8654879918968069,
+        "sd": 0.010292051308087332
+      },
+      "full_clip_f1": {
+        "mean": 0.7178380476538474,
+        "sd": 0.026033686937248005
+      },
+      "live_recall": {
+        "mean": 0.2578616352201258,
+        "sd": 0.040668292944583524
+      },
+      "live_accuracy": {
+        "mean": 0.9504981320049813,
+        "sd": 0.0028534095236337847
+      },
+      "live_f1": {
+        "mean": 0.4064169549464058,
+        "sd": 0.05161809934694288
+      },
+      "other_acceptance": {
+        "mean": 0.0005555555555555556,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 5.343146350670726,
+        "sd": 1.6974401662358662
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7389937106918238,
+        "sd": 0.068083758159154
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 244.15015117489168,
+        "sd": 146.87993055970261
+      },
+      "stream_latency_median_ms": [
+        125.0,
+        148.0,
+        179.0
+      ],
+      "stream_recall": {
+        "mean": 0.3357333333333333,
+        "sd": 0.05390847181411593
+      },
+      "thresholds": [
+        8,
+        9,
+        7
+      ],
+      "fpga_ms": 10.404138
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g5000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g5000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 5000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.28758169934640526,
+        "sd": 0.02872286900530548
+      },
+      "clip_accuracy": {
+        "mean": 0.9858862598588626,
+        "sd": 0.0020729539596759695
+      },
+      "clip_f1": {
+        "mean": 0.8901783702770301,
+        "sd": 0.012967897163918026
+      },
+      "full_clip_f1": {
+        "mean": 0.7479707246739086,
+        "sd": 0.01933012729522564
+      },
+      "live_recall": {
+        "mean": 0.3364779874213837,
+        "sd": 0.03412348178335016
+      },
+      "live_accuracy": {
+        "mean": 0.9558945620589457,
+        "sd": 0.0020015879537137802
+      },
+      "live_f1": {
+        "mean": 0.5010548390479186,
+        "sd": 0.03729001173719465
+      },
+      "other_acceptance": {
+        "mean": 0.0003333333333333333,
+        "sd": 0.0003333333333333333
+      },
+      "fa_per_hour": {
+        "mean": 3.9019029271345436,
+        "sd": 1.584486765560901
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7295597484276731,
+        "sd": 0.07312588650461313
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 195.3060600284642,
+        "sd": 203.24152790095113
+      },
+      "stream_latency_median_ms": [
+        200.0,
+        102.0,
+        138.0
+      ],
+      "stream_recall": {
+        "mean": 0.4238,
+        "sd": 0.04644652839556472
+      },
+      "thresholds": [
+        7,
+        8,
+        7
+      ],
+      "fpga_ms": 10.404285999999999
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g5000_s40000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g5000_s40000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 5000,
+        "rms_full_scale_u6": 40000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.21405228758169934,
+        "sd": 0.019811038648663626
+      },
+      "clip_accuracy": {
+        "mean": 0.9827729348277293,
+        "sd": 0.0021191965397117287
+      },
+      "clip_f1": {
+        "mean": 0.864701290940246,
+        "sd": 0.0201858444637724
+      },
+      "full_clip_f1": {
+        "mean": 0.7366615627090788,
+        "sd": 0.009729871987369314
+      },
+      "live_recall": {
+        "mean": 0.23113207547169812,
+        "sd": 0.021615923089414336
+      },
+      "live_accuracy": {
+        "mean": 0.9489414694894146,
+        "sd": 0.0014267047618168923
+      },
+      "live_f1": {
+        "mean": 0.37371589442627345,
+        "sd": 0.028293744374132058
+      },
+      "other_acceptance": {
+        "mean": 0.0003333333333333333,
+        "sd": 0.0
+      },
+      "fa_per_hour": {
+        "mean": 4.14796887749438,
+        "sd": 0.9288785926871567
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7201257861635221,
+        "sd": 0.05859951306158561
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 148.1141259773099,
+        "sd": 29.250777967919223
+      },
+      "stream_latency_median_ms": [
+        181.0,
+        247.0,
+        188.0
+      ],
+      "stream_recall": {
+        "mean": 0.30716666666666664,
+        "sd": 0.018898236249272934
+      },
+      "thresholds": [
+        9,
+        9,
+        8
+      ],
+      "fpga_ms": 10.399500999999999
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g5000_s80000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g5000_s80000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 5000,
+        "rms_full_scale_u6": 80000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.21241830065359477,
+        "sd": 0.0251549090168965
+      },
+      "clip_accuracy": {
+        "mean": 0.980593607305936,
+        "sd": 0.0017974790447995892
+      },
+      "clip_f1": {
+        "mean": 0.8530621213548043,
+        "sd": 0.005348863813478389
+      },
+      "full_clip_f1": {
+        "mean": 0.6874929748571308,
+        "sd": 0.020022527171529563
+      },
+      "live_recall": {
+        "mean": 0.2327044025157233,
+        "sd": 0.035403554242760066
+      },
+      "live_accuracy": {
+        "mean": 0.9489414694894146,
+        "sd": 0.0023505088528240287
+      },
+      "live_f1": {
+        "mean": 0.3747525203575304,
+        "sd": 0.04644184067284163
+      },
+      "other_acceptance": {
+        "mean": 0.0004444444444444444,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 3.444923305037705,
+        "sd": 0.4027199440982838
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7704402515723271,
+        "sd": 0.09271398105538095
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 412.6174464748223,
+        "sd": 395.0612815700855
+      },
+      "stream_latency_median_ms": [
+        169.0,
+        146.0,
+        181.0
+      ],
+      "stream_recall": {
+        "mean": 0.3,
+        "sd": 0.04685520248595666
+      },
+      "thresholds": [
+        10,
+        9,
+        9
+      ],
+      "fpga_ms": 10.3869575
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g8000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g8000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 8000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.27777777777777773,
+        "sd": 0.03711704801176649
+      },
+      "clip_accuracy": {
+        "mean": 0.9824616023246161,
+        "sd": 0.0014713000081732963
+      },
+      "clip_f1": {
+        "mean": 0.8615963550776891,
+        "sd": 0.009056853458934661
+      },
+      "full_clip_f1": {
+        "mean": 0.7235329281723099,
+        "sd": 0.04823048540857053
+      },
+      "live_recall": {
+        "mean": 0.32547169811320753,
+        "sd": 0.02869227608631235
+      },
+      "live_accuracy": {
+        "mean": 0.954856787048568,
+        "sd": 0.001893761684401695
+      },
+      "live_f1": {
+        "mean": 0.4871608890696908,
+        "sd": 0.03291325080468794
+      },
+      "other_acceptance": {
+        "mean": 0.0006666666666666666,
+        "sd": 0.0
+      },
+      "fa_per_hour": {
+        "mean": 4.6049484995912175,
+        "sd": 1.0228950678200117
+      },
+      "old_rule_live_recall": {
+        "mean": 0.669811320754717,
+        "sd": 0.024959918028911225
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 103.33012301181975,
+        "sd": 21.854789617198666
+      },
+      "stream_latency_median_ms": [
+        99.0,
+        53.0,
+        123.0
+      ],
+      "stream_recall": {
+        "mean": 0.42383333333333334,
+        "sd": 0.04304838363206374
+      },
+      "thresholds": [
+        7,
+        7,
+        7
+      ],
+      "fpga_ms": 10.392339
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g8000_s40000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g8000_s40000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 8000,
+        "rms_full_scale_u6": 40000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.14215686274509806,
+        "sd": 0.07888959284034842
+      },
+      "clip_accuracy": {
+        "mean": 0.9789331672893317,
+        "sd": 0.0017146857245598144
+      },
+      "clip_f1": {
+        "mean": 0.8375162081270418,
+        "sd": 0.012134962785596259
+      },
+      "full_clip_f1": {
+        "mean": 0.6720001141462956,
+        "sd": 0.012959916442700413
+      },
+      "live_recall": {
+        "mean": 0.1619496855345912,
+        "sd": 0.08336299460258845
+      },
+      "live_accuracy": {
+        "mean": 0.9445828144458281,
+        "sd": 0.005428267675642205
+      },
+      "live_f1": {
+        "mean": 0.27214015086551874,
+        "sd": 0.12879967725851865
+      },
+      "other_acceptance": {
+        "mean": 0.0001111111111111111,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 4.271001852674298,
+        "sd": 1.4951086885275582
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7531446540880503,
+        "sd": 0.05507635184948742
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 461.1275909743328,
+        "sd": 210.66206862877098
+      },
+      "stream_latency_median_ms": [
+        197.0,
+        167.0,
+        316.0
+      ],
+      "stream_recall": {
+        "mean": 0.22619999999999998,
+        "sd": 0.10981493523196195
+      },
+      "thresholds": [
+        9,
+        9,
+        11
+      ],
+      "fpga_ms": 10.403421
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g8000_s80000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g8000_s80000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 8000,
+        "rms_full_scale_u6": 80000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.22058823529411764,
+        "sd": 0.004901960784313722
+      },
+      "clip_accuracy": {
+        "mean": 0.9796596097965962,
+        "sd": 0.00047556825393896415
+      },
+      "clip_f1": {
+        "mean": 0.8449458320719206,
+        "sd": 0.0016904086759356434
+      },
+      "full_clip_f1": {
+        "mean": 0.6709521951856884,
+        "sd": 0.02024404670239297
+      },
+      "live_recall": {
+        "mean": 0.25157232704402516,
+        "sd": 0.04280081002772389
+      },
+      "live_accuracy": {
+        "mean": 0.9498754669987547,
+        "sd": 0.002969922793950652
+      },
+      "live_f1": {
+        "mean": 0.39733497865741835,
+        "sd": 0.05463801259149022
+      },
+      "other_acceptance": {
+        "mean": 0.0007777777777777777,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 5.712245276210481,
+        "sd": 0.49836956284251926
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7830188679245284,
+        "sd": 0.018867924528301883
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 425.6589418438936,
+        "sd": 213.8989500980706
+      },
+      "stream_latency_median_ms": [
+        152.0,
+        38.0,
+        194.0
+      ],
+      "stream_recall": {
+        "mean": 0.3333333333333333,
+        "sd": 0.04591103716246599
+      },
+      "thresholds": [
+        9,
+        8,
+        7
+      ],
+      "fpga_ms": 10.39428625
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_maplog_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_maplog_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "log",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.22712418300653595,
+        "sd": 0.043935717842316174
+      },
+      "clip_accuracy": {
+        "mean": 0.9830842673308426,
+        "sd": 0.0010007939768568901
+      },
+      "clip_f1": {
+        "mean": 0.8684179156316136,
+        "sd": 0.008037576072054707
+      },
+      "full_clip_f1": {
+        "mean": 0.7305949605664677,
+        "sd": 0.008812591847868713
+      },
+      "live_recall": {
+        "mean": 0.2845911949685535,
+        "sd": 0.02682189010885531
+      },
+      "live_accuracy": {
+        "mean": 0.9523661270236614,
+        "sd": 0.0019442708587790857
+      },
+      "live_f1": {
+        "mean": 0.44050668827217737,
+        "sd": 0.033552444597126835
+      },
+      "other_acceptance": {
+        "mean": 0.0004444444444444444,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 6.309834012798653,
+        "sd": 0.8242066246606119
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7484276729559749,
+        "sd": 0.027638987156048685
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 285.68256836776965,
+        "sd": 158.57556892960363
+      },
+      "stream_latency_median_ms": [
+        174.0,
+        146.0,
+        200.0
+      ],
+      "stream_recall": {
+        "mean": 0.3381,
+        "sd": 0.05165065343245911
+      },
+      "thresholds": [
+        7,
+        8,
+        9
+      ],
+      "fpga_ms": 10.38839725
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapmel_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapmel_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "mel",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.25,
+        "sd": 0.0765710752539868
+      },
+      "clip_accuracy": {
+        "mean": 0.9838107098381071,
+        "sd": 0.002041543749782698
+      },
+      "clip_f1": {
+        "mean": 0.8748396171251548,
+        "sd": 0.015240029552353455
+      },
+      "full_clip_f1": {
+        "mean": 0.760999668929764,
+        "sd": 0.01718369240963658
+      },
+      "live_recall": {
+        "mean": 0.28144654088050314,
+        "sd": 0.056275252101173824
+      },
+      "live_accuracy": {
+        "mean": 0.9523661270236613,
+        "sd": 0.0035360575004983164
+      },
+      "live_f1": {
+        "mean": 0.43606693723065076,
+        "sd": 0.0693141444683177
+      },
+      "other_acceptance": {
+        "mean": 0.0002222222222222222,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 5.624364579653395,
+        "sd": 0.2904054816196706
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7106918238993711,
+        "sd": 0.04629695554822473
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 176.11291590039696,
+        "sd": 98.05790342246367
+      },
+      "stream_latency_median_ms": [
+        199.0,
+        132.0,
+        164.0
+      ],
+      "stream_recall": {
+        "mean": 0.35000000000000003,
+        "sd": 0.07456198763445085
+      },
+      "thresholds": [
+        7,
+        7,
+        8
+      ],
+      "fpga_ms": 10.39891725
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w15_h5_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w15_h5_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 15,
+        "fft_hop_ms": 5,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.25980392156862747,
+        "sd": 0.024509803921568624
+      },
+      "clip_accuracy": {
+        "mean": 0.9860938148609382,
+        "sd": 0.002072953959675972
+      },
+      "clip_f1": {
+        "mean": 0.8914344942364631,
+        "sd": 0.015453753139120681
+      },
+      "full_clip_f1": {
+        "mean": 0.7548470272349461,
+        "sd": 0.041782468675817794
+      },
+      "live_recall": {
+        "mean": 0.3128930817610063,
+        "sd": 0.039276716971059104
+      },
+      "live_accuracy": {
+        "mean": 0.9541303445413035,
+        "sd": 0.0023573716669988776
+      },
+      "live_f1": {
+        "mean": 0.4728427895981087,
+        "sd": 0.04471151516038249
+      },
+      "other_acceptance": {
+        "mean": 0.0005555555555555556,
+        "sd": 0.00038490017945975053
+      },
+      "fa_per_hour": {
+        "mean": 4.165545016805797,
+        "sd": 0.7325265928038769
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7091194968553459,
+        "sd": 0.03412348178335018
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 101.43189996618672,
+        "sd": 26.64122992460689
+      },
+      "stream_latency_median_ms": [
+        185.0,
+        111.0,
+        140.0
+      ],
+      "stream_recall": {
+        "mean": 0.38809999999999995,
+        "sd": 0.035253226802663025
+      },
+      "thresholds": [
+        8,
+        8,
+        7
+      ],
+      "fpga_ms": 10.39129975
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w15_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w15_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 15,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.27941176470588236,
+        "sd": 0.01470588235294118
+      },
+      "clip_accuracy": {
+        "mean": 0.9855749273557493,
+        "sd": 0.0021191965397116663
+      },
+      "clip_f1": {
+        "mean": 0.8887675704954751,
+        "sd": 0.015622717912595674
+      },
+      "full_clip_f1": {
+        "mean": 0.7484675496827773,
+        "sd": 0.03593110424433737
+      },
+      "live_recall": {
+        "mean": 0.31603773584905653,
+        "sd": 0.020560844073305058
+      },
+      "live_accuracy": {
+        "mean": 0.9545454545454546,
+        "sd": 0.0010784874268797535
+      },
+      "live_f1": {
+        "mean": 0.47829683957303604,
+        "sd": 0.021908626599209155
+      },
+      "other_acceptance": {
+        "mean": 0.0003333333333333333,
+        "sd": 0.0003333333333333333
+      },
+      "fa_per_hour": {
+        "mean": 4.077664320248712,
+        "sd": 2.4496497861648354
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7201257861635221,
+        "sd": 0.03069059952192319
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 102.82041497178864,
+        "sd": 24.59858403416799
+      },
+      "stream_latency_median_ms": [
+        193.0,
+        146.0,
+        129.0
+      ],
+      "stream_recall": {
+        "mean": 0.4333333333333333,
+        "sd": 0.017967285085213443
+      },
+      "thresholds": [
+        7,
+        7,
+        7
+      ],
+      "fpga_ms": 10.40965375
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h5_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h5_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 5,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.26633986928104575,
+        "sd": 0.005660296756761016
+      },
+      "clip_accuracy": {
+        "mean": 0.9832918223329182,
+        "sd": 0.0026478519763746627
+      },
+      "clip_f1": {
+        "mean": 0.8750440237728373,
+        "sd": 0.01597517206305251
+      },
+      "full_clip_f1": {
+        "mean": 0.7069002445097388,
+        "sd": 0.038739090454958304
+      },
+      "live_recall": {
+        "mean": 0.3097484276729559,
+        "sd": 0.009819179242764774
+      },
+      "live_accuracy": {
+        "mean": 0.9538190120381902,
+        "sd": 0.00035949580895991786
+      },
+      "live_f1": {
+        "mean": 0.46953635154304996,
+        "sd": 0.00974405234064571
+      },
+      "other_acceptance": {
+        "mean": 0.0006666666666666666,
+        "sd": 0.0003333333333333334
+      },
+      "fa_per_hour": {
+        "mean": 5.65951685827623,
+        "sd": 2.4285620211798196
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7720125786163522,
+        "sd": 0.03571640469056775
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 236.2057362061312,
+        "sd": 141.44629154124823
+      },
+      "stream_latency_median_ms": [
+        167.0,
+        141.0,
+        82.0
+      ],
+      "stream_recall": {
+        "mean": 0.43570000000000003,
+        "sd": 0.025765868896662495
+      },
+      "thresholds": [
+        8,
+        7,
+        7
+      ],
+      "fpga_ms": 10.397049749999999
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h20_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h20_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 20,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.22058823529411764,
+        "sd": 0.07254239503406244
+      },
+      "clip_accuracy": {
+        "mean": 0.9832918223329182,
+        "sd": 0.00035949580895991786
+      },
+      "clip_f1": {
+        "mean": 0.8738258272693171,
+        "sd": 0.003548469081238068
+      },
+      "full_clip_f1": {
+        "mean": 0.7175184400096507,
+        "sd": 0.029036800420472925
+      },
+      "live_recall": {
+        "mean": 0.26257861635220126,
+        "sd": 0.07669024149847294
+      },
+      "live_accuracy": {
+        "mean": 0.9510170195101703,
+        "sd": 0.004836521460245368
+      },
+      "live_f1": {
+        "mean": 0.41050192606728864,
+        "sd": 0.09241064966001683
+      },
+      "other_acceptance": {
+        "mean": 0.0003333333333333333,
+        "sd": 0.0003333333333333333
+      },
+      "fa_per_hour": {
+        "mean": 4.376458688542799,
+        "sd": 0.1054568358685013
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7625786163522013,
+        "sd": 0.042800810027723936
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 204.77959911731787,
+        "sd": 114.26994337104556
+      },
+      "stream_latency_median_ms": [
+        245.0,
+        13.0,
+        272.0
+      ],
+      "stream_recall": {
+        "mean": 0.35716666666666663,
+        "sd": 0.09608935078005956
+      },
+      "thresholds": [
+        7,
+        7,
+        9
+      ],
+      "fpga_ms": 10.4051025
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w40_h5_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w40_h5_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 40,
+        "fft_hop_ms": 5,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.2630718954248366,
+        "sd": 0.010204245095422237
+      },
+      "clip_accuracy": {
+        "mean": 0.9841220423412205,
+        "sd": 0.002041543749782639
+      },
+      "clip_f1": {
+        "mean": 0.8765374278035112,
+        "sd": 0.011689195314415006
+      },
+      "full_clip_f1": {
+        "mean": 0.7649616711241466,
+        "sd": 0.0491656939226721
+      },
+      "live_recall": {
+        "mean": 0.3270440251572327,
+        "sd": 0.01441061539294289
+      },
+      "live_accuracy": {
+        "mean": 0.9553756745537568,
+        "sd": 0.0010933638182703176
+      },
+      "live_f1": {
+        "mean": 0.49162005991137625,
+        "sd": 0.01717037835895604
+      },
+      "other_acceptance": {
+        "mean": 0.0002222222222222222,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 4.130392738182962,
+        "sd": 1.1263823526664587
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7075471698113208,
+        "sd": 0.08837261318488299
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 235.36208151918322,
+        "sd": 277.2002906826479
+      },
+      "stream_latency_median_ms": [
+        180.0,
+        129.0,
+        26.0
+      ],
+      "stream_recall": {
+        "mean": 0.4000000000000001,
+        "sd": 0.01887935380250077
+      },
+      "thresholds": [
+        7,
+        8,
+        7
+      ],
+      "fpga_ms": 10.39971675
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w40_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w40_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 40,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.25326797385620914,
+        "sd": 0.041110279821598456
+      },
+      "clip_accuracy": {
+        "mean": 0.9845371523453715,
+        "sd": 0.0018242419916195938
+      },
+      "clip_f1": {
+        "mean": 0.8813345752121998,
+        "sd": 0.013034539474259579
+      },
+      "full_clip_f1": {
+        "mean": 0.7383972949768807,
+        "sd": 0.034299719950499165
+      },
+      "live_recall": {
+        "mean": 0.3128930817610063,
+        "sd": 0.042277766225625
+      },
+      "live_accuracy": {
+        "mean": 0.9544416770444167,
+        "sd": 0.0026109891293916924
+      },
+      "live_f1": {
+        "mean": 0.4743912018853103,
+        "sd": 0.04898450670954941
+      },
+      "other_acceptance": {
+        "mean": 0.0002222222222222222,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 3.7788699519546256,
+        "sd": 0.9318669497670635
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7342767295597484,
+        "sd": 0.06840977961574558
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 188.92592145841988,
+        "sd": 152.29562744250157
+      },
+      "stream_latency_median_ms": [
+        205.0,
+        -5.0,
+        127.0
+      ],
+      "stream_recall": {
+        "mean": 0.3880666666666667,
+        "sd": 0.03296670037072765
+      },
+      "thresholds": [
+        7,
+        7,
+        8
+      ],
+      "fpga_ms": 10.398924000000001
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w40_h20_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w40_h20_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 40,
+        "fft_hop_ms": 20,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.27614379084967317,
+        "sd": 0.019811038648663643
+      },
+      "clip_accuracy": {
+        "mean": 0.9844333748443338,
+        "sd": 0.0005392437134398767
+      },
+      "clip_f1": {
+        "mean": 0.8754996465469308,
+        "sd": 0.006905358822207788
+      },
+      "full_clip_f1": {
+        "mean": 0.7710078729969595,
+        "sd": 0.03963929800070976
+      },
+      "live_recall": {
+        "mean": 0.31761006289308175,
+        "sd": 0.02882123078588578
+      },
+      "live_accuracy": {
+        "mean": 0.9546492320464924,
+        "sd": 0.0017146857245598144
+      },
+      "live_f1": {
+        "mean": 0.4798727078942906,
+        "sd": 0.03179245257440579
+      },
+      "other_acceptance": {
+        "mean": 0.0003333333333333333,
+        "sd": 0.0003333333333333333
+      },
+      "fa_per_hour": {
+        "mean": 4.6049484995912175,
+        "sd": 0.9568912556041067
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6886792452830189,
+        "sd": 0.05439888016354145
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 103.98044016634215,
+        "sd": 34.7932452211654
+      },
+      "stream_latency_median_ms": [
+        205.0,
+        96.0,
+        37.0
+      ],
+      "stream_recall": {
+        "mean": 0.4190333333333333,
+        "sd": 0.010943643512712434
+      },
+      "thresholds": [
+        8,
+        8,
+        7
+      ],
+      "fpga_ms": 10.38572975
+    },
+    "b4_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b4_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 4,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 512,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.2450980392156863,
+        "sd": 0.11896726568148626
+      },
+      "clip_accuracy": {
+        "mean": 0.9836031548360316,
+        "sd": 0.0017703115513939445
+      },
+      "clip_f1": {
+        "mean": 0.8718798677033105,
+        "sd": 0.01058511230733957
+      },
+      "full_clip_f1": {
+        "mean": 0.7362519670106872,
+        "sd": 0.03812844286586108
+      },
+      "live_recall": {
+        "mean": 0.26572327044025157,
+        "sd": 0.1462517730092262
+      },
+      "live_accuracy": {
+        "mean": 0.9510170195101703,
+        "sd": 0.009142438559251606
+      },
+      "live_f1": {
+        "mean": 0.40173747773208546,
+        "sd": 0.1931951608001426
+      },
+      "other_acceptance": {
+        "mean": 0.0005555555555555556,
+        "sd": 0.0006938886664887108
+      },
+      "fa_per_hour": {
+        "mean": 4.534643942345551,
+        "sd": 2.994398526676605
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7578616352201258,
+        "sd": 0.07143280938113557
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 262.2359985263396,
+        "sd": 278.1118970829897
+      },
+      "stream_latency_median_ms": [
+        180.0,
+        247.0,
+        126.0
+      ],
+      "stream_recall": {
+        "mean": 0.3595,
+        "sd": 0.1714753918205175
+      },
+      "thresholds": [
+        7,
+        10,
+        7
+      ],
+      "fpga_ms": 10.386856
+    },
+    "b4_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlog_mabsolute": {
+      "key": "b4_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlog_mabsolute",
+      "config": {
+        "bits": 4,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "log",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 512,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.2630718954248366,
+        "sd": 0.025154909016896487
+      },
+      "clip_accuracy": {
+        "mean": 0.982980489829805,
+        "sd": 0.0007835029509413429
+      },
+      "clip_f1": {
+        "mean": 0.8671313743801253,
+        "sd": 0.004150081904832873
+      },
+      "full_clip_f1": {
+        "mean": 0.7505036420809414,
+        "sd": 0.008461922091562352
+      },
+      "live_recall": {
+        "mean": 0.3238993710691824,
+        "sd": 0.01906345228456311
+      },
+      "live_accuracy": {
+        "mean": 0.9550643420506435,
+        "sd": 0.0014379832358396715
+      },
+      "live_f1": {
+        "mean": 0.48738671740050127,
+        "sd": 0.022280725603958374
+      },
+      "other_acceptance": {
+        "mean": 0.0003333333333333333,
+        "sd": 0.0005773502691896258
+      },
+      "fa_per_hour": {
+        "mean": 4.130392738182963,
+        "sd": 0.44844995059026455
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7279874213836478,
+        "sd": 0.03841758403418433
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 161.82351464021505,
+        "sd": 120.86189608542522
+      },
+      "stream_latency_median_ms": [
+        168.0,
+        193.0,
+        189.0
+      ],
+      "stream_recall": {
+        "mean": 0.42383333333333334,
+        "sd": 0.028846894691341263
+      },
+      "thresholds": [
+        7,
+        7,
+        7
+      ],
+      "fpga_ms": 10.4028285
+    },
+    "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute_delta": {
+      "key": "b8_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute_delta",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute_delta"
+      },
+      "input_bits": 2048,
+      "parameter_bytes": 12584,
+      "validation_recall": {
+        "mean": 0.28921568627450983,
+        "sd": 0.06372549019607844
+      },
+      "clip_accuracy": {
+        "mean": 0.9850560398505603,
+        "sd": 0.0008237083782891037
+      },
+      "clip_f1": {
+        "mean": 0.8808248372630759,
+        "sd": 0.005539516997360428
+      },
+      "full_clip_f1": {
+        "mean": 0.7716455914373425,
+        "sd": 0.008498119588853754
+      },
+      "live_recall": {
+        "mean": 0.32861635220125784,
+        "sd": 0.05991370718005549
+      },
+      "live_accuracy": {
+        "mean": 0.9549605645496057,
+        "sd": 0.003357967971640411
+      },
+      "live_f1": {
+        "mean": 0.48833472150974755,
+        "sd": 0.06617588761327885
+      },
+      "other_acceptance": {
+        "mean": 0.0007777777777777778,
+        "sd": 0.0008388704928078612
+      },
+      "fa_per_hour": {
+        "mean": 3.462499444349122,
+        "sd": 3.1240567896677662
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7405660377358491,
+        "sd": 0.008170050979098445
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 113.52428381244152,
+        "sd": 60.16485780530735
+      },
+      "stream_latency_median_ms": [
+        -9.0,
+        129.0,
+        167.0
+      ],
+      "stream_recall": {
+        "mean": 0.4452666666666667,
+        "sd": 0.05947960434748481
+      },
+      "thresholds": [
+        6,
+        7,
+        8
+      ],
+      "fpga_ms": 17.56624125
+    },
+    "b2_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b2_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 2,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 256,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.21405228758169934,
+        "sd": 0.04910123921998927
+      },
+      "clip_accuracy": {
+        "mean": 0.9733291822332918,
+        "sd": 0.002186727636540635
+      },
+      "clip_f1": {
+        "mean": 0.7976472979602879,
+        "sd": 0.01081662960559027
+      },
+      "full_clip_f1": {
+        "mean": 0.6483506475671154,
+        "sd": 0.04400301850089202
+      },
+      "live_recall": {
+        "mean": 0.25,
+        "sd": 0.06553039617665
+      },
+      "live_accuracy": {
+        "mean": 0.9500830220008303,
+        "sd": 0.004428515627511821
+      },
+      "live_f1": {
+        "mean": 0.39521977621928145,
+        "sd": 0.0818347132037784
+      },
+      "other_acceptance": {
+        "mean": 0.0004444444444444444,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 5.518907743784895,
+        "sd": 1.0092132872648956
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6886792452830188,
+        "sd": 0.04323184617882867
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 202.79349537512778,
+        "sd": 143.3659503413756
+      },
+      "stream_latency_median_ms": [
+        198.0,
+        168.0,
+        123.0
+      ],
+      "stream_recall": {
+        "mean": 0.3071333333333333,
+        "sd": 0.046809436370600886
+      },
+      "thresholds": [
+        9,
+        8,
+        9
+      ],
+      "fpga_ms": 10.373952
+    },
+    "b3_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b3_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 3,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 384,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.22712418300653595,
+        "sd": 0.0608975331816478
+      },
+      "clip_accuracy": {
+        "mean": 0.9820464923204649,
+        "sd": 0.0017146857245598144
+      },
+      "clip_f1": {
+        "mean": 0.8637771525760144,
+        "sd": 0.010924891423772403
+      },
+      "full_clip_f1": {
+        "mean": 0.7071980700882635,
+        "sd": 0.009860134686934948
+      },
+      "live_recall": {
+        "mean": 0.2468553459119497,
+        "sd": 0.07080710848552015
+      },
+      "live_accuracy": {
+        "mean": 0.9501867995018681,
+        "sd": 0.004586214154002582
+      },
+      "live_f1": {
+        "mean": 0.3918475770185336,
+        "sd": 0.09392119580504692
+      },
+      "other_acceptance": {
+        "mean": 0.0001111111111111111,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 3.884326787823127,
+        "sd": 0.7628935365499723
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7311320754716982,
+        "sd": 0.07353045881188632
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 216.55561245596718,
+        "sd": 144.30452126297223
+      },
+      "stream_latency_median_ms": [
+        244.0,
+        181.0,
+        263.0
+      ],
+      "stream_recall": {
+        "mean": 0.3809666666666667,
+        "sd": 0.08872318374209376
+      },
+      "thresholds": [
+        8,
+        9,
+        8
+      ],
+      "fpga_ms": 10.381806
+    },
+    "b6_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b6_f8_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 6,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 768,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.2745098039215686,
+        "sd": 0.03431372549019608
+      },
+      "clip_accuracy": {
+        "mean": 0.9837069323370694,
+        "sd": 0.00035949580895991786
+      },
+      "clip_f1": {
+        "mean": 0.8716090270023766,
+        "sd": 0.0037406823975637054
+      },
+      "full_clip_f1": {
+        "mean": 0.7557267450315578,
+        "sd": 0.01406793757297767
+      },
+      "live_recall": {
+        "mean": 0.3191823899371069,
+        "sd": 0.02723350326366159
+      },
+      "live_accuracy": {
+        "mean": 0.9547530095475301,
+        "sd": 0.0017974790447995892
+      },
+      "live_f1": {
+        "mean": 0.48175182481751827,
+        "sd": 0.03160676656147586
+      },
+      "other_acceptance": {
+        "mean": 0.0003333333333333333,
+        "sd": 0.0
+      },
+      "fa_per_hour": {
+        "mean": 4.446763245788467,
+        "sd": 1.2358413360049032
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6477987421383647,
+        "sd": 0.04909589621382388
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 81.74662393739983,
+        "sd": 14.568923261186034
+      },
+      "stream_latency_median_ms": [
+        140.0,
+        180.0,
+        146.0
+      ],
+      "stream_recall": {
+        "mean": 0.41430000000000006,
+        "sd": 0.04345066167505392
+      },
+      "thresholds": [
+        7,
+        7,
+        8
+      ],
+      "fpga_ms": 10.396346
+    },
+    "b8_f12_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f12_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 12,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1536,
+      "parameter_bytes": 9512,
+      "validation_recall": {
+        "mean": 0.25,
+        "sd": 0.06410145505206874
+      },
+      "clip_accuracy": {
+        "mean": 0.9843295973432961,
+        "sd": 0.0007835029509413429
+      },
+      "clip_f1": {
+        "mean": 0.8804537324837427,
+        "sd": 0.0052964839179581525
+      },
+      "full_clip_f1": {
+        "mean": 0.7385057116969164,
+        "sd": 0.022235707203293657
+      },
+      "live_recall": {
+        "mean": 0.2861635220125786,
+        "sd": 0.06281441621206973
+      },
+      "live_accuracy": {
+        "mean": 0.9526774595267747,
+        "sd": 0.00378752336880339
+      },
+      "live_f1": {
+        "mean": 0.44136412085595395,
+        "sd": 0.0719380499528693
+      },
+      "other_acceptance": {
+        "mean": 0.0002222222222222222,
+        "sd": 0.00038490017945975053
+      },
+      "fa_per_hour": {
+        "mean": 5.852854390701815,
+        "sd": 2.882754763574359
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7358490566037735,
+        "sd": 0.03561242658146582
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 173.6346802574872,
+        "sd": 99.64626130962004
+      },
+      "stream_latency_median_ms": [
+        202.0,
+        191.0,
+        127.0
+      ],
+      "stream_recall": {
+        "mean": 0.3833333333333333,
+        "sd": 0.08930153040868524
+      },
+      "thresholds": [
+        8,
+        7,
+        9
+      ],
+      "fpga_ms": 13.99679425
+    },
+    "b8_f16_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f16_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 2048,
+      "parameter_bytes": 12584,
+      "validation_recall": {
+        "mean": 0.29411764705882354,
+        "sd": 0.03828553762699342
+      },
+      "clip_accuracy": {
+        "mean": 0.9836031548360316,
+        "sd": 0.0012582353313597124
+      },
+      "clip_f1": {
+        "mean": 0.8749123173561489,
+        "sd": 0.006237493510652438
+      },
+      "full_clip_f1": {
+        "mean": 0.737582461208912,
+        "sd": 0.03569874216619814
+      },
+      "live_recall": {
+        "mean": 0.34591194968553457,
+        "sd": 0.03955894850757589
+      },
+      "live_accuracy": {
+        "mean": 0.9567247820672478,
+        "sd": 0.00243158458154
+      },
+      "live_f1": {
+        "mean": 0.5125427664573573,
+        "sd": 0.04188810315884422
+      },
+      "other_acceptance": {
+        "mean": 0.0001111111111111111,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 4.2182734347400475,
+        "sd": 1.1919421863332291
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7279874213836478,
+        "sd": 0.08119969392248653
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 155.98823638882467,
+        "sd": 78.79538900383561
+      },
+      "stream_latency_median_ms": [
+        193.0,
+        230.0,
+        -49.0
+      ],
+      "stream_recall": {
+        "mean": 0.4476333333333333,
+        "sd": 0.045911037162465994
+      },
+      "thresholds": [
+        5,
+        7,
+        7
+      ],
+      "fpga_ms": 17.55743825
+    },
+    "b8_f20_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f20_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 20,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 2560,
+      "parameter_bytes": 15656,
+      "validation_recall": {
+        "mean": 0.303921568627451,
+        "sd": 0.008490445135141557
+      },
+      "clip_accuracy": {
+        "mean": 0.9851598173515983,
+        "sd": 0.0006480902862596952
+      },
+      "clip_f1": {
+        "mean": 0.8838739311053375,
+        "sd": 0.008233266742536603
+      },
+      "full_clip_f1": {
+        "mean": 0.7425307416788387,
+        "sd": 0.026252288584801532
+      },
+      "live_recall": {
+        "mean": 0.3584905660377358,
+        "sd": 0.02451015293729546
+      },
+      "live_accuracy": {
+        "mean": 0.9572436695724367,
+        "sd": 0.0017146857245597506
+      },
+      "live_f1": {
+        "mean": 0.5250441717576897,
+        "sd": 0.026764600222924127
+      },
+      "other_acceptance": {
+        "mean": 0.0004444444444444444,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 4.727981474771137,
+        "sd": 0.6111342682022086
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6823899371069183,
+        "sd": 0.08255839995487471
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 119.99230307904293,
+        "sd": 79.67465183068538
+      },
+      "stream_latency_median_ms": [
+        193.0,
+        97.0,
+        129.0
+      ],
+      "stream_recall": {
+        "mean": 0.45239999999999997,
+        "sd": 0.010899999999999986
+      },
+      "thresholds": [
+        7,
+        7,
+        7
+      ],
+      "fpga_ms": 21.1844295
+    },
+    "b8_f24_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f24_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 24,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 3072,
+      "parameter_bytes": 18728,
+      "validation_recall": {
+        "mean": 0.25980392156862747,
+        "sd": 0.03431372549019608
+      },
+      "clip_accuracy": {
+        "mean": 0.9848484848484849,
+        "sd": 0.0007835029509413429
+      },
+      "clip_f1": {
+        "mean": 0.8820821665547189,
+        "sd": 0.009353204869492308
+      },
+      "full_clip_f1": {
+        "mean": 0.7511915545203589,
+        "sd": 0.00996912768950955
+      },
+      "live_recall": {
+        "mean": 0.29559748427672955,
+        "sd": 0.02882123078588578
+      },
+      "live_accuracy": {
+        "mean": 0.9533001245330013,
+        "sd": 0.0019442708587790855
+      },
+      "live_f1": {
+        "mean": 0.45470358613000145,
+        "sd": 0.034713698907484374
+      },
+      "other_acceptance": {
+        "mean": 0.0002222222222222222,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 3.6558369767747076,
+        "sd": 1.0550076706635279
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6588050314465409,
+        "sd": 0.11691390845925351
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 122.92751834404953,
+        "sd": 130.05903679543087
+      },
+      "stream_latency_median_ms": [
+        134.0,
+        183.0,
+        109.0
+      ],
+      "stream_recall": {
+        "mean": 0.3976333333333333,
+        "sd": 0.028867513459481284
+      },
+      "thresholds": [
+        8,
+        7,
+        7
+      ],
+      "fpga_ms": 24.789058250000004
+    },
+    "b8_f32_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f32_tb16_hz300-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 32,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 4096,
+      "parameter_bytes": 24872,
+      "validation_recall": {
+        "mean": 0.2598039215686274,
+        "sd": 0.037008992329758586
+      },
+      "clip_accuracy": {
+        "mean": 0.9831880448318805,
+        "sd": 0.002431584581540064
+      },
+      "clip_f1": {
+        "mean": 0.8680314612257224,
+        "sd": 0.01645247266083644
+      },
+      "full_clip_f1": {
+        "mean": 0.7499238985697163,
+        "sd": 0.029514132522916934
+      },
+      "live_recall": {
+        "mean": 0.30660377358490565,
+        "sd": 0.07075471698113209
+      },
+      "live_accuracy": {
+        "mean": 0.9541303445413035,
+        "sd": 0.004515215840142573
+      },
+      "live_f1": {
+        "mean": 0.46568951801986397,
+        "sd": 0.08225776134065836
+      },
+      "other_acceptance": {
+        "mean": 0.0001111111111111111,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 4.569796220968384,
+        "sd": 1.3069133106440416
+      },
+      "old_rule_live_recall": {
+        "mean": 0.5974842767295597,
+        "sd": 0.019063452284563114
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 53.53692034257576,
+        "sd": 19.577255180658483
+      },
+      "stream_latency_median_ms": [
+        197.0,
+        -26.0,
+        64.0
+      ],
+      "stream_recall": {
+        "mean": 0.4428666666666667,
+        "sd": 0.05715000729075487
+      },
+      "thresholds": [
+        8,
+        6,
+        7
+      ],
+      "fpga_ms": 31.986596749999997
+    },
+    "b8_f8_tb16_hz40-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz40-3400_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 40,
+        "high_hz": 3400,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.18627450980392157,
+        "sd": 0.0382855376269934
+      },
+      "clip_accuracy": {
+        "mean": 0.984744707347447,
+        "sd": 0.0003113325031133263
+      },
+      "clip_f1": {
+        "mean": 0.8802317631721075,
+        "sd": 0.006346405354399538
+      },
+      "full_clip_f1": {
+        "mean": 0.7358224425956594,
+        "sd": 0.016886307897024704
+      },
+      "live_recall": {
+        "mean": 0.22012578616352205,
+        "sd": 0.053643780217710636
+      },
+      "live_accuracy": {
+        "mean": 0.9484225819842259,
+        "sd": 0.0034152101851192196
+      },
+      "live_f1": {
+        "mean": 0.3581530102880131,
+        "sd": 0.07287322474335263
+      },
+      "other_acceptance": {
+        "mean": 0.0001111111111111111,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 4.165545016805797,
+        "sd": 2.6093908399609664
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7374213836477986,
+        "sd": 0.026821890108855332
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 289.6899281307727,
+        "sd": 175.0206791989519
+      },
+      "stream_latency_median_ms": [
+        200.0,
+        180.0,
+        203.0
+      ],
+      "stream_recall": {
+        "mean": 0.29286666666666666,
+        "sd": 0.06352246321840277
+      },
+      "thresholds": [
+        8,
+        10,
+        8
+      ],
+      "fpga_ms": 10.375334
+    },
+    "b8_f8_tb16_hz40-4000_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz40-4000_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 40,
+        "high_hz": 4000,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.173202614379085,
+        "sd": 0.05399578967927551
+      },
+      "clip_accuracy": {
+        "mean": 0.9828767123287672,
+        "sd": 0.0013570669189105513
+      },
+      "clip_f1": {
+        "mean": 0.8673270013038827,
+        "sd": 0.007594707613854478
+      },
+      "full_clip_f1": {
+        "mean": 0.7338228902959752,
+        "sd": 0.014433712918133538
+      },
+      "live_recall": {
+        "mean": 0.2059748427672956,
+        "sd": 0.05706052613718257
+      },
+      "live_accuracy": {
+        "mean": 0.9472810294728102,
+        "sd": 0.0034715086516558316
+      },
+      "live_f1": {
+        "mean": 0.33758457385663193,
+        "sd": 0.0789994581060349
+      },
+      "other_acceptance": {
+        "mean": 0.0003333333333333333,
+        "sd": 0.0003333333333333333
+      },
+      "fa_per_hour": {
+        "mean": 2.1442889959928575,
+        "sd": 0.5066686089954568
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7311320754716982,
+        "sd": 0.07487975408673368
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 263.097229352599,
+        "sd": 165.03538557491092
+      },
+      "stream_latency_median_ms": [
+        192.0,
+        164.0,
+        202.0
+      ],
+      "stream_recall": {
+        "mean": 0.2738,
+        "sd": 0.07835706732643839
+      },
+      "thresholds": [
+        8,
+        8,
+        9
+      ],
+      "fpga_ms": 10.40218775
+    },
+    "b8_f8_tb16_hz40-5120_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz40-5120_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 40,
+        "high_hz": 5120,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.13888888888888887,
+        "sd": 0.024180798344687487
+      },
+      "clip_accuracy": {
+        "mean": 0.981527604815276,
+        "sd": 0.0020015879537137802
+      },
+      "clip_f1": {
+        "mean": 0.8632650388338178,
+        "sd": 0.00969197571944766
+      },
+      "full_clip_f1": {
+        "mean": 0.6776617642258462,
+        "sd": 0.051095358043398854
+      },
+      "live_recall": {
+        "mean": 0.13679245283018868,
+        "sd": 0.04192544536469616
+      },
+      "live_accuracy": {
+        "mean": 0.9430261519302615,
+        "sd": 0.0027671838161007546
+      },
+      "live_f1": {
+        "mean": 0.2390928517012417,
+        "sd": 0.06390351374238866
+      },
+      "other_acceptance": {
+        "mean": 0.0,
+        "sd": 0.0
+      },
+      "fa_per_hour": {
+        "mean": 1.4763957021590166,
+        "sd": 0.39809082543735286
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7389937106918238,
+        "sd": 0.08389510422612642
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 273.74836977531766,
+        "sd": 204.46778765803091
+      },
+      "stream_latency_median_ms": [
+        203.0,
+        172.0,
+        262.0
+      ],
+      "stream_recall": {
+        "mean": 0.19046666666666667,
+        "sd": 0.008256108849411654
+      },
+      "thresholds": [
+        9,
+        9,
+        9
+      ],
+      "fpga_ms": 10.397631
+    },
+    "b8_f8_tb16_hz40-6500_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz40-6500_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 40,
+        "high_hz": 6500,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.1372549019607843,
+        "sd": 0.008490445135141557
+      },
+      "clip_accuracy": {
+        "mean": 0.980593607305936,
+        "sd": 0.0012582353313597124
+      },
+      "clip_f1": {
+        "mean": 0.8535005247428034,
+        "sd": 0.010554191769840657
+      },
+      "full_clip_f1": {
+        "mean": 0.6959799973761723,
+        "sd": 0.013272604660983076
+      },
+      "live_recall": {
+        "mean": 0.15566037735849056,
+        "sd": 0.037439877043366855
+      },
+      "live_accuracy": {
+        "mean": 0.9441677044416771,
+        "sd": 0.0022948676201220495
+      },
+      "live_f1": {
+        "mean": 0.2677623571991818,
+        "sd": 0.05451058775494046
+      },
+      "other_acceptance": {
+        "mean": 0.0001111111111111111,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 2.021256020812939,
+        "sd": 0.43905181927747877
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6588050314465409,
+        "sd": 0.05467087626010603
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 223.4806113446654,
+        "sd": 78.93895589762354
+      },
+      "stream_latency_median_ms": [
+        254.0,
+        75.0,
+        256.0
+      ],
+      "stream_recall": {
+        "mean": 0.19046666666666667,
+        "sd": 0.008256108849411654
+      },
+      "thresholds": [
+        8,
+        9,
+        9
+      ],
+      "fpga_ms": 10.38029575
+    },
+    "b8_f8_tb16_hz40-7600_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz40-7600_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 40,
+        "high_hz": 7600,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.1781045751633987,
+        "sd": 0.03443024102239457
+      },
+      "clip_accuracy": {
+        "mean": 0.9787256122872562,
+        "sd": 0.002592361145038781
+      },
+      "clip_f1": {
+        "mean": 0.8354229071442741,
+        "sd": 0.014366850168003036
+      },
+      "full_clip_f1": {
+        "mean": 0.6951648273489134,
+        "sd": 0.042739096524809415
+      },
+      "live_recall": {
+        "mean": 0.21383647798742136,
+        "sd": 0.04724836226829157
+      },
+      "live_accuracy": {
+        "mean": 0.9476961394769615,
+        "sd": 0.0028534095236337847
+      },
+      "live_f1": {
+        "mean": 0.34871037534708904,
+        "sd": 0.0640720675000487
+      },
+      "other_acceptance": {
+        "mean": 0.0004444444444444444,
+        "sd": 0.0005091750772173156
+      },
+      "fa_per_hour": {
+        "mean": 3.4273471657262884,
+        "sd": 1.3308051017522482
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6305031446540881,
+        "sd": 0.04724836226829159
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 129.41311374996235,
+        "sd": 60.33984364379475
+      },
+      "stream_latency_median_ms": [
+        245.0,
+        -48.0,
+        198.0
+      ],
+      "stream_recall": {
+        "mean": 0.25953333333333334,
+        "sd": 0.04596806862739975
+      },
+      "thresholds": [
+        8,
+        8,
+        8
+      ],
+      "fpga_ms": 10.37850575
+    },
+    "b8_f8_tb16_hz300-5120_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-5120_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 5120,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.19607843137254902,
+        "sd": 0.02136715168402291
+      },
+      "clip_accuracy": {
+        "mean": 0.9794520547945206,
+        "sd": 0.0035360575004983164
+      },
+      "clip_f1": {
+        "mean": 0.846598249466712,
+        "sd": 0.019220705528531983
+      },
+      "full_clip_f1": {
+        "mean": 0.6650059077417264,
+        "sd": 0.04879673464175133
+      },
+      "live_recall": {
+        "mean": 0.23113207547169812,
+        "sd": 0.030931313793877355
+      },
+      "live_accuracy": {
+        "mean": 0.9489414694894146,
+        "sd": 0.0019442708587790855
+      },
+      "live_f1": {
+        "mean": 0.3733413310082208,
+        "sd": 0.04000362641249621
+      },
+      "other_acceptance": {
+        "mean": 0.0003333333333333333,
+        "sd": 0.0003333333333333333
+      },
+      "fa_per_hour": {
+        "mean": 2.2673219711727755,
+        "sd": 0.24163196645897053
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6918238993710691,
+        "sd": 0.06609386653139528
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 228.54253946635345,
+        "sd": 154.46804508123134
+      },
+      "stream_latency_median_ms": [
+        198.0,
+        -5.0,
+        192.0
+      ],
+      "stream_recall": {
+        "mean": 0.3095333333333333,
+        "sd": 0.04062146394867292
+      },
+      "thresholds": [
+        7,
+        7,
+        8
+      ],
+      "fpga_ms": 10.38483925
+    },
+    "b8_f8_tb16_hz150-6500_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz150-6500_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 150,
+        "high_hz": 6500,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.1895424836601307,
+        "sd": 0.024672661553172395
+      },
+      "clip_accuracy": {
+        "mean": 0.9799709422997095,
+        "sd": 0.0018242419916196571
+      },
+      "clip_f1": {
+        "mean": 0.8480982436216423,
+        "sd": 0.014501014513511726
+      },
+      "full_clip_f1": {
+        "mean": 0.6939072337104416,
+        "sd": 0.03471984231627637
+      },
+      "live_recall": {
+        "mean": 0.23270440251572325,
+        "sd": 0.04724836226829157
+      },
+      "live_accuracy": {
+        "mean": 0.949252801992528,
+        "sd": 0.0031133250311332628
+      },
+      "live_f1": {
+        "mean": 0.37546982107907517,
+        "sd": 0.06246975443262136
+      },
+      "other_acceptance": {
+        "mean": 0.0001111111111111111,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 2.7594538718924473,
+        "sd": 0.4755312110735233
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6619496855345912,
+        "sd": 0.04724836226829153
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 125.61666765869631,
+        "sd": 58.00903265390702
+      },
+      "stream_latency_median_ms": [
+        192.0,
+        198.0,
+        100.0
+      ],
+      "stream_recall": {
+        "mean": 0.2905,
+        "sd": 0.03935492345310813
+      },
+      "thresholds": [
+        8,
+        8,
+        7
+      ],
+      "fpga_ms": 10.39657025
+    },
+    "b8_f8_tb16_hz300-6500_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-6500_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 6500,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.16666666666666666,
+        "sd": 0.02593873834377049
+      },
+      "clip_accuracy": {
+        "mean": 0.9782067247820673,
+        "sd": 0.0025483663673326533
+      },
+      "clip_f1": {
+        "mean": 0.838331786559388,
+        "sd": 0.01706327561958837
+      },
+      "full_clip_f1": {
+        "mean": 0.6799858897419874,
+        "sd": 0.022149166037929886
+      },
+      "live_recall": {
+        "mean": 0.17295597484276728,
+        "sd": 0.041211768622896716
+      },
+      "live_accuracy": {
+        "mean": 0.9452054794520549,
+        "sd": 0.0028534095236337847
+      },
+      "live_f1": {
+        "mean": 0.2927579365079365,
+        "sd": 0.0611245572457444
+      },
+      "other_acceptance": {
+        "mean": 0.0002222222222222222,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 3.4097710264148713,
+        "sd": 1.2503789531699658
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6965408805031447,
+        "sd": 0.06507610719048704
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 184.26824454089436,
+        "sd": 93.10113179071486
+      },
+      "stream_latency_median_ms": [
+        199.0,
+        117.0,
+        244.0
+      ],
+      "stream_recall": {
+        "mean": 0.22143333333333334,
+        "sd": 0.04998573129737459
+      },
+      "thresholds": [
+        7,
+        9,
+        9
+      ],
+      "fpga_ms": 10.3893035
+    },
+    "b8_f8_tb16_hz500-6500_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz500-6500_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 500,
+        "high_hz": 6500,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.15849673202614378,
+        "sd": 0.0231657628737873
+      },
+      "clip_accuracy": {
+        "mean": 0.9742631797426319,
+        "sd": 0.0019022730157558564
+      },
+      "clip_f1": {
+        "mean": 0.814692632925452,
+        "sd": 0.011775747829346619
+      },
+      "full_clip_f1": {
+        "mean": 0.6291887640491124,
+        "sd": 0.035401135915043035
+      },
+      "live_recall": {
+        "mean": 0.18710691823899372,
+        "sd": 0.04771695253299849
+      },
+      "live_accuracy": {
+        "mean": 0.9462432544624325,
+        "sd": 0.0030715335381794936
+      },
+      "live_f1": {
+        "mean": 0.31291989664082687,
+        "sd": 0.06903288296132595
+      },
+      "other_acceptance": {
+        "mean": 0.0001111111111111111,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 2.9352152650066166,
+        "sd": 0.9228728491623734
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6509433962264151,
+        "sd": 0.029457537728294333
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 124.40391404620856,
+        "sd": 26.225820336546583
+      },
+      "stream_latency_median_ms": [
+        200.0,
+        134.0,
+        82.0
+      ],
+      "stream_recall": {
+        "mean": 0.21906666666666666,
+        "sd": 0.0352295803740739
+      },
+      "thresholds": [
+        8,
+        8,
+        6
+      ],
+      "fpga_ms": 10.380589
+    },
+    "b8_f8_tb16_hz150-7600_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz150-7600_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 150,
+        "high_hz": 7600,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.15849673202614378,
+        "sd": 0.053995789679275506
+      },
+      "clip_accuracy": {
+        "mean": 0.9788293897882939,
+        "sd": 0.004607300307269241
+      },
+      "clip_f1": {
+        "mean": 0.8454923400900799,
+        "sd": 0.025573003010271093
+      },
+      "full_clip_f1": {
+        "mean": 0.6804736401356898,
+        "sd": 0.06365991480048992
+      },
+      "live_recall": {
+        "mean": 0.16981132075471697,
+        "sd": 0.04645687642356654
+      },
+      "live_accuracy": {
+        "mean": 0.9451017019510171,
+        "sd": 0.0030238277883631224
+      },
+      "live_f1": {
+        "mean": 0.28808142455294355,
+        "sd": 0.06893789372369102
+      },
+      "other_acceptance": {
+        "mean": 0.0001111111111111111,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 2.5661163394668622,
+        "sd": 1.0963623210463094
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6808176100628932,
+        "sd": 0.07855343394211821
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 201.42255650883723,
+        "sd": 180.62057029566805
+      },
+      "stream_latency_median_ms": [
+        202.0,
+        147.0,
+        203.0
+      ],
+      "stream_recall": {
+        "mean": 0.20716666666666664,
+        "sd": 0.07525399214216702
+      },
+      "thresholds": [
+        7,
+        9,
+        8
+      ],
+      "fpga_ms": 10.39118925
+    },
+    "b8_f8_tb16_hz300-7600_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-7600_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 7600,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.21405228758169934,
+        "sd": 0.035461657539559974
+      },
+      "clip_accuracy": {
+        "mean": 0.9776878372768785,
+        "sd": 0.003149437713884097
+      },
+      "clip_f1": {
+        "mean": 0.8286634030017304,
+        "sd": 0.015636321789862323
+      },
+      "full_clip_f1": {
+        "mean": 0.6912828429452471,
+        "sd": 0.04687511007205515
+      },
+      "live_recall": {
+        "mean": 0.23113207547169812,
+        "sd": 0.04085025489549238
+      },
+      "live_accuracy": {
+        "mean": 0.9489414694894146,
+        "sd": 0.002431584581540064
+      },
+      "live_f1": {
+        "mean": 0.3727989611987666,
+        "sd": 0.05147697224986553
+      },
+      "other_acceptance": {
+        "mean": 0.0003333333333333333,
+        "sd": 0.0003333333333333333
+      },
+      "fa_per_hour": {
+        "mean": 4.095240459560128,
+        "sd": 0.29040548161967106
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6792452830188679,
+        "sd": 0.11905122135966002
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 181.38575769382203,
+        "sd": 185.88017803372338
+      },
+      "stream_latency_median_ms": [
+        199.0,
+        37.0,
+        199.0
+      ],
+      "stream_recall": {
+        "mean": 0.27376666666666666,
+        "sd": 0.07637626158259732
+      },
+      "thresholds": [
+        6,
+        9,
+        8
+      ],
+      "fpga_ms": 10.373626999999999
+    },
+    "b8_f8_tb16_hz500-7600_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz500-7600_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 500,
+        "high_hz": 7600,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.1454248366013072,
+        "sd": 0.032638863325879376
+      },
+      "clip_accuracy": {
+        "mean": 0.9749896222498963,
+        "sd": 0.0023367227582394663
+      },
+      "clip_f1": {
+        "mean": 0.8172280676272782,
+        "sd": 0.005508162588866209
+      },
+      "full_clip_f1": {
+        "mean": 0.6321375851994943,
+        "sd": 0.04024038520143094
+      },
+      "live_recall": {
+        "mean": 0.16666666666666666,
+        "sd": 0.017858202345283875
+      },
+      "live_accuracy": {
+        "mean": 0.9449979244499792,
+        "sd": 0.0011786858334994388
+      },
+      "live_f1": {
+        "mean": 0.285444262647297,
+        "sd": 0.026460842874085715
+      },
+      "other_acceptance": {
+        "mean": 0.0,
+        "sd": 0.0
+      },
+      "fa_per_hour": {
+        "mean": 2.2673219711727755,
+        "sd": 0.828692136012345
+      },
+      "old_rule_live_recall": {
+        "mean": 0.619496855345912,
+        "sd": 0.08978799707716498
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 124.42149018551997,
+        "sd": 77.24420486121635
+      },
+      "stream_latency_median_ms": [
+        223.0,
+        130.0,
+        102.0
+      ],
+      "stream_recall": {
+        "mean": 0.21666666666666667,
+        "sd": 0.01796728508521343
+      },
+      "thresholds": [
+        7,
+        8,
+        8
+      ],
+      "fpga_ms": 10.3728505
+    },
+    "b8_f8_tb16_hz300-3400_t400_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t400_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 400,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.18300653594771243,
+        "sd": 0.08635431543610333
+      },
+      "clip_accuracy": {
+        "mean": 0.9690743046907432,
+        "sd": 0.002790437870433542
+      },
+      "clip_f1": {
+        "mean": 0.7696533470519031,
+        "sd": 0.012937586069135596
+      },
+      "full_clip_f1": {
+        "mean": 0.5717443776884833,
+        "sd": 0.03785491979694966
+      },
+      "live_recall": {
+        "mean": 0.19654088050314467,
+        "sd": 0.08765635135073178
+      },
+      "live_accuracy": {
+        "mean": 0.9468659194686593,
+        "sd": 0.005658491440521229
+      },
+      "live_f1": {
+        "mean": 0.321804698628733,
+        "sd": 0.12611687978357883
+      },
+      "other_acceptance": {
+        "mean": 0.0001111111111111111,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 4.727981474771137,
+        "sd": 1.8153693124459132
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6210691823899371,
+        "sd": 0.07158838011215225
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 154.0724372038802,
+        "sd": 138.6913463015188
+      },
+      "stream_latency_median_ms": [
+        180.0,
+        148.0,
+        127.0
+      ],
+      "stream_recall": {
+        "mean": 0.24523333333333333,
+        "sd": 0.1298197339903812
+      },
+      "thresholds": [
+        5,
+        6,
+        5
+      ],
+      "fpga_ms": 10.36497075
+    },
+    "b8_f8_tb16_hz300-3400_t500_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t500_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 500,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.1781045751633987,
+        "sd": 0.05377281918922985
+      },
+      "clip_accuracy": {
+        "mean": 0.9797633872976338,
+        "sd": 0.0006226650062266526
+      },
+      "clip_f1": {
+        "mean": 0.8385107929541045,
+        "sd": 0.006022788259794853
+      },
+      "full_clip_f1": {
+        "mean": 0.6864997038134043,
+        "sd": 0.04075335713143136
+      },
+      "live_recall": {
+        "mean": 0.18553459119496854,
+        "sd": 0.03313098664419101
+      },
+      "live_accuracy": {
+        "mean": 0.9459319219593193,
+        "sd": 0.002186727636540635
+      },
+      "live_f1": {
+        "mean": 0.3108807928683705,
+        "sd": 0.04721963955022963
+      },
+      "other_acceptance": {
+        "mean": 0.0003333333333333333,
+        "sd": 0.0
+      },
+      "fa_per_hour": {
+        "mean": 3.392194887103455,
+        "sd": 0.5202062183698268
+      },
+      "old_rule_live_recall": {
+        "mean": 0.5801886792452831,
+        "sd": 0.047169811320754707
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 55.71636161719146,
+        "sd": 26.37350510589085
+      },
+      "stream_latency_median_ms": [
+        129.0,
+        171.0,
+        122.0
+      ],
+      "stream_recall": {
+        "mean": 0.29283333333333333,
+        "sd": 0.06547628069257852
+      },
+      "thresholds": [
+        6,
+        7,
+        5
+      ],
+      "fpga_ms": 10.384882
+    },
+    "b8_f8_tb16_hz300-3400_t600_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t600_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 600,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.1895424836601307,
+        "sd": 0.028722869005305473
+      },
+      "clip_accuracy": {
+        "mean": 0.9802822748028227,
+        "sd": 0.00035949580895991786
+      },
+      "clip_f1": {
+        "mean": 0.8465104171396227,
+        "sd": 0.009130474266614992
+      },
+      "full_clip_f1": {
+        "mean": 0.6909228532948043,
+        "sd": 0.03456247616410621
+      },
+      "live_recall": {
+        "mean": 0.2012578616352201,
+        "sd": 0.05174365620095703
+      },
+      "live_accuracy": {
+        "mean": 0.9470734744707348,
+        "sd": 0.003294833513156415
+      },
+      "live_f1": {
+        "mean": 0.33213144498182723,
+        "sd": 0.06981406619523041
+      },
+      "other_acceptance": {
+        "mean": 0.0002222222222222222,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 3.5152278622833726,
+        "sd": 2.670127377924903
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6477987421383647,
+        "sd": 0.07096405092073435
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 74.39979770522757,
+        "sd": 43.05778200724386
+      },
+      "stream_latency_median_ms": [
+        128.0,
+        127.0,
+        96.0
+      ],
+      "stream_recall": {
+        "mean": 0.3118666666666667,
+        "sd": 0.0783464315290322
+      },
+      "thresholds": [
+        7,
+        7,
+        6
+      ],
+      "fpga_ms": 10.39244375
+    },
+    "b8_f8_tb16_hz300-3400_t700_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t700_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 700,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.2794117647058824,
+        "sd": 0.01470588235294118
+      },
+      "clip_accuracy": {
+        "mean": 0.9810087173100871,
+        "sd": 0.0009339975093399788
+      },
+      "clip_f1": {
+        "mean": 0.8535179556456152,
+        "sd": 0.005153063771487118
+      },
+      "full_clip_f1": {
+        "mean": 0.7043890115833493,
+        "sd": 0.023255187009955394
+      },
+      "live_recall": {
+        "mean": 0.29716981132075476,
+        "sd": 0.030931313793877355
+      },
+      "live_accuracy": {
+        "mean": 0.9533001245330013,
+        "sd": 0.0015566625155666314
+      },
+      "live_f1": {
+        "mean": 0.4558582120874415,
+        "sd": 0.03383927570494159
+      },
+      "other_acceptance": {
+        "mean": 0.0003333333333333333,
+        "sd": 0.0005773502691896258
+      },
+      "fa_per_hour": {
+        "mean": 3.9194790664459602,
+        "sd": 0.4261987280359576
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6823899371069183,
+        "sd": 0.035403554242760094
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 105.07016080365001,
+        "sd": 29.26889522135348
+      },
+      "stream_latency_median_ms": [
+        129.0,
+        128.0,
+        170.0
+      ],
+      "stream_recall": {
+        "mean": 0.4047666666666667,
+        "sd": 0.043687221625245694
+      },
+      "thresholds": [
+        6,
+        8,
+        7
+      ],
+      "fpga_ms": 10.38101675
+    },
+    "b8_f8_tb16_hz300-3400_t800_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t800_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 800,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.315359477124183,
+        "sd": 0.019811038648663612
+      },
+      "clip_accuracy": {
+        "mean": 0.9838107098381071,
+        "sd": 0.0024315845815400003
+      },
+      "clip_f1": {
+        "mean": 0.8764077407037257,
+        "sd": 0.01280669892148964
+      },
+      "full_clip_f1": {
+        "mean": 0.7285826266301537,
+        "sd": 0.05415360206857192
+      },
+      "live_recall": {
+        "mean": 0.3443396226415094,
+        "sd": 0.012479959014455613
+      },
+      "live_accuracy": {
+        "mean": 0.9559983395599834,
+        "sd": 0.0010007939768568901
+      },
+      "live_f1": {
+        "mean": 0.5080493669776132,
+        "sd": 0.014792826335989611
+      },
+      "other_acceptance": {
+        "mean": 0.0007777777777777777,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 4.868590589262471,
+        "sd": 1.523051323582153
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7232704402515724,
+        "sd": 0.07342952470965798
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 133.68411560263667,
+        "sd": 89.66295505107753
+      },
+      "stream_latency_median_ms": [
+        202.0,
+        134.0,
+        95.0
+      ],
+      "stream_recall": {
+        "mean": 0.4881333333333333,
+        "sd": 0.008256108849411636
+      },
+      "thresholds": [
+        6,
+        7,
+        6
+      ],
+      "fpga_ms": 10.3813355
+    },
+    "b8_f8_tb16_hz300-3400_t900_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t900_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 900,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.22712418300653595,
+        "sd": 0.047610464981481915
+      },
+      "clip_accuracy": {
+        "mean": 0.9839144873391449,
+        "sd": 0.0028077520254189458
+      },
+      "clip_f1": {
+        "mean": 0.8757470959633155,
+        "sd": 0.023060919012355744
+      },
+      "full_clip_f1": {
+        "mean": 0.7213103680560625,
+        "sd": 0.009384851088478535
+      },
+      "live_recall": {
+        "mean": 0.2830188679245283,
+        "sd": 0.04192544536469616
+      },
+      "live_accuracy": {
+        "mean": 0.9523661270236613,
+        "sd": 0.0028534095236337847
+      },
+      "live_f1": {
+        "mean": 0.43849840450759997,
+        "sd": 0.05048103574987982
+      },
+      "other_acceptance": {
+        "mean": 0.0003333333333333333,
+        "sd": 0.0003333333333333333
+      },
+      "fa_per_hour": {
+        "mean": 4.4116109671656325,
+        "sd": 0.9378150970738137
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7405660377358491,
+        "sd": 0.04499713214230878
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 138.46482549534207,
+        "sd": 20.355013367689818
+      },
+      "stream_latency_median_ms": [
+        112.0,
+        181.0,
+        114.0
+      ],
+      "stream_recall": {
+        "mean": 0.39286666666666664,
+        "sd": 0.05842142871698137
+      },
+      "thresholds": [
+        7,
+        9,
+        9
+      ],
+      "fpga_ms": 10.4039605
+    },
+    "b8_f8_tb16_hz300-3400_t1100_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1100_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1100,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.24019607843137256,
+        "sd": 0.042734303368045824
+      },
+      "clip_accuracy": {
+        "mean": 0.9821502698215028,
+        "sd": 0.0014713000081732963
+      },
+      "clip_f1": {
+        "mean": 0.8605544832082002,
+        "sd": 0.012282589242828606
+      },
+      "full_clip_f1": {
+        "mean": 0.7273604070425975,
+        "sd": 0.02018123647441614
+      },
+      "live_recall": {
+        "mean": 0.2971698113207547,
+        "sd": 0.02626303944731142
+      },
+      "live_accuracy": {
+        "mean": 0.9531963470319634,
+        "sd": 0.0018242419916196571
+      },
+      "live_f1": {
+        "mean": 0.45556727537673153,
+        "sd": 0.03161081288327745
+      },
+      "other_acceptance": {
+        "mean": 0.0004444444444444444,
+        "sd": 0.00038490017945975053
+      },
+      "fa_per_hour": {
+        "mean": 3.1285527974322016,
+        "sd": 0.6697408583422186
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6886792452830188,
+        "sd": 0.062399795072278046
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 126.75911671393841,
+        "sd": 75.68164765880594
+      },
+      "stream_latency_median_ms": [
+        194.0,
+        124.0,
+        129.0
+      ],
+      "stream_recall": {
+        "mean": 0.3976333333333333,
+        "sd": 0.04186673301480943
+      },
+      "thresholds": [
+        7,
+        8,
+        8
+      ],
+      "fpga_ms": 10.406188499999999
+    },
+    "b8_f8_tb16_hz300-3400_t1200_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1200_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1200,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.29248366013071897,
+        "sd": 0.01721512051119728
+      },
+      "clip_accuracy": {
+        "mean": 0.982980489829805,
+        "sd": 0.0017146857245598144
+      },
+      "clip_f1": {
+        "mean": 0.8722203142076749,
+        "sd": 0.009700802702765347
+      },
+      "full_clip_f1": {
+        "mean": 0.7118610628676988,
+        "sd": 0.03506854048783478
+      },
+      "live_recall": {
+        "mean": 0.3128930817610063,
+        "sd": 0.04581384366142598
+      },
+      "live_accuracy": {
+        "mean": 0.9541303445413035,
+        "sd": 0.002824960064096358
+      },
+      "live_f1": {
+        "mean": 0.4725402045433085,
+        "sd": 0.05119592787252983
+      },
+      "other_acceptance": {
+        "mean": 0.0005555555555555556,
+        "sd": 0.0005091750772173156
+      },
+      "fa_per_hour": {
+        "mean": 5.413450907916395,
+        "sd": 2.8086648621964305
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7515723270440251,
+        "sd": 0.021786802610929332
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 173.9334746257813,
+        "sd": 27.549139260155933
+      },
+      "stream_latency_median_ms": [
+        174.0,
+        122.0,
+        115.0
+      ],
+      "stream_recall": {
+        "mean": 0.4190666666666667,
+        "sd": 0.03933374293572037
+      },
+      "thresholds": [
+        7,
+        8,
+        7
+      ],
+      "fpga_ms": 10.386725
+    },
+    "b8_f8_tb16_hz300-3400_t1300_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1300_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1300,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.24019607843137256,
+        "sd": 0.05653216958171958
+      },
+      "clip_accuracy": {
+        "mean": 0.9852635948526359,
+        "sd": 0.0009511365078778677
+      },
+      "clip_f1": {
+        "mean": 0.8851560178396759,
+        "sd": 0.0062169367050268235
+      },
+      "full_clip_f1": {
+        "mean": 0.7444045018486706,
+        "sd": 0.02551918129473369
+      },
+      "live_recall": {
+        "mean": 0.25,
+        "sd": 0.06553039617665
+      },
+      "live_accuracy": {
+        "mean": 0.9503943545039436,
+        "sd": 0.004428515627511821
+      },
+      "live_f1": {
+        "mean": 0.3967016004985548,
+        "sd": 0.08206090159935545
+      },
+      "other_acceptance": {
+        "mean": 0.0001111111111111111,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 3.4097710264148713,
+        "sd": 1.5795073142945035
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7437106918238995,
+        "sd": 0.019063452284563142
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 156.60340126472425,
+        "sd": 49.18623156168513
+      },
+      "stream_latency_median_ms": [
+        166.0,
+        200.0,
+        196.0
+      ],
+      "stream_recall": {
+        "mean": 0.3357333333333333,
+        "sd": 0.06813327625568386
+      },
+      "thresholds": [
+        7,
+        8,
+        9
+      ],
+      "fpga_ms": 10.375365
+    },
+    "b8_f8_tb16_hz300-3400_t1400_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1400_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1400,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.23202614379084965,
+        "sd": 0.031515198565336446
+      },
+      "clip_accuracy": {
+        "mean": 0.9820464923204649,
+        "sd": 0.0018242419916196571
+      },
+      "clip_f1": {
+        "mean": 0.8641142785072785,
+        "sd": 0.005459587877332986
+      },
+      "full_clip_f1": {
+        "mean": 0.7257898513503895,
+        "sd": 0.041065786216546676
+      },
+      "live_recall": {
+        "mean": 0.26572327044025157,
+        "sd": 0.024205667167202276
+      },
+      "live_accuracy": {
+        "mean": 0.9510170195101701,
+        "sd": 0.0014713000081732963
+      },
+      "live_f1": {
+        "mean": 0.4168833751976739,
+        "sd": 0.029235910449307092
+      },
+      "other_acceptance": {
+        "mean": 0.0005555555555555556,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 5.1322326789337245,
+        "sd": 2.709919231416038
+      },
+      "old_rule_live_recall": {
+        "mean": 0.75,
+        "sd": 0.06948547105026527
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 215.72953390833058,
+        "sd": 136.97787896760443
+      },
+      "stream_latency_median_ms": [
+        185.0,
+        129.0,
+        -5.0
+      ],
+      "stream_recall": {
+        "mean": 0.3595333333333333,
+        "sd": 0.03933374293572037
+      },
+      "thresholds": [
+        8,
+        7,
+        8
+      ],
+      "fpga_ms": 10.38543475
+    },
+    "b8_f8_tb16_hz300-3400_t1500_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1500_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1500,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.1699346405228758,
+        "sd": 0.07630911391395828
+      },
+      "clip_accuracy": {
+        "mean": 0.9826691573266917,
+        "sd": 0.0012961805725193905
+      },
+      "clip_f1": {
+        "mean": 0.8653244316775234,
+        "sd": 0.006174342597551846
+      },
+      "full_clip_f1": {
+        "mean": 0.73363260036488,
+        "sd": 0.023652073293186936
+      },
+      "live_recall": {
+        "mean": 0.21698113207547168,
+        "sd": 0.06381013801164473
+      },
+      "live_accuracy": {
+        "mean": 0.9481112494811125,
+        "sd": 0.00437345527308127
+      },
+      "live_f1": {
+        "mean": 0.3527687876057967,
+        "sd": 0.08650892433735245
+      },
+      "other_acceptance": {
+        "mean": 0.0002222222222222222,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 4.587372360279802,
+        "sd": 2.058435316487228
+      },
+      "old_rule_live_recall": {
+        "mean": 0.7342767295597484,
+        "sd": 0.07522562084217416
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 315.59715747580117,
+        "sd": 305.57872571832877
+      },
+      "stream_latency_median_ms": [
+        164.0,
+        89.0,
+        123.0
+      ],
+      "stream_recall": {
+        "mean": 0.29286666666666666,
+        "sd": 0.1071500038886296
+      },
+      "thresholds": [
+        8,
+        8,
+        10
+      ],
+      "fpga_ms": 10.398686
+    },
+    "b8_f8_tb16_hz300-3400_t1600_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f8_tb16_hz300-3400_t1600_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 8,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 3400,
+        "duration_ms": 1600,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 1024,
+      "parameter_bytes": 6440,
+      "validation_recall": {
+        "mean": 0.22875816993464052,
+        "sd": 0.05421784321253941
+      },
+      "clip_accuracy": {
+        "mean": 0.9837069323370694,
+        "sd": 0.00047556825393896415
+      },
+      "clip_f1": {
+        "mean": 0.8722367994694334,
+        "sd": 0.0014603586987851193
+      },
+      "full_clip_f1": {
+        "mean": 0.7530153557057804,
+        "sd": 0.034285045756376586
+      },
+      "live_recall": {
+        "mean": 0.2562893081761006,
+        "sd": 0.06507610719048702
+      },
+      "live_accuracy": {
+        "mean": 0.9506019095060192,
+        "sd": 0.004295185157030917
+      },
+      "live_f1": {
+        "mean": 0.4037192998438983,
+        "sd": 0.08036314353260185
+      },
+      "other_acceptance": {
+        "mean": 0.0003333333333333333,
+        "sd": 0.0
+      },
+      "fa_per_hour": {
+        "mean": 3.444923305037705,
+        "sd": 0.8106011791699091
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6823899371069183,
+        "sd": 0.05364378021771062
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 106.72231789892321,
+        "sd": 15.805425732443604
+      },
+      "stream_latency_median_ms": [
+        181.0,
+        139.0,
+        132.0
+      ],
+      "stream_recall": {
+        "mean": 0.3333,
+        "sd": 0.0783570673264384
+      },
+      "thresholds": [
+        8,
+        7,
+        8
+      ],
+      "fpga_ms": 10.391064499999999
+    },
+    "b8_f16_tb16_hz300-6500_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute": {
+      "key": "b8_f16_tb16_hz300-6500_t1000_g3000_s20000_mapequal_w25_h10_qlinear_mabsolute",
+      "config": {
+        "bits": 8,
+        "bands": 16,
+        "time_bins": 16,
+        "low_hz": 300,
+        "high_hz": 6500,
+        "duration_ms": 1000,
+        "rms_gate_u6": 3000,
+        "rms_full_scale_u6": 20000,
+        "band_mapping": "equal",
+        "fft_window_ms": 25,
+        "fft_hop_ms": 10,
+        "quantizer": "linear",
+        "feature_mode": "absolute"
+      },
+      "input_bits": 2048,
+      "parameter_bytes": 12584,
+      "validation_recall": {
+        "mean": 0.16176470588235295,
+        "sd": 0.06372549019607843
+      },
+      "clip_accuracy": {
+        "mean": 0.9828767123287672,
+        "sd": 0.002431584581540064
+      },
+      "clip_f1": {
+        "mean": 0.870242856393069,
+        "sd": 0.014256956775104614
+      },
+      "full_clip_f1": {
+        "mean": 0.7204391965186684,
+        "sd": 0.03644250071150308
+      },
+      "live_recall": {
+        "mean": 0.2012578616352201,
+        "sd": 0.04818098567938542
+      },
+      "live_accuracy": {
+        "mean": 0.9471772519717726,
+        "sd": 0.0031185095893144
+      },
+      "live_f1": {
+        "mean": 0.3327872945910831,
+        "sd": 0.06799096487686355
+      },
+      "other_acceptance": {
+        "mean": 0.0001111111111111111,
+        "sd": 0.00019245008972987527
+      },
+      "fa_per_hour": {
+        "mean": 2.583692478778279,
+        "sd": 1.191942186333229
+      },
+      "old_rule_live_recall": {
+        "mean": 0.6540880503144654,
+        "sd": 0.011870808860488627
+      },
+      "old_rule_fa_per_hour": {
+        "mean": 92.81959170359245,
+        "sd": 40.15110052540218
+      },
+      "stream_latency_median_ms": [
+        181.0,
+        177.0,
+        33.0
+      ],
+      "stream_recall": {
+        "mean": 0.24759999999999996,
+        "sd": 0.05408169745856725
+      },
+      "thresholds": [
+        7,
+        8,
+        9
+      ],
+      "fpga_ms": 17.57213875
+    }
+  }
+}
